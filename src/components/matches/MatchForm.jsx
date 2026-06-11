@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import { updateMatch } from '@/api/matchesSupabase';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 
@@ -11,7 +11,145 @@ import { useSpells } from '@/hooks/useSpells';
 const TAGS = ['stomp', 'remontada', 'mala composición', 'buen early', 'mal late', 'autofill', 'duoQ', 'soloQ'];
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const PRIMARY_BRANCHES = ['Dominación', 'Precisión', 'Valor', 'Brujería'];
-const STEPS = ['info', 'champion', 'build', 'stats'];
+const STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
+
+const ROLE_LABELS = {
+  top: 'Top',
+  jungler: 'Jungla',
+  mid: 'Mid',
+  adc: 'ADC',
+  support: 'Support',
+};
+
+function resolveChampion(champions, name) {
+  return champions.find(c => c.name === name) || null;
+}
+
+function buildTeamSlots({ champions, names = [], ownName, ownLane, directEnemyName, includeOwn = false }) {
+  const slots = [];
+  const used = new Set();
+
+  if (includeOwn && ownName) {
+    const ownChampion = resolveChampion(champions, ownName);
+    slots.push({ ...(ownChampion || { name: ownName }), role: ownLane || 'adc' });
+    used.add(ownName);
+  }
+
+  if (directEnemyName && ownLane) {
+    const directEnemy = resolveChampion(champions, directEnemyName);
+    slots.push({ ...(directEnemy || { name: directEnemyName }), role: ownLane });
+    used.add(directEnemyName);
+  }
+
+  const freeRoles = LANES.filter(role => !slots.some(champ => champ.role === role));
+  names
+    .filter(Boolean)
+    .filter(name => !used.has(name))
+    .slice(0, freeRoles.length)
+    .forEach((name, index) => {
+      const champ = resolveChampion(champions, name);
+      slots.push({ ...(champ || { name }), role: freeRoles[index] });
+      used.add(name);
+    });
+
+  return slots;
+}
+
+function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }) {
+  const [search, setSearch] = useState('');
+  const filteredChampions = champions.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()));
+  const selectedByRole = {};
+  LANES.forEach(role => {
+    selectedByRole[role] = selected.find(s => s.role === role);
+  });
+
+  return (
+    <div className="rd-card p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-4 h-px bg-primary/50" />
+          <h3 className="rd-card-title">{title}</h3>
+        </div>
+        <span className="text-xs text-muted-foreground">{selected.length}/{LANES.length}</span>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <div className="space-y-2 pb-4 border-b border-border lg:border-b-0 lg:pb-0">
+          {LANES.map(role => {
+            const champ = selectedByRole[role];
+            const locked = lockedRole === role;
+            return (
+              <div key={role} className="flex items-center gap-3">
+                <div className="w-16 text-xs font-semibold text-muted-foreground">{ROLE_LABELS[role]}</div>
+                <div className="relative w-11 h-11 rounded-lg border-2 border-border bg-secondary/20 flex items-center justify-center overflow-hidden shrink-0">
+                  {champ ? (
+                    <>
+                      {champ.image_url
+                        ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                        : <span className="text-xs font-bold text-primary">{champ.name?.[0]}</span>}
+                      {!locked && (
+                        <button
+                          type="button"
+                          onClick={() => onSelect(champ, role)}
+                          className="absolute inset-0 opacity-0 hover:opacity-100 bg-black/50 flex items-center justify-center transition-opacity text-sm text-foreground cursor-pointer"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-xl text-muted-foreground opacity-30">+</span>
+                  )}
+                </div>
+                <div className="flex-1 text-xs text-foreground">
+                  {champ ? champ.name : '—'}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="min-w-0">
+          <div className="relative mb-2">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar campeón..."
+              className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
+            />
+          </div>
+          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[calc(100vh-26rem)] overflow-y-auto pr-1">
+            {filteredChampions.map(champ => {
+              const selectedRole = Object.keys(selectedByRole).find(role => selectedByRole[role]?.name === champ.name);
+              const isSelected = Boolean(selectedRole);
+              return (
+                <button
+                  key={champ.id || champ.name}
+                  type="button"
+                  onClick={() => {
+                    if (isSelected) {
+                      if (selectedRole !== lockedRole) onSelect(selectedByRole[selectedRole], selectedRole);
+                      return;
+                    }
+                    const firstEmptyRole = LANES.find(role => role !== lockedRole && !selectedByRole[role]);
+                    if (firstEmptyRole) onSelect(champ, firstEmptyRole);
+                  }}
+                  className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center transition-all overflow-hidden
+                    ${isSelected ? 'border-primary ring-2 ring-primary/50' : 'border-border/40 hover:border-primary/50'}`}
+                >
+                  {champ.image_url
+                    ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                    : <span className="text-xs font-bold text-primary">{champ.name?.[0]}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MatchForm({ match, onClose, onSaved }) {
   const [step, setStep] = useState('info');
@@ -20,6 +158,8 @@ export default function MatchForm({ match, onClose, onSaved }) {
   const [lane, setLane] = useState(match?.lane || '');
   const [ownChampion, setOwnChampion] = useState(null); // will init after data loads
   const [champSearch, setChampSearch] = useState('');
+  const [allyChampions, setAllyChampions] = useState([]);
+  const [enemyChampions, setEnemyChampions] = useState([]);
 
   // Build
   const [selectedItems, setSelectedItems] = useState([]);
@@ -63,7 +203,24 @@ export default function MatchForm({ match, onClose, onSaved }) {
   // Initialize champion/items/runes from match data once data is loaded
   const [initialized, setInitialized] = useState(false);
   if (!initialized && champions.length > 0 && items.length > 0 && runes.length > 0) {
-    if (match?.own_champion_name) setOwnChampion(champions.find(c => c.name === match.own_champion_name) || null);
+    const initialOwnChampion = match?.own_champion_name
+      ? champions.find(c => c.name === match.own_champion_name) || null
+      : null;
+
+    if (initialOwnChampion) setOwnChampion(initialOwnChampion);
+    setAllyChampions(buildTeamSlots({
+      champions,
+      names: match?.ally_champions || [],
+      ownName: match?.own_champion_name,
+      ownLane: match?.lane,
+      includeOwn: true,
+    }));
+    setEnemyChampions(buildTeamSlots({
+      champions,
+      names: match?.enemy_champions || [],
+      ownLane: match?.lane,
+      directEnemyName: match?.enemy_champion_name,
+    }));
     if (match?.items_used?.length > 0) setSelectedItems(match.items_used.map(n => items.find(i => i.name === n)).filter(Boolean));
     if (match?.runes_used?.length > 0) {
       const resolvedRunes = match.runes_used.map(n => runes.find(r => r.name === n)).filter(Boolean);
@@ -88,21 +245,64 @@ export default function MatchForm({ match, onClose, onSaved }) {
     onSuccess: onSaved,
   });
 
-  // enemy_champion_name is derived automatically: enemy with the same lane as the user
-  const directEnemy = match?.enemy_champions
-    ? (() => {
-        // enemy_champions is stored as names; we can't know their roles after the fact
-        // so keep the existing value unless the user changed lanes
-        return match?.enemy_champion_name || '';
-      })()
-    : '';
+  const handleOwnChampionSelect = (champ) => {
+    setOwnChampion(champ);
+    setAllyChampions(prev => [
+      ...prev.filter(ally => ally.role !== lane && ally.name !== champ.name),
+      { ...champ, role: lane || 'adc' },
+    ]);
+    setChampSearch('');
+  };
+
+  const handleLaneSelect = (nextLane) => {
+    const resolvedLane = nextLane === lane ? '' : nextLane;
+    setLane(resolvedLane);
+
+    if (ownChampion && resolvedLane) {
+      setAllyChampions(prev => [
+        ...prev.filter(ally => ally.name !== ownChampion.name && ally.role !== resolvedLane),
+        { ...ownChampion, role: resolvedLane },
+      ]);
+    }
+  };
+
+  const handleSelectAlly = (champ, role) => {
+    if (role === lane) return;
+
+    setAllyChampions(prev => {
+      const isAlreadyInRole = prev.find(c => c.role === role && c.name === champ.name);
+      if (isAlreadyInRole) return prev.filter(c => c.role !== role);
+
+      return [
+        ...prev.filter(c => c.role !== role && c.name !== champ.name),
+        { ...champ, role },
+      ];
+    });
+  };
+
+  const handleSelectEnemy = (champ, role) => {
+    setEnemyChampions(prev => {
+      const isAlreadyInRole = prev.find(c => c.role === role && c.name === champ.name);
+      if (isAlreadyInRole) return prev.filter(c => c.role !== role);
+
+      return [
+        ...prev.filter(c => c.role !== role && c.name !== champ.name),
+        { ...champ, role },
+      ];
+    });
+  };
 
   const handleSave = () => {
+    const directEnemy = enemyChampions.find(enemy => enemy.role === lane);
+
     saveMutation.mutate({
       lane,
       own_champion_name: ownChampion?.name || match?.own_champion_name || '',
       own_champion_id: ownChampion?.id || match?.own_champion_id || '',
-      enemy_champion_name: directEnemy,
+      ally_champions: allyChampions.map(c => c.name),
+      enemy_champions: enemyChampions.map(c => c.name),
+      enemy_champion_name: directEnemy?.name || '',
+      enemy_champion_id: directEnemy?.id || '',
       items_used: selectedItems.map(i => i.name),
       runes_used: selectedRunes.map(r => r.name),
       spells_used: selectedSpells,
@@ -255,7 +455,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
             <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium block mb-2">Línea</label>
             <div className="grid grid-cols-5 gap-2">
               {LANES.map(l => (
-                <button key={l} type="button" onClick={() => setLane(l === lane ? '' : l)}
+                <button key={l} type="button" onClick={() => handleLaneSelect(l)}
                   className={`py-2 rounded-lg border-2 text-sm font-medium capitalize transition-all ${lane === l ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}>
                   {l}
                 </button>
@@ -275,14 +475,23 @@ export default function MatchForm({ match, onClose, onSaved }) {
                   <p className="font-semibold text-foreground">{ownChampion.name}</p>
                   <p className="text-xs text-muted-foreground">{ownChampion.roles}</p>
                 </div>
-                <button type="button" onClick={() => setOwnChampion(null)} className="text-muted-foreground hover:text-red-400 text-lg">×</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAllyChampions(prev => prev.filter(ally => ally.name !== ownChampion.name));
+                    setOwnChampion(null);
+                  }}
+                  className="text-muted-foreground hover:text-red-400 text-lg"
+                >
+                  ×
+                </button>
               </div>
             )}
             <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
               className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all mb-2" />
-            <div className="grid grid-cols-6 sm:grid-cols-9 gap-2 max-h-44 overflow-y-auto p-1">
+            <div className="grid grid-cols-6 sm:grid-cols-9 gap-2 max-h-[calc(100vh-34rem)] overflow-y-auto p-1">
               {filteredChamps.map(champ => (
-                <button key={champ.id} type="button" onClick={() => { setOwnChampion(champ); setChampSearch(''); }}
+                <button key={champ.id} type="button" onClick={() => handleOwnChampionSelect(champ)}
                   className={`w-12 h-12 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all
                     ${ownChampion?.id === champ.id ? 'border-primary ring-2 ring-primary/40' : 'border-border/40 hover:border-primary/50'}`}>
                   {champ.image_url ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" /> : <span className="text-xs font-bold text-primary">{champ.name[0]}</span>}
@@ -298,6 +507,63 @@ export default function MatchForm({ match, onClose, onSaved }) {
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
               <ArrowLeft size={16} /> Atrás
             </button>
+            <button onClick={() => setStep('allies')}
+              className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP 2: EQUIPO ALIADO ── */}
+      {step === 'allies' && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Equipo aliado</h2>
+            <p className="text-muted-foreground text-sm">Editá los campeones aliados. Tu campeón queda fijo en tu línea.</p>
+          </div>
+
+          <ChampionPoolByRole
+            champions={champions}
+            title="Equipo aliado"
+            selected={allyChampions}
+            onSelect={handleSelectAlly}
+            lockedRole={lane}
+          />
+
+          <div className="flex gap-3">
+            <button onClick={() => setStep('champion')}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
+              <ArrowLeft size={16} /> Atrás
+            </button>
+            <button onClick={() => setStep('enemies')}
+              className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP 3: EQUIPO ENEMIGO ── */}
+      {step === 'enemies' && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Equipo enemigo</h2>
+            <p className="text-muted-foreground text-sm">Editá los campeones enemigos. El rival de tu línea se usa como matchup directo.</p>
+          </div>
+
+          <ChampionPoolByRole
+            champions={champions}
+            title="Equipo enemigo"
+            selected={enemyChampions}
+            onSelect={handleSelectEnemy}
+          />
+
+          <div className="flex gap-3">
+            <button onClick={() => setStep('allies')}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
+              <ArrowLeft size={16} /> Atrás
+            </button>
             <button onClick={() => setStep('build')}
               className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
               Siguiente
@@ -306,7 +572,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
         </div>
       )}
 
-      {/* ── STEP 2: BUILD ── */}
+      {/* ── STEP 4: BUILD ── */}
       {step === 'build' && (
         <div className="space-y-6">
           <div>
@@ -534,7 +800,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-border">
-            <button type="button" onClick={() => setStep('champion')}
+            <button type="button" onClick={() => setStep('enemies')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
               <ArrowLeft size={16} /> Atrás
             </button>

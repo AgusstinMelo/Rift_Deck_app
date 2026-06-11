@@ -35,8 +35,9 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
         <span className="text-xs text-muted-foreground">{selected.length}/{ROLES.length}</span>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
       {/* Role slots */}
-      <div className="space-y-3 mb-4 pb-4 border-b border-border">
+      <div className="space-y-3 pb-4 border-b border-border lg:border-b-0 lg:pb-0">
         {ROLES.map(role => {
           const champ = selectedByRole[role];
           return (
@@ -67,13 +68,14 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
         })}
       </div>
 
+      <div className="min-w-0">
       {/* Champion grid */}
       <div className="relative mb-2">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar campeón..."
           className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
       </div>
-      <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-48 overflow-y-auto">
+      <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[calc(100vh-26rem)] overflow-y-auto pr-1">
         {filteredChampions.map(champ => {
           const isSelected = Object.values(selectedByRole).some(c => c && c.id === champ.id);
           return (
@@ -100,6 +102,8 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
             </button>
           );
         })}
+      </div>
+      </div>
       </div>
     </div>
   );
@@ -436,7 +440,7 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
             <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
           </div>
-          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-72 overflow-y-auto">
+          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[calc(100vh-15rem)] overflow-y-auto pr-1">
             {champions.filter(c => !champSearch || c.name?.toLowerCase().includes(champSearch.toLowerCase())).map(champ => (
               <button
                 key={champ.id}
