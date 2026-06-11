@@ -831,8 +831,8 @@ export default function Stats() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-        <div className="lg:col-span-2">
-          <SectionCard title="Winrate por campeón" watermark>
+        <div className="lg:col-span-2 flex flex-col">
+          <SectionCard title="Winrate por campeón" watermark fullHeight>
             <div className="space-y-3">
               {champArr.slice(0, 5).map(c => {
                 const tone =
