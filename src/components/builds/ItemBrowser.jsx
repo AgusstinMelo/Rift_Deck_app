@@ -8,7 +8,38 @@ const CATEGORIES = [
   { key: 'Mejorado', label: 'Mejorado' },
 ];
 
+const TYPE_ORDER = [
+  'Daño Físico',
+  'Daño Mágico',
+  'Defensa',
+  'Vida',
+  'Crítico',
+  'Velocidad de Ataque',
+  'Movimiento',
+  'Soporte',
+  'Encantamiento',
+];
+
 const UNIQUE_ITEMS = ['escudo reliquia', 'hoz espectral', 'guadaña de niebla oscura', 'baluarte de la montaña'];
+
+const getItemTypes = (item) => {
+  if (Array.isArray(item?.type)) return item.type.filter(Boolean);
+  if (typeof item?.type === 'string' && item.type.trim()) return [item.type.trim()];
+  return [];
+};
+
+const sortItemTypes = (a, b) => {
+  const indexA = TYPE_ORDER.findIndex(type => type.toLowerCase() === a.toLowerCase());
+  const indexB = TYPE_ORDER.findIndex(type => type.toLowerCase() === b.toLowerCase());
+
+  if (indexA !== -1 || indexB !== -1) {
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  }
+
+  return a.localeCompare(b);
+};
 
 const isEnchant = (item) =>
   item && item.category === 'Mejorado' && Array.isArray(item.type) && item.type.includes('Encantamiento');
@@ -76,14 +107,17 @@ function canAddItem(item, selectedItems) {
 export default function ItemBrowser({ items, selectedItems, onSelect }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [tooltip, setTooltip] = useState(null);
 
   const canAddEnchantment = selectedItems.some(isMobilityBoots) && !selectedItems.some(isEnchant);
+  const itemTypes = [...new Set(items.flatMap(getItemTypes))].sort(sortItemTypes);
 
   const filtered = items.filter(item => {
     const matchSearch = !search || item.name?.toLowerCase().includes(search.toLowerCase());
     const matchCat = category === 'all' || (item.category && item.category.toLowerCase() === category.toLowerCase());
-    return matchSearch && matchCat;
+    const matchType = typeFilter === 'all' || getItemTypes(item).some(type => type.toLowerCase() === typeFilter.toLowerCase());
+    return matchSearch && matchCat && matchType;
   });
 
   return (
@@ -107,6 +141,16 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
             </button>
           ))}
         </div>
+        <select
+          value={typeFilter}
+          onChange={e => setTypeFilter(e.target.value)}
+          className="bg-secondary/70 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground outline-none focus:border-primary/40 transition-all"
+        >
+          <option value="all">Todos los tipos</option>
+          {itemTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
       </div>
 
       <div className="relative">
