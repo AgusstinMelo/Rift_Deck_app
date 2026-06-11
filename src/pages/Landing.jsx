@@ -24,7 +24,7 @@ const AUTH_REDIRECT_PATH = '/';
 
 export default function Landing() {
   const { checkUserAuth, refreshUser } = useAuth();
-  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'verify'
+  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'check-email'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -32,7 +32,6 @@ export default function Landing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [verifyCode, setVerifyCode] = useState('');
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [modalIdx, setModalIdx] = useState(null);
   const scrollRef = useRef(null);
@@ -71,6 +70,7 @@ export default function Landing() {
           email,
           password,
           options: {
+            emailRedirectTo: window.location.origin + AUTH_REDIRECT_PATH,
             data: {
               full_name: fullName || '',
               visible_name: fullName || '',
@@ -85,30 +85,11 @@ export default function Landing() {
           window.location.href = AUTH_REDIRECT_PATH;
           return;
         }
-        setSuccess('Te enviamos un código de verificación a tu email.');
-        setMode('verify');
+        setMode('check-email');
         setPassword('');
-      } else if (mode === 'verify') {
-        const { error: verifyError } = await supabase.auth.verifyOtp({
-          email,
-          token: verifyCode,
-          type: 'signup',
-        });
-
-        if (verifyError) throw verifyError;
-
-        await (refreshUser || checkUserAuth)?.();
-        window.location.href = AUTH_REDIRECT_PATH;
       }
     } catch (err) {
-      setError(
-        err?.message ||
-          (mode === 'login'
-            ? 'Credenciales incorrectas.'
-            : mode === 'verify'
-            ? 'Código incorrecto o expirado.'
-            : 'Error al registrarse.')
-      );
+      setError(err?.message || (mode === 'login' ? 'Credenciales incorrectas.' : 'Error al registrarse.'));
     } finally {
       setLoading(false);
     }
@@ -132,7 +113,7 @@ export default function Landing() {
     }
   };
 
-  const handleResendCode = async () => {
+  const handleResendConfirmation = async () => {
     setError('');
     setSuccess('');
     setLoading(true);
@@ -145,11 +126,11 @@ export default function Landing() {
     setLoading(false);
 
     if (resendError) {
-      setError(resendError.message || 'No se pudo reenviar el cÃ³digo.');
+      setError(resendError.message || 'No se pudo reenviar el correo de confirmación.');
       return;
     }
 
-    setSuccess('CÃ³digo reenviado.');
+    setSuccess('Correo de confirmación reenviado.');
   };
 
   return (
@@ -182,33 +163,23 @@ export default function Landing() {
         </div>
 
         <div className="rd-card p-8">
-          {mode === 'verify' ? (
-            /* Verification step */
+          {mode === 'check-email' ? (
+            /* Email confirmation step */
             <div>
               <div className="text-center mb-6">
                 <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3">
                   <Mail size={22} className="text-primary" />
                 </div>
-                <h2 className="font-rajdhani font-bold text-xl text-foreground">Verificá tu email</h2>
+                <h2 className="font-rajdhani font-bold text-xl text-foreground">Revisá tu correo</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Enviamos un código a <span className="text-foreground font-medium">{email}</span>
+                  Te enviamos un enlace de confirmación. Abrilo desde tu email para activar tu cuenta y acceder a Rift Deck.
+                </p>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Si no lo encontrás, revisá la carpeta de spam o correo no deseado.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="rd-label mb-1.5 block">Código de verificación</label>
-                  <input
-                    type="text"
-                    value={verifyCode}
-                    onChange={e => setVerifyCode(e.target.value.trim())}
-                    placeholder="Ingresá el código"
-                    required
-                    autoFocus
-                    className="w-full bg-secondary/70 border border-border rounded-xl px-4 py-3 text-lg text-foreground text-center tracking-[0.3em] font-mono outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground placeholder:tracking-normal"
-                  />
-                </div>
-
+              <div className="space-y-4">
                 {error && (
                   <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
                 )}
@@ -217,32 +188,24 @@ export default function Landing() {
                 )}
 
                 <button
-                  type="submit"
-                  disabled={loading || !verifyCode}
+                  type="button"
+                  onClick={() => { setMode('login'); setError(''); setSuccess(''); setPassword(''); }}
+                  disabled={loading}
                   className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
-                  {loading && <Loader2 size={15} className="animate-spin" />}
-                  Verificar y entrar
+                  Volver al inicio de sesión
                 </button>
 
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { setMode('register'); setError(''); setSuccess(''); setVerifyCode(''); }}
-                    className="flex-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    ← Volver
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleResendCode}
-                    disabled={loading}
-                    className="flex-1 text-sm text-primary hover:text-primary/80 transition-colors"
-                  >
-                    Reenviar código
-                  </button>
-                </div>
-              </form>
+                <button
+                  type="button"
+                  onClick={handleResendConfirmation}
+                  disabled={loading || !email}
+                  className="w-full text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {loading && <Loader2 size={15} className="animate-spin" />}
+                  Reenviar correo de confirmación
+                </button>
+              </div>
             </div>
           ) : (
             <>
