@@ -22,6 +22,12 @@ const TYPE_ORDER = [
 
 const UNIQUE_ITEMS = ['escudo reliquia', 'hoz espectral', 'guadaña de niebla oscura', 'baluarte de la montaña'];
 
+const normalizeSearch = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
 const getItemTypes = (item) => {
   if (Array.isArray(item?.type)) return item.type.filter(Boolean);
   if (typeof item?.type === 'string' && item.type.trim()) return [item.type.trim()];
@@ -114,7 +120,8 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
   const itemTypes = [...new Set(items.flatMap(getItemTypes))].sort(sortItemTypes);
 
   const filtered = items.filter(item => {
-    const matchSearch = !search || item.name?.toLowerCase().includes(search.toLowerCase());
+    const normalizedSearch = normalizeSearch(search);
+    const matchSearch = !normalizedSearch || normalizeSearch(item.name).includes(normalizedSearch);
     const matchCat = category === 'all' || (item.category && item.category.toLowerCase() === category.toLowerCase());
     const matchType = typeFilter === 'all' || getItemTypes(item).some(type => type.toLowerCase() === typeFilter.toLowerCase());
     return matchSearch && matchCat && matchType;
