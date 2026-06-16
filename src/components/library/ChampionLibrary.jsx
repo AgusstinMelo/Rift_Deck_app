@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Champion } from '@/api/entitiesSupabase';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
-import { Search, ChevronRight } from 'lucide-react';
-import LaneBadge from '@/components/ui/LaneBadge';
+import { Search } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ChampionDetail from './ChampionDetail';
@@ -33,7 +32,7 @@ const normalizeLane = (lane) =>
     .toLowerCase()
     .replace(/[^a-z]/g, '');
 
-export default function ChampionLibrary() {
+export default function ChampionLibrary({ selectedId, onSelectId, onClearSelected }) {
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -55,6 +54,18 @@ export default function ChampionLibrary() {
     queryFn: () => getTierlistExecutions(10),
   });
 
+  useEffect(() => {
+    if (!selectedId) {
+      setSelected(null);
+      return;
+    }
+
+    const nextSelected = champions.find(champ => String(champ.id) === String(selectedId));
+    if (nextSelected) {
+      setSelected(nextSelected);
+    }
+  }, [champions, selectedId]);
+
   const filtered = champions.filter(c => {
     const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase());
     const championLanes = Array.isArray(c.lane) ? c.lane : [c.lane];
@@ -72,7 +83,16 @@ export default function ChampionLibrary() {
   if (selected) {
     const tierData = getTierEntriesForChampion(selected, currentTierlist);
 
-    return <ChampionDetail champion={selected} tierData={tierData} onBack={() => setSelected(null)} />;
+    return (
+      <ChampionDetail
+        champion={selected}
+        tierData={tierData}
+        onBack={() => {
+          setSelected(null);
+          onClearSelected?.();
+        }}
+      />
+    );
   }
 
   return (
@@ -155,7 +175,10 @@ export default function ChampionLibrary() {
             return (
               <button
                 key={champ.id}
-                onClick={() => setSelected(champ)}
+                onClick={() => {
+                  setSelected(champ);
+                  onSelectId?.(champ.id);
+                }}
                 className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/40 hover:bg-primary/5 transition-all group aspect-square relative"
               >
                 {champ.image_url

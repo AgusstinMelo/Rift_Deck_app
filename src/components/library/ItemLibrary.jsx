@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { WRItem } from '@/api/entitiesSupabase';
 import { Search, ArrowLeft, Coins, Sword } from 'lucide-react';
@@ -17,7 +17,7 @@ const CATEGORY_COLORS = {
   'Mejorado': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
 };
 
-export default function ItemLibrary() {
+export default function ItemLibrary({ selectedId, onSelectId, onClearSelected }) {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [selected, setSelected] = useState(null);
@@ -26,6 +26,18 @@ export default function ItemLibrary() {
     queryKey: ['writems'],
     queryFn: () => WRItem.list('type'),
   });
+
+  useEffect(() => {
+    if (!selectedId) {
+      setSelected(null);
+      return;
+    }
+
+    const nextSelected = items.find(item => String(item.id) === String(selectedId));
+    if (nextSelected) {
+      setSelected(nextSelected);
+    }
+  }, [items, selectedId]);
 
   const CATEGORY_ORDER = {
     'Básico': 3,
@@ -177,7 +189,10 @@ export default function ItemLibrary() {
     return (
       <div className="space-y-6">
         <button
-          onClick={() => setSelected(null)}
+          onClick={() => {
+            setSelected(null);
+            onClearSelected?.();
+          }}
           className="
             flex items-center gap-2 text-sm
             text-muted-foreground hover:text-foreground
@@ -432,7 +447,10 @@ export default function ItemLibrary() {
                   {groupItems.map(item => (
                     <button
                       key={item.id}
-                      onClick={() => setSelected(item)}
+                      onClick={() => {
+                        setSelected(item);
+                        onSelectId?.(item.id);
+                      }}
                       className="
                         bg-card border border-border rounded-lg overflow-hidden
                         text-left hover:border-primary/40 hover:bg-primary/5

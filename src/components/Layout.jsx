@@ -1,10 +1,12 @@
-import { Link, useLocation, Outlet } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, BookOpen, TrendingUp, Wrench, Swords,
-  BarChart3, Sparkles, Settings, Menu, LogOut, User, Bug, Info, Scale, ShieldCheck
+  BarChart3, Sparkles, Settings, Menu, LogOut, User, Bug, Info, Scale, ShieldCheck, Search
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import BugReportModal from '@/components/BugReportModal';
 import LegalInfoModal from '@/components/LegalInfoModal';
 import wordmarkUrl from '@/assets/riftdeck-final.png';
@@ -27,6 +29,175 @@ const infoItems = [
   { type: 'legal', label: 'Aviso Legal', icon: Scale },
   { type: 'privacy', label: 'Política de privacidad', icon: ShieldCheck },
 ];
+
+const SEARCH_TYPES = {
+  champion: { tab: 'champions', label: 'Campeón' },
+  item: { tab: 'items', label: 'Item' },
+  rune: { tab: 'runes', label: 'Runa' },
+};
+
+function normalizeSearch(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function SidebarSearch({ collapsed, onNavigate, onExpand }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
+
+  const { data: champions = [] } = useQuery({
+    queryKey: ['sidebar-search', 'champions'],
+    queryFn: () => Champion.list('name'),
+  });
+
+  const { data: items = [] } = useQuery({
+    queryKey: ['sidebar-search', 'items'],
+    queryFn: () => WRItem.list('name'),
+  });
+
+  const { data: runes = [] } = useQuery({
+    queryKey: ['sidebar-search', 'runes'],
+    queryFn: () => Rune.list('name'),
+  });
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!searchRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
+
+  const suggestions = useMemo(() => {
+    const normalizedQuery = normalizeSearch(query.trim());
+    if (normalizedQuery.length < 1) return [];
+
+    const allResults = [
+      ...champions.map(entity => ({ entity, type: 'champion' })),
+      ...items.map(entity => ({ entity, type: 'item' })),
+      ...runes.map(entity => ({ entity, type: 'rune' })),
+    ];
+
+    return allResults
+      .filter(({ entity }) => normalizeSearch(entity.name).includes(normalizedQuery))
+      .sort((a, b) => {
+        const nameA = normalizeSearch(a.entity.name);
+        const nameB = normalizeSearch(b.entity.name);
+        const startsA = nameA.startsWith(normalizedQuery);
+        const startsB = nameB.startsWith(normalizedQuery);
+
+        if (startsA !== startsB) return startsA ? -1 : 1;
+
+        return String(a.entity.name || '').localeCompare(String(b.entity.name || ''), 'es', {
+          sensitivity: 'base',
+          numeric: true,
+        });
+      })
+      .slice(0, 8);
+  }, [champions, items, query, runes]);
+
+  const goToResult = ({ entity, type }) => {
+    const config = SEARCH_TYPES[type];
+    navigate(`/library?tab=${config.tab}&id=${encodeURIComponent(entity.id)}`);
+    setQuery('');
+    setOpen(false);
+    onNavigate?.();
+  };
+
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        onClick={onExpand}
+        className="rd-nav-item rd-nav-item-idle justify-center px-2 w-full"
+        title="Buscar"
+        aria-label="Buscar"
+      >
+        <Search size={18} className="shrink-0" />
+      </button>
+    );
+  }
+
+  return (
+    <div ref={searchRef} className="relative mb-3">
+      <Search
+        size={15}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+      />
+
+      <input
+        value={query}
+        onChange={event => {
+          setQuery(event.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder="Buscar..."
+        className="
+          w-full h-10 rounded-xl border border-primary/10
+          bg-secondary/50 pl-9 pr-3 text-sm text-foreground
+          placeholder:text-muted-foreground outline-none
+          focus:border-primary/35 focus:ring-2 focus:ring-primary/10
+          transition-all
+        "
+      />
+
+      {open && query.trim().length > 0 && (
+        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-[360] overflow-hidden rounded-xl border border-primary/20 bg-popover shadow-2xl">
+          {suggestions.length > 0 ? (
+            <div className="max-h-80 overflow-y-auto p-1.5">
+              {suggestions.map(({ entity, type }) => {
+                const config = SEARCH_TYPES[type];
+                const imageUrl = entity.image_url || entity.image_url_card;
+
+                return (
+                  <button
+                    key={`${type}-${entity.id}`}
+                    type="button"
+                    onClick={() => goToResult({ entity, type })}
+                    className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-primary/10 transition-colors"
+                  >
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={entity.name}
+                        className="h-9 w-9 rounded-lg object-cover border border-primary/15 shrink-0"
+                      />
+                    ) : (
+                      <div className="h-9 w-9 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                        {entity.name?.[0] || '?'}
+                      </div>
+                    )}
+
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-foreground">
+                        {entity.name}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        {config.label}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="px-3 py-3 text-xs text-muted-foreground">
+              Sin resultados
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -101,6 +272,12 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 py-5 overflow-y-auto px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <SidebarSearch
+            collapsed={collapsed}
+            onNavigate={() => setMobileOpen(false)}
+            onExpand={() => setCollapsed(false)}
+          />
+
           {navItems.map(({ path, label, icon: Icon }) => {
             const active = isActive(path);
 

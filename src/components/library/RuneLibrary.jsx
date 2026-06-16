@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
 
@@ -32,7 +32,7 @@ const BRANCH_ICONS = {
 
 const BRANCHES = ['Clave', 'Dominación', 'Precisión', 'Valor', 'Brujería'];
 
-export default function RuneLibrary() {
+export default function RuneLibrary({ selectedId, onSelectId, onClearSelected }) {
   const [search, setSearch] = useState('');
   const [branchFilter, setBranchFilter] = useState('all');
   const [selected, setSelected] = useState(null);
@@ -41,6 +41,18 @@ export default function RuneLibrary() {
     queryKey: ['runes'],
     queryFn: () => Rune.list('branch'),
   });
+
+  useEffect(() => {
+    if (!selectedId) {
+      setSelected(null);
+      return;
+    }
+
+    const nextSelected = runes.find(rune => String(rune.id) === String(selectedId));
+    if (nextSelected) {
+      setSelected(nextSelected);
+    }
+  }, [runes, selectedId]);
 
   const BRANCH_ORDER = BRANCHES.reduce((acc, branch, index) => {
     acc[branch] = index;
@@ -136,7 +148,10 @@ export default function RuneLibrary() {
     return (
       <div className="space-y-6">
         <button
-          onClick={() => setSelected(null)}
+          onClick={() => {
+            setSelected(null);
+            onClearSelected?.();
+          }}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={15} />
@@ -306,7 +321,10 @@ export default function RuneLibrary() {
                         return (
                           <button
                             key={`${branch}-${rune.id}`}
-                            onClick={() => setSelected(rune)}
+                            onClick={() => {
+                              setSelected(rune);
+                              onSelectId?.(rune.id);
+                            }}
                             className="group relative overflow-hidden rd-card p-2.5 text-left hover:border-primary/30 hover:bg-primary/[0.02] transition-all duration-200"
                           >
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.10),transparent_42%)]" />

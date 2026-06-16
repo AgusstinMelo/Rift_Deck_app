@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BookOpen, Sword, Gem, Library as LibraryIcon } from 'lucide-react';
 import ChampionLibrary from '@/components/library/ChampionLibrary';
 import ItemLibrary from '@/components/library/ItemLibrary';
@@ -11,7 +11,22 @@ const tabs = [
 ];
 
 export default function Library() {
-  const [activeTab, setActiveTab] = useState('champions');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const activeTab = tabs.some(tab => tab.id === urlTab) ? urlTab : 'champions';
+  const selectedId = searchParams.get('id');
+
+  const setActiveTab = (tabId) => {
+    setSearchParams({ tab: tabId });
+  };
+
+  const setSelectedId = (id) => {
+    setSearchParams({ tab: activeTab, id: String(id) });
+  };
+
+  const clearSelectedId = () => {
+    setSearchParams({ tab: activeTab });
+  };
 
   return (
     <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
@@ -81,9 +96,27 @@ export default function Library() {
       </div>
 
       <div>
-        {activeTab === 'champions' && <ChampionLibrary />}
-        {activeTab === 'items' && <ItemLibrary />}
-        {activeTab === 'runes' && <RuneLibrary />}
+        {activeTab === 'champions' && (
+          <ChampionLibrary
+            selectedId={selectedId}
+            onSelectId={setSelectedId}
+            onClearSelected={clearSelectedId}
+          />
+        )}
+        {activeTab === 'items' && (
+          <ItemLibrary
+            selectedId={selectedId}
+            onSelectId={setSelectedId}
+            onClearSelected={clearSelectedId}
+          />
+        )}
+        {activeTab === 'runes' && (
+          <RuneLibrary
+            selectedId={selectedId}
+            onSelectId={setSelectedId}
+            onClearSelected={clearSelectedId}
+          />
+        )}
       </div>
     </div>
   );
