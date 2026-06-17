@@ -779,19 +779,19 @@ export default function MatchForm({ match, onClose, onSaved }) {
           {/* Hechizos */}
           <div>
             <label className="text-sm font-semibold text-foreground block mb-3">Hechizos ({selectedSpells.length}/2)</label>
-            <div className="flex flex-wrap gap-2 w-full sm:flex-nowrap">
+            <div className="grid grid-cols-4 gap-2 w-full sm:flex sm:flex-nowrap">
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
                 return (
                   <button key={spell.id} type="button" onClick={() => toggleSpell(spell.name)}
                     disabled={disabled} title={spell.name}
-                    className={`shrink-0 w-11 h-11 sm:w-auto sm:h-auto sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
+                    className={`aspect-square w-full min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
                       selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                     } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
                     {spell.image_url
-                      ? <img src={spell.image_url} alt={spell.name} className="w-9 h-9 sm:w-8 sm:h-8 rounded-full object-cover" />
-                      : <div className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                      ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
+                      : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
                     }
                   </button>
                 );
