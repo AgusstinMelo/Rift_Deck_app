@@ -209,7 +209,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, existingB
             <label className="text-sm font-semibold text-foreground block mb-3">
               Hechizos ({selectedSpells.length}/2)
             </label>
-            <div className="grid grid-cols-4 gap-2 w-full sm:flex sm:flex-nowrap">
+            <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-nowrap">
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
