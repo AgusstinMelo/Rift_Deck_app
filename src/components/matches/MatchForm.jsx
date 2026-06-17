@@ -779,7 +779,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
           {/* Hechizos */}
           <div>
             <label className="text-sm font-semibold text-foreground block mb-3">Hechizos ({selectedSpells.length}/2)</label>
-            <div className="flex gap-2 w-full overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
+            <div className="flex flex-wrap gap-2 w-full sm:flex-nowrap">
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
