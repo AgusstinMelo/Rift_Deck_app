@@ -748,7 +748,7 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
                 <label className="text-sm font-semibold text-foreground block mb-3">
                   Hechizos ({selectedSpells.length}/2)
                 </label>
-                <div className="flex gap-2 w-full">
+                <div className="flex gap-2 w-full overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
                   {spells.map(spell => {
                     const selected = selectedSpells.includes(spell.name);
                     const disabled = selectedSpells.length >= 2 && !selected;
@@ -759,13 +759,13 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
                         onClick={() => toggleSpell(spell.name)}
                         disabled={disabled}
                         title={spell.name}
-                        className={`flex-1 flex items-center justify-center p-1.5 rounded-xl border-2 transition-all ${
+                        className={`shrink-0 w-11 h-11 sm:w-auto sm:h-auto sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
                           selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                         } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
                       >
                         {spell.image_url
-                          ? <img src={spell.image_url} alt={spell.name} className="w-8 h-8 rounded-full object-cover" />
-                          : <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                          ? <img src={spell.image_url} alt={spell.name} className="w-9 h-9 sm:w-8 sm:h-8 rounded-full object-cover" />
+                          : <div className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
                         }
                       </button>
                     );
