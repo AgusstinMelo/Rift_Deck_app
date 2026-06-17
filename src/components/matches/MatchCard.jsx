@@ -162,6 +162,7 @@ export default function MatchCard({
 
   const enemyNames = match.enemy_champions || [];
   const itemNames = match.items_used || [];
+  const tags = Array.isArray(match.tags) ? match.tags.filter(Boolean) : [];
 
   const formatDate = (d) => {
     if (!d) return null;
@@ -270,6 +271,15 @@ export default function MatchCard({
                   {match.side === 'blue' ? 'Blue' : 'Red'}
                 </span>
               )}
+
+              {tags.map(tag => (
+                <span
+                  key={tag}
+                  className="text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded-md border font-semibold bg-primary/10 text-primary border-primary/20"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
 
             <div className="inline-grid grid-cols-[auto_auto] gap-x-2 gap-y-2 self-start md:grid md:grid-cols-[auto_auto_auto_auto] md:gap-x-3 md:gap-y-2 md:self-auto">

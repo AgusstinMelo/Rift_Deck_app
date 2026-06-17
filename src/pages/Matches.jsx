@@ -41,6 +41,7 @@ export default function Matches() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [matchToDelete, setMatchToDelete] = useState(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
@@ -76,7 +77,10 @@ export default function Matches() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteMatch(id),
-    onSuccess: () => qc.invalidateQueries(['matches']),
+    onSuccess: () => {
+      setMatchToDelete(null);
+      qc.invalidateQueries(['matches']);
+    },
   });
 
   const deleteAllMutation = useMutation({
@@ -247,6 +251,44 @@ export default function Matches() {
             </div>
           </div>
         )}
+
+        {matchToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="rd-card p-5 w-full max-w-xs mx-4 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                  <Trash2 size={20} className="text-red-400" />
+                </div>
+                <div>
+                  <p className="font-rajdhani font-bold text-lg text-foreground">Eliminar partida</p>
+                  <p className="text-xs text-muted-foreground">Esta acción no se puede deshacer.</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                ¿Querés eliminar la partida de <span className="text-foreground font-semibold">{matchToDelete.own_champion_name || 'este campeón'}</span>?
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMatchToDelete(null)}
+                  className="flex-1 px-4 py-2 rounded-lg bg-secondary border border-border text-sm text-muted-foreground hover:text-foreground transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteMutation.mutate(matchToDelete.id)}
+                  disabled={deleteMutation.isPending}
+                  className="flex-1 px-4 py-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {matches.length > 0 && (
@@ -352,7 +394,7 @@ export default function Matches() {
                 champions={champions}
                 items={items}
                 onEdit={setEditing}
-                onDelete={(id) => deleteMutation.mutate(id)}
+                onDelete={(id) => setMatchToDelete(matches.find(match => match.id === id) || null)}
               />
             </div>
           ))}

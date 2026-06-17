@@ -223,7 +223,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, existingB
                     }}
                     disabled={disabled}
                     title={spell.name}
-                    className={`aspect-square w-full min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
+                    className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
                       selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                     } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
                   >

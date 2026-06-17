@@ -8,10 +8,12 @@ import ItemBrowser from '@/components/builds/ItemBrowser';
 
 import { useSpells } from '@/hooks/useSpells';
 
-const TAGS = ['stomp', 'remontada', 'mala composición', 'buen early', 'mal late', 'autofill', 'duoQ', 'soloQ'];
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const PRIMARY_BRANCHES = ['Dominación', 'Precisión', 'Valor', 'Brujería'];
 const STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
+
+const cleanTags = (tagList) =>
+  [...new Set(tagList.map(tag => tag.trim()).filter(Boolean))];
 
 const ROLE_LABELS = {
   top: 'Top',
@@ -182,6 +184,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
   const [hour, setHour] = useState(match?.hour || '');
   const [notes, setNotes] = useState(match?.notes || '');
   const [tags, setTags] = useState(match?.tags || []);
+  const [tagInput, setTagInput] = useState('');
 
   const { data: spells = [] } = useSpells();
 
@@ -317,11 +320,25 @@ export default function MatchForm({ match, onClose, onSaved }) {
       date,
       hour: hour || null,
       notes,
-      tags,
+      tags: cleanTags([...tags, tagInput]),
     });
   };
 
-  const toggleTag = (tag) => setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+  const addTag = () => {
+    const nextTag = tagInput.trim();
+    if (!nextTag) return;
+
+    setTags(prev => {
+      const exists = prev.some(tag => tag.toLowerCase() === nextTag.toLowerCase());
+      return exists ? prev : [...prev, nextTag];
+    });
+    setTagInput('');
+  };
+
+  const removeTag = (tagToRemove) => {
+    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  };
+
   const toggleSpell = (spell) => {
     if (selectedSpells.includes(spell)) setSelectedSpells(prev => prev.filter(s => s !== spell));
     else if (selectedSpells.length < 2) setSelectedSpells(prev => [...prev, spell]);
@@ -786,7 +803,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
                 return (
                   <button key={spell.id} type="button" onClick={() => toggleSpell(spell.name)}
                     disabled={disabled} title={spell.name}
-                    className={`aspect-square w-full min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
+                    className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
                       selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                     } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
                     {spell.image_url
@@ -873,11 +890,38 @@ export default function MatchForm({ match, onClose, onSaved }) {
 
           {/* Tags */}
           <div>
-            <label className="text-sm font-semibold text-foreground block mb-3">Tags</label>
-            <div className="flex flex-wrap gap-2">
-              {TAGS.map(tag => (
-                <button key={tag} type="button" onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${tags.includes(tag) ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-secondary border-border text-muted-foreground hover:border-border/80'}`}>
+            <label className="text-sm font-semibold text-foreground block mb-3">Etiquetas</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
+                placeholder="Agregar etiqueta..."
+                className="min-w-0 flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
+              />
+              <button
+                type="button"
+                onClick={addTag}
+                className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Agregar
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  title="Quitar etiqueta"
+                  className="px-3 py-1.5 rounded-lg text-sm border bg-primary/20 border-primary/50 text-primary transition-all hover:bg-primary/30"
+                >
                   {tag}
                 </button>
               ))}

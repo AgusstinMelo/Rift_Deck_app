@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { getBuildsForChampion, deleteBuild } from '@/api/buildsSupabase';
@@ -7,6 +8,7 @@ import LaneBadge from '@/components/ui/LaneBadge';
 export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBack, onCompare }) {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const [buildToDelete, setBuildToDelete] = useState(null);
 
   const { data: allBuilds = [], isLoading } = useQuery({
     queryKey: ['builds', champion.id, champion.name, user?.email],
@@ -23,7 +25,10 @@ export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBa
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteBuild(id),
-    onSuccess: () => qc.invalidateQueries(['builds', champion.id]),
+    onSuccess: () => {
+      setBuildToDelete(null);
+      qc.invalidateQueries(['builds', champion.id]);
+    },
   });
 
   return (
@@ -94,7 +99,7 @@ export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBa
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(build.id); }}
+                <button onClick={(e) => { e.stopPropagation(); setBuildToDelete(build); }}
                   className="w-8 h-8 rounded-lg bg-secondary/50 border border-border/40 flex items-center justify-center text-muted-foreground hover:text-red-400 hover:border-red-500/30 transition-all">
                   <Trash2 size={14} />
                 </button>
@@ -102,6 +107,44 @@ export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBa
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {buildToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="rd-card p-5 w-full max-w-xs mx-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                <Trash2 size={20} className="text-red-400" />
+              </div>
+              <div>
+                <p className="font-rajdhani font-bold text-lg text-foreground">Eliminar build</p>
+                <p className="text-xs text-muted-foreground">Esta acción no se puede deshacer.</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              ¿Querés eliminar <span className="text-foreground font-semibold">{buildToDelete.name || 'esta build'}</span>?
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setBuildToDelete(null)}
+                className="flex-1 px-4 py-2 rounded-lg bg-secondary border border-border text-sm text-muted-foreground hover:text-foreground transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteMutation.mutate(buildToDelete.id)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 px-4 py-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
