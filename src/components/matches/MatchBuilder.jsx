@@ -4,6 +4,7 @@ import { WRItem, Rune } from '@/api/entitiesSupabase';
 import { ArrowLeft, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
+import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -202,6 +203,15 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
 
   const removeTag = (tagToRemove) => {
     setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  };
+
+  const togglePresetTag = (presetTag) => {
+    setTags(prev => {
+      const selectedTag = prev.find(tag => tag.toLowerCase() === presetTag.toLowerCase());
+      return selectedTag
+        ? prev.filter(tag => tag !== selectedTag)
+        : [...prev, presetTag];
+    });
   };
 
   const isMobilityBoots = (item) =>
@@ -900,6 +910,27 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-semibold text-foreground block mb-3">Etiquetas</label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {PRESET_MATCH_TAGS.map(tag => {
+                    const isSelected = tags.some(selectedTag => selectedTag.toLowerCase() === tag.toLowerCase());
+
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => togglePresetTag(tag)}
+                        aria-pressed={isSelected}
+                        className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                          isSelected
+                            ? 'bg-primary/20 border-primary/50 text-primary'
+                            : 'bg-secondary/50 border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="text"
