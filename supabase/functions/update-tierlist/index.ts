@@ -150,7 +150,7 @@ const DICT_CHAMP: Record<string, string> = {
   "锤石": "Thresh",
   "阿木木": "Amumu",
   "莉莉娅": "Lillia",
-  "希瓦娜": "Shivana",
+  "希瓦娜": "Shyvana",
   "拉莫斯": "Rammus",
   "赵信": "Xin Zhao",
   "奈德丽": "Nidalee",
