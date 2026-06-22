@@ -168,6 +168,8 @@ export default function MatchForm({ match, onClose, onSaved }) {
   const [champSearch, setChampSearch] = useState('');
   const [allyChampions, setAllyChampions] = useState([]);
   const [enemyChampions, setEnemyChampions] = useState([]);
+  const [alliesChanged, setAlliesChanged] = useState(false);
+  const [enemiesChanged, setEnemiesChanged] = useState(false);
 
   // Build
   const [selectedItems, setSelectedItems] = useState([]);
@@ -256,6 +258,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
 
   const handleOwnChampionSelect = (champ) => {
     setOwnChampion(champ);
+    setAlliesChanged(true);
     setAllyChampions(prev => [
       ...prev.filter(ally => ally.role !== lane && ally.name !== champ.name),
       { ...champ, role: lane || 'adc' },
@@ -268,6 +271,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
     setLane(resolvedLane);
 
     if (ownChampion && resolvedLane) {
+      setAlliesChanged(true);
       setAllyChampions(prev => [
         ...prev.filter(ally => ally.name !== ownChampion.name && ally.role !== resolvedLane),
         { ...ownChampion, role: resolvedLane },
@@ -278,6 +282,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
   const handleSelectAlly = (champ, role) => {
     if (role === lane) return;
 
+    setAlliesChanged(true);
     setAllyChampions(prev => {
       const isAlreadyInRole = prev.find(c => c.role === role && c.name === champ.name);
       if (isAlreadyInRole) return prev.filter(c => c.role !== role);
@@ -290,6 +295,7 @@ export default function MatchForm({ match, onClose, onSaved }) {
   };
 
   const handleSelectEnemy = (champ, role) => {
+    setEnemiesChanged(true);
     setEnemyChampions(prev => {
       const isAlreadyInRole = prev.find(c => c.role === role && c.name === champ.name);
       if (isAlreadyInRole) return prev.filter(c => c.role !== role);
@@ -308,8 +314,12 @@ export default function MatchForm({ match, onClose, onSaved }) {
       lane,
       own_champion_name: ownChampion?.name || match?.own_champion_name || '',
       own_champion_id: ownChampion?.id || match?.own_champion_id || '',
-      ally_champions: getChampionNamesByRole(allyChampions),
-      enemy_champions: getChampionNamesByRole(enemyChampions),
+      ally_champions: alliesChanged
+        ? getChampionNamesByRole(allyChampions)
+        : (match?.ally_champions || []),
+      enemy_champions: enemiesChanged
+        ? getChampionNamesByRole(enemyChampions)
+        : (match?.enemy_champions || []),
       enemy_champion_name: directEnemy?.name || '',
       enemy_champion_id: directEnemy?.id || '',
       items_used: selectedItems.map(i => i.name),
