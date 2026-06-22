@@ -109,6 +109,20 @@ function EmptyIconSlot() {
   );
 }
 
+function placeChampionInRole(names, championName, role, roleOrder) {
+  const normalizedNames = names.filter(Boolean);
+  const roleIndex = roleOrder.indexOf(role);
+
+  if (!championName || roleIndex < 0 || !normalizedNames.includes(championName)) {
+    return normalizedNames;
+  }
+
+  const withoutChampion = normalizedNames.filter(name => name !== championName);
+  withoutChampion.splice(Math.min(roleIndex, withoutChampion.length), 0, championName);
+
+  return withoutChampion;
+}
+
 function InfoStat({ label, value, valueClass = 'text-foreground' }) {
   if (!value) return <div />;
 
@@ -145,22 +159,19 @@ export default function MatchCard({
   const rawAllies = match.ally_champions || [];
   const ownLane = match.lane;
 
-  const alliesWithoutOwn = rawAllies.filter(n => n !== ownName);
+  const orderedAllies = placeChampionInRole(
+    rawAllies.includes(ownName) ? rawAllies : [...rawAllies, ownName],
+    ownName,
+    ownLane,
+    ROLE_ORDER
+  );
 
-  const ownLaneIndex = ROLE_ORDER.indexOf(ownLane);
-
-  const orderedAllies = [...alliesWithoutOwn];
-
-  if (ownName) {
-    const insertAt = Math.min(
-      ownLaneIndex >= 0 ? ownLaneIndex : 0,
-      orderedAllies.length
-    );
-
-    orderedAllies.splice(insertAt, 0, ownName);
-  }
-
-  const enemyNames = match.enemy_champions || [];
+  const enemyNames = placeChampionInRole(
+    match.enemy_champions || [],
+    match.enemy_champion_name,
+    ownLane,
+    ROLE_ORDER
+  );
   const itemNames = match.items_used || [];
   const tags = Array.isArray(match.tags) ? match.tags.filter(Boolean) : [];
 

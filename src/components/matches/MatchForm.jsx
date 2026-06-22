@@ -16,6 +16,11 @@ const STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
 const cleanTags = (tagList) =>
   [...new Set(tagList.map(tag => tag.trim()).filter(Boolean))];
 
+const getChampionNamesByRole = (selected) =>
+  LANES
+    .map(role => selected.find(champion => champion.role === role)?.name)
+    .filter(Boolean);
+
 const ROLE_LABELS = {
   top: 'Top',
   jungler: 'Jungla',
@@ -303,8 +308,8 @@ export default function MatchForm({ match, onClose, onSaved }) {
       lane,
       own_champion_name: ownChampion?.name || match?.own_champion_name || '',
       own_champion_id: ownChampion?.id || match?.own_champion_id || '',
-      ally_champions: allyChampions.map(c => c.name),
-      enemy_champions: enemyChampions.map(c => c.name),
+      ally_champions: getChampionNamesByRole(allyChampions),
+      enemy_champions: getChampionNamesByRole(enemyChampions),
       enemy_champion_name: directEnemy?.name || '',
       enemy_champion_id: directEnemy?.id || '',
       items_used: selectedItems.map(i => i.name),

@@ -14,6 +14,11 @@ const PRIMARY_BRANCHES = ['Dominación', 'Precisión', 'Valor', 'Brujería'];
 const cleanTags = (tagList) =>
   [...new Set(tagList.map(tag => tag.trim()).filter(Boolean))];
 
+const getChampionNamesByRole = (selected) =>
+  LANES
+    .map(role => selected.find(champion => champion.role === role)?.name)
+    .filter(Boolean);
+
 function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, myLane, mirrored = false }) {
   const [search, setSearch] = useState('');
   const ROLES = ['top', 'jungler', 'mid', 'adc', 'support'];
@@ -358,8 +363,8 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
       lane,
       own_champion_name: myChampion.name,
       own_champion_id: myChampion.id,
-      ally_champions: allyChampions.map(c => c.name),
-      enemy_champions: enemyChampions.map(c => c.name),
+      ally_champions: getChampionNamesByRole(allyChampions),
+      enemy_champions: getChampionNamesByRole(enemyChampions),
       enemy_champion_name: directEnemy?.name || '',
       enemy_champion_id: directEnemy?.id || '',
       items_used: selectedItems.map(i => i.name),
