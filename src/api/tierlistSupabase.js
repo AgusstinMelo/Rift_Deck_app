@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
 
-export async function getTierlistEntries(order = "-ranking_final", limit = 1000) {
+export async function getTierlistEntries(order = "-ranking_final", limit = 1000, filters = {}) {
   const orderConfig = order === "-updated_at"
     ? { column: "updated_at", ascending: false }
     : { column: "ranking_final", ascending: false };
@@ -9,6 +9,14 @@ export async function getTierlistEntries(order = "-ranking_final", limit = 1000)
     .from("tierlist_entries")
     .select("*")
     .order(orderConfig.column, { ascending: orderConfig.ascending });
+
+  if (filters.patch) {
+    query = query.eq("patch", filters.patch);
+  }
+
+  if (filters.patches?.length) {
+    query = query.in("patch", filters.patches);
+  }
 
   if (limit) {
     query = query.limit(limit);

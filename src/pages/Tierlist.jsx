@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, Trophy, Table2, Layers } from 'lucide-react';
@@ -7,7 +7,17 @@ import LaneBadge from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
-const TIERS = ['S+', 'S', 'A', 'B', 'C'];
+const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
+
+const sortTiers = (tiers) => [...tiers].sort((a, b) => {
+  const aIndex = TIER_ORDER.indexOf(a);
+  const bIndex = TIER_ORDER.indexOf(b);
+
+  if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+  if (aIndex === -1) return 1;
+  if (bIndex === -1) return -1;
+  return aIndex - bIndex;
+});
 
 export default function Tierlist() {
   const [laneFilter, setLaneFilter] = useState('all');
@@ -15,11 +25,6 @@ export default function Tierlist() {
   const [diffFilter, setDiffFilter] = useState('all');
   const [viewMode, setViewMode] = useState('tier');
   const [patchFilter, setPatchFilter] = useState(''); // stores execution id
-
-  const { data: tierlist = [], isLoading } = useQuery({
-    queryKey: ['tierlist-full'],
-    queryFn: () => getTierlistEntries('-ranking_final', 1000),
-  });
 
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],
@@ -37,6 +42,17 @@ export default function Tierlist() {
 
   const activePatchFilter = activeExec?.patch || '';
   const previousPatch = activeExec === latestExec ? previousExec?.patch : null;
+
+  const patchesToLoad = useMemo(
+    () => [activePatchFilter, previousPatch].filter(Boolean),
+    [activePatchFilter, previousPatch]
+  );
+
+  const { data: tierlist = [], isLoading } = useQuery({
+    queryKey: ['tierlist-full', patchesToLoad],
+    queryFn: () => getTierlistEntries('-ranking_final', 2000, { patches: patchesToLoad }),
+    enabled: patchesToLoad.length > 0,
+  });
 
   const prevEntries = previousPatch ? tierlist.filter(t => t.patch === previousPatch) : [];
 
@@ -62,6 +78,11 @@ export default function Tierlist() {
 
     return matchPatch && matchLane && matchTier && matchDiff;
   });
+
+  const availableTiers = useMemo(
+    () => sortTiers(new Set(tierlist.filter(t => t.patch === activePatchFilter).map(t => t.tier).filter(Boolean))),
+    [tierlist, activePatchFilter]
+  );
 
   const renderVariation = (entry) => {
     const variation = getPositionVariation(entry);
@@ -151,7 +172,7 @@ export default function Tierlist() {
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
             <option value="all">Todos los tiers</option>
-            {TIERS.map(t => (
+            {availableTiers.map(t => (
               <option key={t} value={t}>Tier {t}</option>
             ))}
           </select>
@@ -227,7 +248,7 @@ export default function Tierlist() {
         </div>
       ) : viewMode === 'tier' ? (
         <div className="space-y-6">
-          {TIERS.map(tier => {
+          {availableTiers.map(tier => {
             const championsInTier = filtered.filter(t => t.tier === tier);
             if (championsInTier.length === 0) return null;
 
