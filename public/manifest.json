@@ -1,0 +1,14 @@
+{
+  "name": "Rift Deck",
+  "short_name": "Rift Deck",
+  "icons": [
+    {
+      "src": "/riftdeck-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
+  "display": "standalone"
+}
