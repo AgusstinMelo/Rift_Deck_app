@@ -204,6 +204,7 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [bugModalOpen, setBugModalOpen] = useState(false);
   const [activeInfoModal, setActiveInfoModal] = useState(null);
+  const mainRef = useRef(null);
   const location = useLocation();
   const { user, logout } = useAuth();
   const visibleName = user?.visible_name || user?.full_name || user?.email || 'Usuario';
@@ -212,6 +213,10 @@ export default function Layout() {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [location.pathname, location.search]);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden rd-app-shell">
@@ -425,7 +430,7 @@ export default function Layout() {
           </button>
         </header>
 
-        <main className="flex-1 overflow-y-auto rd-main-content">
+        <main ref={mainRef} className="flex-1 overflow-y-auto rd-main-content">
           <Outlet />
         </main>
       </div>
