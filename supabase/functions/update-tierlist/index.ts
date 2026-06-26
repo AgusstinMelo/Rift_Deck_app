@@ -36,9 +36,9 @@ const METRIC_KEYS = [
 ];
 
 const DEFAULT_WEIGHTS = {
-  winrate: 0.47,
+  winrate: 0.50,
   pickrate: 0.37,
-  banrate: 0.11,
+  banrate: 0.08,
   facilidad: 0.05,
 };
 
