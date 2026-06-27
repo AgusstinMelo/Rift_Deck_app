@@ -119,6 +119,7 @@ export default function Dashboard() {
     runes,
     spells: spellsData,
     limit: 1,
+    minimum: 1,
   })[0] || null;
 
   const totalMatches = sortedMatches.length;

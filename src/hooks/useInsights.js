@@ -96,6 +96,7 @@ function normalizeMatch(match, index) {
     won: keyOf(match.result) === 'win',
     champion,
     lane: laneOf(match.lane),
+    side: keyOf(match.side),
     directEnemy,
     allies: unique(firstList(match, ['ally_champions', 'allies', 'ally_team']))
       .filter(name => keyOf(name) !== keyOf(champion)),
@@ -568,6 +569,129 @@ function detectSavedBuilds(ctx) {
   return cards;
 }
 
+function detectFoundationSignals(ctx) {
+  const total = ctx.matches.length;
+  if (!total) return [];
+
+  const overall = summarize(ctx.matches);
+  const recentRows = ctx.matches.slice(0, Math.min(5, total));
+  const recent = summarize(recentRows);
+  const champions = groupBy(ctx.matches, row => row.champion).sort((a, b) => b.games - a.games);
+  const lanes = groupBy(ctx.matches, row => row.lane).sort((a, b) => b.games - a.games);
+  const mainChampion = champions[0];
+  const mainLane = lanes[0];
+  const items = groupBy(ctx.matches, row => row.items).sort((a, b) => b.games - a.games);
+  const runes = groupBy(ctx.matches, row => row.runes).sort((a, b) => b.games - a.games);
+  const enemies = groupBy(ctx.matches, row => row.enemies).sort((a, b) => b.games - a.games);
+  const spellPairs = groupBy(
+    ctx.matches,
+    row => row.spells.length ? [row.spells.slice().sort().join(' + ')] : []
+  ).sort((a, b) => b.games - a.games);
+  const sides = groupBy(ctx.matches, row => row.side).filter(side => side.games >= 2);
+  const blue = sides.find(side => side.name === 'blue');
+  const red = sides.find(side => side.name === 'red');
+  const mostUsedItem = items[0];
+  const mostUsedRune = runes[0];
+  const mostFrequentEnemy = enemies[0];
+  const mostUsedSpells = spellPairs[0];
+  const avgKills = ctx.matches.reduce((sum, row) => sum + row.kills, 0) / total;
+  const avgAssists = ctx.matches.reduce((sum, row) => sum + row.assists, 0) / total;
+  const laneLabels = { top: 'Baron Lane', jungler: 'Jungla', mid: 'Mid', dragonline: 'Dragon Lane', adc: 'Dragon Lane', support: 'Support' };
+  const mainLaneLabel = laneLabels[mainLane?.name] || mainLane?.name;
+
+  return [
+    makeCard({
+      id: 'foundation-overall-performance', domain: 'rendimiento general', tone: overall.wr >= 50 ? 'positive' : 'warning',
+      title: `Tu rendimiento general es de ${percent(overall.wr)} de winrate`,
+      thesis: `Ganaste ${overall.wins} de las ${total} partidas analizadas y perdiste ${total - overall.wins}. Este valor funciona como tu referencia personal: los demás insights comparan campeones, builds y matchups contra este rendimiento, no contra el promedio de otros jugadores.`,
+      action: 'Usá este promedio como punto de control y evaluá los cambios únicamente cuando una decisión tenga varias partidas comparables.',
+      sample: total, evidence: [`${overall.wins} victorias`, `${total - overall.wins} derrotas`, `${percent(overall.wr)} de winrate`],
+      score: 18, sources: ['partidas'],
+    }),
+    mainLane && makeCard({
+      id: `foundation-lane-${keyOf(mainLane.name)}`, domain: 'rol', tone: 'neutral',
+      title: `${mainLaneLabel} es tu rol con mayor volumen`,
+      thesis: `Jugaste ${games(mainLane.games)} en ${mainLaneLabel}, que representan el ${percent((mainLane.games / total) * 100)} de tu historial, con ${percent(mainLane.wr)} de winrate. Es la línea donde tus estadísticas tienen mayor respaldo y, por lo tanto, la mejor referencia para evaluar campeones y builds.`,
+      action: `Compará cualquier cambio de rol contra tu ${percent(mainLane.wr)} en ${mainLaneLabel}, sin mezclar ambas muestras.`,
+      sample: mainLane.games, evidence: [`${games(mainLane.games)}`, `${percent(mainLane.wr)} de winrate`, `${percent((mainLane.games / total) * 100)} del historial`],
+      score: 25, sources: ['partidas'],
+    }),
+    makeCard({
+      id: 'foundation-recent-reference', domain: 'forma', tone: recent.wr >= overall.wr ? 'positive' : 'warning',
+      title: `Tus últimas ${recent.games} partidas están en ${percent(recent.wr)} de winrate`,
+      thesis: `El bloque reciente registra ${percent(recent.wr)}, mientras que tu historial completo está en ${percent(overall.wr)}. Esta comparación no define una tendencia por sí sola, pero muestra si tu rendimiento inmediato está por encima o por debajo de la referencia acumulada.`,
+      action: `Completá otras ${recent.games} partidas sin cambiar drásticamente de pool y compará ambos bloques bajo condiciones similares.`,
+      sample: recent.games, evidence: [`Últimas ${recent.games}: ${percent(recent.wr)}`, `General: ${percent(overall.wr)}`],
+      score: 24, sources: ['partidas'],
+    }),
+    makeCard({
+      id: 'foundation-survival', domain: 'supervivencia', tone: overall.avgDeaths <= 5 ? 'positive' : 'warning',
+      title: `Promediás ${overall.avgDeaths.toFixed(1)} muertes por partida`,
+      thesis: `La cifra se calcula sobre tus ${games(total)} y permite medir estabilidad entre bloques, campeones y matchups. Por sí sola no determina si jugaste bien, pero un aumento sostenido suele reducir el margen para disputar objetivos y cerrar partidas.`,
+      action: 'Compará este promedio con tus próximos bloques y registrá especialmente las muertes anteriores al primer objetivo importante.',
+      sample: total, evidence: [`${overall.avgDeaths.toFixed(1)} muertes`, `${games(total)}`],
+      score: 20, sources: ['partidas'],
+    }),
+    makeCard({
+      id: 'foundation-offensive-profile', domain: 'producción ofensiva', tone: 'neutral',
+      title: `Tu promedio es ${avgKills.toFixed(1)} asesinatos y ${avgAssists.toFixed(1)} asistencias`,
+      thesis: `En conjunto, tu relación KDA global es ${overall.kda.toFixed(2)}. Esta referencia sirve para detectar si un campeón o una build mejora tu participación ofensiva sin aumentar las muertes, que es una señal más útil que observar únicamente el resultado final.`,
+      action: 'Al comparar builds o campeones, buscá aumentar asesinatos y asistencias sin superar tu promedio actual de muertes.',
+      sample: total, evidence: [`${avgKills.toFixed(1)} asesinatos`, `${avgAssists.toFixed(1)} asistencias`, `${overall.kda.toFixed(2)} KDA`],
+      score: 19, sources: ['partidas'],
+    }),
+    blue && red && makeCard({
+      id: 'foundation-side-comparison', domain: 'lado del mapa', tone: 'neutral',
+      title: 'Tu rendimiento cambia según el lado del mapa',
+      thesis: `En lado azul tenés ${percent(blue.wr)} de winrate en ${games(blue.games)}; en lado rojo, ${percent(red.wr)} en ${games(red.games)}. La diferencia puede estar asociada al orden de selección, los objetivos o la composición, por lo que conviene observarla junto con el draft.`,
+      action: 'Compará en cada lado qué campeones seleccionás y cuántas veces obtenés tu pick principal antes de atribuir la diferencia al mapa.',
+      sample: blue.games + red.games, effect: blue.wr - red.wr,
+      evidence: [`Azul: ${percent(blue.wr)} (${blue.games})`, `Rojo: ${percent(red.wr)} (${red.games})`],
+      score: 27, sources: ['partidas'],
+    }),
+    mostUsedItem && makeCard({
+      id: `foundation-item-${keyOf(mostUsedItem.name)}`, domain: 'objeto frecuente', tone: 'neutral',
+      title: `${mostUsedItem.name} es tu objeto más repetido`,
+      thesis: `Aparece en ${games(mostUsedItem.games)}, que representan el ${percent((mostUsedItem.games / total) * 100)} de tu historial, y esas partidas registran ${percent(mostUsedItem.wr)} de winrate. El dato describe frecuencia y resultado conjunto; no prueba que el objeto sea la causa del rendimiento.`,
+      action: `Compará ${mostUsedItem.name} dentro del mismo campeón y contra una alternativa concreta antes de convertirlo en una compra automática.`,
+      sample: mostUsedItem.games, evidence: [`${games(mostUsedItem.games)}`, `${percent(mostUsedItem.wr)} de winrate`],
+      entities: [mostUsedItem.name], score: 23, sources: ['partidas', 'objetos'],
+    }),
+    mostUsedRune && makeCard({
+      id: `foundation-rune-${keyOf(mostUsedRune.name)}`, domain: 'runa frecuente', tone: 'neutral',
+      title: `${mostUsedRune.name} es tu runa más utilizada`,
+      thesis: `La usaste en ${games(mostUsedRune.games)} y esas partidas alcanzan ${percent(mostUsedRune.wr)} de winrate. Para interpretar la cifra correctamente debe compararse dentro del mismo campeón, porque una runa usada por varios picks mezcla planes de juego diferentes.`,
+      action: `Mantené ${mostUsedRune.name} fija durante un bloque con el mismo campeón y comparala después contra una sola alternativa.`,
+      sample: mostUsedRune.games, evidence: [`${games(mostUsedRune.games)}`, `${percent(mostUsedRune.wr)} de winrate`],
+      entities: [mostUsedRune.name], score: 22, sources: ['partidas', 'runas'],
+    }),
+    mostFrequentEnemy && makeCard({
+      id: `foundation-enemy-${keyOf(mostFrequentEnemy.name)}`, domain: 'rival frecuente', tone: mostFrequentEnemy.wr >= overall.wr ? 'positive' : 'warning',
+      title: `${mostFrequentEnemy.name} es el rival que más aparece en tu historial`,
+      thesis: `Estuvo presente en ${games(mostFrequentEnemy.games)} del equipo enemigo y tu winrate en esas partidas fue de ${percent(mostFrequentEnemy.wr)}, frente a tu ${percent(overall.wr)} general. La muestra incluye rival directo y composición completa, por lo que todavía no equivale a un matchup de línea.`,
+      action: `Separá las partidas donde ${mostFrequentEnemy.name} fue rival directo de aquellas donde ocupó otra línea y compará ambos resultados.`,
+      sample: mostFrequentEnemy.games, evidence: [`${games(mostFrequentEnemy.games)}`, `${percent(mostFrequentEnemy.wr)} de winrate`],
+      entities: [mostFrequentEnemy.name], score: 21, sources: ['partidas', 'composiciones'],
+    }),
+    mostUsedSpells && makeCard({
+      id: `foundation-spells-${keyOf(mostUsedSpells.name)}`, domain: 'hechizos frecuentes', tone: 'neutral',
+      title: `${mostUsedSpells.name} es tu combinación de hechizos más usada`,
+      thesis: `La combinación aparece en ${games(mostUsedSpells.games)} y registra ${percent(mostUsedSpells.wr)} de winrate. Su frecuencia muestra tu configuración predeterminada, pero el valor estratégico depende del campeón y del matchup en que la elegís.`,
+      action: 'Identificá en qué matchups cambiás uno de estos hechizos y compará ese grupo por separado.',
+      sample: mostUsedSpells.games, evidence: [`${games(mostUsedSpells.games)}`, `${percent(mostUsedSpells.wr)} de winrate`],
+      score: 20, sources: ['partidas', 'hechizos'],
+    }),
+    mainChampion && makeCard({
+      id: `foundation-champion-${keyOf(mainChampion.name)}`, domain: 'pool', tone: mainChampion.wr >= overall.wr ? 'positive' : 'warning',
+      title: `${mainChampion.name} es tu campeón más jugado`,
+      thesis: `Acumula ${games(mainChampion.games)}, equivalentes al ${percent((mainChampion.games / total) * 100)} de tu historial, con ${percent(mainChampion.wr)} de winrate. Tu promedio general es ${percent(overall.wr)}, por lo que esta comparación muestra si tu pick con mayor volumen está impulsando o frenando el resultado global.`,
+      action: `Tomá el ${percent(mainChampion.wr)} de ${mainChampion.name} como referencia y compará por separado sus builds y matchups más repetidos.`,
+      sample: mainChampion.games, evidence: [`${games(mainChampion.games)}`, `${percent(mainChampion.wr)} de winrate`],
+      entities: [mainChampion.name], score: 21, sources: ['partidas'],
+    }),
+  ].filter(Boolean);
+}
+
 function selectEditorially(candidates, limit) {
   const sorted = candidates.sort((a, b) => b.score - a.score);
   const selected = [];
@@ -591,6 +715,7 @@ function selectEditorially(candidates, limit) {
  */
 export function computeInsightReport({
   matches = [], tierlist = [], wrItems = [], builds = [], champions = [], runes = [], spells = [], limit = 6,
+  minimum = 6,
 } = {}) {
   const normalizedMatches = matches.map(normalizeMatch).sort((a, b) => b.timestamp - a.timestamp);
   if (!normalizedMatches.length) return { insights: [], coverage: {}, generatedAt: new Date().toISOString() };
@@ -626,6 +751,7 @@ export function computeInsightReport({
     ...detectAllySynergy(ctx),
     ...detectMetaMovement(ctx),
     ...detectSavedBuilds(ctx),
+    ...detectFoundationSignals(ctx),
   ];
 
   if (!candidates.length) {
@@ -638,7 +764,8 @@ export function computeInsightReport({
     }));
   }
 
-  const insights = selectEditorially(candidates, Math.max(1, limit));
+  const targetLimit = Math.max(1, Number(limit) || 6, Number(minimum) || 0);
+  const insights = selectEditorially(candidates, targetLimit);
   return {
     insights,
     coverage: {
