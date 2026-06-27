@@ -15,11 +15,14 @@ export const getLatestSuccessfulExecution = (executions = []) =>
 
 export const getCurrentTierlistEntries = (tierlist = [], executions = []) => {
   const latestExecution = getLatestSuccessfulExecution(executions);
+  const activeSnapshotKey = latestExecution?.snapshot_key;
   const activePatch = latestExecution?.patch ||
     [...new Set(tierlist.map(entry => entry.patch).filter(Boolean))]
       .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0];
 
-  const patchEntries = tierlist.filter(entry => entry.patch === activePatch);
+  const patchEntries = activeSnapshotKey
+    ? tierlist.filter(entry => entry.snapshot_key === activeSnapshotKey)
+    : tierlist.filter(entry => entry.patch === activePatch);
   const newestByChampionLane = new Map();
 
   for (const entry of patchEntries) {

@@ -4,12 +4,19 @@ import { getTierlistConfig, runTierlistUpdate, saveTierlistConfig } from '@/api/
 import { Play, Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 
+const getLocalDateInput = () => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 10);
+};
+
 const DEFAULT_FORM = {
   winrate_weight: 0.47,
   pickrate_weight: 0.37,
   banrate_weight: 0.11,
   facilidad_weight: 0.05,
   active_patch: '',
+  active_snapshot_date: getLocalDateInput(),
   active_data_source: 'https://lolm.qq.com/',
   active_region: 'China',
   active_elo: 'All elos',
@@ -39,6 +46,7 @@ export default function TierlistConfig() {
       banrate_weight: currentConfig.banrate_weight ?? 0.15,
       facilidad_weight: currentConfig.facilidad_weight ?? 0.05,
       active_patch: currentConfig.active_patch || '',
+      active_snapshot_date: currentConfig.active_snapshot_date || getLocalDateInput(),
       active_data_source: currentConfig.active_data_source || '',
       active_region: currentConfig.active_region || '',
       active_elo: currentConfig.active_elo || '',
@@ -84,6 +92,8 @@ export default function TierlistConfig() {
 
       setRunResult(result);
       qc.invalidateQueries({ queryKey: ['tierlist-full'] });
+      qc.invalidateQueries({ queryKey: ['tierlist-all'] });
+      qc.invalidateQueries({ queryKey: ['tierlist'] });
       qc.invalidateQueries({ queryKey: ['executions'] });
     } catch (error) {
       setRunResult({
@@ -122,7 +132,13 @@ export default function TierlistConfig() {
     {
       key: 'active_patch',
       label: 'Parche Activo',
-      placeholder: 'ej: 5.3',
+      placeholder: 'ej: 7.1h',
+    },
+    {
+      key: 'active_snapshot_date',
+      label: 'Fecha de la Tierlist',
+      type: 'date',
+      placeholder: '',
     },
     {
       key: 'active_data_source',
@@ -222,13 +238,14 @@ export default function TierlistConfig() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {sourceFields.map(({ key, label, placeholder }) => (
+          {sourceFields.map(({ key, label, placeholder, type = 'text' }) => (
             <div key={key}>
               <label className="block text-xs text-muted-foreground mb-1 uppercase tracking-wide">
                 {label}
               </label>
 
               <input
+                type={type}
                 value={form[key]}
                 onChange={e => set(key, e.target.value)}
                 placeholder={placeholder}
@@ -321,7 +338,13 @@ export default function TierlistConfig() {
 
           {runResult.patch && (
             <p className="text-sm text-muted-foreground mb-1">
-              Patch procesado: {runResult.patch}
+              Parche procesado: {runResult.patch}
+            </p>
+          )}
+
+          {runResult.snapshot_date && (
+            <p className="text-sm text-muted-foreground mb-1">
+              Fecha de la tierlist: {new Date(`${runResult.snapshot_date}T00:00:00`).toLocaleDateString('es-ES')}
             </p>
           )}
 

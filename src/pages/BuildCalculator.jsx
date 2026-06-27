@@ -18,14 +18,19 @@ export default function BuildCalculator() {
     queryFn: () => Champion.list('name'),
   });
 
-  const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist-full'],
-    queryFn: () => getTierlistEntries('-updated_at', 1000),
-  });
-
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],
     queryFn: () => getTierlistExecutions(10),
+  });
+
+  const currentSnapshotKey = executions.find(execution =>
+    execution.status === 'success' || execution.status === 'partial'
+  )?.snapshot_key;
+
+  const { data: tierlist = [] } = useQuery({
+    queryKey: ['tierlist-full', currentSnapshotKey],
+    queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
+    enabled: !!currentSnapshotKey,
   });
 
   const { data: items = [] } = useQuery({

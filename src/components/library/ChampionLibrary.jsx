@@ -44,14 +44,19 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
     queryFn: () => Champion.list('name'),
   });
 
-  const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist'],
-    queryFn: () => getTierlistEntries('-updated_at', 1000),
-  });
-
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],
     queryFn: () => getTierlistExecutions(10),
+  });
+
+  const currentSnapshotKey = executions.find(execution =>
+    execution.status === 'success' || execution.status === 'partial'
+  )?.snapshot_key;
+
+  const { data: tierlist = [] } = useQuery({
+    queryKey: ['tierlist', currentSnapshotKey],
+    queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
+    enabled: !!currentSnapshotKey,
   });
 
   useEffect(() => {

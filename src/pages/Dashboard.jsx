@@ -43,15 +43,21 @@ export default function Dashboard() {
     queryFn: () => getTierlistExecutions(10)
   });
 
-  const { data: tierlistAll = [] } = useQuery({
-    queryKey: ['tierlist-all'],
-    queryFn: () => getTierlistEntries('-ranking_final', 1000)
+  const latestSuccessExec = executions.find(e => e.status === 'success' || e.status === 'partial');
+  const recentSnapshotKeys = executions
+    .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
+    .slice(0, 3)
+    .map(execution => execution.snapshot_key);
+
+  const { data: tierlistHistory = [] } = useQuery({
+    queryKey: ['tierlist-all', recentSnapshotKeys],
+    queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: recentSnapshotKeys }),
+    enabled: recentSnapshotKeys.length > 0,
   });
 
-  const latestSuccessExec = executions.find(e => e.status === 'success' || e.status === 'partial');
-  const latestPatch = latestSuccessExec?.patch || '';
-
-  const tierlist = tierlistAll.filter(t => t.patch === latestPatch);
+  const tierlist = latestSuccessExec?.snapshot_key
+    ? tierlistHistory.filter(entry => entry.snapshot_key === latestSuccessExec.snapshot_key)
+    : [];
 
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
@@ -106,7 +112,7 @@ export default function Dashboard() {
 
   const topInsight = computeInsights({
     matches: sortedMatches,
-    tierlist,
+    tierlist: tierlistHistory,
     wrItems,
     builds: allBuilds,
     champions,
@@ -297,10 +303,10 @@ export default function Dashboard() {
             </>
           )}
 
-          {lastExecution?.executed_at && (
+          {latestSuccessExec?.snapshot_date && (
             <>
               <span className="text-border">|</span>
-              <span>{formatDate(lastExecution.executed_at)}</span>
+              <span>Tierlist {formatDate(latestSuccessExec.snapshot_date)}</span>
             </>
           )}
 

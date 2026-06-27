@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
-import { getTierlistEntries } from '@/api/tierlistSupabase';
+import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
 import { BarChart3, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
@@ -573,9 +573,20 @@ export default function Stats() {
     enabled: !!user?.email,
   });
 
+  const { data: tierlistExecutions = [] } = useQuery({
+    queryKey: ['executions'],
+    queryFn: () => getTierlistExecutions(10),
+  });
+
+  const insightSnapshotKeys = tierlistExecutions
+    .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
+    .slice(0, 5)
+    .map(execution => execution.snapshot_key);
+
   const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist'],
-    queryFn: () => getTierlistEntries('-ranking_final', 1000),
+    queryKey: ['tierlist', insightSnapshotKeys],
+    queryFn: () => getTierlistEntries('-ranking_final', 3000, { snapshotKeys: insightSnapshotKeys }),
+    enabled: insightSnapshotKeys.length > 0,
   });
 
   const { data: champions = [] } = useQuery({
@@ -1009,7 +1020,7 @@ export default function Stats() {
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {insights.map((insight, i) => (
-              <article key={insight.id} className={`relative rounded-2xl border p-5 overflow-hidden ${insightTone[insight.tone] || insightTone.neutral}`}>
+              <article key={insight.id} className={`relative flex flex-col rounded-2xl border p-5 overflow-hidden ${insightTone[insight.tone] || insightTone.neutral}`}>
                 <div className={`absolute inset-y-0 left-0 w-1 ${insightAccent[insight.tone] || insightAccent.neutral}`} />
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
@@ -1036,7 +1047,9 @@ export default function Stats() {
                   </div>
                 )}
 
-                <div className="flex items-start gap-2 mt-4 pt-4 border-t border-border/50">
+                <div className="min-h-4 flex-1" aria-hidden="true" />
+
+                <div className="flex items-start gap-2 pt-4 border-t border-border/50 xl:h-[88px] xl:shrink-0">
                   <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" />
                   <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">Cómo validarlo:</span> {insight.action}</p>
                 </div>

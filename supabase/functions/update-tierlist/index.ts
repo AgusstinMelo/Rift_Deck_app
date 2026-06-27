@@ -479,6 +479,10 @@ Deno.serve(async (req) => {
   }
 
   let supabaseAdmin: ReturnType<typeof createClient> | null = null;
+  let executionId: string | null = null;
+  let executionPatch = "unknown";
+  let executionSnapshotDate = new Date().toISOString().slice(0, 10);
+  let executionSnapshotKey = `unknown::${executionSnapshotDate}`;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -549,8 +553,20 @@ Deno.serve(async (req) => {
 
     log("Datos obtenidos. Promediando rangos por campeón y línea...");
 
-    const patch = configPayload.active_patch?.trim() ||
-      new Date().toISOString().split("T")[0];
+    const patch = configPayload.active_patch?.trim() || "unknown";
+    const snapshotDate = configPayload.active_snapshot_date?.trim() ||
+      new Date().toISOString().slice(0, 10);
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(snapshotDate) || Number.isNaN(Date.parse(`${snapshotDate}T00:00:00Z`))) {
+      throw new Error("La fecha de la tierlist debe tener formato YYYY-MM-DD.");
+    }
+
+    const snapshotKey = `${patch.toLocaleLowerCase().trim()}::${snapshotDate}`;
+    executionPatch = patch;
+    executionSnapshotDate = snapshotDate;
+    executionSnapshotKey = snapshotKey;
+
+    log(`Snapshot: parche ${patch}, fecha ${snapshotDate}`);
 
     const laneData = buildAveragedLaneData(dataRank, dataChamp, log);
     const allEntries: Array<{ lane: string; champ: any; patch: string }> = [];
@@ -574,12 +590,67 @@ Deno.serve(async (req) => {
       );
     }
 
-    log("Eliminando entradas anteriores de la tierlist...");
+    const executionPayload = {
+      patch: String(patch),
+      snapshot_date: snapshotDate,
+      snapshot_key: snapshotKey,
+      executed_at: new Date().toISOString(),
+      status: "running",
+      champions_processed: allEntries.length,
+      lanes_processed: Object.keys(laneData).length,
+      data_source: "mlol.qt.qq.com",
+      admin_user: user.email,
+      weights_used: {
+        ...weights,
+        difficulty_default: 2,
+        averaged_ranks: RANK_KEYS,
+        rank_weights: RANK_WEIGHTS,
+        competitive_base_factor: COMPETITIVE_BASE_FACTOR,
+        presence_factor_weight: PRESENCE_FACTOR_WEIGHT,
+        high_rank_factor_weight: HIGH_RANK_FACTOR_WEIGHT,
+      },
+      unmapped_champions: unmapped,
+      logs: logs.join("\n"),
+      error_message: null,
+    };
+
+    const { data: previousExecution, error: previousExecutionError } = await supabaseAdmin
+      .from("tierlist_executions")
+      .select("id")
+      .eq("snapshot_key", snapshotKey)
+      .order("executed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (previousExecutionError) throw previousExecutionError;
+
+    if (previousExecution?.id) {
+      const { data: updatedExecution, error: updateExecutionError } = await supabaseAdmin
+        .from("tierlist_executions")
+        .update(executionPayload)
+        .eq("id", previousExecution.id)
+        .select("id")
+        .single();
+
+      if (updateExecutionError) throw updateExecutionError;
+      executionId = String(updatedExecution.id);
+    } else {
+      const { data: createdExecution, error: createExecutionError } = await supabaseAdmin
+        .from("tierlist_executions")
+        .insert(executionPayload)
+        .select("id")
+        .single();
+
+      if (createExecutionError) throw createExecutionError;
+      executionId = String(createdExecution.id);
+    }
+
+    log("Eliminando entradas anteriores del mismo snapshot...");
 
     const { error: deleteError } = await supabaseAdmin
       .from("tierlist_entries")
       .delete()
-      .eq("patch", patch);
+      .eq("snapshot_key", snapshotKey);
 
     if (deleteError) throw deleteError;
 
@@ -591,6 +662,8 @@ Deno.serve(async (req) => {
       lane,
       tier: champ.tier,
       patch: p,
+      snapshot_date: snapshotDate,
+      snapshot_key: snapshotKey,
       winrate: champ.win_rate_percent,
       pickrate: champ.appear_rate_percent,
       banrate: champ.forbid_rate_percent,
@@ -621,29 +694,17 @@ Deno.serve(async (req) => {
     log(`Guardadas ${records.length} entradas correctamente.`);
 
     const execution = {
-      patch: String(patch),
+      ...executionPayload,
       executed_at: new Date().toISOString(),
       status: "success",
       champions_processed: records.length,
-      lanes_processed: Object.keys(laneData).length,
-      data_source: "mlol.qt.qq.com",
-      admin_user: user.email,
-      weights_used: {
-        ...weights,
-        difficulty_default: 2,
-        averaged_ranks: RANK_KEYS,
-        rank_weights: RANK_WEIGHTS,
-        competitive_base_factor: COMPETITIVE_BASE_FACTOR,
-        presence_factor_weight: PRESENCE_FACTOR_WEIGHT,
-        high_rank_factor_weight: HIGH_RANK_FACTOR_WEIGHT,
-      },
-      unmapped_champions: unmapped,
       logs: logs.join("\n"),
     };
 
     const { error: executionError } = await supabaseAdmin
       .from("tierlist_executions")
-      .insert(execution);
+      .update(execution)
+      .eq("id", executionId);
 
     if (executionError) throw executionError;
 
@@ -651,6 +712,8 @@ Deno.serve(async (req) => {
       status: "success",
       champions_processed: records.length,
       patch,
+      snapshot_date: snapshotDate,
+      snapshot_key: snapshotKey,
       logs: logs.join("\n"),
     });
   } catch (error) {
@@ -660,9 +723,22 @@ Deno.serve(async (req) => {
     const stack = error instanceof Error ? error.stack || error.message : message;
 
     try {
-      if (supabaseAdmin) {
+      if (supabaseAdmin && executionId) {
+        await supabaseAdmin.from("tierlist_executions").update({
+          patch: executionPatch,
+          snapshot_date: executionSnapshotDate,
+          snapshot_key: executionSnapshotKey,
+          executed_at: new Date().toISOString(),
+          status: "failed",
+          error_message: message,
+          data_source: "mlol.qt.qq.com",
+          logs: stack,
+        }).eq("id", executionId);
+      } else if (supabaseAdmin) {
         await supabaseAdmin.from("tierlist_executions").insert({
-          patch: "unknown",
+          patch: executionPatch,
+          snapshot_date: executionSnapshotDate,
+          snapshot_key: executionSnapshotKey,
           executed_at: new Date().toISOString(),
           status: "failed",
           error_message: message,

@@ -425,28 +425,38 @@ function detectAllySynergy(ctx) {
   })];
 }
 
-function patchParts(value) {
-  return clean(value).split(/[^0-9]+/).filter(Boolean).map(Number);
+function snapshotKeyOf(entry) {
+  return clean(entry?.snapshot_key) ||
+    `${keyOf(entry?.patch)}::${clean(entry?.snapshot_date || entry?.updated_at).slice(0, 10)}`;
 }
 
-function comparePatch(a, b) {
-  const left = patchParts(a);
-  const right = patchParts(b);
-  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
-    const diff = (left[index] || 0) - (right[index] || 0);
-    if (diff) return diff;
-  }
-  return clean(a).localeCompare(clean(b));
+function snapshotTime(entry) {
+  const value = entry?.snapshot_date || entry?.updated_at || 0;
+  return new Date(String(value).length === 10 ? `${value}T00:00:00` : value).getTime() || 0;
+}
+
+function snapshotLabel(entry) {
+  const rawDate = clean(entry?.snapshot_date || entry?.updated_at).slice(0, 10);
+  const dateLabel = rawDate ? rawDate.split('-').reverse().join('/') : 'sin fecha';
+  return `${clean(entry?.patch) || 'sin parche'} · ${dateLabel}`;
 }
 
 function detectMetaMovement(ctx) {
   const played = groupBy(ctx.matches, row => row.champion).filter(champ => champ.games >= 3);
   const movements = played.flatMap(champ => {
-    const entries = ctx.tierlist
+    const bestBySnapshot = new Map();
+    ctx.tierlist
       .filter(entry => keyOf(entry.champion_name) === keyOf(champ.name))
-      .sort((a, b) => comparePatch(b.patch, a.patch));
+      .forEach(entry => {
+        const snapshotKey = snapshotKeyOf(entry);
+        const current = bestBySnapshot.get(snapshotKey);
+        if (!current || Number(entry.ranking_final || 0) > Number(current.ranking_final || 0)) {
+          bestBySnapshot.set(snapshotKey, entry);
+        }
+      });
+    const entries = [...bestBySnapshot.values()].sort((a, b) => snapshotTime(b) - snapshotTime(a));
     const latest = entries[0];
-    const previous = entries.find(entry => clean(entry.patch) !== clean(latest?.patch));
+    const previous = entries[1];
     if (!latest || !previous) return [];
     const rankDelta = Number(latest.ranking_final || 0) - Number(previous.ranking_final || 0);
     const tierChanged = clean(latest.tier) !== clean(previous.tier);
@@ -461,12 +471,12 @@ function detectMetaMovement(ctx) {
   return [makeCard({
     id: `meta-move-${keyOf(move.champ.name)}`, domain: 'meta', tone: agrees ? 'opportunity' : 'neutral',
     title: `${move.champ.name} cambió de posición en la tierlist reciente`,
-    thesis: `${move.champ.name} pasó de tier ${move.previous.tier || 'sin clasificación'} en el parche ${move.previous.patch} a tier ${move.latest.tier || 'sin clasificación'} en ${move.latest.patch}. En tu historial tiene ${percent(move.champ.wr)} de winrate en ${games(move.champ.games)}, frente a tu ${percent(summarize(ctx.matches).wr)} general. La tierlist describe el meta; tu muestra personal indica si ese cambio también es relevante para vos.`,
+    thesis: `${move.champ.name} pasó de tier ${move.previous.tier || 'sin clasificación'} en la tierlist ${snapshotLabel(move.previous)} a tier ${move.latest.tier || 'sin clasificación'} en ${snapshotLabel(move.latest)}. En tu historial tiene ${percent(move.champ.wr)} de winrate en ${games(move.champ.games)}, frente a tu ${percent(summarize(ctx.matches).wr)} general. La tierlist describe el meta; tu muestra personal indica si ese cambio también es relevante para vos.`,
     action: agrees
       ? `Priorizá ${move.champ.name} durante las próximas 5 partidas manteniendo la misma build para validar la coincidencia entre meta y rendimiento personal.`
       : 'No cambies todavía su lugar en tu pool: probá una build estable y registrá al menos dos matchups antes de tomar la decisión.',
     sample: move.champ.games, effect: move.rankDelta,
-    evidence: [`${move.previous.patch}: ${move.previous.tier}`, `${move.latest.patch}: ${move.latest.tier}`, `Personal: ${percent(move.champ.wr)}`],
+    evidence: [`${snapshotLabel(move.previous)}: ${move.previous.tier}`, `${snapshotLabel(move.latest)}: ${move.latest.tier}`, `Personal: ${percent(move.champ.wr)}`],
     entities: [move.champ.name], score: 76, sources: ['partidas', 'tierlists'],
   })];
 }
@@ -585,10 +595,11 @@ export function computeInsightReport({
   const normalizedMatches = matches.map(normalizeMatch).sort((a, b) => b.timestamp - a.timestamp);
   if (!normalizedMatches.length) return { insights: [], coverage: {}, generatedAt: new Date().toISOString() };
 
-  const patches = [...new Set((tierlist || []).map(row => clean(row.patch)).filter(Boolean))];
-  const latestPatch = patches.sort(comparePatch).at(-1) || '';
-  const latestTierlist = latestPatch
-    ? tierlist.filter(entry => clean(entry.patch) === clean(latestPatch))
+  const latestTierEntry = [...(tierlist || [])].sort((a, b) => snapshotTime(b) - snapshotTime(a))[0];
+  const latestSnapshotKey = latestTierEntry ? snapshotKeyOf(latestTierEntry) : '';
+  const latestPatch = clean(latestTierEntry?.patch);
+  const latestTierlist = latestSnapshotKey
+    ? tierlist.filter(entry => snapshotKeyOf(entry) === latestSnapshotKey)
     : tierlist;
   const tierByChampion = latestTierMap(latestTierlist);
   const ctx = {

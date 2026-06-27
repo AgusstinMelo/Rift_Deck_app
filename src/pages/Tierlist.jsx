@@ -9,6 +9,13 @@ import EmptyState from '@/components/ui/EmptyState';
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
 
+const formatSnapshotDate = (execution) => {
+  const rawDate = execution?.snapshot_date || execution?.executed_at;
+  if (!rawDate) return 'sin fecha';
+  const datePart = String(rawDate).slice(0, 10);
+  return new Date(`${datePart}T00:00:00`).toLocaleDateString('es-ES');
+};
+
 const sortTiers = (tiers) => [...tiers].sort((a, b) => {
   const aIndex = TIER_ORDER.indexOf(a);
   const bIndex = TIER_ORDER.indexOf(b);
@@ -33,31 +40,34 @@ export default function Tierlist() {
 
   const successfulExecs = executions.filter(e => e.status === 'success' || e.status === 'partial');
 
-  const latestExec = successfulExecs[0];
-  const previousExec = successfulExecs[1];
+  const latestExec = successfulExecs[0] || null;
+  const selectedIndex = patchFilter
+    ? successfulExecs.findIndex(execution => String(execution.id) === String(patchFilter))
+    : 0;
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+  const activeExec = successfulExecs[activeIndex] || latestExec;
+  const comparisonExec = successfulExecs[activeIndex + 1] || null;
 
-  const activeExec = patchFilter
-    ? successfulExecs.find(e => e.id === patchFilter) || latestExec
-    : latestExec;
+  const activeSnapshotKey = activeExec?.snapshot_key || '';
+  const comparisonSnapshotKey = comparisonExec?.snapshot_key || '';
 
-  const activePatchFilter = activeExec?.patch || '';
-  const previousPatch = activeExec === latestExec ? previousExec?.patch : null;
-
-  const patchesToLoad = useMemo(
-    () => [activePatchFilter, previousPatch].filter(Boolean),
-    [activePatchFilter, previousPatch]
+  const snapshotKeysToLoad = useMemo(
+    () => [activeSnapshotKey, comparisonSnapshotKey].filter(Boolean),
+    [activeSnapshotKey, comparisonSnapshotKey]
   );
 
   const { data: tierlist = [], isLoading } = useQuery({
-    queryKey: ['tierlist-full', patchesToLoad],
-    queryFn: () => getTierlistEntries('-ranking_final', 2000, { patches: patchesToLoad }),
-    enabled: patchesToLoad.length > 0,
+    queryKey: ['tierlist-full', snapshotKeysToLoad],
+    queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: snapshotKeysToLoad }),
+    enabled: snapshotKeysToLoad.length > 0,
   });
 
-  const prevEntries = previousPatch ? tierlist.filter(t => t.patch === previousPatch) : [];
+  const prevEntries = comparisonSnapshotKey
+    ? tierlist.filter(entry => entry.snapshot_key === comparisonSnapshotKey)
+    : [];
 
   const getPositionVariation = (entry) => {
-    if (!previousPatch || prevEntries.length === 0) return null;
+    if (!comparisonSnapshotKey || prevEntries.length === 0) return null;
 
     const prev = prevEntries.find(
       p => p.champion_name === entry.champion_name && p.lane === entry.lane
@@ -71,17 +81,17 @@ export default function Tierlist() {
   };
 
   const filtered = tierlist.filter(t => {
-    const matchPatch = t.patch === activePatchFilter;
+    const matchSnapshot = t.snapshot_key === activeSnapshotKey;
     const matchLane = laneFilter === 'all' || t.lane === laneFilter;
     const matchTier = tierFilter === 'all' || t.tier === tierFilter;
     const matchDiff = diffFilter === 'all' || String(Math.round(t.difficulty)) === diffFilter;
 
-    return matchPatch && matchLane && matchTier && matchDiff;
+    return matchSnapshot && matchLane && matchTier && matchDiff;
   });
 
   const availableTiers = useMemo(
-    () => sortTiers(new Set(tierlist.filter(t => t.patch === activePatchFilter).map(t => t.tier).filter(Boolean))),
-    [tierlist, activePatchFilter]
+    () => sortTiers(new Set(tierlist.filter(t => t.snapshot_key === activeSnapshotKey).map(t => t.tier).filter(Boolean))),
+    [tierlist, activeSnapshotKey]
   );
 
   const renderVariation = (entry) => {
@@ -130,10 +140,12 @@ export default function Tierlist() {
             {activeExec ? (
               <>
                 <span className="text-foreground font-medium">Parche {activeExec.patch}</span>
-                {previousExec && activeExec === latestExec && (
+                <span> · {formatSnapshotDate(activeExec)}</span>
+                {comparisonExec && (
                   <>
                     <span> vs </span>
-                    <span className="text-foreground font-medium">Parche {previousExec.patch}</span>
+                    <span className="text-foreground font-medium">Parche {comparisonExec.patch}</span>
+                    <span> · {formatSnapshotDate(comparisonExec)}</span>
                   </>
                 )}
               </>
@@ -196,7 +208,7 @@ export default function Tierlist() {
             >
               {successfulExecs.map(e => (
                 <option key={e.id} value={e.id}>
-                  {e.patch}
+                  {e.patch} · {formatSnapshotDate(e)}
                 </option>
               ))}
             </select>
