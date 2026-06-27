@@ -33,7 +33,7 @@ export default function Dashboard() {
   const { data: allBuilds = [] } = useQuery({
     queryKey: ['builds-dashboard', user?.email],
     queryFn: () => user?.email
-      ? getUserBuilds(user, 10)
+      ? getUserBuilds(user, 1000)
       : [],
     enabled: !!user?.email,
   });
@@ -104,7 +104,16 @@ export default function Dashboard() {
 
   const latestMatches = sortedMatches.slice(0, 5);
 
-  const topInsight = computeInsights({ matches: sortedMatches, tierlist, wrItems })[0] || null;
+  const topInsight = computeInsights({
+    matches: sortedMatches,
+    tierlist,
+    wrItems,
+    builds: allBuilds,
+    champions,
+    runes,
+    spells: spellsData,
+    limit: 1,
+  })[0] || null;
 
   const totalMatches = sortedMatches.length;
   const wins = sortedMatches.filter(m => m.result === 'win').length;
@@ -408,9 +417,17 @@ export default function Dashboard() {
               <p className="rd-section-kicker">Insight del día</p>
 
               {topInsight ? (
-                <p className="text-sm text-foreground leading-relaxed max-w-2xl">
-                  {topInsight}
-                </p>
+                <div className="max-w-2xl">
+                  <p className="font-rajdhani text-lg font-bold text-foreground leading-tight">
+                    {topInsight.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+                    {topInsight.thesis}
+                  </p>
+                  <p className="text-xs text-primary/90 mt-2">
+                    Cómo validarlo: {topInsight.action}
+                  </p>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Registrá más partidas para recibir insights personalizados.

@@ -120,7 +120,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAppState();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      // Some Supabase projects fall back to their Site URL when a redirect URL
+      // has not yet been allowlisted. Preserve the recovery flow in that case.
+      if (event === 'PASSWORD_RECOVERY' && window.location.pathname !== '/reset-password') {
+        window.location.replace('/reset-password');
+        return;
+      }
       checkUserAuth();
     });
 

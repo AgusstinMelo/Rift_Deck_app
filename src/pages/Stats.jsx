@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Champion, WRItem } from '@/api/entitiesSupabase';
+import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
+import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
-import { BarChart3, AlertCircle} from 'lucide-react';
+import { BarChart3, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { computeInsights } from '@/hooks/useInsights';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { getMyMembership } from '@/api/membershipSupabase';
@@ -36,6 +36,21 @@ function getWrTone(wr) {
   if (!Number.isFinite(value)) return 'text-muted-foreground';
   return value < 50 ? 'text-red-400' : 'text-green-400';
 }
+
+const insightTone = {
+  positive: 'border-green-500/25 bg-green-500/[0.04]',
+  opportunity: 'border-cyan-500/25 bg-cyan-500/[0.04]',
+  warning: 'border-yellow-500/25 bg-yellow-500/[0.04]',
+  critical: 'border-red-500/25 bg-red-500/[0.04]',
+  neutral: 'border-border/70 bg-background/25',
+};
+
+const insightAccent = {
+  positive: 'bg-green-400', opportunity: 'bg-cyan-400', warning: 'bg-yellow-400',
+  critical: 'bg-red-400', neutral: 'bg-primary/60',
+};
+
+const COACH_BOOK_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png';
 
 function getPoolGrade(score) {
   if (score >= 90) return 'S+';
@@ -573,6 +588,22 @@ export default function Stats() {
     queryFn: () => WRItem.list('name'),
   });
 
+  const { data: builds = [] } = useQuery({
+    queryKey: ['builds-insights', user?.email],
+    queryFn: () => user?.email ? getUserBuilds(user, 1000) : [],
+    enabled: !!user?.email,
+  });
+
+  const { data: runes = [] } = useQuery({
+    queryKey: ['runes'],
+    queryFn: () => Rune.list('name'),
+  });
+
+  const { data: spells = [] } = useQuery({
+    queryKey: ['spells'],
+    queryFn: () => Spell.list('name'),
+  });
+
   const getChampImg = (name) =>
     champions.find(c => c.name?.toLowerCase() === name?.toLowerCase())?.image_url;
 
@@ -774,7 +805,7 @@ export default function Stats() {
     .sort((a, b) => a.wr - b.wr)
     .slice(0, 5);
 
-  const insights = computeInsights({ matches, tierlist, wrItems });
+  const insights = computeInsights({ matches, tierlist, wrItems, builds, champions, runes, spells });
 
   return (
     <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
@@ -954,46 +985,65 @@ export default function Stats() {
       </div>
 
       {insights.length > 0 && (
-        <div className="rd-card rd-card-watermark p-6 overflow-hidden">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div>
-              <h2 className="rd-card-title">
-                Rift Deck Coach
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-[170px_1fr] gap-6 items-start">
-            <div className="hidden xl:flex items-start justify-center pt-1">
+        <section className="rd-card rd-card-watermark p-5 md:p-7 overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
+            <div className="flex items-center gap-4">
               <img
-                src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png"
-                alt="Rift Deck Coach"
-                className="w-[155px] object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]"
+                src={COACH_BOOK_URL}
+                alt="Libro de Rift Deck Coach"
+                className="w-16 md:w-20 h-auto object-contain drop-shadow-[0_0_20px_rgba(212,175,55,0.22)]"
               />
-            </div>
-
-            <div className="space-y-3">
-              {insights.map((insight, i) => (
-                <div
-                  key={i}
-                  className="relative rounded-2xl border border-border/70 bg-background/25 px-5 py-4 overflow-hidden shadow-sm"
-                >
-                  <div className="absolute inset-y-0 left-0 w-1 bg-primary/45" />
-
-                  <div className="flex items-start gap-4">
-                    <span className="font-rajdhani text-2xl font-bold text-primary/35 leading-none mt-0.5">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {insight}
-                    </p>
-                  </div>
+              <div>
+                <div className="flex items-center gap-2 text-primary mb-2">
+                  <Sparkles size={15} />
+                  <span className="text-[10px] uppercase tracking-[0.24em] font-semibold">Lectura estratégica</span>
                 </div>
-              ))}
+                <h2 className="font-rajdhani text-2xl font-bold text-foreground">Rift Deck Coach</h2>
+                <p className="text-xs text-muted-foreground mt-1">Hipótesis priorizadas para tu próximo bloque de partidas.</p>
+              </div>
             </div>
+            <p className="text-[11px] text-muted-foreground max-w-sm md:text-right">
+              La confianza mide evidencia, no certeza. Cada tarjeta propone algo que podés validar.
+            </p>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {insights.map((insight, i) => (
+              <article key={insight.id} className={`relative rounded-2xl border p-5 overflow-hidden ${insightTone[insight.tone] || insightTone.neutral}`}>
+                <div className={`absolute inset-y-0 left-0 w-1 ${insightAccent[insight.tone] || insightAccent.neutral}`} />
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                      {String(i + 1).padStart(2, '0')} · {insight.domain}
+                    </p>
+                    <h3 className="font-rajdhani text-xl font-bold leading-tight text-foreground">{insight.title}</h3>
+                  </div>
+                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full border border-border/70 px-2 py-1 text-[10px] text-muted-foreground">
+                    <ShieldCheck size={11} /> {insight.confidenceLabel}
+                  </span>
+                </div>
+
+                <div className="mt-1">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Qué muestran los datos</p>
+                  <p className="text-sm text-foreground/85 leading-relaxed">{insight.thesis}</p>
+                </div>
+
+                {insight.evidence.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {insight.evidence.map(item => (
+                      <span key={item} className="rounded-md bg-background/45 border border-border/50 px-2 py-1 text-[11px] text-muted-foreground">{item}</span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-start gap-2 mt-4 pt-4 border-t border-border/50">
+                  <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" />
+                  <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">Cómo validarlo:</span> {insight.action}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

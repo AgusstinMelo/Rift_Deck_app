@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Loader2, Mail, Lock, Eye, EyeOff, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, ChevronLeft, ChevronRight, X, ArrowLeft, KeyRound } from 'lucide-react';
 import wordmarkUrl from '@/assets/riftdeck-final.png';
 
 const SCREENSHOTS = [
@@ -24,17 +23,27 @@ const AUTH_REDIRECT_PATH = '/';
 
 export default function Landing() {
   const { checkUserAuth, refreshUser } = useAuth();
-  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'check-email'
+  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(() => (
+    new URLSearchParams(window.location.search).get('password_updated') === '1'
+      ? 'Contraseña creada correctamente. Ya podés ingresar con tu email y la nueva contraseña.'
+      : ''
+  ));
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [modalIdx, setModalIdx] = useState(null);
   const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('password_updated') === '1') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const navigateCarousel = (dir) => {
     const newIdx = (carouselIdx + dir + SCREENSHOTS.length) % SCREENSHOTS.length;
@@ -133,6 +142,26 @@ export default function Landing() {
     setSuccess('Correo de confirmación reenviado.');
   };
 
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    setLoading(false);
+
+    if (resetError) {
+      setError(resetError.message || 'No se pudo enviar el enlace de recuperación.');
+      return;
+    }
+
+    setMode('reset-sent');
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
@@ -207,6 +236,69 @@ export default function Landing() {
                 </button>
               </div>
             </div>
+          ) : mode === 'reset-sent' ? (
+            <div>
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3">
+                  <Mail size={22} className="text-primary" />
+                </div>
+                <h2 className="font-rajdhani font-bold text-xl text-foreground">Revisá tu correo</h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Si existe una cuenta para <span className="text-foreground">{email}</span>, vas a recibir un enlace para crear una contraseña.
+                </p>
+                <p className="text-xs text-muted-foreground mt-3">También revisá spam o correo no deseado.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all"
+              >
+                Volver al inicio de sesión
+              </button>
+            </div>
+          ) : mode === 'forgot-password' ? (
+            <div>
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(''); }}
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-5"
+              >
+                <ArrowLeft size={14} /> Volver
+              </button>
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3">
+                  <KeyRound size={22} className="text-primary" />
+                </div>
+                <h2 className="font-rajdhani font-bold text-xl text-foreground">Crear o recuperar contraseña</h2>
+                <p className="text-sm text-muted-foreground mt-2">Funciona también si originalmente te registraste con Google.</p>
+              </div>
+              <form onSubmit={handlePasswordReset} className="space-y-4">
+                <div>
+                  <label className="rd-label mb-1.5 block">Email</label>
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="tu@email.com"
+                      required
+                      autoFocus
+                      className="w-full bg-secondary/70 border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground"
+                    />
+                  </div>
+                </div>
+                {error && <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>}
+                <button
+                  type="submit"
+                  disabled={loading || !email.trim()}
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                >
+                  {loading && <Loader2 size={15} className="animate-spin" />}
+                  Enviar enlace
+                </button>
+              </form>
+            </div>
           ) : (
             <>
               {/* Tabs */}
@@ -276,7 +368,18 @@ export default function Landing() {
                 </div>
 
                 <div>
-                  <label className="rd-label mb-1.5 block">Contraseña</label>
+                  <div className="flex items-center justify-between gap-3 mb-1.5">
+                    <label className="rd-label">Contraseña</label>
+                    {mode === 'login' && (
+                      <button
+                        type="button"
+                        onClick={() => { setMode('forgot-password'); setError(''); setSuccess(''); setPassword(''); }}
+                        className="text-[11px] text-primary hover:text-primary/80 transition-colors"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <input

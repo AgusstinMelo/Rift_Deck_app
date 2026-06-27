@@ -18,6 +18,7 @@ import Suggester from '@/pages/Suggester';
 import TierlistConfig from '@/pages/TierlistConfig';
 import Profile from '@/pages/Profile';
 import MembresiaResultado from '@/pages/MembresiaResultado';
+import ResetPassword from '@/pages/ResetPassword';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
@@ -38,6 +39,7 @@ const AuthenticatedApp = () => {
     <Routes>
       {/* Public: landing/login */}
       <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Landing />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected routes */}
       {isAuthenticated ? (
