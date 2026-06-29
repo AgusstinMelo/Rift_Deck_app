@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import { updateMatch } from '@/api/matchesSupabase';
@@ -159,7 +159,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
   );
 }
 
-export default function MatchForm({ match, onClose, onSaved }) {
+export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }) {
   const [step, setStep] = useState('info');
 
   // Champion & composition
@@ -187,7 +187,14 @@ export default function MatchForm({ match, onClose, onSaved }) {
   const [gold, setGold] = useState(match?.gold ?? '');
   const [duration, setDuration] = useState(match?.duration_minutes ?? '');
   const [side, setSide] = useState(match?.side || '');
-  const [patch, setPatch] = useState(match?.patch || '');
+  const [patch, setPatch] = useState(match?.patch || defaultPatch);
+  const patchWasEdited = useRef(false);
+
+  useEffect(() => {
+    if (!match?.patch && defaultPatch && !patch && !patchWasEdited.current) {
+      setPatch(defaultPatch);
+    }
+  }, [defaultPatch, match?.patch, patch]);
   const [date, setDate] = useState(match?.date?.split('T')[0] || new Date().toISOString().split('T')[0]);
   const [hour, setHour] = useState(match?.hour || '');
   const [notes, setNotes] = useState(match?.notes || '');
@@ -473,7 +480,10 @@ export default function MatchForm({ match, onClose, onSaved }) {
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Parche</label>
-              <input value={patch} onChange={e => setPatch(e.target.value)} placeholder="ej: 5.3"
+              <input value={patch} onChange={e => {
+                patchWasEdited.current = true;
+                setPatch(e.target.value);
+              }} placeholder="ej: 5.3"
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
             </div>
           </div>

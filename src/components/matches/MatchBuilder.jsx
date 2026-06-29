@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { WRItem, Rune } from '@/api/entitiesSupabase';
 import { ArrowLeft, Search } from 'lucide-react';
@@ -117,7 +117,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
   );
 }
 
-export default function MatchBuilder({ champions, onSave, onCancel }) {
+export default function MatchBuilder({ champions, defaultPatch = '', onSave, onCancel }) {
   const [step, setStep] = useState('info'); // info, lane, myChamp, allies, enemies, build, stats
   const [lane, setLane] = useState('');
   const [myChampion, setMyChampion] = useState(null);
@@ -176,7 +176,14 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const [date, setDate] = useState(todayStr);
   const [hour, setHour] = useState('');
-  const [patch, setPatch] = useState('');
+  const [patch, setPatch] = useState(defaultPatch);
+  const patchWasEdited = useRef(false);
+
+  useEffect(() => {
+    if (defaultPatch && !patch && !patchWasEdited.current) {
+      setPatch(defaultPatch);
+    }
+  }, [defaultPatch, patch]);
   const [primaryBranch, setPrimaryBranch] = useState('Dominación');
   const [secondaryBranch, setSecondaryBranch] = useState('Precisión');
 
@@ -448,7 +455,10 @@ export default function MatchBuilder({ champions, onSave, onCancel }) {
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Parche</label>
-              <input type="text" value={patch} onChange={e => setPatch(e.target.value)} placeholder="ej: 5.3"
+              <input type="text" value={patch} onChange={e => {
+                patchWasEdited.current = true;
+                setPatch(e.target.value);
+              }} placeholder="ej: 5.3"
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
             </div>
           </div>

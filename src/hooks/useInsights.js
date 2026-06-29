@@ -251,6 +251,38 @@ function detectRecentForm(ctx) {
   })];
 }
 
+function detectCloseGamePattern(ctx) {
+  const shortGames = ctx.matches.filter(match => match.duration > 0 && match.duration < 10);
+  const longGames = ctx.matches.filter(match => match.duration >= 20);
+  if (shortGames.length < 4 || longGames.length < 4) return [];
+
+  const shortSummary = summarize(shortGames);
+  const longSummary = summarize(longGames);
+  const gap = longSummary.wr - shortSummary.wr;
+  if (Math.abs(gap) < 18) return [];
+
+  const longGamesAreWorse = gap < 0;
+  return [makeCard({
+    id: 'close-game-pattern', domain: 'cierre', tone: longGamesAreWorse ? 'warning' : 'positive',
+    title: longGamesAreWorse
+      ? 'Tu rendimiento baja cuando la partida se extiende'
+      : 'Tu rendimiento mejora cuando la partida se extiende',
+    thesis: `En las partidas de menos de 10 minutos registrás ${percent(shortSummary.wr)} de winrate en ${games(shortSummary.games)}; en las de 20 minutos o más, ${percent(longSummary.wr)} en ${games(longSummary.games)}. La diferencia de ${percent(Math.abs(gap))} plantea como hipótesis que la duración y la forma de cerrar están relacionadas con tus resultados, pero no demuestra por sí sola cuál es la causa.`,
+    action: longGamesAreWorse
+      ? 'En las próximas partidas con ventaja antes del minuto 25, marcá cuándo aparece el primer objetivo de leyenda disponible y si lo tomaste.'
+      : 'En las próximas partidas que terminen antes del minuto 10, marcá cuándo apareció el primer objetivo de leyenda disponible y si lo tomaste.',
+    sample: shortSummary.games + longSummary.games,
+    effect: gap,
+    evidence: [
+      `Menos de 10 min: ${percent(shortSummary.wr)} (${shortSummary.games})`,
+      `20 min o más: ${percent(longSummary.wr)} (${longSummary.games})`,
+      `Diferencia: ${percent(Math.abs(gap))}`,
+    ],
+    score: 82,
+    sources: ['partidas'],
+  })];
+}
+
 function detectLossFingerprint(ctx) {
   const losses = ctx.matches.filter(row => !row.won);
   const wins = ctx.matches.filter(row => row.won);
@@ -331,8 +363,10 @@ function detectPoolShape(ctx) {
   const topShare = champs.slice(0, 3).reduce((sum, champ) => sum + champ.games, 0) / matches.length;
   const laneCount = new Set(matches.map(row => row.lane).filter(Boolean)).size;
   const damageTypes = unique(champs.slice(0, 4).map(champ => championCatalog.get(keyOf(champ.name))?.damage_type));
-  if (topShare < 0.72 && laneCount <= 2) return [];
-  const scattered = topShare < 0.72;
+  const scaledSampleSize = Math.min(matches.length, 60);
+  const scatteredThreshold = Math.max(0.54, 0.72 - (scaledSampleSize - 15) * 0.003);
+  if (topShare < scatteredThreshold && laneCount <= 2) return [];
+  const scattered = topShare < scatteredThreshold;
   const coreNames = champs.slice(0, 3).map(champ => champ.name);
   return [makeCard({
     id: 'pool-shape', domain: 'pool', tone: scattered ? 'warning' : 'neutral',
@@ -346,7 +380,7 @@ function detectPoolShape(ctx) {
       ? 'Limitá las próximas 10 partidas a 3 campeones: uno principal, uno para cubrir su peor matchup y uno que aporte un tipo de daño o función diferente.'
       : `Antes de sumar otro pick similar, elegí un campeón que aporte otro tipo de daño o que responda al peor matchup de ${champs[0]?.name}.`,
     sample: matches.length, effect: (topShare - 0.6) * 100,
-    evidence: [`Top 3: ${percent(topShare * 100)}`, `${champs.length} picks usados`, `${laneCount} roles jugados`],
+    evidence: [`Top 3: ${percent(topShare * 100)}`, `Umbral: ${percent(scatteredThreshold * 100)}`, `${champs.length} picks usados`],
     score: 67, sources: ['partidas', championCatalog.size ? 'campeones' : null],
   })];
 }
@@ -594,10 +628,25 @@ function detectFoundationSignals(ctx) {
   const mostUsedRune = runes[0];
   const mostFrequentEnemy = enemies[0];
   const mostUsedSpells = spellPairs[0];
-  const avgKills = ctx.matches.reduce((sum, row) => sum + row.kills, 0) / total;
-  const avgAssists = ctx.matches.reduce((sum, row) => sum + row.assists, 0) / total;
   const laneLabels = { top: 'Baron Lane', jungler: 'Jungla', mid: 'Mid', dragonline: 'Dragon Lane', adc: 'Dragon Lane', support: 'Support' };
   const mainLaneLabel = laneLabels[mainLane?.name] || mainLane?.name;
+  const laneCombatSegments = lanes
+    .filter(lane => lane.games >= 4)
+    .map(lane => {
+      const kills = lane.rows.reduce((sum, row) => sum + row.kills, 0) / lane.games;
+      const deaths = lane.rows.reduce((sum, row) => sum + row.deaths, 0) / lane.games;
+      const assists = lane.rows.reduce((sum, row) => sum + row.assists, 0) / lane.games;
+      const totalDeaths = lane.rows.reduce((sum, row) => sum + row.deaths, 0);
+      const totalKillsAndAssists = lane.rows.reduce((sum, row) => sum + row.kills + row.assists, 0);
+      return {
+        name: laneLabels[lane.name] || lane.name,
+        games: lane.games,
+        kills,
+        deaths,
+        assists,
+        kda: totalDeaths ? totalKillsAndAssists / totalDeaths : totalKillsAndAssists,
+      };
+    });
 
   return [
     makeCard({
@@ -632,12 +681,15 @@ function detectFoundationSignals(ctx) {
       sample: total, evidence: [`${overall.avgDeaths.toFixed(1)} muertes`, `${games(total)}`],
       score: 20, sources: ['partidas'],
     }),
-    makeCard({
+    laneCombatSegments.length > 0 && makeCard({
       id: 'foundation-offensive-profile', domain: 'producción ofensiva', tone: 'neutral',
-      title: `Tu promedio es ${avgKills.toFixed(1)} asesinatos y ${avgAssists.toFixed(1)} asistencias`,
-      thesis: `En conjunto, tu relación KDA global es ${overall.kda.toFixed(2)}. Esta referencia sirve para detectar si un campeón o una build mejora tu participación ofensiva sin aumentar las muertes, que es una señal más útil que observar únicamente el resultado final.`,
-      action: 'Al comparar builds o campeones, buscá aumentar asesinatos y asistencias sin superar tu promedio actual de muertes.',
-      sample: total, evidence: [`${avgKills.toFixed(1)} asesinatos`, `${avgAssists.toFixed(1)} asistencias`, `${overall.kda.toFixed(2)} KDA`],
+      title: laneCombatSegments.length === 1
+        ? `Tu perfil ofensivo en ${laneCombatSegments[0].name}`
+        : 'Tu perfil ofensivo cambia según la línea',
+      thesis: laneCombatSegments.map(segment => `${segment.name}: ${segment.kills.toFixed(1)} / ${segment.deaths.toFixed(1)} / ${segment.assists.toFixed(1)} → KDA ${segment.kda.toFixed(2)} en ${games(segment.games)}.`).join(' '),
+      action: 'Compará cada línea por separado: buscá aumentar asesinatos y asistencias sin superar su propio promedio de muertes, evitando mezclar roles con responsabilidades distintas.',
+      sample: laneCombatSegments.reduce((sum, segment) => sum + segment.games, 0),
+      evidence: laneCombatSegments.map(segment => `${segment.name}: KDA ${segment.kda.toFixed(2)} (${segment.games})`),
       score: 19, sources: ['partidas'],
     }),
     blue && red && makeCard({
@@ -705,6 +757,19 @@ function selectEditorially(candidates, limit) {
     card.entities.forEach(entity => entityCount.set(entity, (entityCount.get(entity) || 0) + 1));
     if (selected.length >= limit) break;
   }
+
+  const floorTarget = Math.min(3, limit);
+  if (selected.length < floorTarget) {
+    const selectedIds = new Set(selected.map(card => card.id));
+    const unusedFoundations = sorted
+      .filter(card => card.id.startsWith('foundation-') && !selectedIds.has(card.id))
+      .sort((a, b) => b.score - a.score);
+    for (const card of unusedFoundations) {
+      selected.push(card);
+      selectedIds.add(card.id);
+      if (selected.length >= floorTarget) break;
+    }
+  }
   return selected;
 }
 
@@ -741,6 +806,7 @@ export function computeInsightReport({
 
   const candidates = [
     ...detectRecentForm(ctx),
+    ...detectCloseGamePattern(ctx),
     ...detectLossFingerprint(ctx),
     ...detectChampionIdentity(ctx),
     ...detectPoolShape(ctx),

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Champion, WRItem } from '@/api/entitiesSupabase';
 import { getUserMatches, createMatch, deleteMatch, deleteMatches } from '@/api/matchesSupabase';
+import { getTierlistExecutions } from '@/api/tierlistSupabase';
 import { Plus, Swords, Search, Trophy, Shield, Skull, Trash2 } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import MatchForm from '@/components/matches/MatchForm';
@@ -67,6 +68,15 @@ export default function Matches() {
     enabled: !!user?.email,
   });
 
+  const { data: tierlistExecutions = [] } = useQuery({
+    queryKey: ['executions'],
+    queryFn: () => getTierlistExecutions(10),
+  });
+
+  const latestTierlistPatch = tierlistExecutions.find(
+    execution => execution.status === 'success' || execution.status === 'partial'
+  )?.patch || '';
+
   const createMatchMutation = useMutation({
     mutationFn: (data) => createMatch(user, data),
     onSuccess: () => {
@@ -117,6 +127,7 @@ export default function Matches() {
       <div className="w-full max-w-none mx-0 p-5 md:p-6 rd-dashboard">
         <MatchBuilder
           champions={champions}
+          defaultPatch={latestTierlistPatch}
           onSave={(data) => createMatchMutation.mutate(data)}
           onCancel={() => setShowForm(false)}
         />
@@ -129,6 +140,7 @@ export default function Matches() {
       <div className="w-full max-w-none mx-0 p-5 md:p-6 rd-dashboard">
         <MatchForm
           match={editing}
+          defaultPatch={latestTierlistPatch}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);
