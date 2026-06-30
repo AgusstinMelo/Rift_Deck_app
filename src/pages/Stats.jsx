@@ -11,6 +11,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { computeInsights } from '@/hooks/useInsights';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { getMyMembership } from '@/api/membershipSupabase';
+import { MATCH_TYPES } from '@/constants/matchTypes';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
@@ -544,6 +545,7 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
 
 export default function Stats() {
   const { user } = useAuth();
+  const [matchTypeFilter, setMatchTypeFilter] = useState('all');
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
 
@@ -565,7 +567,7 @@ export default function Stats() {
       .finally(() => setMembershipLoading(false));
   }, [user]);
 
-  const { data: matches = [], isLoading } = useQuery({
+  const { data: allMatches = [], isLoading } = useQuery({
     queryKey: ['matches', user?.email],
     queryFn: () => user?.email
       ? getUserMatches(user, 1000)
@@ -623,6 +625,10 @@ export default function Stats() {
     return champ?.image_url_card || champ?.image_url;
   };
 
+  const matches = matchTypeFilter === 'all'
+    ? allMatches
+    : allMatches.filter(match => (match.type || 'ranked') === matchTypeFilter);
+
   if (membershipLoading || isLoading) {
     return (
       <div className="w-full max-w-none mx-0 p-5 md:p-6">
@@ -635,7 +641,7 @@ export default function Stats() {
     return <MembershipGate />;
   }
 
-  if (matches.length === 0) {
+  if (allMatches.length === 0) {
     return (
       <div className="w-full max-w-none mx-0 p-5 md:p-6">
         <PageHeader title="Estadísticas Personales" />
@@ -644,6 +650,42 @@ export default function Stats() {
             icon={BarChart3}
             title="Sin partidas"
             description="Registrá partidas para ver tus estadísticas personales."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (matches.length === 0) {
+    return (
+      <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <PageHeader title="Estadísticas Personales" />
+          <div className="flex flex-col items-stretch sm:items-end gap-3">
+            <div className="flex items-center gap-3 rd-status-pill">
+              <BarChart3 size={16} className="text-primary" />
+              <span className="text-xs text-muted-foreground">Performance personal</span>
+            </div>
+            <label className="min-w-64 text-xs text-muted-foreground">
+              Tipo de partida
+              <select
+                value={matchTypeFilter}
+                onChange={event => setMatchTypeFilter(event.target.value)}
+                className="mt-1 w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40"
+              >
+                <option value="all">Todas las partidas</option>
+                {MATCH_TYPES.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+        <div className="rd-card p-6">
+          <EmptyState
+            icon={BarChart3}
+            title="Sin partidas de este tipo"
+            description="Elegí otro tipo de partida para procesar sus estadísticas e insights."
           />
         </div>
       </div>
@@ -821,7 +863,7 @@ export default function Stats() {
   return (
     <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
@@ -839,11 +881,24 @@ export default function Stats() {
           </p>
         </div>
 
-        <div className="hidden sm:flex items-center gap-3 rd-status-pill">
-          <BarChart3 size={16} className="text-primary" />
-          <span className="text-xs text-muted-foreground">
-            Performance personal
-          </span>
+        <div className="flex flex-col items-stretch sm:items-end gap-3">
+          <div className="flex items-center gap-3 rd-status-pill">
+            <BarChart3 size={16} className="text-primary" />
+            <span className="text-xs text-muted-foreground">Performance personal</span>
+          </div>
+          <label className="min-w-64 text-xs text-muted-foreground">
+            Procesar estadísticas de
+            <select
+              value={matchTypeFilter}
+              onChange={event => setMatchTypeFilter(event.target.value)}
+              className="mt-1 w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40"
+            >
+              <option value="all">Todas las partidas</option>
+              {MATCH_TYPES.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
 

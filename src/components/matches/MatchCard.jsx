@@ -1,5 +1,6 @@
 import { Edit, Trash2, Clock3 } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
+import { getMatchTypeLabel } from '@/constants/matchTypes';
 
 const isMovement = (item) =>
   item && Array.isArray(item.type) && item.type.includes('Movimiento');
@@ -282,6 +283,10 @@ export default function MatchCard({
                   {match.side === 'blue' ? 'Blue' : 'Red'}
                 </span>
               )}
+
+              <span className="text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded-md border font-semibold bg-secondary/70 text-muted-foreground border-border/60">
+                {getMatchTypeLabel(match.type)}
+              </span>
 
               {tags.map(tag => (
                 <span

@@ -6,6 +6,7 @@ import { ArrowLeft, Save, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
+import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -188,6 +189,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
   const [duration, setDuration] = useState(match?.duration_minutes ?? '');
   const [side, setSide] = useState(match?.side || '');
   const [patch, setPatch] = useState(match?.patch || defaultPatch);
+  const [matchType, setMatchType] = useState(match?.type || DEFAULT_MATCH_TYPE);
   const patchWasEdited = useRef(false);
 
   useEffect(() => {
@@ -340,6 +342,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
       duration_minutes: duration !== '' ? Number(duration) : null,
       side: side || null,
       patch,
+      type: matchType,
       date,
       hour: hour || null,
       notes,
@@ -464,8 +467,8 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
       {step === 'info' && (
         <div className="space-y-5">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Fecha y parche</h2>
-            <p className="text-muted-foreground text-sm">¿Cuándo jugaste y en qué parche?</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Datos de la partida</h2>
+            <p className="text-muted-foreground text-sm">Elegí cuándo jugaste, el parche y el tipo de partida.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -485,6 +488,15 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                 setPatch(e.target.value);
               }} placeholder="ej: 5.3"
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Tipo de partida</label>
+              <select value={matchType} onChange={e => setMatchType(e.target.value)}
+                className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all">
+                {MATCH_TYPES.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </div>
           </div>
           <button onClick={() => setStep('champion')}

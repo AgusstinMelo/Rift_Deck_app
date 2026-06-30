@@ -5,6 +5,7 @@ import { ArrowLeft, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
+import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -177,6 +178,7 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
   const [date, setDate] = useState(todayStr);
   const [hour, setHour] = useState('');
   const [patch, setPatch] = useState(defaultPatch);
+  const [matchType, setMatchType] = useState(DEFAULT_MATCH_TYPE);
   const patchWasEdited = useRef(false);
 
   useEffect(() => {
@@ -387,6 +389,7 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
       date,
       hour: hour || null,
       patch,
+      type: matchType,
       tags: cleanTags([...tags, tagInput]),
       notes,
     });
@@ -439,8 +442,8 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
       {step === 'info' && (
         <div className="space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Fecha y parche</h2>
-            <p className="text-muted-foreground text-sm">¿Cuándo jugaste y en qué parche?</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Datos de la partida</h2>
+            <p className="text-muted-foreground text-sm">Elegí cuándo jugaste, el parche y el tipo de partida.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -460,6 +463,15 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
                 setPatch(e.target.value);
               }} placeholder="ej: 5.3"
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Tipo de partida</label>
+              <select value={matchType} onChange={e => setMatchType(e.target.value)}
+                className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all">
+                {MATCH_TYPES.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="flex gap-3 pt-2">

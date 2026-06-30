@@ -9,6 +9,7 @@ import MatchForm from '@/components/matches/MatchForm';
 import MatchBuilder from '@/components/matches/MatchBuilder';
 import MatchCard from '@/components/matches/MatchCard';
 import { useAuth } from '@/lib/AuthContext';
+import { MATCH_TYPES } from '@/constants/matchTypes';
 
 function MatchMetric({ label, value, sub, icon: Icon, tone = 'primary' }) {
   const toneClass = {
@@ -47,6 +48,7 @@ export default function Matches() {
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
   const [resultFilter, setResultFilter] = useState('all');
+  const [matchTypeFilter, setMatchTypeFilter] = useState('all');
   const qc = useQueryClient();
   const { user } = useAuth();
 
@@ -113,8 +115,9 @@ export default function Matches() {
 
       const matchLane = laneFilter === 'all' || m.lane === laneFilter;
       const matchResult = resultFilter === 'all' || m.result === resultFilter;
+      const matchType = matchTypeFilter === 'all' || (m.type || 'ranked') === matchTypeFilter;
 
-      return matchSearch && matchLane && matchResult;
+      return matchSearch && matchLane && matchResult && matchType;
     })
     .sort((a, b) => {
       const dateA = `${a.date || ''}T${a.hour || '00:00'}`;
@@ -368,6 +371,17 @@ export default function Matches() {
             <option value="all">Todos los resultados</option>
             <option value="win">Victorias</option>
             <option value="loss">Derrotas</option>
+          </select>
+
+          <select
+            value={matchTypeFilter}
+            onChange={e => setMatchTypeFilter(e.target.value)}
+            className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
+          >
+            <option value="all">Todos los tipos</option>
+            {MATCH_TYPES.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
         </div>
       </div>
