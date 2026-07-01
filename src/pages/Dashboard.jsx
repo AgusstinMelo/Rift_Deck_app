@@ -18,11 +18,15 @@ import {
 } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
 import { computeInsights } from '@/hooks/useInsights';
+import { useState } from 'react';
+import PatchFilter from '@/components/filters/PatchFilter';
+import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [patchFilter, setPatchFilter] = useState('');
 
-  const { data: matches = [] } = useQuery({
+  const { data: allMatches = [] } = useQuery({
     queryKey: ['matches', user?.email],
     queryFn: () => user?.email
       ? getUserMatches(user, 1000)
@@ -39,13 +43,17 @@ export default function Dashboard() {
   });
 
   const { data: executions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10)
+    queryKey: ['executions', 'patch-filters'],
+    queryFn: () => getTierlistExecutions(100)
   });
 
-  const latestSuccessExec = executions.find(e => e.status === 'success' || e.status === 'partial');
+  const successfulExecutions = executions
+    .filter(e => e.status === 'success' || e.status === 'partial')
+    .filter(e => patchMatchesSelection(e.patch, patchFilter));
+  const latestSuccessExec = successfulExecutions[0];
   const recentSnapshotKeys = executions
     .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
+    .filter(execution => patchMatchesSelection(execution.patch, patchFilter))
     .slice(0, 3)
     .map(execution => execution.snapshot_key);
 
@@ -84,6 +92,9 @@ export default function Dashboard() {
   const getChampImg = (name) =>
     champions.find(c => c.name?.toLowerCase() === name?.toLowerCase())?.image_url;
 
+  const matches = filterByPatch(allMatches, patchFilter);
+  const builds = filterByPatch(allBuilds, patchFilter);
+
   const getMatchTimestamp = (match) => {
     if (!match?.date) return 0;
 
@@ -114,7 +125,7 @@ export default function Dashboard() {
     matches: sortedMatches,
     tierlist: tierlistHistory,
     wrItems,
-    builds: allBuilds,
+    builds,
     champions,
     runes,
     spells: spellsData,
@@ -166,7 +177,7 @@ export default function Dashboard() {
     }
   });
 
-  const buildsWithStats = allBuilds.map(b => ({
+  const buildsWithStats = builds.map(b => ({
     ...b,
     matchStats: buildMatchStats[b.id] || null,
     wr: buildMatchStats[b.id]
@@ -217,7 +228,7 @@ export default function Dashboard() {
     })
     .filter(l => l.champions.some(c => c !== null));
 
-  const lastExecution = executions[0];
+  const lastExecution = patchFilter ? latestSuccessExec : executions[0];
 
   const wrColor = winrate === null
     ? 'text-muted-foreground'
@@ -271,7 +282,7 @@ export default function Dashboard() {
   return (
     <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
@@ -289,29 +300,40 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground rd-status-pill">
-          {lastExecution?.status === 'success'
-            ? <span className="w-2 h-2 rounded-full bg-green-400 shrink-0 shadow-[0_0_12px_rgba(74,222,128,.65)]" />
-            : <span className="w-2 h-2 rounded-full bg-red-400 shrink-0 shadow-[0_0_12px_rgba(248,113,113,.65)]" />
-          }
+        <div className="flex flex-col items-stretch sm:items-end gap-3">
+          <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground rd-status-pill">
+            {lastExecution?.status === 'success'
+              ? <span className="w-2 h-2 rounded-full bg-green-400 shrink-0 shadow-[0_0_12px_rgba(74,222,128,.65)]" />
+              : <span className="w-2 h-2 rounded-full bg-red-400 shrink-0 shadow-[0_0_12px_rgba(248,113,113,.65)]" />
+            }
 
-          <span>Datos actualizados</span>
+            <span>Datos actualizados</span>
 
-          {latestSuccessExec?.patch && (
-            <>
-              <span className="text-border">|</span>
-              <span>Parche {latestSuccessExec.patch}</span>
-            </>
-          )}
+            {latestSuccessExec?.patch && (
+              <>
+                <span className="text-border">|</span>
+                <span>Parche {latestSuccessExec.patch}</span>
+              </>
+            )}
 
-          {latestSuccessExec?.snapshot_date && (
-            <>
-              <span className="text-border">|</span>
-              <span>Tierlist {formatDate(latestSuccessExec.snapshot_date)}</span>
-            </>
-          )}
+            {latestSuccessExec?.snapshot_date && (
+              <>
+                <span className="text-border">|</span>
+                <span>Tierlist {formatDate(latestSuccessExec.snapshot_date)}</span>
+              </>
+            )}
 
-          <Sparkles size={14} className="text-primary" />
+            <Sparkles size={14} className="text-primary" />
+          </div>
+          <PatchFilter
+            value={patchFilter}
+            onChange={setPatchFilter}
+            patches={[
+              ...allMatches.map(match => match.patch),
+              ...allBuilds.map(build => build.patch),
+              ...executions.map(execution => execution.patch),
+            ]}
+          />
         </div>
       </div>
 
@@ -398,10 +420,10 @@ export default function Dashboard() {
           </div>
 
           <p className="font-rajdhani font-bold text-4xl text-primary tracking-[-0.08em]">
-            {allBuilds.length || '—'}
+            {builds.length || '—'}
           </p>
 
-          {allBuilds.length > 0 && (
+          {builds.length > 0 && (
             <p className="text-xs text-muted-foreground mt-1">
               {buildsWithStats.filter(b => b.matchStats).length} usada
               {buildsWithStats.filter(b => b.matchStats).length !== 1 ? 's' : ''} en ranked
@@ -591,7 +613,7 @@ export default function Dashboard() {
             <Link to="/build-calculator" className="rd-link">Ver todas</Link>
           </div>
 
-          {allBuilds.length === 0 ? (
+          {builds.length === 0 ? (
             <p className="text-muted-foreground text-sm text-center py-6">
               No hay builds creadas aún.
             </p>

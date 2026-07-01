@@ -12,6 +12,8 @@ import { computeInsights } from '@/hooks/useInsights';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { getMyMembership } from '@/api/membershipSupabase';
 import { MATCH_TYPES } from '@/constants/matchTypes';
+import PatchFilter from '@/components/filters/PatchFilter';
+import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
@@ -546,6 +548,7 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
 export default function Stats() {
   const { user } = useAuth();
   const [matchTypeFilter, setMatchTypeFilter] = useState('all');
+  const [patchFilter, setPatchFilter] = useState('');
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
 
@@ -576,12 +579,13 @@ export default function Stats() {
   });
 
   const { data: tierlistExecutions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10),
+    queryKey: ['executions', 'patch-filters'],
+    queryFn: () => getTierlistExecutions(100),
   });
 
   const insightSnapshotKeys = tierlistExecutions
     .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
+    .filter(execution => patchMatchesSelection(execution.patch, patchFilter))
     .slice(0, 5)
     .map(execution => execution.snapshot_key);
 
@@ -625,9 +629,11 @@ export default function Stats() {
     return champ?.image_url_card || champ?.image_url;
   };
 
-  const matches = matchTypeFilter === 'all'
+  const matchesByType = matchTypeFilter === 'all'
     ? allMatches
     : allMatches.filter(match => (match.type || 'ranked') === matchTypeFilter);
+  const matches = filterByPatch(matchesByType, patchFilter);
+  const insightBuilds = filterByPatch(builds, patchFilter);
 
   if (membershipLoading || isLoading) {
     return (
@@ -679,13 +685,19 @@ export default function Stats() {
                 ))}
               </select>
             </label>
+            <PatchFilter
+              value={patchFilter}
+              onChange={setPatchFilter}
+              patches={allMatches.map(match => match.patch)}
+              className="min-w-64"
+            />
           </div>
         </div>
         <div className="rd-card p-6">
           <EmptyState
             icon={BarChart3}
-            title="Sin partidas de este tipo"
-            description="Elegí otro tipo de partida para procesar sus estadísticas e insights."
+            title="Sin partidas para estos filtros"
+            description="Elegí otro tipo de partida o parche para procesar sus estadísticas e insights."
           />
         </div>
       </div>
@@ -858,7 +870,7 @@ export default function Stats() {
     .sort((a, b) => a.wr - b.wr)
     .slice(0, 5);
 
-  const insights = computeInsights({ matches, tierlist, wrItems, builds, champions, runes, spells });
+  const insights = computeInsights({ matches, tierlist, wrItems, builds: insightBuilds, champions, runes, spells });
 
   return (
     <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
@@ -899,6 +911,12 @@ export default function Stats() {
               ))}
             </select>
           </label>
+          <PatchFilter
+            value={patchFilter}
+            onChange={setPatchFilter}
+            patches={allMatches.map(match => match.patch)}
+            className="min-w-64"
+          />
         </div>
       </div>
 
