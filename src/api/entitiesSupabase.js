@@ -1,7 +1,15 @@
 import { SupabaseEntityFactory } from '@/api/supabaseApi';
 
 export const Champion = SupabaseEntityFactory('champions');
-export const WRItem = SupabaseEntityFactory('wr_items');
+const WRItemEntity = SupabaseEntityFactory('wr_items');
+
+export const WRItem = {
+  ...WRItemEntity,
+  list: (optionsOrOrder, limit) => WRItemEntity.filter({ active: true }, optionsOrOrder, limit),
+  filter: (filters = {}, optionsOrOrder, limit) =>
+    WRItemEntity.filter({ active: true, ...filters }, optionsOrOrder, limit),
+  listAll: WRItemEntity.list,
+};
 export const Match = SupabaseEntityFactory('matches');
 export const Build = SupabaseEntityFactory('builds');
 export const TierlistEntry = SupabaseEntityFactory('tierlist_entries');
