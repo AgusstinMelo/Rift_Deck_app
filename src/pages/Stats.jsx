@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
@@ -11,9 +11,9 @@ import EmptyState from '@/components/ui/EmptyState';
 import { computeInsights } from '@/hooks/useInsights';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { getMyMembership } from '@/api/membershipSupabase';
-import { MATCH_TYPES } from '@/constants/matchTypes';
+import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
-import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
+import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
@@ -54,6 +54,15 @@ const insightAccent = {
 };
 
 const COACH_BOOK_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png';
+
+function getPatchFilterValue(value) {
+  const parsed = parsePatch(value);
+
+  if (!parsed) return String(value || '').trim();
+  if (parsed.minor === null) return String(parsed.major);
+
+  return `${parsed.major}.${parsed.minor}`;
+}
 
 function getPoolGrade(score) {
   if (score >= 90) return 'S+';
@@ -547,8 +556,9 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
 
 export default function Stats() {
   const { user } = useAuth();
-  const [matchTypeFilter, setMatchTypeFilter] = useState('all');
+  const [matchTypeFilter, setMatchTypeFilter] = useState(DEFAULT_MATCH_TYPE);
   const [patchFilter, setPatchFilter] = useState('');
+  const patchDefaultApplied = useRef(false);
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
 
@@ -582,6 +592,26 @@ export default function Stats() {
     queryKey: ['executions', 'patch-filters'],
     queryFn: () => getTierlistExecutions(100),
   });
+
+  const latestTierlistExecution = tierlistExecutions
+    .find(execution => execution.status === 'success' || execution.status === 'partial');
+  const currentPatchFilter = getPatchFilterValue(latestTierlistExecution?.patch);
+  const patchOptions = [
+    ...allMatches.map(match => match.patch),
+    ...tierlistExecutions.map(execution => execution.patch),
+  ];
+
+  useEffect(() => {
+    if (patchDefaultApplied.current || patchFilter || !currentPatchFilter) return;
+
+    patchDefaultApplied.current = true;
+    setPatchFilter(currentPatchFilter);
+  }, [currentPatchFilter, patchFilter]);
+
+  const handlePatchFilterChange = (value) => {
+    patchDefaultApplied.current = true;
+    setPatchFilter(value);
+  };
 
   const insightSnapshotKeys = tierlistExecutions
     .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
@@ -687,8 +717,8 @@ export default function Stats() {
             </label>
             <PatchFilter
               value={patchFilter}
-              onChange={setPatchFilter}
-              patches={allMatches.map(match => match.patch)}
+              onChange={handlePatchFilterChange}
+              patches={patchOptions}
               className="min-w-64"
             />
           </div>
@@ -913,8 +943,8 @@ export default function Stats() {
           </label>
           <PatchFilter
             value={patchFilter}
-            onChange={setPatchFilter}
-            patches={allMatches.map(match => match.patch)}
+            onChange={handlePatchFilterChange}
+            patches={patchOptions}
             className="min-w-64"
           />
         </div>
