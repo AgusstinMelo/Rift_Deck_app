@@ -22,6 +22,14 @@ function calcWR(matches) {
   return matches.length > 0 ? (wins / matches.length) * 100 : 0;
 }
 
+function calcMatchKDA(match) {
+  const kills = Number(match.kills || 0);
+  const deaths = Number(match.deaths || 0);
+  const assists = Number(match.assists || 0);
+
+  return deaths === 0 ? kills + assists : (kills + assists) / deaths;
+}
+
 function getKdaTone(avgKDA) {
   const kda = Number(avgKDA);
 
@@ -743,9 +751,9 @@ export default function Stats() {
   const totalDeaths = matches.reduce((s, m) => s + (m.deaths || 0), 0);
   const totalAssists = matches.reduce((s, m) => s + (m.assists || 0), 0);
 
-  const avgKDA = totalDeaths > 0
-    ? ((totalKills + totalAssists) / totalDeaths).toFixed(2)
-    : '∞';
+  const avgKDA = (
+    matches.reduce((sum, match) => sum + calcMatchKDA(match), 0) / totalMatches
+  ).toFixed(2);
 
   const blueMatches = matches.filter(m => m.side === 'blue');
   const redMatches = matches.filter(m => m.side === 'red');
