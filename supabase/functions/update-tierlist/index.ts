@@ -292,7 +292,11 @@ function normalizeWeights(configPayload: any) {
   };
 }
 
-function processLane(champions: any[], weights: ReturnType<typeof normalizeWeights>) {
+function processLane(
+  champions: any[],
+  weights: ReturnType<typeof normalizeWeights>,
+  applyEloPresencePenalty: boolean,
+) {
   const n = champions.length;
 
   if (n === 0) return [];
@@ -340,17 +344,21 @@ function processLane(champions: any[], weights: ReturnType<typeof normalizeWeigh
       const appearsInGrandmaster = ranksPresent.includes("4");
       const appearsInHighElo = appearsInMaster || appearsInGrandmaster;
 
-      let competitiveFactor =
-        COMPETITIVE_BASE_FACTOR +
-        presenceRatio * PRESENCE_FACTOR_WEIGHT +
-        highRankRatio * HIGH_RANK_FACTOR_WEIGHT;
+      let competitiveFactor = 1;
 
-      if (!appearsInHighElo) {
-        competitiveFactor *= 0.82;
-      }
+      if (applyEloPresencePenalty) {
+        competitiveFactor =
+          COMPETITIVE_BASE_FACTOR +
+          presenceRatio * PRESENCE_FACTOR_WEIGHT +
+          highRankRatio * HIGH_RANK_FACTOR_WEIGHT;
 
-      if (rankCount === 1) {
-        competitiveFactor *= 0.88;
+        if (!appearsInHighElo) {
+          competitiveFactor *= 0.82;
+        }
+
+        if (rankCount === 1) {
+          competitiveFactor *= 0.88;
+        }
       }
 
       const rankingFinal = Number(clamp(
@@ -529,10 +537,12 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const configPayload = body?.config || {};
     const weights = normalizeWeights(configPayload);
+    const applyEloPresencePenalty = configPayload.apply_elo_presence_penalty !== false;
 
     log("Iniciando extracción de datos desde API de Tencent...");
     log(`Rangos a promediar: ${RANK_KEYS.join(", ")}`);
     log(`Pesos normalizados: ${JSON.stringify(weights)}`);
+    log(`Penalización por ausencia en elos: ${applyEloPresencePenalty ? "activada" : "desactivada"}`);
 
     const [respRank, respChamp] = await Promise.all([
       fetch(RANK_URL, { headers: { "User-Agent": "Mozilla/5.0" } }),
@@ -574,7 +584,7 @@ Deno.serve(async (req) => {
     const unmapped: string[] = [];
 
     for (const [lane, champions] of Object.entries(laneData)) {
-      const processed = processLane(champions, weights);
+      const processed = processLane(champions, weights, applyEloPresencePenalty);
 
       for (const champ of processed) {
         if (champ.name_es === champ.original_name && champ.original_name) {
@@ -609,6 +619,7 @@ Deno.serve(async (req) => {
         competitive_base_factor: COMPETITIVE_BASE_FACTOR,
         presence_factor_weight: PRESENCE_FACTOR_WEIGHT,
         high_rank_factor_weight: HIGH_RANK_FACTOR_WEIGHT,
+        apply_elo_presence_penalty: applyEloPresencePenalty,
       },
       unmapped_champions: unmapped,
       logs: logs.join("\n"),

@@ -20,6 +20,7 @@ const DEFAULT_FORM = {
   active_data_source: 'https://lolm.qq.com/',
   active_region: 'China',
   active_elo: 'All elos',
+  apply_elo_presence_penalty: true,
 };
 
 export default function TierlistConfig() {
@@ -50,6 +51,7 @@ export default function TierlistConfig() {
       active_data_source: currentConfig.active_data_source || '',
       active_region: currentConfig.active_region || '',
       active_elo: currentConfig.active_elo || '',
+      apply_elo_presence_penalty: currentConfig.apply_elo_presence_penalty ?? true,
     });
   }, [currentConfig?.id]);
 
@@ -253,6 +255,41 @@ export default function TierlistConfig() {
               />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Calculation options */}
+      <div className="bg-card border border-border rounded-xl p-5 mb-6">
+        <h2 className="font-rajdhani font-bold text-lg text-foreground mb-4">
+          Opciones de Cálculo
+        </h2>
+
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-secondary/40 p-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              Penalización por ausencia en elos
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Reduce el ranking de los campeones que no aparecen en todos los elos analizados, con mayor peso para los elos altos.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.apply_elo_presence_penalty}
+            aria-label="Activar penalización por ausencia en elos"
+            onClick={() => set('apply_elo_presence_penalty', !form.apply_elo_presence_penalty)}
+            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+              form.apply_elo_presence_penalty ? 'bg-primary' : 'bg-muted'
+            }`}
+          >
+            <span
+              className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                form.apply_elo_presence_penalty ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
       </div>
 
