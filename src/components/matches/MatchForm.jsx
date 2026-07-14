@@ -5,6 +5,7 @@ import { updateMatch } from '@/api/matchesSupabase';
 import { ArrowLeft, Save, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
+import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 
@@ -379,6 +380,27 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
     else if (selectedSpells.length < 2) setSelectedSpells(prev => [...prev, spell]);
   };
 
+  const applySavedBuild = (build) => {
+    const resolvedItems = (build.items || [])
+      .map(name => items.find(item => item.name === name))
+      .filter(Boolean);
+    const resolvedRunes = (build.additional_runes || [])
+      .map(name => runes.find(rune => rune.name === name))
+      .filter(Boolean);
+
+    setSelectedItems(resolvedItems);
+    setSelectedRunes(resolvedRunes);
+    setSelectedSpells((build.spells || []).slice(0, 2));
+
+    const branches = [...new Set(
+      resolvedRunes.filter(rune => rune.branch !== 'Clave').map(rune => rune.branch),
+    )];
+    const nextPrimary = branches[0] || primaryBranch;
+    setPrimaryBranch(nextPrimary);
+    setSecondaryBranch(branches[1] || PRIMARY_BRANCHES.find(branch => branch !== nextPrimary));
+    setRunesInitialized(true);
+  };
+
   const addItem = (item) => {
     if (selectedItems.length >= 6) return;
 
@@ -643,6 +665,8 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
             <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Tu build</h2>
             <p className="text-muted-foreground text-sm">Items, runas y hechizos que usaste</p>
           </div>
+
+          <SavedBuildPicker champion={ownChampion} onApply={applySavedBuild} />
 
           {/* Runas */}
           <div className="rd-card p-4">

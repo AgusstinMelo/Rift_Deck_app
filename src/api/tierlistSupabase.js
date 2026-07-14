@@ -1,28 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-
-function normalizeSnapshotRecord(record = {}) {
-  const rawPatch = String(record.patch || '').trim();
-  const legacyDateMatch = rawPatch.match(/\s+(\d{2})-(\d{2})-(\d{4})\s*$/);
-  const normalizedPatch = legacyDateMatch
-    ? rawPatch.replace(/\s+\d{2}-\d{2}-\d{4}\s*$/, '').trim()
-    : rawPatch;
-  const legacyDate = legacyDateMatch
-    ? `${legacyDateMatch[3]}-${legacyDateMatch[2]}-${legacyDateMatch[1]}`
-    : '';
-  const snapshotDate = String(
-    legacyDate || record.snapshot_date || record.executed_at || record.updated_at || ''
-  ).slice(0, 10);
-  const snapshotKey = normalizedPatch && snapshotDate
-    ? `${normalizedPatch.toLowerCase()}::${snapshotDate}`
-    : String(record.snapshot_key || '');
-
-  return {
-    ...record,
-    patch: normalizedPatch || rawPatch,
-    snapshot_date: snapshotDate || null,
-    snapshot_key: snapshotKey,
-  };
-}
+import { normalizeTierlistSnapshotRecord } from '@/utils/tierlist';
 
 export async function getTierlistEntries(order = "-ranking_final", limit = 1000, filters = {}) {
   const orderConfig = order === "-updated_at"
@@ -69,7 +46,7 @@ export async function getTierlistEntries(order = "-ranking_final", limit = 1000,
 
   if (error) throw error;
 
-  let normalized = (data || []).map(normalizeSnapshotRecord);
+  let normalized = (data || []).map(normalizeTierlistSnapshotRecord);
   if (requestedSnapshotKeys.length) {
     const requested = new Set(requestedSnapshotKeys);
     normalized = normalized.filter(entry => requested.has(entry.snapshot_key));
@@ -110,7 +87,7 @@ export async function getTierlistExecutions(limit = 10) {
   if (error) throw error;
 
   const seenSnapshots = new Set();
-  const uniqueExecutions = (data || []).map(normalizeSnapshotRecord).filter(execution => {
+  const uniqueExecutions = (data || []).map(normalizeTierlistSnapshotRecord).filter(execution => {
     const snapshotIdentity = execution.snapshot_key || String(execution.id);
     if (seenSnapshots.has(snapshotIdentity)) return false;
     seenSnapshots.add(snapshotIdentity);

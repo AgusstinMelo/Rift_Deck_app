@@ -1,10 +1,13 @@
 import React from 'react'
-import ReactDOM from 'react-dom/client'
+import ReactDOM, { hydrateRoot } from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 
-document.title = 'Rift Deck';
+const root = document.getElementById('root');
+const app = <App />;
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <App />
-)
+if (root.dataset.prerendered === 'true') {
+  hydrateRoot(root, app);
+} else {
+  ReactDOM.createRoot(root).render(app);
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2, Mail, Lock, Eye, EyeOff, ChevronLeft, ChevronRight, X, ArrowLeft, KeyRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import wordmarkUrl from '@/assets/riftdeck-final.png';
 
 const SCREENSHOTS = [
@@ -31,7 +32,7 @@ export default function Landing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(() => (
-    new URLSearchParams(window.location.search).get('password_updated') === '1'
+    new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('password_updated') === '1'
       ? 'Contraseña creada correctamente. Ya podés ingresar con tu email y la nueva contraseña.'
       : ''
   ));
@@ -163,7 +164,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -181,9 +182,18 @@ export default function Landing() {
         {/* Brand */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <img src={LOGO_URL} alt="Rift Deck" className="w-14 h-14 object-contain drop-shadow-[0_0_24px_rgba(77,166,255,.35)]" />
-            <img src={WORDMARK_URL} alt="Rift Deck" className="h-16 object-contain drop-shadow-[0_0_14px_rgba(212,175,55,.40)]" />
+            <img src={LOGO_URL} alt="" width="56" height="56" className="w-14 h-14 object-contain drop-shadow-[0_0_24px_rgba(77,166,255,.35)]" />
+            <img src={WORDMARK_URL} alt="Rift Deck" height="64" className="h-16 object-contain drop-shadow-[0_0_14px_rgba(212,175,55,.40)]" />
           </div>
+          <h1 className="text-center font-rajdhani text-xl font-bold text-foreground">
+            Builds, estadísticas y meta de Wild Rift
+          </h1>
+          <p className="mt-1 max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
+            Registrá tus partidas, analizá tu rendimiento y consultá campeones, tier lists, objetos y runas en un solo lugar.
+          </p>
+          <Link to="/campeones" className="mt-3 text-xs font-semibold text-primary hover:text-primary/80">
+            Explorar campeones de Wild Rift
+          </Link>
           <div className="flex items-center gap-2 opacity-60 mt-1">
             <span className="h-px w-6 bg-primary/50" />
             <span className="text-[9px] uppercase tracking-[0.32em] text-primary">Juega con Información</span>
@@ -432,18 +442,20 @@ export default function Landing() {
                   className={`shrink-0 rounded-lg p-1.5 border-2 transition-all ${i === carouselIdx ? 'border-primary bg-primary/10' : 'border-border/40 bg-secondary/40 hover:border-primary/50'}`}
                   onMouseEnter={() => setCarouselIdx(i)}
                 >
-                  <img src={s.url} alt={s.label} className="w-24 h-16 object-cover object-top rounded" />
+                  <img src={s.url} alt={`Vista de ${s.label} en Rift Deck`} width="96" height="64" loading="lazy" className="w-24 h-16 object-cover object-top rounded" />
                 </button>
               ))}
             </div>
             <button
               onClick={() => navigateCarousel(-1)}
+              aria-label="Ver captura anterior"
               className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center hover:bg-secondary transition-all z-10 shadow"
             >
               <ChevronLeft size={13} className="text-foreground" />
             </button>
             <button
               onClick={() => navigateCarousel(1)}
+              aria-label="Ver captura siguiente"
               className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center hover:bg-secondary transition-all z-10 shadow"
             >
               <ChevronRight size={13} className="text-foreground" />
@@ -465,7 +477,8 @@ export default function Landing() {
           <div className="relative w-full h-full flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
             <img
               src={SCREENSHOTS[modalIdx].url}
-              alt={SCREENSHOTS[modalIdx].label}
+              alt={`Vista ampliada de ${SCREENSHOTS[modalIdx].label} en Rift Deck`}
+              loading="lazy"
               className="max-w-[96vw] max-h-[92vh] rounded-xl border border-border shadow-2xl object-contain"
               style={{ imageRendering: 'auto' }}
             />
@@ -473,6 +486,7 @@ export default function Landing() {
             {/* Close */}
             <button
               onClick={() => setModalIdx(null)}
+              aria-label="Cerrar vista ampliada"
               className="fixed top-4 right-4 w-9 h-9 rounded-full bg-background border border-border flex items-center justify-center hover:bg-secondary transition-all z-10"
             >
               <X size={15} className="text-foreground" />
@@ -480,6 +494,7 @@ export default function Landing() {
             {/* Prev */}
             <button
               onClick={() => setModalIdx(i => (i - 1 + SCREENSHOTS.length) % SCREENSHOTS.length)}
+              aria-label="Ver captura anterior"
               className="fixed left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 border border-border flex items-center justify-center hover:bg-background transition-all z-10"
             >
               <ChevronLeft size={20} className="text-foreground" />
@@ -487,6 +502,7 @@ export default function Landing() {
             {/* Next */}
             <button
               onClick={() => setModalIdx(i => (i + 1) % SCREENSHOTS.length)}
+              aria-label="Ver captura siguiente"
               className="fixed right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 border border-border flex items-center justify-center hover:bg-background transition-all z-10"
             >
               <ChevronRight size={20} className="text-foreground" />
@@ -494,6 +510,6 @@ export default function Landing() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

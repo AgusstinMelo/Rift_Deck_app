@@ -5,6 +5,30 @@ export const normalizeChampionName = (name) =>
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '');
 
+export const normalizeTierlistSnapshotRecord = (record = {}) => {
+  const rawPatch = String(record.patch || '').trim();
+  const legacyDateMatch = rawPatch.match(/\s+(\d{2})-(\d{2})-(\d{4})\s*$/);
+  const normalizedPatch = legacyDateMatch
+    ? rawPatch.replace(/\s+\d{2}-\d{2}-\d{4}\s*$/, '').trim()
+    : rawPatch;
+  const legacyDate = legacyDateMatch
+    ? `${legacyDateMatch[3]}-${legacyDateMatch[2]}-${legacyDateMatch[1]}`
+    : '';
+  const snapshotDate = String(
+    legacyDate || record.snapshot_date || record.executed_at || record.updated_at || ''
+  ).slice(0, 10);
+  const snapshotKey = normalizedPatch && snapshotDate
+    ? `${normalizedPatch.toLowerCase()}::${snapshotDate}`
+    : String(record.snapshot_key || '');
+
+  return {
+    ...record,
+    patch: normalizedPatch || rawPatch,
+    snapshot_date: snapshotDate || null,
+    snapshot_key: snapshotKey,
+  };
+};
+
 const getEntryTime = (entry) =>
   new Date(entry?.updated_at || entry?.created_date || entry?.updated_date || 0).getTime() || 0;
 

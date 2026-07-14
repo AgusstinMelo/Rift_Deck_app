@@ -4,6 +4,7 @@ import { WRItem, Rune } from '@/api/entitiesSupabase';
 import { ArrowLeft, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
+import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 
@@ -202,6 +203,26 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
     } else if (selectedSpells.length < 2) {
       setSelectedSpells(prev => [...prev, spell]);
     }
+  };
+
+  const applySavedBuild = (build) => {
+    const resolvedItems = (build.items || [])
+      .map(name => items.find(item => item.name === name))
+      .filter(Boolean);
+    const resolvedRunes = (build.additional_runes || [])
+      .map(name => runes.find(rune => rune.name === name))
+      .filter(Boolean);
+
+    setSelectedItems(resolvedItems);
+    setSelectedRunes(resolvedRunes);
+    setSelectedSpells((build.spells || []).slice(0, 2));
+
+    const branches = [...new Set(
+      resolvedRunes.filter(rune => rune.branch !== 'Clave').map(rune => rune.branch),
+    )];
+    const nextPrimary = branches[0] || primaryBranch;
+    setPrimaryBranch(nextPrimary);
+    setSecondaryBranch(branches[1] || PRIMARY_BRANCHES.find(branch => branch !== nextPrimary));
   };
 
   const addTag = () => {
@@ -602,6 +623,8 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
                 </p>
               </div>
 
+              <SavedBuildPicker champion={myChampion} onApply={applySavedBuild} />
+
               {/* Runas */}
               <div className="rd-card p-4">
                 <div className="flex items-center gap-2 mb-5">
@@ -994,6 +1017,7 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
                   ))}
                 </div>
               </div>
+
               <div>
                 <label className="text-xs text-muted-foreground block mb-1">Notas</label>
                 <textarea
