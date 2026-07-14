@@ -1,12 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { championSlug } from '../src/utils/championSlug.js';
+import { SITE_URL } from '../src/seo/publicSeo.js';
 import {
   getCurrentTierlistEntries,
   normalizeTierlistSnapshotRecord,
 } from '../src/utils/tierlist.js';
-
-const SITE_URL = 'https://riftdeck.com.ar';
 
 const readLocalEnv = async () => {
   try {

@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://riftdeck.com.ar';
+export const SITE_URL = 'https://www.riftdeck.com.ar';
 export const SOCIAL_IMAGE = `${SITE_URL}/riftdeck-final.png`;
 
 export const LANDING_SEO = {

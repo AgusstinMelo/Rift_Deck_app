@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://riftdeck.com.ar/sitemap.xml
+Sitemap: https://www.riftdeck.com.ar/sitemap.xml
