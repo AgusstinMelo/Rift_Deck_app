@@ -103,7 +103,7 @@ const resolveChampionReferences = (references, champions) => {
 function MatchupColumn({ title, icon: Icon, iconClass, champions }) {
   return (
     <div className="rd-mini-action">
-      <h3 className="mb-3 flex items-center gap-2 font-rajdhani text-lg font-bold uppercase"><Icon size={18} className={iconClass} />{title}</h3>
+      <h3 className="mb-3 flex min-h-12 items-center gap-2 font-rajdhani text-lg font-bold uppercase"><Icon size={18} className={`shrink-0 ${iconClass}`} />{title}</h3>
       <div className="space-y-2">
         {champions.length ? champions.map(candidate => (
           <Link key={candidate.id} to={`/campeones/${championSlug(candidate.name)}`} className="flex items-center gap-3 rounded-lg border border-transparent p-2 transition-colors hover:border-primary/30 hover:bg-secondary/50">
