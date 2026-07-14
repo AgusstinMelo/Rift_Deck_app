@@ -6,12 +6,14 @@ import {
 } from 'lucide-react';
 
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Champion } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { useAuth } from '@/lib/AuthContext';
 
 import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
+import { championSlug } from '@/utils/championSlug';
 
 const SCALING_LABEL = {
   earlygame: 'Early Game',
@@ -340,12 +342,21 @@ function PersonalMetric({ label, value, hint }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function ChampionDetail({ champion, tierData = [], onBack }) {
+export default function ChampionDetail({
+  champion,
+  tierData = [],
+  onBack,
+  publicMode = false,
+  champions: initialChampions,
+  relatedChampions = [],
+}) {
   const { user } = useAuth();
 
   const { data: allChampions = [] } = useQuery({
     queryKey: ['champions'],
     queryFn: () => Champion.list(),
+    initialData: initialChampions,
+    staleTime: initialChampions ? 5 * 60 * 1000 : undefined,
   });
 
   const champByExternalId = Object.fromEntries(
@@ -367,7 +378,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
     queryFn: () => user?.email
       ? getUserMatches(user, 200)
       : [],
-    enabled: !!user?.email,
+    enabled: !publicMode && !!user?.email,
   });
 
   const champMatches = matches.filter(
@@ -501,7 +512,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
         "
       >
         <ArrowLeft size={15} />
-        Volver a la biblioteca
+        {publicMode ? 'Todos los campeones' : 'Volver a la biblioteca'}
       </button>
 
       {/* HERO */}
@@ -570,7 +581,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
 
               {/* meta strip */}
               <div className="mt-5 pt-4 border-t border-border/40">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+                <div className={`grid grid-cols-1 gap-x-6 gap-y-4 ${publicMode ? '' : 'md:grid-cols-4'}`}>
                   <div className="min-w-0">
                     <p className="rd-label mb-1">Escalado</p>
                     <p className="text-base font-semibold text-foreground leading-tight">
@@ -578,7 +589,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
                     </p>
                   </div>
 
-                  <div className="min-w-0">
+                  {!publicMode && <div className="min-w-0">
                     <p className="rd-label mb-1">Proyección</p>
                     <p
                       className={`
@@ -591,21 +602,21 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       Score {projection.projectionScore}
                     </p>
-                  </div>
+                  </div>}
 
-                  <div className="min-w-0">
+                  {!publicMode && <div className="min-w-0">
                     <p className="rd-label mb-1">WR Personal</p>
                     <p className="text-base font-semibold text-foreground leading-tight">
                       {wr ? `${wr}%` : 'Sin datos'}
                     </p>
-                  </div>
+                  </div>}
 
-                  <div className="min-w-0">
+                  {!publicMode && <div className="min-w-0">
                     <p className="rd-label mb-1">Partidas</p>
                     <p className="text-base font-semibold text-foreground leading-tight">
                       {champMatches.length}
                     </p>
-                  </div>
+                  </div>}
                 </div>
               </div>
             </div>
@@ -616,9 +627,9 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
       {/* layout */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         {/* LEFT */}
-        <div className="space-y-6">
+        <div className={publicMode ? 'contents' : 'space-y-6'}>
           {/* profile */}
-          <div className="rd-card p-5">
+          <div className={`rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-1' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Perfil del Campeón</h2>
@@ -661,7 +672,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
           </div>
 
           {/* base stats */}
-          <div className="rd-card p-5">
+          <div className={`rd-card p-5 ${publicMode ? 'xl:col-start-1 xl:row-start-2' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Estadísticas Base</h2>
@@ -686,7 +697,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
           </div>
 
           {/* matchups */}
-          <div className="rd-card p-5">
+          <div className={`rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-3' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Matchups y Sinergias</h2>
@@ -787,9 +798,9 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
         </div>
 
         {/* RIGHT */}
-        <div className="space-y-6">
+        <div className={publicMode ? 'space-y-6 xl:col-start-2 xl:row-start-2' : 'space-y-6'}>
           {/* personal */}
-          <div className="rd-card p-5">
+          {!publicMode && <div className="rd-card p-5">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Rendimiento Personal</h2>
@@ -849,7 +860,7 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
                 )}
               </>
             )}
-          </div>
+          </div>}
 
           {/* tier */}
           {tierData.length > 0 && (
@@ -913,6 +924,24 @@ export default function ChampionDetail({ champion, tierData = [], onBack }) {
           )}
         </div>
       </div>
+
+      {publicMode && relatedChampions.length > 0 && (
+        <section className="rd-card p-5">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="w-6 h-px bg-primary/50" />
+            <h2 className="rd-card-title">Campeones del mismo rol o línea</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">Opciones relacionadas por los datos de rol y línea registrados en Rift Deck.</p>
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {relatedChampions.map(related => (
+              <Link key={related.id} to={`/campeones/${championSlug(related.name)}`} className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5">
+                {related.image_url && <img src={related.image_url} alt={`${related.name} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />}
+                <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{related.name}</h3>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
