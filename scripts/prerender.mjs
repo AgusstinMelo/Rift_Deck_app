@@ -2,8 +2,9 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { championSlug, findChampionBySlug } from '../src/utils/championSlug.js';
+import { entitySlug, findEntityBySlug } from '../src/utils/entitySlug.js';
 import { DAMAGE_LABELS, displayList, getChampionLaneLabels } from '../src/utils/championPresentation.js';
-import { CHAMPIONS_SEO, LANDING_SEO, SITE_URL, getChampionSeo } from '../src/seo/publicSeo.js';
+import { CHAMPIONS_SEO, ITEMS_SEO, LANDING_SEO, RUNES_SEO, SITE_URL, getChampionSeo, getItemSeo, getRuneSeo } from '../src/seo/publicSeo.js';
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -30,26 +31,33 @@ const renderHead = seo => {
 
 const template = await readFile(resolve('dist/index.html'), 'utf8');
 const publicData = JSON.parse(await readFile(resolve('.prerender/public-data.json'), 'utf8'));
-const { champions, executions, tierlist } = publicData;
+const { champions, items, runes, executions, tierlist } = publicData;
 const { renderPublicRoute } = await import(pathToFileURL(resolve('dist-ssr/entry-server.js')).href);
-const paths = ['/', '/campeones', ...champions.map(champion => `/campeones/${championSlug(champion.name)}`)];
+const paths = ['/', '/campeones', ...champions.map(champion => `/campeones/${championSlug(champion.name)}`), '/objetos', ...items.map(item => `/objetos/${entitySlug(item.name)}`), '/runas', ...runes.map(rune => `/runas/${entitySlug(rune.name)}`)];
 
 for (const pathname of paths) {
   const champion = pathname.startsWith('/campeones/')
     ? findChampionBySlug(champions, pathname.split('/').pop())
     : null;
   if (pathname.startsWith('/campeones/') && !champion) throw new Error(`No se encontró champion para ${pathname}.`);
+  const item = pathname.startsWith('/objetos/') ? findEntityBySlug(items, pathname.split('/').pop()) : null;
+  const rune = pathname.startsWith('/runas/') ? findEntityBySlug(runes, pathname.split('/').pop()) : null;
+  if (pathname.startsWith('/objetos/') && !item) throw new Error(`No se encontró objeto para ${pathname}.`);
+  if (pathname.startsWith('/runas/') && !rune) throw new Error(`No se encontró runa para ${pathname}.`);
 
   const seo = pathname === '/'
     ? LANDING_SEO
     : pathname === '/campeones'
       ? CHAMPIONS_SEO
-      : getChampionSeo(champion, championSlug(champion.name), getChampionLaneLabels(champion), displayList, DAMAGE_LABELS);
-  const routeData = pathname === '/' ? undefined : {
-    champions,
-    executions,
-    tierlist,
-  };
+      : pathname === '/objetos' ? ITEMS_SEO
+        : pathname === '/runas' ? RUNES_SEO
+          : item ? getItemSeo(item, entitySlug(item.name))
+            : rune ? getRuneSeo(rune, entitySlug(rune.name))
+              : getChampionSeo(champion, championSlug(champion.name), getChampionLaneLabels(champion), displayList, DAMAGE_LABELS);
+  const routeData = pathname === '/' ? undefined
+    : pathname.startsWith('/objetos') ? { items }
+      : pathname.startsWith('/runas') ? { runes }
+        : { champions, executions, tierlist };
   const markup = renderPublicRoute(pathname, routeData);
   if (!markup.includes('<h1')) throw new Error(`El prerender de ${pathname} no contiene H1.`);
 

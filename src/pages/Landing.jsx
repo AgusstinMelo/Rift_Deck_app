@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2, Mail, Lock, Eye, EyeOff, ChevronLeft, ChevronRight, X, ArrowLeft, KeyRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import wordmarkUrl from '@/assets/riftdeck-final.png';
 
 const SCREENSHOTS = [
@@ -196,12 +195,12 @@ export default function Landing() {
             <span className="text-[9px] uppercase tracking-[0.32em] text-primary">Juega con Información</span>
             <span className="h-px w-6 bg-primary/50" />
           </div>
-          <Link
-            to="/campeones"
+          <a
+            href="/campeones"
             className="mt-4 inline-flex items-center justify-center rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:border-primary/70 hover:bg-primary/20"
           >
             Biblioteca de Rift Deck
-          </Link>
+          </a>
         </div>
 
         <div className="rd-card p-8">

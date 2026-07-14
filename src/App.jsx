@@ -32,7 +32,7 @@ const RouteFallback = () => (
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
   const location = useLocation();
-  const usesPageSeo = location.pathname === '/campeones' || location.pathname.startsWith('/campeones/');
+  const usesPageSeo = ['/campeones', '/objetos', '/runas'].some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
   const publicData = typeof window !== 'undefined' ? window.__RIFTDECK_PUBLIC_DATA__ : undefined;
 
   if (usesPageSeo) {

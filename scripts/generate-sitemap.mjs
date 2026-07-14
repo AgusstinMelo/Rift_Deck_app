@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { championSlug } from '../src/utils/championSlug.js';
+import { entitySlug } from '../src/utils/entitySlug.js';
 import { SITE_URL } from '../src/seo/publicSeo.js';
 import {
   getCurrentTierlistEntries,
@@ -44,6 +45,24 @@ if (!response.ok) {
 }
 
 const champions = await response.json();
+const fetchPublicRows = async (table, columns, filters = '') => {
+  const result = await fetch(`${supabaseUrl}/rest/v1/${table}?select=${columns.join(',')}${filters}&order=name.asc`, {
+    headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+  });
+  if (!result.ok) throw new Error(`No se pudo consultar ${table} con la clave anónima (${result.status}).`);
+  return result.json();
+};
+const itemColumns = [
+  'id', 'name', 'image_url', 'price', 'description', 'category', 'type', 'tags', 'active',
+  'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power',
+  'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact',
+  'critical_damage', 'physic_vamp', 'magic_vamp', 'flat_armor_penetration',
+  'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration',
+  'ability_haste', 'tenacity', 'healing_and_shield',
+];
+const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description', 'tags'];
+const items = await fetchPublicRows('wr_items', itemColumns, '&active=eq.true');
+const runes = await fetchPublicRows('runes', runeColumns);
 const executionParams = new URLSearchParams({
   select: '*',
   order: 'snapshot_date.desc,executed_at.desc',
@@ -86,7 +105,12 @@ if (new Set(slugs).size !== slugs.length) {
   throw new Error('Existen nombres de campeones que generan slugs duplicados.');
 }
 
-const paths = ['/', '/campeones', ...slugs.map(slug => `/campeones/${slug}`)];
+const itemSlugs = items.map(item => entitySlug(item.name)).filter(Boolean);
+const runeSlugs = runes.map(rune => entitySlug(rune.name)).filter(Boolean);
+if (new Set(itemSlugs).size !== itemSlugs.length) throw new Error('Existen objetos que generan slugs duplicados.');
+if (new Set(runeSlugs).size !== runeSlugs.length) throw new Error('Existen runas que generan slugs duplicados.');
+
+const paths = ['/', '/campeones', ...slugs.map(slug => `/campeones/${slug}`), '/objetos', ...itemSlugs.map(slug => `/objetos/${slug}`), '/runas', ...runeSlugs.map(slug => `/runas/${slug}`)];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${paths.map(path => `  <url>\n    <loc>${SITE_URL}${path}</loc>\n  </url>`).join('\n')}
@@ -96,5 +120,5 @@ ${paths.map(path => `  <url>\n    <loc>${SITE_URL}${path}</loc>\n  </url>`).join
 await writeFile(resolve('public/sitemap.xml'), sitemap, 'utf8');
 await mkdir(resolve('.prerender'), { recursive: true });
 const currentTierlist = getCurrentTierlistEntries(tierlist, executions);
-await writeFile(resolve('.prerender/public-data.json'), JSON.stringify({ champions, executions, tierlist: currentTierlist }), 'utf8');
+await writeFile(resolve('.prerender/public-data.json'), JSON.stringify({ champions, items, runes, executions, tierlist: currentTierlist }), 'utf8');
 console.log(`Sitemap generado con ${paths.length} URLs públicas.`);

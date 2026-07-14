@@ -4,6 +4,8 @@ import { WRItem } from '@/api/entitiesSupabase';
 import { Search, ArrowLeft, Coins, Sword } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import ReactMarkdown from 'react-markdown';
+import { Link } from 'react-router-dom';
+import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 
 const CATEGORY_LABELS = {
   'Básico': 'Básico',
@@ -17,27 +19,31 @@ const CATEGORY_COLORS = {
   'Mejorado': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
 };
 
-export default function ItemLibrary({ selectedId, onSelectId, onClearSelected }) {
+export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialItems, publicBasePath }) {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['writems'],
     queryFn: () => WRItem.list('type'),
+    initialData: initialItems,
+    staleTime: initialItems ? 5 * 60 * 1000 : undefined,
   });
 
   useEffect(() => {
-    if (!selectedId) {
+    if (!selectedId && !selectedSlug) {
       setSelected(null);
       return;
     }
 
-    const nextSelected = items.find(item => String(item.id) === String(selectedId));
+    const nextSelected = selectedSlug
+      ? findEntityBySlug(items, selectedSlug)
+      : items.find(item => String(item.id) === String(selectedId));
     if (nextSelected) {
       setSelected(nextSelected);
     }
-  }, [items, selectedId]);
+  }, [items, selectedId, selectedSlug]);
 
   const CATEGORY_ORDER = {
     'Básico': 3,
@@ -188,7 +194,13 @@ export default function ItemLibrary({ selectedId, onSelectId, onClearSelected })
   if (selected) {
     return (
       <div className="space-y-6">
-        <button
+        {publicBasePath ? <Link
+          to={publicBasePath}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={15} />
+          Volver a objetos
+        </Link> : <button
           onClick={() => {
             setSelected(null);
             onClearSelected?.();
@@ -201,7 +213,7 @@ export default function ItemLibrary({ selectedId, onSelectId, onClearSelected })
         >
           <ArrowLeft size={15} />
           Volver a objetos
-        </button>
+        </button>}
 
         <div className="rd-card overflow-hidden relative">
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.18),transparent_35%)]" />
@@ -444,13 +456,15 @@ export default function ItemLibrary({ selectedId, onSelectId, onClearSelected })
                 </div>
 
                 <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-12 xl:grid-cols-14 gap-1.5">
-                  {groupItems.map(item => (
-                    <button
+                  {groupItems.map(item => {
+                    const Card = publicBasePath ? Link : 'button';
+                    return (
+                    <Card
                       key={item.id}
-                      onClick={() => {
+                      {...(publicBasePath ? { to: `${publicBasePath}/${entitySlug(item.name)}` } : { onClick: () => {
                         setSelected(item);
                         onSelectId?.(item.id);
-                      }}
+                      }})}
                       className="
                         bg-card border border-border rounded-lg overflow-hidden
                         text-left hover:border-primary/40 hover:bg-primary/5
@@ -473,8 +487,8 @@ export default function ItemLibrary({ selectedId, onSelectId, onClearSelected })
                           <Sword size={22} className="text-primary" />
                         </div>
                       )}
-                    </button>
-                  ))}
+                    </Card>
+                  );})}
                 </div>
               </div>
             ))}

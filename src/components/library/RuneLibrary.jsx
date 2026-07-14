@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 
 import EmptyState from '@/components/ui/EmptyState';
+import { Link } from 'react-router-dom';
+import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 
 const BRANCH_COLORS = {
   Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
@@ -32,27 +34,31 @@ const BRANCH_ICONS = {
 
 const BRANCHES = ['Clave', 'Dominación', 'Precisión', 'Valor', 'Brujería'];
 
-export default function RuneLibrary({ selectedId, onSelectId, onClearSelected }) {
+export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialRunes, publicBasePath }) {
   const [search, setSearch] = useState('');
   const [branchFilter, setBranchFilter] = useState('all');
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialRunes, selectedSlug) : null);
 
   const { data: runes = [], isLoading } = useQuery({
     queryKey: ['runes'],
     queryFn: () => Rune.list('branch'),
+    initialData: initialRunes,
+    staleTime: initialRunes ? 5 * 60 * 1000 : undefined,
   });
 
   useEffect(() => {
-    if (!selectedId) {
+    if (!selectedId && !selectedSlug) {
       setSelected(null);
       return;
     }
 
-    const nextSelected = runes.find(rune => String(rune.id) === String(selectedId));
+    const nextSelected = selectedSlug
+      ? findEntityBySlug(runes, selectedSlug)
+      : runes.find(rune => String(rune.id) === String(selectedId));
     if (nextSelected) {
       setSelected(nextSelected);
     }
-  }, [runes, selectedId]);
+  }, [runes, selectedId, selectedSlug]);
 
   const BRANCH_ORDER = BRANCHES.reduce((acc, branch, index) => {
     acc[branch] = index;
@@ -147,7 +153,13 @@ export default function RuneLibrary({ selectedId, onSelectId, onClearSelected })
 
     return (
       <div className="space-y-6">
-        <button
+        {publicBasePath ? <Link
+          to={publicBasePath}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={15} />
+          Volver a runas
+        </Link> : <button
           onClick={() => {
             setSelected(null);
             onClearSelected?.();
@@ -156,7 +168,7 @@ export default function RuneLibrary({ selectedId, onSelectId, onClearSelected })
         >
           <ArrowLeft size={15} />
           Volver a runas
-        </button>
+        </button>}
 
         <div className="rd-card overflow-hidden relative">
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.18),transparent_35%)]" />
@@ -317,14 +329,15 @@ export default function RuneLibrary({ selectedId, onSelectId, onClearSelected })
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
                       {branchRunes.map(rune => {
                         const RuneBranchIcon = BRANCH_ICONS[rune.branch] || BranchIcon;
+                        const Card = publicBasePath ? Link : 'button';
 
                         return (
-                          <button
+                          <Card
                             key={`${branch}-${rune.id}`}
-                            onClick={() => {
+                            {...(publicBasePath ? { to: `${publicBasePath}/${entitySlug(rune.name)}` } : { onClick: () => {
                               setSelected(rune);
                               onSelectId?.(rune.id);
-                            }}
+                            }})}
                             className="group relative overflow-hidden rd-card p-2.5 text-left hover:border-primary/30 hover:bg-primary/[0.02] transition-all duration-200"
                           >
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.10),transparent_42%)]" />
@@ -389,7 +402,7 @@ export default function RuneLibrary({ selectedId, onSelectId, onClearSelected })
                                 )}
                               </div>
                             </div>
-                          </button>
+                          </Card>
                         );
                       })}
                     </div>
