@@ -49,9 +49,12 @@ export const AuthProvider = ({ children }) => {
     return createdProfile;
   };
 
-  const checkUserAuth = useCallback(async () => {
+  const checkUserAuth = useCallback(async ({ showLoading = false } = {}) => {
     try {
-      setIsLoadingAuth(true);
+      // Token refreshes happen periodically and when a suspended tab becomes
+      // active again. They must not replace the whole app with the auth loader,
+      // because doing so unmounts any form the user is currently completing.
+      if (showLoading) setIsLoadingAuth(true);
       setAuthError(null);
 
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -104,7 +107,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
       setAppPublicSettings({ id: 'supabase', public_settings: {} });
-      await checkUserAuth();
+      await checkUserAuth({ showLoading: true });
     } catch (error) {
       console.error('App state check failed:', error);
       setAuthError({
@@ -127,7 +130,19 @@ export const AuthProvider = ({ children }) => {
         window.location.replace('/reset-password');
         return;
       }
-      checkUserAuth();
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        setIsLoadingAuth(false);
+        return;
+      }
+
+      // INITIAL_SESSION, TOKEN_REFRESHED and SIGNED_IN can update the user in
+      // the background. Keeping isLoadingAuth false preserves the mounted page
+      // and all unsaved form state when the tab regains focus.
+      checkUserAuth({ showLoading: false });
     });
 
     return () => {
