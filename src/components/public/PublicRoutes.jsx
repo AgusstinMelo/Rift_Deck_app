@@ -8,7 +8,7 @@ export default function PublicRoutes({ publicData }) {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/campeones" element={<PublicChampions initialChampions={champions} />} />
+      <Route path="/campeones" element={<PublicChampions initialChampions={champions} initialExecutions={publicData?.executions} initialTierlist={publicData?.tierlist} />} />
       <Route path="/campeones/:slug" element={<PublicChampionDetail initialChampions={champions} initialExecutions={publicData?.executions} initialTierlist={publicData?.tierlist} />} />
     </Routes>
   );

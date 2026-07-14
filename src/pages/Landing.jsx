@@ -189,16 +189,19 @@ export default function Landing() {
             Builds, estadísticas y meta de Wild Rift
           </h1>
           <p className="mt-1 max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
-            Registrá tus partidas, analizá tu rendimiento y consultá campeones, tier lists, objetos y runas en un solo lugar.
+            Registra tus partidas, analiza tu rendimiento, consulta campeones, tierlists, objetos y runas en un solo lugar.
           </p>
-          <Link to="/campeones" className="mt-3 text-xs font-semibold text-primary hover:text-primary/80">
-            Explorar campeones de Wild Rift
-          </Link>
           <div className="flex items-center gap-2 opacity-60 mt-1">
             <span className="h-px w-6 bg-primary/50" />
             <span className="text-[9px] uppercase tracking-[0.32em] text-primary">Juega con Información</span>
             <span className="h-px w-6 bg-primary/50" />
           </div>
+          <Link
+            to="/campeones"
+            className="mt-4 inline-flex items-center justify-center rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:border-primary/70 hover:bg-primary/20"
+          >
+            Ver campeones de Wild Rift
+          </Link>
         </div>
 
         <div className="rd-card p-8">
