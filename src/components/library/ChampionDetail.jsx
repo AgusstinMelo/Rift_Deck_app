@@ -403,17 +403,19 @@ export default function ChampionDetail({
   const avgAssists =
     champMatches.length > 0 ? (totalAssists / champMatches.length).toFixed(1) : null;
 
-  const personalKdaValue =
-    totalDeaths > 0
-      ? ((totalKills + totalAssists) / totalDeaths).toFixed(2)
-      : totalKills + totalAssists > 0
-        ? 'Perfecto'
-        : '0.00';
-
   const numericKda =
-    totalDeaths > 0
-      ? (totalKills + totalAssists) / totalDeaths
-      : totalKills + totalAssists;
+    champMatches.length > 0
+      ? champMatches.reduce((sum, match) => {
+          const kills = Number(match.kills || 0);
+          const deaths = Number(match.deaths || 0);
+          const assists = Number(match.assists || 0);
+          const matchKda = deaths === 0 ? kills + assists : (kills + assists) / deaths;
+
+          return sum + matchKda;
+        }, 0) / champMatches.length
+      : 0;
+
+  const personalKdaValue = numericKda.toFixed(2);
 
   const avgKdaLine =
     champMatches.length > 0
