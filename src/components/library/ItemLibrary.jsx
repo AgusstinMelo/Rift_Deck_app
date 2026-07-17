@@ -191,6 +191,17 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
       })
     : [];
 
+  const relatedItems = selected && publicBasePath
+    ? items
+        .filter(item => item.id !== selected.id)
+        .filter(item => {
+          const selectedTypes = getItemTypes(selected.type).map(normalizeKey);
+          return getItemTypes(item.type).some(type => selectedTypes.includes(normalizeKey(type)));
+        })
+        .sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), 'es', { sensitivity: 'base' }))
+        .slice(0, 6)
+    : [];
+
   if (selected) {
     return (
       <div className="space-y-6">
@@ -326,6 +337,36 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
             )}
           </div>
         </div>
+
+        {relatedItems.length > 0 && (
+          <section className="rd-card p-5">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="w-6 h-px bg-primary/50" />
+              <h2 className="rd-card-title">Objetos del mismo tipo</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Otros objetos que comparten la clasificación registrada de {selected.name}.
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              {relatedItems.map(item => (
+                <Link
+                  key={item.id}
+                  to={`${publicBasePath}/${entitySlug(item.name)}`}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                >
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={`${item.name} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                      <Sword size={18} className="text-primary" />
+                    </div>
+                  )}
+                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{item.name}</h3>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     );
   }

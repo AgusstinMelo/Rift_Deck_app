@@ -148,6 +148,17 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     return acc;
   }, {});
 
+  const relatedRunes = selected && publicBasePath
+    ? runes
+        .filter(rune => rune.id !== selected.id)
+        .filter(rune => {
+          const selectedBranches = getRuneBranches(selected.branch);
+          return getRuneBranches(rune.branch).some(branch => selectedBranches.includes(branch));
+        })
+        .sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), 'es', { sensitivity: 'base' }))
+        .slice(0, 6)
+    : [];
+
   if (selected) {
     const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
 
@@ -230,6 +241,39 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
             </div>
           </div>
         </div>
+
+        {relatedRunes.length > 0 && (
+          <section className="rd-card p-5">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="w-6 h-px bg-primary/50" />
+              <h2 className="rd-card-title">Runas de la misma rama</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Otras runas que comparten la rama registrada de {selected.name}.
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              {relatedRunes.map(rune => {
+                const RelatedIcon = BRANCH_ICONS[rune.branch] || Gem;
+                return (
+                  <Link
+                    key={rune.id}
+                    to={`${publicBasePath}/${entitySlug(rune.name)}`}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    {rune.image_url ? (
+                      <img src={rune.image_url} alt={`${rune.name} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary">
+                        <RelatedIcon size={18} className="text-primary" />
+                      </div>
+                    )}
+                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{rune.name}</h3>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     );
   }
