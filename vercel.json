@@ -1,4 +1,5 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "headers": [
     {
@@ -49,47 +50,47 @@
   "rewrites": [
     {
       "source": "/login",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/reset-password",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/library",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/tierlist",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/build-calculator",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/matches",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/stats",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/suggester",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/admin/:path*",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/membresia/resultado",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/profile",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }
