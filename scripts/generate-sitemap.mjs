@@ -54,6 +54,7 @@ const fetchPublicRows = async (table, columns, filters = '') => {
 };
 const itemColumns = [
   'id', 'name', 'image_url', 'price', 'description', 'category', 'type', 'tags', 'active',
+  'good_against', 'avoid_against',
   'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power',
   'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact',
   'critical_damage', 'physic_vamp', 'magic_vamp', 'flat_armor_penetration',

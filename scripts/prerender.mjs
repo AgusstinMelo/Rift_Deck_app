@@ -55,7 +55,7 @@ for (const pathname of paths) {
             : rune ? getRuneSeo(rune, entitySlug(rune.name))
               : getChampionSeo(champion, championSlug(champion.name), getChampionLaneLabels(champion), displayList, DAMAGE_LABELS);
   const routeData = pathname === '/' ? undefined
-    : pathname.startsWith('/objetos') ? { items }
+    : pathname.startsWith('/objetos') ? { items, champions }
       : pathname.startsWith('/runas') ? { runes }
         : { champions, executions, tierlist };
   const markup = renderPublicRoute(pathname, routeData);

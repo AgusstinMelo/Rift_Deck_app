@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { WRItem } from '@/api/entitiesSupabase';
-import { Search, ArrowLeft, Coins, Sword } from 'lucide-react';
+import { Champion, WRItem } from '@/api/entitiesSupabase';
+import { Search, ArrowLeft, Coins, Sword, CheckCircle2, Ban } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
@@ -19,7 +19,7 @@ const CATEGORY_COLORS = {
   'Mejorado': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
 };
 
-export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialItems, publicBasePath }) {
+export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialItems, initialChampions, publicBasePath }) {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
@@ -29,6 +29,13 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
     queryFn: () => WRItem.list('type'),
     initialData: initialItems,
     staleTime: initialItems ? 5 * 60 * 1000 : undefined,
+  });
+
+  const { data: champions = [] } = useQuery({
+    queryKey: ['champions'],
+    queryFn: () => Champion.list('name'),
+    initialData: initialChampions,
+    staleTime: initialChampions ? 5 * 60 * 1000 : undefined,
   });
 
   useEffect(() => {
@@ -72,6 +79,8 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
       .replace(/[\u0300-\u036f]/g, '')
       .trim();
   };
+
+  const normalizeChampionName = (value) => normalizeKey(value).replace(/[^a-z0-9]/g, '');
 
   const getTypeOrder = (type) => {
     return TYPE_ORDER[normalizeKey(type)] ?? 999;
@@ -202,6 +211,15 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
         .slice(0, 6)
     : [];
 
+  const championsByName = new Map(
+    champions.map(champion => [normalizeChampionName(champion.name), champion])
+  );
+  const resolveChampionList = values => (Array.isArray(values) ? values : [])
+    .map(name => championsByName.get(normalizeChampionName(name)))
+    .filter(Boolean);
+  const recommendedAgainst = selected ? resolveChampionList(selected.good_against) : [];
+  const avoidAgainst = selected ? resolveChampionList(selected.avoid_against) : [];
+
   if (selected) {
     return (
       <div className="space-y-6">
@@ -226,6 +244,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           Volver a objetos
         </button>}
 
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="rd-card overflow-hidden relative">
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.18),transparent_35%)]" />
 
@@ -336,6 +355,43 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               </div>
             )}
           </div>
+        </div>
+
+        <aside className="rd-card h-fit p-5">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="w-6 h-px bg-primary/50" />
+            <h2 className="rd-card-title">Enfrentamientos</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="rd-mini-action">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-green-400">
+                <CheckCircle2 size={15} /> Recomendado vs
+              </h3>
+              <div className="space-y-2">
+                {recommendedAgainst.length > 0 ? recommendedAgainst.map(champion => (
+                  <div key={champion.id} className="flex items-center gap-2">
+                    {champion.image_url && <img src={champion.image_url} alt={champion.name} width="32" height="32" className="h-8 w-8 shrink-0 rounded-lg object-cover border border-green-500/20" />}
+                    <span className="truncate text-xs font-medium text-green-300">{champion.name}</span>
+                  </div>
+                )) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
+              </div>
+            </div>
+
+            <div className="rd-mini-action">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
+                <Ban size={15} /> Evitar vs
+              </h3>
+              <div className="space-y-2">
+                {avoidAgainst.length > 0 ? avoidAgainst.map(champion => (
+                  <div key={champion.id} className="flex items-center gap-2">
+                    {champion.image_url && <img src={champion.image_url} alt={champion.name} width="32" height="32" className="h-8 w-8 shrink-0 rounded-lg object-cover border border-red-500/20" />}
+                    <span className="truncate text-xs font-medium text-red-300">{champion.name}</span>
+                  </div>
+                )) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
+              </div>
+            </div>
+          </div>
+        </aside>
         </div>
 
         {relatedItems.length > 0 && (

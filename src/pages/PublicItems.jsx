@@ -8,7 +8,7 @@ import Seo from '@/components/Seo';
 import { findEntityBySlug } from '@/utils/entitySlug';
 import { ITEMS_SEO, getItemSeo } from '@/seo/publicSeo';
 
-export default function PublicItems({ initialItems }) {
+export default function PublicItems({ initialItems, initialChampions }) {
   const { slug } = useParams();
   const { data: items, isLoading, isError } = useQuery({
     queryKey: ['writems'], queryFn: () => WRItem.list('type'), initialData: initialItems,
@@ -25,7 +25,7 @@ export default function PublicItems({ initialItems }) {
       <PublicHeader />
       <main className="mx-auto w-full max-w-[1800px] px-5 py-8 md:py-12">
         {!slug && <><h1 className="font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] md:text-5xl">Objetos de Wild Rift</h1><p className="mb-6 mt-1 text-sm text-muted-foreground">Estadísticas, efectos y precios de los objetos disponibles.</p></>}
-        <ItemLibrary initialItems={items} selectedSlug={slug} publicBasePath="/objetos" />
+        <ItemLibrary initialItems={items} initialChampions={initialChampions} selectedSlug={slug} publicBasePath="/objetos" />
       </main>
     </div>
   );
