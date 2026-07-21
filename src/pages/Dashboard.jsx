@@ -454,7 +454,7 @@ export default function Dashboard() {
                     {topInsight.thesis}
                   </p>
                   <p className="text-xs text-primary/90 mt-2">
-                    Cómo validarlo: {topInsight.action}
+                    Consejo: {topInsight.action}
                   </p>
                 </div>
               ) : (

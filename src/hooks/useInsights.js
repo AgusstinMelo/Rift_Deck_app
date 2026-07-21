@@ -198,6 +198,14 @@ function relationNames(entity, fields) {
   return unique(fields.flatMap(field => listOf(entity?.[field])));
 }
 
+function championRelations(champion) {
+  return {
+    strong: relationNames(champion, ['strong_against', 'strongAgainst', 'good_against', 'goodAgainst', 'counters']),
+    weak: relationNames(champion, ['weak_against', 'weakAgainst', 'avoid_against', 'avoidAgainst', 'countered_by']),
+    synergies: relationNames(champion, ['synergies', 'synergy', 'good_with', 'goodWith', 'best_allies']),
+  };
+}
+
 function makeCard({ id, domain, tone = 'neutral', title, thesis, action, evidence = [], sample = 0,
   effect = 0, corroboration = 0, score = 50, entities = [], sources = [] }) {
   const certainty = confidence(sample, effect, corroboration);
@@ -368,6 +376,17 @@ function detectPoolShape(ctx) {
   if (topShare < scatteredThreshold && laneCount <= 2) return [];
   const scattered = topShare < scatteredThreshold;
   const coreNames = champs.slice(0, 3).map(champ => champ.name);
+  const coreRelations = coreNames.map(name => ({
+    name,
+    ...championRelations(championCatalog.get(keyOf(name))),
+  }));
+  const sharedWeaknesses = unique(coreRelations.flatMap(entry => entry.weak))
+    .filter(enemy => coreRelations.filter(entry => entry.weak.some(name => keyOf(name) === keyOf(enemy))).length >= 2);
+  const uncoveredEnemy = sharedWeaknesses[0];
+  const coverPick = champs.slice(3).find(champ => {
+    const relations = championRelations(championCatalog.get(keyOf(champ.name)));
+    return uncoveredEnemy && relations.strong.some(name => keyOf(name) === keyOf(uncoveredEnemy));
+  });
   return [makeCard({
     id: 'pool-shape', domain: 'pool', tone: scattered ? 'warning' : 'neutral',
     title: scattered
@@ -375,13 +394,17 @@ function detectPoolShape(ctx) {
       : `Tu pool está concentrado en ${coreNames.length} ${coreNames.length === 1 ? 'campeón' : 'campeones'}`,
     thesis: scattered
       ? `Usaste ${champs.length} campeones en ${games(matches.length)}, y tus 3 picks más frecuentes sólo reúnen el ${percent(topShare * 100)} de la muestra. Esa dispersión reduce la cantidad de repeticiones comparables para cada campeón y hace más difícil separar aprendizaje de variación.`
-      : `${coreNames.join(', ')} ${coreNames.length === 1 ? 'concentra' : 'concentran'} el ${percent(topShare * 100)} de tus ${games(matches.length)}.${damageTypes.length === 1 ? ` Además, ${coreNames.length === 1 ? 'usa' : 'comparten'} daño ${damageTypes[0]}, por lo que el núcleo puede ofrecer respuestas similares frente al draft rival.` : ' La concentración favorece la práctica, pero también vuelve importante que el resto del pool cubra situaciones diferentes.'}`,
+      : `${coreNames.join(', ')} ${coreNames.length === 1 ? 'concentra' : 'concentran'} el ${percent(topShare * 100)} de tus ${games(matches.length)}.${damageTypes.length === 1 ? ` Además, ${coreNames.length === 1 ? 'usa' : 'comparten'} daño ${damageTypes[0]}, por lo que el núcleo ofrece respuestas parecidas frente al draft rival.` : ' La concentración favorece la práctica.'}${uncoveredEnemy ? ` ${uncoveredEnemy} figura como debilidad de al menos dos picks del núcleo${coverPick ? `, mientras que ${coverPick.name} aparece como una respuesta favorable` : ''}.` : ''}`,
     action: scattered
       ? 'Limitá las próximas 10 partidas a 3 campeones: uno principal, uno para cubrir su peor matchup y uno que aporte un tipo de daño o función diferente.'
-      : `Antes de sumar otro pick similar, elegí un campeón que aporte otro tipo de daño o que responda al peor matchup de ${champs[0]?.name}.`,
+      : coverPick
+        ? `Usá a ${coverPick.name} como pick de cobertura cuando aparezca ${uncoveredEnemy}; mantené ${champs[0]?.name} como prioridad en los drafts que no expongan esa debilidad.`
+        : uncoveredEnemy
+          ? `Tu siguiente pick debe tener un cruce favorable contra ${uncoveredEnemy} y, si ${damageTypes.length === 1}, aportar un tipo de daño distinto al núcleo.`
+          : `Mantené este núcleo para ganar consistencia y sumá sólo un pick que cubra el peor matchup de ${champs[0]?.name} o aporte un tipo de daño diferente.`,
     sample: matches.length, effect: (topShare - 0.6) * 100,
     evidence: [`Top 3: ${percent(topShare * 100)}`, `Umbral: ${percent(scatteredThreshold * 100)}`, `${champs.length} picks usados`],
-    score: 67, sources: ['partidas', championCatalog.size ? 'campeones' : null],
+    score: uncoveredEnemy ? 81 : 67, sources: ['partidas', championCatalog.size ? 'campeones' : null],
   })];
 }
 
@@ -416,18 +439,22 @@ function detectChoiceLeverage(ctx, type) {
   const corroboratedGood = goodAgainst.find(name => encountered.some(enemy => keyOf(enemy) === keyOf(name)));
   const corroboratedBad = avoidAgainst.find(name => encountered.some(enemy => keyOf(enemy) === keyOf(name)));
   const context = corroboratedGood
-    ? ` El catálogo también lo recomienda contra ${corroboratedGood}.`
-    : corroboratedBad ? ` El catálogo lo desaconseja contra ${corroboratedBad}; separá ese matchup antes de concluir.`
+    ? ` Además, el catálogo lo recomienda contra ${corroboratedGood}, rival presente en esas partidas.`
+    : corroboratedBad ? ` Sin embargo, el catálogo lo desaconseja contra ${corroboratedBad}, rival presente en esas partidas: no lo conviertas en una compra automática en ese cruce.`
       : recommended ? ` También figura entre los objetos recomendados de ${best.left}.` : '';
 
   return [makeCard({
     id: `${type}-${keyOf(best.left)}-${keyOf(best.right)}`, domain: config.domain,
     tone: positive ? 'opportunity' : 'critical',
-    title: `${best.right} está asociado a un cambio importante con ${best.left}`,
-    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección. La comparación muestra una asociación, pero no demuestra que ${best.right} sea la causa: los matchups y el resto de la build también pueden ser distintos.${context}`,
+    title: positive ? `Priorizá ${best.right} con ${best.left} en el contexto correcto` : `Dejá de comprar ${best.right} por defecto con ${best.left}`,
+    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección: una diferencia de ${percent(Math.abs(best.delta))}.${context}`,
     action: positive
-      ? `Repetí ${best.right} en 5 partidas con matchups similares y registrá el motivo de la elección; así vas a comprobar si la ventaja se mantiene bajo un contexto comparable.`
-      : `Quitá ${best.right} de tu opción predeterminada durante 5 partidas y volvé a usarlo únicamente cuando puedas identificar qué problema específico del draft resuelve.`,
+      ? corroboratedGood
+        ? `Incluí ${best.right} en tu variante contra ${corroboratedGood}; fuera de ese matchup, elegilo sólo cuando resuelva el mismo tipo de amenaza.`
+        : `Conservalo como opción prioritaria con ${best.left}, pero asignale una condición de compra concreta del draft en lugar de usarlo siempre.`
+      : corroboratedBad
+        ? `Evitá ${best.right} contra ${corroboratedBad}. Prepará una variante que responda específicamente a ese campeón y reservá este objeto para drafts donde sí cumpla una función clara.`
+        : `Sacalo de la build predeterminada y usalo únicamente cuando puedas nombrar el problema del draft que resuelve.`,
     sample: best.games + best.baseline.games, effect: best.delta,
     corroboration: corroboratedGood || corroboratedBad || recommended ? 1 : 0,
     evidence: [`Con: ${percent(best.wr)} (${best.games})`, `Sin: ${percent(best.baseline.wr)} (${best.baseline.games})`, corroboratedGood ? `Buena vs ${corroboratedGood}` : recommended && 'Recomendado para el campeón'],
@@ -447,16 +474,18 @@ function detectAllySynergy(ctx) {
     .sort((a, b) => Math.abs(b.delta) * b.games - Math.abs(a.delta) * a.games);
   const pair = pairs[0];
   if (!pair) return [];
+  const relations = championRelations(ctx.championCatalog.get(keyOf(pair.left)));
+  const catalogSynergy = relations.synergies.some(name => keyOf(name) === keyOf(pair.right));
   return [makeCard({
     id: `synergy-${pair.id}`, domain: 'draft', tone: pair.delta > 0 ? 'opportunity' : 'warning',
-    title: `${pair.right} cambia tus resultados cuando jugás ${pair.left}`,
-    thesis: `Cuando ${pair.right} aparece como aliado, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}. Tu promedio general con ${pair.left} es ${percent(pair.baseline.wr)}. La diferencia puede estar en la interacción entre ambos campeones o en el tipo de composición en la que suelen aparecer, por lo que todavía necesita una validación más específica.`,
+    title: pair.delta > 0 ? `Buscá la dupla ${pair.left} + ${pair.right} en el draft` : `Evitá armar ${pair.left} + ${pair.right} sin compensar la composición`,
+    thesis: `Cuando ${pair.right} aparece como aliado, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${catalogSynergy ? ' El catálogo también identifica esta dupla como sinergia favorable.' : ''}`,
     action: pair.delta > 0
-      ? `Cuando vuelvas a jugar la dupla, registrá qué aporta ${pair.right} —iniciación, daño, control o protección— y cuál de esos recursos falta cuando jugás sin él.`
-      : 'Revisá las composiciones de esas partidas y determiná si a la dupla le falta iniciación, primera línea, protección o variedad de daño antes de evitarla por completo.',
-    sample: pair.games, effect: pair.delta,
-    evidence: [`Juntos: ${percent(pair.wr)} (${pair.games})`, `${pair.left}: ${percent(pair.baseline.wr)}`],
-    entities: [pair.left, pair.right], score: 74, sources: ['partidas', 'composiciones'],
+      ? `Priorizá ${pair.left} cuando tu equipo ya haya mostrado ${pair.right}; si no está disponible, buscá un aliado que aporte una función equivalente de iniciación, control, daño o protección.`
+      : `No completes esta dupla por inercia. Si ambos quedan seleccionados, usá los picks restantes para sumar primera línea, iniciación, protección o variedad de daño, según lo que falte.`,
+    sample: pair.games, effect: pair.delta, corroboration: catalogSynergy ? 1 : 0,
+    evidence: [`Juntos: ${percent(pair.wr)} (${pair.games})`, `${pair.left}: ${percent(pair.baseline.wr)}`, catalogSynergy && 'Catálogo: sinergia'],
+    entities: [pair.left, pair.right], score: catalogSynergy ? 86 : 74, sources: ['partidas', 'composiciones', catalogSynergy ? 'campeones' : null],
   })];
 }
 
@@ -528,19 +557,18 @@ function detectMatchup(ctx) {
   const pair = pairs[0];
   if (!pair) return [];
   const champion = ctx.championCatalog.get(keyOf(pair.left));
-  const good = relationNames(champion, ['good_against', 'goodAgainst', 'strong_against', 'counters']);
-  const avoid = relationNames(champion, ['avoid_against', 'avoidAgainst', 'weak_against', 'countered_by']);
+  const { strong: good, weak: avoid } = championRelations(champion);
   const catalogGood = good.some(name => keyOf(name) === keyOf(pair.right));
   const catalogBad = avoid.some(name => keyOf(name) === keyOf(pair.right));
   const conflict = (pair.delta > 0 && catalogBad) || (pair.delta < 0 && catalogGood);
   const corroborates = (pair.delta > 0 && catalogGood) || (pair.delta < 0 && catalogBad);
   return [makeCard({
     id: `matchup-${pair.id}`, domain: 'draft', tone: pair.delta > 0 ? 'positive' : 'critical',
-    title: `${pair.right} modifica el rendimiento de tus partidas con ${pair.left}`,
-    thesis: `Cuando ${pair.right} aparece en el equipo enemigo, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}; tu promedio general con ${pair.left} es ${percent(pair.baseline.wr)}. Este cálculo incluye tanto al rival directo como al resto de la composición enemiga, por lo que no debe leerse automáticamente como un counter de línea.${conflict ? ' Además, el resultado contradice la referencia del catálogo y requiere más partidas antes de sacar una conclusión.' : corroborates ? ' El catálogo y tus resultados personales señalan la misma dirección, lo que refuerza la señal sin convertirla en una certeza.' : ''}`,
+    title: pair.delta > 0 ? `Considerá ${pair.left} como respuesta frente a ${pair.right}` : `Protegé tu draft cuando juegues ${pair.left} contra ${pair.right}`,
+    thesis: `Cuando ${pair.right} aparece en el equipo enemigo, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${corroborates ? ' El catálogo coincide con tu rendimiento personal.' : conflict ? ' El catálogo marca el cruce en sentido contrario, así que el resultado puede depender de la composición completa más que del duelo directo.' : ''}`,
     action: pair.delta > 0
-      ? `En las próximas partidas, separá cuándo ${pair.right} es tu rival directo y cuándo sólo forma parte del equipo enemigo; compará ambos grupos antes de usarlo como respuesta de draft.`
-      : `En tus próximas partidas contra ${pair.right}, compará la runa principal, el primer objeto y las muertes antes del minuto 10 para identificar dónde comienza la desventaja.`,
+      ? `Subí la prioridad de ${pair.left} cuando el rival muestre ${pair.right}${catalogGood ? '; el historial y la referencia del campeón respaldan esa respuesta' : ', especialmente si el resto del draft mantiene una composición equilibrada'}.`
+      : `Si el rival muestra ${pair.right}, elegí otro campeón de tu pool que figure fuerte contra él. Si ya fijaste ${pair.left}, adaptá la runa y el primer objeto para sobrevivir al cruce y evitá peleas tempranas sin ventaja.`,
     sample: pair.games, effect: pair.delta, corroboration: corroborates ? 1 : 0,
     evidence: [`Cruce: ${percent(pair.wr)} (${pair.games})`, `Promedio de ${pair.left}: ${percent(pair.baseline.wr)}`, corroborates && 'Catálogo: coincide'],
     entities: [pair.left, pair.right], score: 83, sources: ['partidas', champion ? 'campeones' : null],

@@ -1125,7 +1125,7 @@ export default function Stats() {
               </div>
             </div>
             <p className="text-[11px] text-muted-foreground max-w-sm md:text-right">
-              La confianza mide evidencia, no certeza. Cada tarjeta propone algo que podés validar.
+              La confianza refleja cuánto respaldo tiene cada consejo en tu historial y en los datos del juego.
             </p>
           </div>
 
@@ -1162,7 +1162,7 @@ export default function Stats() {
 
                 <div className="flex items-start gap-2 pt-4 border-t border-border/50 xl:h-[88px] xl:shrink-0">
                   <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">Cómo validarlo:</span> {insight.action}</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">Consejo:</span> {insight.action}</p>
                 </div>
               </article>
             ))}
