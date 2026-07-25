@@ -139,7 +139,35 @@ export async function runTierlistUpdate(config) {
     body: { config },
   });
 
-  if (error) throw error;
+  if (error) {
+    const patch = config?.active_patch?.trim() || "unknown";
+    const snapshotDate = config?.active_snapshot_date?.trim();
+
+    // The Edge gateway can close a long-running request even though the
+    // function finishes and persists the tierlist successfully. Reconcile the
+    // result with the execution record before reporting a false failure.
+    if (snapshotDate) {
+      const snapshotKey = `${patch.toLocaleLowerCase().trim()}::${snapshotDate}`;
+      const { data: execution } = await supabase
+        .from("tierlist_executions")
+        .select("status, champions_processed, patch, snapshot_date, snapshot_key, logs, error_message")
+        .eq("snapshot_key", snapshotKey)
+        .order("executed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (execution?.status === "success") {
+        return execution;
+      }
+
+      if (execution?.status === "failed") {
+        throw new Error(execution.error_message || error.message);
+      }
+    }
+
+    throw error;
+  }
+
   return data;
 }
 
