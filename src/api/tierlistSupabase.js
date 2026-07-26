@@ -135,6 +135,7 @@ export async function saveTierlistConfig(payload) {
 }
 
 export async function runTierlistUpdate(config) {
+  const startedAt = new Date().toISOString();
   const { data, error } = await supabase.functions.invoke("update-tierlist", {
     body: { config },
   });
@@ -144,24 +145,54 @@ export async function runTierlistUpdate(config) {
     const snapshotDate = config?.active_snapshot_date?.trim();
 
     // The Edge gateway can close a long-running request even though the
-    // function finishes and persists the tierlist successfully. Reconcile the
-    // result with the execution record before reporting a false failure.
+    // function finishes and persists the tierlist successfully. Give the final
+    // database writes a few seconds to become visible before reporting a false
+    // failure.
     if (snapshotDate) {
       const snapshotKey = `${patch.toLocaleLowerCase().trim()}::${snapshotDate}`;
-      const { data: execution } = await supabase
-        .from("tierlist_executions")
-        .select("status, champions_processed, patch, snapshot_date, snapshot_key, logs, error_message")
-        .eq("snapshot_key", snapshotKey)
-        .order("executed_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const maxAttempts = 10;
 
-      if (execution?.status === "success") {
-        return execution;
-      }
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const [{ data: execution }, { data: refreshedEntries }] = await Promise.all([
+          supabase
+            .from("tierlist_executions")
+            .select("status, champions_processed, patch, snapshot_date, snapshot_key, executed_at, logs, error_message")
+            .eq("snapshot_key", snapshotKey)
+            .gte("executed_at", startedAt)
+            .order("executed_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from("tierlist_entries")
+            .select("patch, snapshot_date, snapshot_key, updated_at")
+            .eq("snapshot_key", snapshotKey)
+            .gte("updated_at", startedAt)
+            .limit(1),
+        ]);
 
-      if (execution?.status === "failed") {
-        throw new Error(execution.error_message || error.message);
+        if (execution?.status === "success") {
+          return execution;
+        }
+
+        // This also covers installations where RLS allows reading the public
+        // tierlist but not the administrative execution history.
+        if (refreshedEntries?.length) {
+          return {
+            status: "success",
+            patch,
+            snapshot_date: snapshotDate,
+            snapshot_key: snapshotKey,
+            message: "La actualización terminó correctamente aunque se perdió la respuesta de la Edge Function.",
+          };
+        }
+
+        if (execution?.status === "failed") {
+          throw new Error(execution.error_message || error.message);
+        }
+
+        if (attempt < maxAttempts - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
     }
 
