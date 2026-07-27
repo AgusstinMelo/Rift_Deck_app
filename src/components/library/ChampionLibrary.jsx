@@ -175,7 +175,7 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
         <EmptyState icon={Search} title="Sin resultados" description="Probá con otros filtros o buscá otro campeón." />
       ) : (
         <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-12 xl:grid-cols-14 gap-1.5">
-          {filtered.map(champ => {
+          {filtered.map((champ, index) => {
             const tier = getBestTierForChampion(champ, currentTierlist);
             return (
               <button
@@ -187,7 +187,15 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
                 className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/40 hover:bg-primary/5 transition-all group aspect-square relative"
               >
                 {champ.image_url
-                  ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                  ? <img
+                      src={champ.image_url}
+                      alt={champ.name}
+                      width="160"
+                      height="160"
+                      loading={index < 14 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
                   : <div className="w-full h-full flex items-center justify-center text-lg font-bold text-primary bg-secondary">{champ.name[0]}</div>}
                 {tier && (
                   <div className="absolute top-0.5 right-0.5">

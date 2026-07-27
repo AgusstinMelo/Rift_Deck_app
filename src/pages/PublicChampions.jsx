@@ -108,7 +108,15 @@ export default function PublicChampions({ initialChampions, initialExecutions, i
                 <article key={champion.id} className="aspect-square overflow-hidden rounded-lg border border-border bg-card transition-all hover:border-primary/40 hover:bg-primary/5">
                   <Link to={`/campeones/${championSlug(champion.name)}`} aria-label={`Ver información de ${champion.name}`} title={champion.name} className="group relative block h-full">
                     {champion.image_url ? (
-                      <img src={champion.image_url} alt={`${champion.name} en Wild Rift`} width="160" height="160" loading={index < 14 ? 'eager' : 'lazy'} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                      <img
+                        src={champion.image_url}
+                        alt={`${champion.name} en Wild Rift`}
+                        width="160"
+                        height="160"
+                        loading={index < 14 ? 'eager' : 'lazy'}
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-secondary text-lg font-bold text-primary">{champion.name?.[0]}</div>
                     )}

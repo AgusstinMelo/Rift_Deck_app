@@ -573,6 +573,10 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         <img
                           src={item.image_url}
                           alt={item.name}
+                          width="160"
+                          height="160"
+                          loading="lazy"
+                          decoding="async"
                           className="
                             w-full h-full object-cover
                             transition-transform duration-200
