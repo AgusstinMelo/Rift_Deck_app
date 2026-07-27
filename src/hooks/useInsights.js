@@ -198,6 +198,39 @@ function relationNames(entity, fields) {
   return unique(fields.flatMap(field => listOf(entity?.[field])));
 }
 
+const itemStatGuidance = [
+  { key: 'armor', label: 'armadura', useful: 'daño físico sostenido', weak: 'una composición mayormente mágica' },
+  { key: 'magic_res', label: 'resistencia mágica', useful: 'daño mágico relevante', weak: 'una composición mayormente física' },
+  { key: 'tenacity', label: 'tenacidad', useful: 'mucho control de masas reducible', weak: 'poco control o levantamientos que la tenacidad no reduce' },
+  { key: 'life', label: 'vida', useful: 'daño mixto o burst', weak: 'daño porcentual de vida y peleas donde necesitás una resistencia específica' },
+  { key: 'attack_damage', label: 'daño de ataque', useful: 'potenciar tu daño físico', weak: 'una partida donde necesitás supervivencia o utilidad defensiva' },
+  { key: 'ability_power', label: 'poder de habilidad', useful: 'potenciar escalados mágicos', weak: 'una partida donde necesitás supervivencia o utilidad defensiva' },
+  { key: 'attack_speed', label: 'velocidad de ataque', useful: 'peleas largas en las que podés atacar con continuidad', weak: 'composiciones que no te permiten pegar de forma sostenida' },
+  { key: 'critical_impact', label: 'probabilidad de crítico', useful: 'una build que ya escala con críticos', weak: 'una build orientada a efectos al impacto o daño de habilidades' },
+  { key: 'percentage_armor_penetration', label: 'penetración de armadura', useful: 'rivales que acumulan armadura', weak: 'equipos frágiles con poca armadura adicional' },
+  { key: 'flat_armor_penetration', label: 'penetración de armadura', useful: 'objetivos frágiles con poca armadura', weak: 'varios rivales que acumulan mucha armadura' },
+  { key: 'percentage_magic_penetration', label: 'penetración mágica', useful: 'rivales que acumulan resistencia mágica', weak: 'equipos con poca resistencia mágica adicional' },
+  { key: 'flat_magic_penetration', label: 'penetración mágica', useful: 'objetivos frágiles con poca resistencia mágica', weak: 'varios rivales que acumulan mucha resistencia mágica' },
+  { key: 'ability_haste', label: 'aceleración de habilidad', useful: 'peleas donde podés lanzar varias rotaciones', weak: 'intercambios que se deciden antes de una segunda rotación' },
+  { key: 'physic_vamp', label: 'vampirismo físico', useful: 'peleas extendidas en las que podés hacer daño físico', weak: 'burst o control que no te dejan sostenerte pegando' },
+  { key: 'magic_vamp', label: 'vampirismo mágico', useful: 'peleas extendidas en las que podés hacer daño mágico', weak: 'burst o control que no te dejan sostenerte usando habilidades' },
+  { key: 'healing_and_shield', label: 'potencia de curaciones y escudos', useful: 'una build con curaciones o escudos frecuentes', weak: 'un kit que casi no aprovecha ese efecto' },
+];
+
+function describeItemStats(item) {
+  const stats = itemStatGuidance
+    .filter(stat => Number(item?.[stat.key]) > 0)
+    .sort((a, b) => Number(item?.[b.key]) - Number(item?.[a.key]));
+  if (!stats.length) return null;
+  const primary = stats[0];
+  const labels = stats.slice(0, 2).map(stat => stat.label);
+  return {
+    summary: labels.length === 2 ? `${labels[0]} y ${labels[1]}` : labels[0],
+    useful: primary.useful,
+    weak: primary.weak,
+  };
+}
+
 function championRelations(champion) {
   return {
     strong: relationNames(champion, ['strong_against', 'strongAgainst', 'good_against', 'goodAgainst', 'counters']),
@@ -438,17 +471,31 @@ function detectChoiceLeverage(ctx, type) {
   const encountered = unique(best.rows.flatMap(row => row.enemies));
   const corroboratedGood = goodAgainst.find(name => encountered.some(enemy => keyOf(enemy) === keyOf(name)));
   const corroboratedBad = avoidAgainst.find(name => encountered.some(enemy => keyOf(enemy) === keyOf(name)));
+  const statProfile = describeItemStats(itemData);
   const context = corroboratedGood
     ? ` Además, el catálogo lo recomienda contra ${corroboratedGood}, rival presente en esas partidas.`
     : corroboratedBad ? ` Sin embargo, el catálogo lo desaconseja contra ${corroboratedBad}, rival presente en esas partidas: no lo conviertas en una compra automática en ese cruce.`
       : recommended ? ` También figura entre los objetos recomendados de ${best.left}.` : '';
+  const itemContext = type === 'item' && statProfile
+    ? ` El objeto aporta principalmente ${statProfile.summary}: suele ser útil frente a ${statProfile.useful} y pierde valor frente a ${statProfile.weak}.`
+    : '';
+  const cautiousItemTitle = positive
+    ? `Revisá cuándo te conviene comprar ${best.right} con ${best.left}`
+    : `Revisá si ${best.right} encaja en tus builds de ${best.left}`;
+  const itemAction = corroboratedBad
+    ? `Revisá especialmente su compra contra ${corroboratedBad}. Compará qué aporta el resto de tu build, qué amenaza rival necesitás responder y si las estadísticas de ${best.right} resuelven realmente ese problema.`
+    : corroboratedGood
+      ? `Tomá el cruce contra ${corroboratedGood} como un contexto favorable, no como una regla. Antes de comprarlo, comprobá que combine con el resto de tu build y responda a la amenaza principal del equipo rival.`
+      : statProfile
+        ? `Antes de comprarlo, comprobá que ${statProfile.summary} combine con el resto de tu build. Es más justificable frente a ${statProfile.useful}; considerá otra opción frente a ${statProfile.weak}.`
+        : `No descartes el objeto sólo por esta muestra: revisá si combina con el resto de tu build, qué estadística te aporta y qué amenaza concreta del equipo rival necesitás responder.`;
 
   return [makeCard({
     id: `${type}-${keyOf(best.left)}-${keyOf(best.right)}`, domain: config.domain,
     tone: positive ? 'opportunity' : 'critical',
-    title: positive ? `Priorizá ${best.right} con ${best.left} en el contexto correcto` : `Dejá de comprar ${best.right} por defecto con ${best.left}`,
-    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección: una diferencia de ${percent(Math.abs(best.delta))}.${context}`,
-    action: positive
+    title: type === 'item' ? cautiousItemTitle : positive ? `Priorizá ${best.right} con ${best.left} en el contexto correcto` : `Dejá de comprar ${best.right} por defecto con ${best.left}`,
+    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección: una diferencia de ${percent(Math.abs(best.delta))}. Esta muestra señala una asociación, no demuestra que el objeto sea la causa del resultado.${context}${itemContext}`,
+    action: type === 'item' ? itemAction : positive
       ? corroboratedGood
         ? `Incluí ${best.right} en tu variante contra ${corroboratedGood}; fuera de ese matchup, elegilo sólo cuando resuelva el mismo tipo de amenaza.`
         : `Conservalo como opción prioritaria con ${best.left}, pero asignale una condición de compra concreta del draft en lugar de usarlo siempre.`
