@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Champion, WRItem } from '@/api/entitiesSupabase';
 import { getUserMatches, createMatch, deleteMatch, deleteMatches } from '@/api/matchesSupabase';
@@ -51,6 +51,7 @@ export default function Matches() {
   const [matchTypeFilter, setMatchTypeFilter] = useState('all');
   const qc = useQueryClient();
   const { user } = useAuth();
+  const createInFlightRef = useRef(false);
 
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
@@ -95,6 +96,17 @@ export default function Matches() {
     },
   });
 
+  const handleCreateMatch = (data) => {
+    if (createInFlightRef.current) return;
+
+    createInFlightRef.current = true;
+    createMatchMutation.mutate(data, {
+      onSettled: () => {
+        createInFlightRef.current = false;
+      },
+    });
+  };
+
   const deleteAllMutation = useMutation({
     mutationFn: () => deleteMatches(matches.map(m => m.id)),
     onSuccess: () => {
@@ -131,8 +143,9 @@ export default function Matches() {
         <MatchBuilder
           champions={champions}
           defaultPatch={latestTierlistPatch}
-          onSave={(data) => createMatchMutation.mutate(data)}
+          onSave={handleCreateMatch}
           onCancel={() => setShowForm(false)}
+          isSaving={createMatchMutation.isPending}
         />
       </div>
     );

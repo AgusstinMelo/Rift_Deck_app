@@ -119,7 +119,13 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
   );
 }
 
-export default function MatchBuilder({ champions, defaultPatch = '', onSave, onCancel }) {
+export default function MatchBuilder({ champions, defaultPatch = '', onSave, onCancel, isSaving = false }) {
+  const clientRequestIdRef = useRef(null);
+  if (!clientRequestIdRef.current) {
+    clientRequestIdRef.current = globalThis.crypto?.randomUUID?.()
+      || `match-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
   const [step, setStep] = useState('info'); // info, lane, myChamp, allies, enemies, build, stats
   const [lane, setLane] = useState('');
   const [myChampion, setMyChampion] = useState(null);
@@ -388,8 +394,11 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
   };
 
   const handleSave = () => {
+    if (isSaving) return;
+
     const directEnemy = enemyChampions.find(e => e.role === lane);
     onSave({
+      client_request_id: clientRequestIdRef.current,
       lane,
       own_champion_name: myChampion.name,
       own_champion_id: myChampion.id,
@@ -1045,9 +1054,10 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              disabled={isSaving}
+              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Guardar Partida
+              {isSaving ? 'Guardando...' : 'Guardar Partida'}
             </button>
           </div>
         </div>

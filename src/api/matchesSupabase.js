@@ -37,12 +37,18 @@ export async function createMatch(user, payload) {
     throw new Error("User id is required to create a match.");
   }
 
+  const { client_request_id, ...matchPayload } = payload;
+
   const { data, error } = await supabase
     .from("matches")
-    .insert({
-      ...payload,
+    .upsert({
+      ...matchPayload,
       user_id: user.id,
       created_by: user.email,
+      client_request_id,
+    }, {
+      onConflict: "user_id,client_request_id",
+      ignoreDuplicates: false,
     })
     .select()
     .single();
