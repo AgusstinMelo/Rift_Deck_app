@@ -37,7 +37,7 @@ export async function createMatch(user, payload) {
     throw new Error("User id is required to create a match.");
   }
 
-  const { client_request_id, ...matchPayload } = payload;
+  const { client_request_id: _clientRequestId, ...matchPayload } = payload;
 
   const { data, error } = await supabase
     .from("matches")
@@ -45,7 +45,6 @@ export async function createMatch(user, payload) {
       ...matchPayload,
       user_id: user.id,
       created_by: user.email,
-      client_request_id,
     })
     .select()
     .single();
