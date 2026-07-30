@@ -10,6 +10,7 @@ import MatchBuilder from '@/components/matches/MatchBuilder';
 import MatchCard from '@/components/matches/MatchCard';
 import { useAuth } from '@/lib/AuthContext';
 import { MATCH_TYPES } from '@/constants/matchTypes';
+import { toast } from '@/components/ui/use-toast';
 
 function MatchMetric({ label, value, sub, icon: Icon, tone = 'primary' }) {
   const toneClass = {
@@ -84,7 +85,19 @@ export default function Matches() {
     mutationFn: (data) => createMatch(user, data),
     onSuccess: () => {
       setShowForm(false);
-      qc.invalidateQueries(['matches']);
+      qc.invalidateQueries({ queryKey: ['matches', user?.email] });
+      toast({
+        title: 'Partida guardada',
+        description: 'La partida se agregó correctamente a tu historial.',
+      });
+    },
+    onError: (error) => {
+      console.error('No se pudo guardar la partida:', error);
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo guardar la partida',
+        description: error?.message || 'Ocurrió un error inesperado. Intentá nuevamente.',
+      });
     },
   });
 

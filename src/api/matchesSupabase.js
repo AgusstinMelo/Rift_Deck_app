@@ -41,14 +41,11 @@ export async function createMatch(user, payload) {
 
   const { data, error } = await supabase
     .from("matches")
-    .upsert({
+    .insert({
       ...matchPayload,
       user_id: user.id,
       created_by: user.email,
       client_request_id,
-    }, {
-      onConflict: "user_id,client_request_id",
-      ignoreDuplicates: false,
     })
     .select()
     .single();
