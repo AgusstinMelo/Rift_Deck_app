@@ -12,6 +12,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { MATCH_TYPES } from '@/constants/matchTypes';
 import { toast } from '@/components/ui/use-toast';
 
+const showTemporaryToast = (options) => {
+  const notification = toast(options);
+  globalThis.setTimeout(() => notification.dismiss(), 3000);
+};
+
 function MatchMetric({ label, value, sub, icon: Icon, tone = 'primary' }) {
   const toneClass = {
     primary: 'text-primary',
@@ -86,19 +91,17 @@ export default function Matches() {
     onSuccess: () => {
       setShowForm(false);
       qc.invalidateQueries({ queryKey: ['matches', user?.email] });
-      toast({
+      showTemporaryToast({
         title: 'Partida guardada',
         description: 'La partida se agregó correctamente a tu historial.',
-        duration: 3000,
       });
     },
     onError: (error) => {
       console.error('No se pudo guardar la partida:', error);
-      toast({
+      showTemporaryToast({
         variant: 'destructive',
         title: 'No se pudo guardar la partida',
         description: error?.message || 'Ocurrió un error inesperado. Intentá nuevamente.',
-        duration: 3000,
       });
     },
   });
