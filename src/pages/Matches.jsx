@@ -89,6 +89,7 @@ export default function Matches() {
       toast({
         title: 'Partida guardada',
         description: 'La partida se agregó correctamente a tu historial.',
+        duration: 3000,
       });
     },
     onError: (error) => {
@@ -97,6 +98,7 @@ export default function Matches() {
         variant: 'destructive',
         title: 'No se pudo guardar la partida',
         description: error?.message || 'Ocurrió un error inesperado. Intentá nuevamente.',
+        duration: 3000,
       });
     },
   });
