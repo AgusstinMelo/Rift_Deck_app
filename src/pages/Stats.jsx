@@ -311,8 +311,8 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
     'text-red-400';
 
   const getRingColor = (champ) => {
-    if (champ.games >= 4 && champ.wr >= 50) return 'ring-green-400';
-    if (champ.games >= 2 && champ.wr >= 45) return 'ring-yellow-400';
+    if (champ.games < 3) return 'ring-yellow-400';
+    if (champ.wr >= 50) return 'ring-green-400';
     return 'ring-red-400';
   };
 
