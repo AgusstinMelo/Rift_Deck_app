@@ -182,7 +182,8 @@ const DICT_CHAMP: Record<string, string> = {
   "梅尔": "Mel",
   "塔莉垭": "Taliyah",
   "斯卡纳": "Skarner",
-  "芸阿娜": "Yunara"
+  "芸阿娜": "Yunara",
+  "科加斯": "Cho'Gath"
 };
 
 const corsHeaders = {

@@ -7,12 +7,13 @@ import PublicHeader from '@/components/public/PublicHeader';
 import Seo from '@/components/Seo';
 import { findEntityBySlug } from '@/utils/entitySlug';
 import { ITEMS_SEO, getItemSeo } from '@/seo/publicSeo';
+import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 
 export default function PublicItems({ initialItems, initialChampions }) {
   const { slug } = useParams();
   const { data: items, isLoading, isError } = useQuery({
     queryKey: ['writems'], queryFn: () => WRItem.list('type'), initialData: initialItems,
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
   const item = slug ? findEntityBySlug(items, slug) : null;
   const notFound = Boolean(slug && !isLoading && (isError || !item));

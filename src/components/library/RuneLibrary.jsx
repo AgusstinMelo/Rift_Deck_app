@@ -15,6 +15,7 @@ import {
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
+import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 
 const BRANCH_COLORS = {
   Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
@@ -43,7 +44,9 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     queryKey: ['runes'],
     queryFn: () => Rune.list('branch'),
     initialData: initialRunes,
-    staleTime: initialRunes ? 5 * 60 * 1000 : undefined,
+    ...(publicBasePath ? publicCatalogQueryOptions : {
+      staleTime: initialRunes ? 5 * 60 * 1000 : undefined,
+    }),
   });
 
   useEffect(() => {

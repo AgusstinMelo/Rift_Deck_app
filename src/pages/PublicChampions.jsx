@@ -10,6 +10,7 @@ import TierBadge from '@/components/ui/TierBadge';
 import { championSlug } from '@/utils/championSlug';
 import { CHAMPIONS_SEO } from '@/seo/publicSeo';
 import { getBestTierForChampion, getCurrentTierlistEntries } from '@/utils/tierlist';
+import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 
 const LANE_FILTERS = {
   top: ['top', 'toplane'],
@@ -30,13 +31,13 @@ export default function PublicChampions({ initialChampions, initialExecutions, i
     queryKey: ['public-champions'],
     queryFn: () => Champion.list('name'),
     initialData: initialChampions,
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],
     queryFn: () => getTierlistExecutions(10),
     initialData: initialExecutions,
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
   const currentSnapshotKey = executions.find(execution =>
     execution.status === 'success' || execution.status === 'partial'
@@ -46,7 +47,7 @@ export default function PublicChampions({ initialChampions, initialExecutions, i
     queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
     initialData: initialTierlist,
     enabled: Boolean(currentSnapshotKey),
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
   const currentTierlist = getCurrentTierlistEntries(tierlist, executions);
   const filtered = champions.filter(champion => {

@@ -15,6 +15,7 @@ import {
 } from '@/utils/championPresentation';
 import { getChampionSeo } from '@/seo/publicSeo';
 import { getCurrentTierlistEntries, getTierEntriesForChampion } from '@/utils/tierlist';
+import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 
 export default function PublicChampionDetail({ initialChampions, initialExecutions, initialTierlist }) {
   const { slug } = useParams();
@@ -23,14 +24,14 @@ export default function PublicChampionDetail({ initialChampions, initialExecutio
     queryKey: ['public-champions'],
     queryFn: () => Champion.list('name'),
     initialData: initialChampions,
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
   const champion = findChampionBySlug(champions, slug);
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],
     queryFn: () => getTierlistExecutions(10),
     initialData: initialExecutions,
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
   const currentSnapshotKey = executions.find(execution =>
     execution.status === 'success' || execution.status === 'partial'
@@ -40,7 +41,7 @@ export default function PublicChampionDetail({ initialChampions, initialExecutio
     queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
     initialData: initialTierlist,
     enabled: Boolean(currentSnapshotKey),
-    staleTime: 5 * 60 * 1000,
+    ...publicCatalogQueryOptions,
   });
 
   if (isLoading) {

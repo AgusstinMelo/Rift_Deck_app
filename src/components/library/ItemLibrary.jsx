@@ -6,6 +6,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
+import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 
 const CATEGORY_LABELS = {
   'Básico': 'Básico',
@@ -28,14 +29,18 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
     queryKey: ['writems'],
     queryFn: () => WRItem.list('type'),
     initialData: initialItems,
-    staleTime: initialItems ? 5 * 60 * 1000 : undefined,
+    ...(publicBasePath ? publicCatalogQueryOptions : {
+      staleTime: initialItems ? 5 * 60 * 1000 : undefined,
+    }),
   });
 
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
     queryFn: () => Champion.list('name'),
     initialData: initialChampions,
-    staleTime: initialChampions ? 5 * 60 * 1000 : undefined,
+    ...(publicBasePath ? publicCatalogQueryOptions : {
+      staleTime: initialChampions ? 5 * 60 * 1000 : undefined,
+    }),
   });
 
   useEffect(() => {
