@@ -489,19 +489,27 @@ function detectChoiceLeverage(ctx, type) {
       : statProfile
         ? `Antes de comprarlo, comprobá que ${statProfile.summary} combine con el resto de tu build. Es más justificable frente a ${statProfile.useful}; considerá otra opción frente a ${statProfile.weak}.`
         : `No descartes el objeto sólo por esta muestra: revisá si combina con el resto de tu build, qué estadística te aporta y qué amenaza concreta del equipo rival necesitás responder.`;
+  const choiceTitle = type === 'rune'
+    ? positive
+      ? `Revisá cuándo te conviene elegir ${best.right} con ${best.left}`
+      : `Dejá de equipar ${best.right} por defecto con ${best.left}`
+    : positive
+      ? `Revisá cuándo te conviene usar ${best.right} con ${best.left}`
+      : `Dejá de usar ${best.right} por defecto con ${best.left}`;
+  const choiceAction = type === 'rune'
+    ? positive
+      ? `Conservala como una opción prioritaria con ${best.left}, pero elegila sólo cuando encaje con el matchup y el plan de la partida.`
+      : `Sacala de la página de runas predeterminada y equipala únicamente cuando encaje con el matchup y el plan de la partida.`
+    : positive
+      ? `Conservala como una opción prioritaria con ${best.left}, pero elegila según el matchup y el plan de la partida.`
+      : `Dejá de seleccionarla por defecto y usala únicamente cuando encaje con el matchup y el plan de la partida.`;
 
   return [makeCard({
     id: `${type}-${keyOf(best.left)}-${keyOf(best.right)}`, domain: config.domain,
     tone: positive ? 'opportunity' : 'critical',
-    title: type === 'item' ? cautiousItemTitle : positive ? `Priorizá ${best.right} con ${best.left} en el contexto correcto` : `Dejá de comprar ${best.right} por defecto con ${best.left}`,
-    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección: una diferencia de ${percent(Math.abs(best.delta))}. Esta muestra señala una asociación, no demuestra que el objeto sea la causa del resultado.${context}${itemContext}`,
-    action: type === 'item' ? itemAction : positive
-      ? corroboratedGood
-        ? `Incluí ${best.right} en tu variante contra ${corroboratedGood}; fuera de ese matchup, elegilo sólo cuando resuelva el mismo tipo de amenaza.`
-        : `Conservalo como opción prioritaria con ${best.left}, pero asignale una condición de compra concreta del draft en lugar de usarlo siempre.`
-      : corroboratedBad
-        ? `Evitá ${best.right} contra ${corroboratedBad}. Prepará una variante que responda específicamente a ese campeón y reservá este objeto para drafts donde sí cumpla una función clara.`
-        : `Sacalo de la build predeterminada y usalo únicamente cuando puedas nombrar el problema del draft que resuelve.`,
+    title: type === 'item' ? cautiousItemTitle : choiceTitle,
+    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección: una diferencia de ${percent(Math.abs(best.delta))}. Esta muestra señala una asociación, no demuestra que ${type === 'item' ? 'el objeto' : 'esta elección'} sea la causa del resultado.${context}${itemContext}`,
+    action: type === 'item' ? itemAction : choiceAction,
     sample: best.games + best.baseline.games, effect: best.delta,
     corroboration: corroboratedGood || corroboratedBad || recommended ? 1 : 0,
     evidence: [`Con: ${percent(best.wr)} (${best.games})`, `Sin: ${percent(best.baseline.wr)} (${best.baseline.games})`, corroboratedGood ? `Buena vs ${corroboratedGood}` : recommended && 'Recomendado para el campeón'],
