@@ -36,7 +36,7 @@ const publicColumns = [
   'assist', 'attack_range',
   'external_id', 'original_name', 'strong_against', 'weak_against', 'synergies',
 ];
-const response = await fetch(`${supabaseUrl}/rest/v1/champions?select=${publicColumns.join(',')}&order=name.asc`, {
+const response = await fetch(`${supabaseUrl}/rest/v1/current_champions?select=${publicColumns.join(',')}&order=name.asc`, {
   headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
 });
 
@@ -62,8 +62,8 @@ const itemColumns = [
   'ability_haste', 'tenacity', 'healing_and_shield',
 ];
 const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description', 'tags'];
-const items = await fetchPublicRows('wr_items', itemColumns, '&active=eq.true');
-const runes = await fetchPublicRows('runes', runeColumns);
+const items = await fetchPublicRows('current_wr_items', itemColumns, '&active=eq.true');
+const runes = await fetchPublicRows('current_runes', runeColumns);
 const executionParams = new URLSearchParams({
   select: '*',
   order: 'snapshot_date.desc,executed_at.desc',
