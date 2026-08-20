@@ -239,6 +239,24 @@ function championRelations(champion) {
   };
 }
 
+function recommendedItems(champion) {
+  return relationNames(champion, [
+    'recommended_items', 'recommendedItems', 'core_items', 'coreItems', 'suggested_items',
+  ]);
+}
+
+function championRoles(champion) {
+  return unique([...listOf(champion?.roles), ...listOf(champion?.role), champion?.lane, champion?.position]).map(laneOf);
+}
+
+function poolCounterFor(ctx, enemy, excludedChampion, lane) {
+  return groupBy(ctx.matches, row => row.champion)
+    .filter(entry => keyOf(entry.name) !== keyOf(excludedChampion))
+    .filter(entry => entry.rows.some(row => !lane || row.lane === lane))
+    .filter(entry => championRelations(ctx.championCatalog.get(keyOf(entry.name))).strong.some(name => keyOf(name) === keyOf(enemy)))
+    .sort((a, b) => (b.games * 2 + b.wr / 10) - (a.games * 2 + a.wr / 10))[0] || null;
+}
+
 function makeCard({ id, domain, tone = 'neutral', title, thesis, action, evidence = [], sample = 0,
   effect = 0, corroboration = 0, score = 50, entities = [], sources = [] }) {
   const certainty = confidence(sample, effect, corroboration);
@@ -463,9 +481,7 @@ function detectChoiceLeverage(ctx, type) {
   const positive = best.delta > 0;
   const itemData = type === 'item' ? ctx.itemCatalog.get(keyOf(best.right)) : null;
   const championData = type === 'item' ? ctx.championCatalog.get(keyOf(best.left)) : null;
-  const recommended = relationNames(championData, [
-    'recommended_items', 'recommendedItems', 'core_items', 'coreItems', 'suggested_items',
-  ]).some(name => keyOf(name) === keyOf(best.right));
+  const recommended = recommendedItems(championData).some(name => keyOf(name) === keyOf(best.right));
   const goodAgainst = relationNames(itemData, ['good_against', 'goodAgainst', 'strong_against', 'recommended_against']);
   const avoidAgainst = relationNames(itemData, ['avoid_against', 'avoidAgainst', 'weak_against', 'bad_against']);
   const encountered = unique(best.rows.flatMap(row => row.enemies));
@@ -518,6 +534,29 @@ function detectChoiceLeverage(ctx, type) {
   })];
 }
 
+function detectRecommendedItemFit(ctx) {
+  const candidates = groupBy(ctx.matches, row => row.champion).flatMap(champion => {
+    const wanted = recommendedItems(ctx.championCatalog.get(keyOf(champion.name)));
+    if (!wanted.length || champion.games < 2) return [];
+    const withRows = champion.rows.filter(row => row.items.some(item => wanted.some(value => keyOf(value) === keyOf(item))));
+    const withoutRows = champion.rows.filter(row => !withRows.includes(row));
+    const missing = wanted.filter(item => !champion.rows.some(row => row.items.some(used => keyOf(used) === keyOf(item))));
+    return [{ champion, wanted, missing, adherence: withRows.length / champion.games, withStats: summarize(withRows), withoutStats: summarize(withoutRows) }];
+  }).sort((a, b) => (b.champion.games * (1 - b.adherence)) - (a.champion.games * (1 - a.adherence)));
+  const pick = candidates[0];
+  if (!pick) return [];
+  const comparison = pick.withStats.games >= 2 && pick.withoutStats.games >= 2;
+  const delta = comparison ? pick.withStats.wr - pick.withoutStats.wr : 0;
+  return [makeCard({
+    id: `recommended-items-${keyOf(pick.champion.name)}`, domain: 'build', tone: pick.adherence < 0.5 ? 'warning' : 'neutral',
+    title: `Contrastá tu build de ${pick.champion.name} con sus objetos recomendados`,
+    thesis: `${pick.champion.name} tiene como objetos recomendados ${pick.wanted.join(', ')}. En tu historial, al menos uno aparece en ${pick.withStats.games} de ${pick.champion.games} partidas (${percent(pick.adherence * 100)}).${comparison ? ` Con objetos recomendados registrás ${percent(pick.withStats.wr)} de winrate y sin ellos ${percent(pick.withoutStats.wr)}; es una asociación contextual, no una prueba de causalidad.` : ' Todavía no hay dos grupos comparables para relacionarlos con el resultado.'}`,
+    action: pick.missing.length ? `Probá primero ${pick.missing.slice(0, 2).join(' o ')} cuando sus estadísticas respondan al draft rival; mantené estable el resto de la build.` : `Revisá en qué matchups usaste estos objetos y conservá sólo las compras que respondan a una amenaza concreta.`,
+    sample: pick.champion.games, effect: delta,
+    evidence: [`Recomendados presentes: ${percent(pick.adherence * 100)}`, `${pick.champion.games} partidas con ${pick.champion.name}`, comparison && `Diferencia observada: ${percent(Math.abs(delta))}`],
+    entities: [pick.champion.name, ...pick.wanted], score: 84, sources: ['partidas', 'campeones', 'objetos'],
+  })];
+}
 function detectAllySynergy(ctx) {
   const pairs = pairedGroups(ctx.matches, row => row.champion, row => row.allies)
     .filter(pair => pair.games >= 3)
@@ -525,25 +564,32 @@ function detectAllySynergy(ctx) {
       const baseline = summarize(ctx.matches.filter(row => keyOf(row.champion) === keyOf(pair.left)));
       return { ...pair, baseline, delta: pair.wr - baseline.wr };
     })
-    .filter(pair => Math.abs(pair.delta) >= 20)
+    .filter(pair => {
+      const relations = championRelations(ctx.championCatalog.get(keyOf(pair.left)));
+      return Math.abs(pair.delta) >= 20 || relations.synergies.some(name => keyOf(name) === keyOf(pair.right));
+    })
     .sort((a, b) => Math.abs(b.delta) * b.games - Math.abs(a.delta) * a.games);
   const pair = pairs[0];
   if (!pair) return [];
-  const relations = championRelations(ctx.championCatalog.get(keyOf(pair.left)));
-  const catalogSynergy = relations.synergies.some(name => keyOf(name) === keyOf(pair.right));
+  const catalogSynergy = championRelations(ctx.championCatalog.get(keyOf(pair.left))).synergies.some(name => keyOf(name) === keyOf(pair.right));
+  const allyRoles = championRoles(ctx.championCatalog.get(keyOf(pair.right)));
+  const allyRole = allyRoles.includes('dragonline') ? 'ADC' : allyRoles.includes('support') ? 'support' : allyRoles[0];
+  const roleContext = pair.rows[0]?.lane === 'support' && allyRole === 'ADC'
+    ? ' Esta es además tu dupla de bot: la lectura evalúa específicamente la relación support–ADC.'
+    : allyRole ? ` La señal también queda asociada al rol ${allyRole} de ${pair.right}.` : '';
   return [makeCard({
-    id: `synergy-${pair.id}`, domain: 'draft', tone: pair.delta > 0 ? 'opportunity' : 'warning',
-    title: pair.delta > 0 ? `Buscá la dupla ${pair.left} + ${pair.right} en el draft` : `Evitá armar ${pair.left} + ${pair.right} sin compensar la composición`,
-    thesis: `Cuando ${pair.right} aparece como aliado, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${catalogSynergy ? ' El catálogo también identifica esta dupla como sinergia favorable.' : ''}`,
+    id: `synergy-${pair.id}`, domain: 'sinergia', tone: pair.delta > 0 ? 'opportunity' : 'warning',
+    title: pair.delta > 0 ? `Buscá la dupla ${pair.left} + ${pair.right} en el draft` : `Revisá la sinergia de ${pair.left} + ${pair.right}`,
+    thesis: `Cuando ${pair.right} aparece como aliado, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${catalogSynergy ? ' El catálogo también identifica esta dupla como sinergia favorable.' : ''}${roleContext}`,
     action: pair.delta > 0
-      ? `Priorizá ${pair.left} cuando tu equipo ya haya mostrado ${pair.right}; si no está disponible, buscá un aliado que aporte una función equivalente de iniciación, control, daño o protección.`
-      : `No completes esta dupla por inercia. Si ambos quedan seleccionados, usá los picks restantes para sumar primera línea, iniciación, protección o variedad de daño, según lo que falte.`,
+      ? `Priorizá ${pair.left} cuando tu equipo ya haya mostrado ${pair.right}; si no está disponible, buscá un aliado con una función equivalente.`
+      : `No completes esta dupla por inercia. Compensá con primera línea, iniciación, protección o variedad de daño según lo que falte.`,
     sample: pair.games, effect: pair.delta, corroboration: catalogSynergy ? 1 : 0,
-    evidence: [`Juntos: ${percent(pair.wr)} (${pair.games})`, `${pair.left}: ${percent(pair.baseline.wr)}`, catalogSynergy && 'Catálogo: sinergia'],
-    entities: [pair.left, pair.right], score: catalogSynergy ? 86 : 74, sources: ['partidas', 'composiciones', catalogSynergy ? 'campeones' : null],
+    evidence: [`Juntos: ${percent(pair.wr)} (${pair.games})`, `${pair.left}: ${percent(pair.baseline.wr)}`, allyRole && `Rol aliado: ${allyRole}`],
+    entities: [pair.left, pair.right], score: catalogSynergy ? 88 : 78,
+    sources: ['partidas', 'composiciones', catalogSynergy ? 'campeones' : null],
   })];
 }
-
 function snapshotKeyOf(entry) {
   return clean(entry?.snapshot_key) ||
     `${keyOf(entry?.patch)}::${clean(entry?.snapshot_date || entry?.updated_at).slice(0, 10)}`;
@@ -601,35 +647,44 @@ function detectMetaMovement(ctx) {
 }
 
 function detectMatchup(ctx) {
-  const pairs = pairedGroups(ctx.matches, row => row.champion, row => row.enemies)
-    .filter(pair => pair.games >= 3)
+  const pairs = pairedGroups(ctx.matches, row => row.champion, row => row.directEnemy)
+    .filter(pair => pair.games >= 2)
     .map(pair => {
       const championRows = ctx.matches.filter(row => keyOf(row.champion) === keyOf(pair.left));
-      return { ...pair, baseline: summarize(championRows), delta: pair.wr - summarize(championRows).wr };
+      const baseline = summarize(championRows);
+      return { ...pair, baseline, delta: pair.wr - baseline.wr };
     })
-    .filter(pair => Math.abs(pair.delta) >= 18)
+    .filter(pair => {
+      const relations = championRelations(ctx.championCatalog.get(keyOf(pair.left)));
+      const catalogKnown = [...relations.strong, ...relations.weak].some(name => keyOf(name) === keyOf(pair.right));
+      return Math.abs(pair.delta) >= 18 || catalogKnown;
+    })
     .sort((a, b) => Math.abs(b.delta) * b.games - Math.abs(a.delta) * a.games);
   const pair = pairs[0];
   if (!pair) return [];
   const champion = ctx.championCatalog.get(keyOf(pair.left));
-  const { strong: good, weak: avoid } = championRelations(champion);
-  const catalogGood = good.some(name => keyOf(name) === keyOf(pair.right));
-  const catalogBad = avoid.some(name => keyOf(name) === keyOf(pair.right));
+  const { strong, weak } = championRelations(champion);
+  const catalogGood = strong.some(name => keyOf(name) === keyOf(pair.right));
+  const catalogBad = weak.some(name => keyOf(name) === keyOf(pair.right));
   const conflict = (pair.delta > 0 && catalogBad) || (pair.delta < 0 && catalogGood);
   const corroborates = (pair.delta > 0 && catalogGood) || (pair.delta < 0 && catalogBad);
+  const counter = poolCounterFor(ctx, pair.right, pair.left, pair.rows[0]?.lane);
+  const unfavorable = catalogBad || pair.delta < 0;
   return [makeCard({
-    id: `matchup-${pair.id}`, domain: 'draft', tone: pair.delta > 0 ? 'positive' : 'critical',
-    title: pair.delta > 0 ? `Considerá ${pair.left} como respuesta frente a ${pair.right}` : `Protegé tu draft cuando juegues ${pair.left} contra ${pair.right}`,
-    thesis: `Cuando ${pair.right} aparece en el equipo enemigo, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${corroborates ? ' El catálogo coincide con tu rendimiento personal.' : conflict ? ' El catálogo marca el cruce en sentido contrario, así que el resultado puede depender de la composición completa más que del duelo directo.' : ''}`,
-    action: pair.delta > 0
-      ? `Subí la prioridad de ${pair.left} cuando el rival muestre ${pair.right}${catalogGood ? '; el historial y la referencia del campeón respaldan esa respuesta' : ', especialmente si el resto del draft mantiene una composición equilibrada'}.`
-      : `Si el rival muestra ${pair.right}, elegí otro campeón de tu pool que figure fuerte contra él. Si ya fijaste ${pair.left}, adaptá la runa y el primer objeto para sobrevivir al cruce y evitá peleas tempranas sin ventaja.`,
+    id: `matchup-${pair.id}`, domain: 'matchup directo', tone: unfavorable ? 'critical' : 'positive',
+    title: unfavorable ? `${pair.left} queda expuesto en el cruce directo contra ${pair.right}` : `Considerá ${pair.left} como respuesta frente a ${pair.right}`,
+    thesis: `En el matchup directo contra ${pair.right}, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${catalogBad ? ` El catálogo marca a ${pair.left} como débil contra ${pair.right}.` : catalogGood ? ` El catálogo marca a ${pair.left} como fuerte contra ${pair.right}.` : ''}${corroborates ? ' Tu rendimiento personal coincide con esa relación.' : conflict ? ' Tu resultado personal va en sentido contrario, por lo que conviene considerar la composición completa y ampliar la muestra.' : ''}${counter ? ` Dentro de tu pool, ${counter.name} figura fuerte contra ${pair.right} y es una alternativa concreta para ese draft.` : ''}`,
+    action: !unfavorable
+      ? `Subí la prioridad de ${pair.left} cuando el rival muestre ${pair.right}${catalogGood ? '; el historial y el catálogo respaldan esa respuesta' : ', si el resto del draft se mantiene equilibrado'}.`
+      : counter
+        ? `La próxima vez que el rival muestre ${pair.right}, priorizá ${counter.name} en lugar de ${pair.left}. Si ya fijaste ${pair.left}, adaptá runas y primer objeto para sobrevivir al cruce.`
+        : `Si el rival muestra ${pair.right}, evitá seleccionar ${pair.left} a ciegas. Tu pool todavía no registra una alternativa catalogada como fuerte contra él; si ya fijaste el pick, adaptá runas y primer objeto.`,
     sample: pair.games, effect: pair.delta, corroboration: corroborates ? 1 : 0,
-    evidence: [`Cruce: ${percent(pair.wr)} (${pair.games})`, `Promedio de ${pair.left}: ${percent(pair.baseline.wr)}`, corroborates && 'Catálogo: coincide'],
-    entities: [pair.left, pair.right], score: 83, sources: ['partidas', champion ? 'campeones' : null],
+    evidence: [`Directo: ${percent(pair.wr)} (${pair.games})`, `Promedio de ${pair.left}: ${percent(pair.baseline.wr)}`, counter && `Alternativa: ${counter.name}`],
+    entities: [pair.left, pair.right, counter?.name], score: unfavorable ? 91 : 83,
+    sources: ['partidas', champion ? 'campeones' : null],
   })];
 }
-
 function buildSimilarity(match, build) {
   if (keyOf(match.champion) !== keyOf(build.champion_name)) return 0;
   const wanted = unique(listOf(build.items)).map(keyOf);
@@ -834,7 +889,7 @@ function selectEditorially(candidates, limit) {
   const entityCount = new Map();
   for (const card of sorted) {
     if ((domainCount.get(card.domain) || 0) >= 1) continue;
-    if (card.entities.some(entity => (entityCount.get(entity) || 0) >= 2)) continue;
+    if (card.entities.some(entity => (entityCount.get(entity) || 0) >= 3)) continue;
     selected.push(card);
     domainCount.set(card.domain, (domainCount.get(card.domain) || 0) + 1);
     card.entities.forEach(entity => entityCount.set(entity, (entityCount.get(entity) || 0) + 1));
@@ -893,6 +948,7 @@ export function computeInsightReport({
     ...detectLossFingerprint(ctx),
     ...detectChampionIdentity(ctx),
     ...detectPoolShape(ctx),
+    ...detectRecommendedItemFit(ctx),
     ...detectChoiceLeverage(ctx, 'item'),
     ...detectChoiceLeverage(ctx, 'rune'),
     ...detectChoiceLeverage(ctx, 'spell'),
