@@ -74,6 +74,18 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     return String(value);
   };
 
+  const getRuneTags = (value) => {
+    if (Array.isArray(value)) {
+      return value.map(tag => String(tag).trim()).filter(Boolean);
+    }
+
+    if (typeof value === 'string') {
+      return value.split(',').map(tag => tag.trim()).filter(Boolean);
+    }
+
+    return [];
+  };
+
   const getRuneBranches = (value) => {
     if (value === null || value === undefined) return ['Sin rama'];
 
@@ -227,13 +239,9 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   </p>
                 )}
 
-                {(selected.tags || '').length > 0 && (
+                {getRuneTags(selected.tags).length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-5">
-                    {selected.tags
-                      .split(',')
-                      .map(t => t.trim())
-                      .filter(Boolean)
-                      .map(t => (
+                    {getRuneTags(selected.tags).map(t => (
                         <span key={t} className="rd-status-pill">
                           {t}
                         </span>
@@ -430,12 +438,9 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                                   </div>
                                 </div>
 
-                                {(rune.tags || '').length > 0 && (
+                                {getRuneTags(rune.tags).length > 0 && (
                                   <div className="flex flex-wrap gap-1 mt-2">
-                                    {rune.tags
-                                      .split(',')
-                                      .map(t => t.trim())
-                                      .filter(Boolean)
+                                    {getRuneTags(rune.tags)
                                       .slice(0, 2)
                                       .map(t => (
                                         <span
