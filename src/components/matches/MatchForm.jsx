@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import { updateMatch } from '@/api/matchesSupabase';
@@ -685,8 +686,8 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
 
                   <div className="grid grid-cols-7 gap-x-3 gap-y-3">
                     {claveRunes.map(rune => (
-                      <button
-                        key={rune.id}
+                      <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+<button
                         type="button"
                         onClick={() =>
                           isRuneSelected(rune)
@@ -701,7 +702,6 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                             ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                             : 'opacity-45 hover:opacity-85'
                         }`}
-                        title={rune.name}
                       >
                         {rune.image_url ? (
                           <img
@@ -715,6 +715,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                           </span>
                         )}
                       </button>
+                      </EntityHoverCard>
                     ))}
                   </div>
                 </div>
@@ -750,8 +751,8 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
 
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
-                            <button
-                              key={rune.id}
+                            <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+<button
                               type="button"
                               onClick={() => handleTogglePrimaryRune(rune)}
                               className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
@@ -759,7 +760,6 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                                   ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                                   : 'opacity-45 hover:opacity-85'
                               }`}
-                              title={rune.name}
                             >
                               {rune.image_url ? (
                                 <img
@@ -773,6 +773,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                                 </span>
                               )}
                             </button>
+                      </EntityHoverCard>
                           ))}
                         </div>
                       </div>
@@ -807,8 +808,8 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
 
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
-                            <button
-                              key={rune.id}
+                            <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+<button
                               type="button"
                               onClick={() => handleToggleSecondaryRune(rune)}
                               className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
@@ -816,7 +817,6 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                                   ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                                   : 'opacity-45 hover:opacity-85'
                               }`}
-                              title={rune.name}
                             >
                               {rune.image_url ? (
                                 <img
@@ -830,6 +830,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                                 </span>
                               )}
                             </button>
+                      </EntityHoverCard>
                           ))}
                         </div>
                       </div>
@@ -872,8 +873,9 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
                 return (
-                  <button key={spell.id} type="button" onClick={() => toggleSpell(spell.name)}
-                    disabled={disabled} title={spell.name}
+                  <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
+<button type="button" onClick={() => toggleSpell(spell.name)}
+                    aria-disabled={disabled}
                     className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
                       selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                     } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
@@ -882,6 +884,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
                       : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
                     }
                   </button>
+                      </EntityHoverCard>
                 );
               })}
             </div>

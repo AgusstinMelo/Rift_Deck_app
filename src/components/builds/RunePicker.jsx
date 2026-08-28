@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
 
@@ -14,9 +15,9 @@ function RuneIcon({ rune, selected, onClick }) {
   const branchGlow = BRANCH_COLORS[rune.branch] || 'border-primary/70 shadow-primary/40';
 
   return (
+    <EntityHoverCard entity={rune} kind={rune.branch}>
     <button
       onClick={() => onClick(rune)}
-      title={`${rune.name}${rune.description ? '\n' + rune.description : ''}`}
       className={`relative rounded-full border-2 transition-all flex-shrink-0 overflow-hidden w-9 h-9 cursor-pointer
         ${selected
           ? `${branchGlow} shadow-[0_0_8px_1px] scale-110`
@@ -33,6 +34,7 @@ function RuneIcon({ rune, selected, onClick }) {
         )
       }
     </button>
+    </EntityHoverCard>
   );
 }
 

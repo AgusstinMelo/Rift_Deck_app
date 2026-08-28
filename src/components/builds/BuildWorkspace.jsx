@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSpells } from '@/hooks/useSpells';
 import { useAuth } from '@/lib/AuthContext';
@@ -214,15 +215,14 @@ export default function BuildWorkspace({ champion, tierEntries, items, existingB
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
                 return (
-                  <button
-                    key={spell.id}
+                  <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
+<button
                     type="button"
                     onClick={() => {
                       if (selected) setSelectedSpells(prev => prev.filter(s => s !== spell.name));
                       else if (selectedSpells.length < 2) setSelectedSpells(prev => [...prev, spell.name]);
                     }}
-                    disabled={disabled}
-                    title={spell.name}
+                    aria-disabled={disabled}
                     className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
                       selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                     } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
@@ -232,6 +232,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, existingB
                       : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
                     }
                   </button>
+                      </EntityHoverCard>
                 );
               })}
             </div>

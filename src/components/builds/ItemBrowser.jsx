@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 
 const CATEGORIES = [
@@ -21,6 +22,40 @@ const TYPE_ORDER = [
 ];
 
 const UNIQUE_ITEMS = ['escudo reliquia', 'hoz espectral', 'guadaña de niebla oscura', 'baluarte de la montaña'];
+const ITEM_STATS = [
+  { key: 'life', label: 'Vida', color: 'text-green-400' },
+  { key: 'life_reg', label: 'Reg. de vida', color: 'text-green-400' },
+  { key: 'mana', label: 'Maná', color: 'text-sky-300' },
+  { key: 'mana_reg', label: 'Reg. de maná', color: 'text-sky-300' },
+  { key: 'attack_damage', label: 'Daño de ataque', color: 'text-orange-400' },
+  { key: 'physical_damage', label: 'Daño físico', color: 'text-orange-700' },
+  { key: 'magic_damage', label: 'Daño mágico', color: 'text-cyan-400' },
+  { key: 'true_damage', label: 'Daño verdadero', color: 'text-white' },
+  { key: 'attack_speed', label: 'Vel. de ataque', unit: '%', color: 'text-yellow-200' },
+  { key: 'ability_power', label: 'Poder de habilidad', color: 'text-violet-400' },
+  { key: 'armor', label: 'Armadura', color: 'text-yellow-400' },
+  { key: 'magic_res', label: 'Resist. mágica' },
+  { key: 'flat_movement', label: 'Vel. de movimiento', color: 'text-white' },
+  { key: 'percentage_movement', label: 'Vel. de movimiento', unit: '%', color: 'text-white' },
+  { key: 'critical_impact', label: 'Prob. de crítico', unit: '%', color: 'text-red-400' },
+  { key: 'critical_damage', label: 'Daño crítico', unit: '%', color: 'text-red-400' },
+  { key: 'physic_vamp', label: 'Vamp. físico', unit: '%', color: 'text-green-300' },
+  { key: 'magic_vamp', label: 'Vamp. mágico', unit: '%', color: 'text-green-300' },
+  { key: 'flat_armor_penetration', label: 'Pen. de armadura', color: 'text-red-300' },
+  { key: 'percentage_armor_penetration', label: 'Pen. de armadura', unit: '%', color: 'text-red-300' },
+  { key: 'flat_magic_penetration', label: 'Pen. mágica' },
+  { key: 'percentage_magic_penetration', label: 'Pen. mágica', unit: '%' },
+  { key: 'ability_haste', label: 'Aceleración de habilidad', color: 'text-white' },
+  { key: 'tenacity', label: 'Tenacidad', unit: '%', color: 'text-violet-700' },
+  { key: 'healing_and_shield', label: 'Curación y escudo', unit: '%', color: 'text-green-300' },
+  { key: 'adaptable_ad', label: 'Daño adaptable', color: 'text-orange-400' },
+  { key: 'adaptable_ap', label: 'Poder adaptable', color: 'text-violet-400' },
+];
+
+const getActiveStats = (item) => ITEM_STATS.filter(({ key }) => {
+  const value = Number(item?.[key]);
+  return Number.isFinite(value) && value !== 0;
+});
 
 const normalizeSearch = (value) =>
   String(value || '')
@@ -116,6 +151,24 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
   const [typeFilter, setTypeFilter] = useState('all');
   const [tooltip, setTooltip] = useState(null);
 
+  const showTooltip = (event, item, lockReason) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const tooltipWidth = Math.min(320, window.innerWidth - 24);
+    const wouldOverflowRight = rect.left + tooltipWidth > window.innerWidth - 12;
+    const left = wouldOverflowRight
+      ? Math.max(12, rect.right - tooltipWidth)
+      : Math.max(12, rect.left);
+    const placeBelow = rect.top < Math.min(300, window.innerHeight / 2);
+
+    setTooltip({
+      item,
+      lockReason,
+      position: placeBelow
+        ? { top: rect.bottom + 8, left, width: tooltipWidth }
+        : { bottom: window.innerHeight - rect.top + 8, left, width: tooltipWidth },
+    });
+  };
+
   const canAddEnchantment = selectedItems.some(isMobilityBoots) && !selectedItems.some(isEnchant);
   const itemTypes = [...new Set(items.flatMap(getItemTypes))].sort(sortItemTypes);
 
@@ -171,12 +224,16 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
             const isDisabled = !addable;
 
             return (
-              <div key={item.id} className="relative group">
+              <div
+                key={item.id}
+                className="relative group"
+                onMouseEnter={event => showTooltip(event, item, lockReason)}
+                onMouseLeave={() => setTooltip(null)}
+              >
                 <button
                   onClick={() => addable && onSelect(item)}
-                  onMouseEnter={() => setTooltip(item)}
-                  onMouseLeave={() => setTooltip(null)}
                   disabled={isDisabled}
+                  aria-label={item.name}
                   className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center transition-all
                     ${alreadyInBuild ? 'ring-2 ring-primary opacity-60' : ''}
                     ${isDisabled ? 'opacity-25 cursor-not-allowed' : 'cursor-pointer hover:border-primary/50'}
@@ -186,29 +243,48 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
                     ? <img src={item.image_url} alt={item.name} className="w-10 h-10 object-contain rounded" />
                     : <span className="text-xs font-bold text-primary px-0.5 text-center leading-tight">{item.name?.slice(0, 5)}</span>}
                 </button>
-
-                {/* Lock reason tooltip */}
-                {lockReason && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 pointer-events-none">
-                    <div className="bg-popover border border-border rounded-lg px-2 py-1 text-[10px] text-muted-foreground whitespace-nowrap shadow-lg">
-                      {lockReason}
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
 
         {/* Item tooltip */}
-        {tooltip && (
-          <div className="absolute bottom-full left-0 mb-2 z-50 pointer-events-none">
-            <div className="bg-popover border border-border rounded-xl p-3 shadow-xl min-w-48 max-w-64">
-              <p className="font-semibold text-foreground text-sm mb-1">{tooltip.name}</p>
-              {tooltip.category && <span className="text-xs text-muted-foreground capitalize">{tooltip.category}</span>}
-              {tooltip.price && <span className="text-xs text-primary ml-2 font-semibold">{tooltip.price}g</span>}
+        {tooltip && typeof document !== 'undefined' && createPortal(
+          <div
+            className="fixed z-[100] pointer-events-none"
+            style={tooltip.position}
+          >
+            <div className="bg-popover border border-primary/25 rounded-xl p-3 shadow-2xl w-full">
+              <div className="flex items-start gap-3">
+                {tooltip.item.image_url && <img src={tooltip.item.image_url} alt="" className="w-11 h-11 object-contain rounded-lg border border-border bg-secondary/30 shrink-0" />}
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-foreground text-sm leading-tight">{tooltip.item.name}</p>
+                  <div className="flex flex-wrap items-center gap-x-2 mt-1">
+                    {tooltip.item.category && <span className="text-[11px] text-muted-foreground">{tooltip.item.category}</span>}
+                    {tooltip.item.price != null && <span className="text-[11px] text-primary font-semibold">{tooltip.item.price} oro</span>}
+                  </div>
+                </div>
+              </div>
+              {getActiveStats(tooltip.item).length > 0 && (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-3 pt-2.5 border-t border-border/70">
+                  {getActiveStats(tooltip.item).map(({ key, label, unit, color }) => (
+                    <div key={key} className="flex items-baseline justify-between gap-2 text-[11px]">
+                      <span className="text-muted-foreground truncate">{label}</span>
+                      <span className={`${color || 'text-primary'} font-semibold shrink-0`}>+{tooltip.item[key]}{unit || ''}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {tooltip.item.description && (
+                <p className="mt-3 pt-2.5 border-t border-border/70 text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {String(tooltip.item.description).replace(/\\n/g, '\n')}
+                </p>
+              )}
+              {getItemTypes(tooltip.item).length > 0 && <p className="mt-2 text-[10px] text-muted-foreground/80">{getItemTypes(tooltip.item).join(' / ')}</p>}
+              {tooltip.lockReason && <p className="mt-2 rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-1.5 text-[10px] text-amber-300">{tooltip.lockReason}</p>}
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
 
