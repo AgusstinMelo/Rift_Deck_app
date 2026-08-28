@@ -74,18 +74,6 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     return String(value);
   };
 
-  const getRuneTags = (value) => {
-    if (Array.isArray(value)) {
-      return value.map(tag => String(tag).trim()).filter(Boolean);
-    }
-
-    if (typeof value === 'string') {
-      return value.split(',').map(tag => tag.trim()).filter(Boolean);
-    }
-
-    return [];
-  };
-
   const getRuneBranches = (value) => {
     if (value === null || value === undefined) return ['Sin rama'];
 
@@ -239,15 +227,6 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   </p>
                 )}
 
-                {getRuneTags(selected.tags).length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-5">
-                    {getRuneTags(selected.tags).map(t => (
-                        <span key={t} className="rd-status-pill">
-                          {t}
-                        </span>
-                      ))}
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -438,20 +417,6 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                                   </div>
                                 </div>
 
-                                {getRuneTags(rune.tags).length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {getRuneTags(rune.tags)
-                                      .slice(0, 2)
-                                      .map(t => (
-                                        <span
-                                          key={t}
-                                          className="rd-status-pill text-[9px] px-1.5 py-0.5"
-                                        >
-                                          {t}
-                                        </span>
-                                      ))}
-                                  </div>
-                                )}
                               </div>
                             </div>
                           </Card>
