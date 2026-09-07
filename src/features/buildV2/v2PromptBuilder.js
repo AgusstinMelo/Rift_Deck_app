@@ -25,6 +25,8 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies }) {
     }
     return index;
   };
+  const alliedChampions = Object.values(allies).map(id => championMap.get(String(id))).filter(Boolean);
+  const enemyChampions = Object.values(enemies).map(id => championMap.get(String(id))).filter(Boolean);
   const context = {
     selected: [role, selected],
     allies: Object.entries(allies).map(([lane, id]) => contextualChampion(lane, id)),
@@ -36,9 +38,12 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies }) {
     MOVEMENT_ITEMS: allColumnsTable(snapshot.movementItems),
     RUNES: allColumnsTable(snapshot.runes),
     SPELLS: allColumnsTable(snapshot.spells),
-    ITEM_EFFECT_INDEX: indexByTags([...snapshot.coreItems, ...snapshot.movementItems], ['tags', 'effect_tags', 'situational_role', 'type']),
+    ITEM_EFFECT_INDEX: indexByTags([...snapshot.coreItems, ...snapshot.movementItems], ['tags', 'effect_tags', 'trigger_tags', 'situational_role', 'type']),
+    ITEM_TRIGGER_INDEX: indexByTags(snapshot.coreItems, ['trigger_tags']),
     ITEM_ORDERING_INDEX: indexByTags(snapshot.coreItems, ['situational_role']),
     RUNE_EFFECT_INDEX: indexByTags(snapshot.runes, ['tags', 'trigger_tags', 'benefit_tags', 'branch']),
+    ALLY_TRAIT_INDEX: indexByTags(alliedChampions, ['damage_type', 'roles', 'traits', 'item_scalings', 'vulnerabilities', 'tags']),
+    ENEMY_TRAIT_INDEX: indexByTags(enemyChampions, ['damage_type', 'roles', 'traits', 'item_scalings', 'vulnerabilities', 'tags']),
     CHAMPION_TRAIT_INDEX: indexByTags(matchChampions, ['damage_type', 'roles', 'traits', 'item_scalings', 'vulnerabilities', 'tags']),
   };
 
@@ -63,11 +68,14 @@ La selecciÃ³n debe surgir de un anÃ¡lisis global, no de afinidad aislada ent
 1. PerfilÃ¡ al campeÃ³n elegido y su rol usando todas sus columnas disponibles: patrÃ³n de daÃ±o, rango, escalado, traits, item_scalings y vulnerabilities.
 2. AgregÃ¡ el perfil de los CINCO aliados. DeterminÃ¡ desde damage_type, roles, traits y demÃ¡s datos quÃ© daÃ±o, frontline, control, utilidad y condiciones ya aporta el equipo. Si el equipo estÃ¡ muy concentrado en daÃ±o fÃ­sico o mÃ¡gico, evaluÃ¡ explÃ­citamente si el campeÃ³n puede aportar el tipo complementario segÃºn sus propios scalings y los items disponibles; no fuerces un tipo que sus datos no sostienen.
 3. AgregÃ¡ el perfil de los CINCO enemigos. IdentificÃ¡ Ãºnicamente desde sus datos amenazas, resistencias, vida, curaciÃ³n/sustain, escudos, dive, burst, DPS, rango, movilidad y CC. Una necesidad respaldada por varias fuentes enemigas pesa mÃ¡s que una coincidencia aislada.
-4. EscribÃ­ internamente una lista priorizada de necesidades de la partida: crÃ­ticas, importantes y opcionales. Las necesidades crÃ­ticas deben quedar cubiertas por una selecciÃ³n concreta cuando exista una alternativa compatible en el catÃ¡logo. Ejemplo conceptual: si varios datos enemigos evidencian curaciÃ³n o sustain, comparÃ¡ los items con efectos anti_curacion y elegÃ­ el compatible con el campeÃ³n y el resto de la build; no ignores esa necesidad por sumar otro item genÃ©rico de daÃ±o.
+4. Crea internamente una lista priorizada de necesidades criticas, importantes y opcionales. Primero conta evidencia enemiga usando ENEMY_TRAIT_INDEX y las filas originales: cuantos enemigos respaldan vida alta/tanque, curacion, escudos, armadura, resistencia magica, burst, dive, DPS, rango y CC. No declares una necesidad sin asociarla con campeones y columnas concretas.
+4a. Para cada objeto candidato lee effect_tags, trigger_tags, situational_role, stats y descripcion. Separa valor base de valor condicionado. Todo efecto condicionado necesita demanda real: anti-vida o dano por vida requiere evidencia enemiga de vida alta o frontline; anti-curacion requiere curacion o sustain; penetracion requiere la resistencia correspondiente; anti-escudo requiere escudos. Si el trigger no aparece, reduci fuertemente su prioridad aunque sea una compra estandar o tenga sinergia con el campeon.
+4b. La ausencia tambien es evidencia. Una composicion fragil sin vida alta ni frontline respaldada por sus columnas favorece dano directo, burst o el motor compatible que permitan los datos; no justifiques efectos anti-vida como universales. Nunca inventes que un enemigo es tanque, resistente o de mucha vida por su rol o por conocimiento externo.
 5. ElegÃ­ UN arquetipo principal respaldado por item_scalings/traits del campeÃ³n y por la composiciÃ³n: por ejemplo crÃ­tico, on-hit/efectos de impacto, daÃ±o fÃ­sico, daÃ±o mÃ¡gico, tanque, utilidad u otro que surja literalmente de los datos. build_theme debe nombrar ese plan antes de seleccionar los slots.
 5a. CalculÃ¡ el perfil de daÃ±o FINAL, no solo el type nominal. Si una descripciÃ³n convierte, reemplaza o impide una mecÃ¡nica (por ejemplo, transforma crÃ­tico en otro daÃ±o o impide golpes crÃ­ticos), aplicÃ¡ esa transformaciÃ³n a toda la build. ComparÃ¡ el resultado contra el balance aliado requerido. RechazÃ¡ una transformaciÃ³n que agrave una concentraciÃ³n de daÃ±o aliada salvo que resuelva una necesidad superior explÃ­cita en los datos.
 5b. DefinÃ­ las mecÃ¡nicas nÃºcleo del arquetipo. Al menos 3 de los 5 core_items deben reforzar directamente ese mismo nÃºcleo mediante stats, effect_tags o descripciones compatibles. Los restantes solo pueden ser adaptaciÃ³n o defensa necesaria y no deben anular el motor principal.
-6. ConstruÃ­ los cinco items como un sistema. Cada item debe cumplir al menos una funciÃ³n clara: motor del arquetipo, amplificador compatible, adaptaciÃ³n crÃ­tica o supervivencia necesaria. EvitÃ¡ mezclar motores incompatibles o items que solo son buenos individualmente. Una excepciÃ³n al arquetipo requiere una necesidad de composiciÃ³n explÃ­cita y debe explicarse.
+6. Construi los cinco items como un sistema. Para cada candidato crea internamente una ficha con: valor base, efecto condicionado, evidencia del trigger en aliados o enemigos, relacion con los otros cuatro y costo de oportunidad frente a una alternativa. Cada item debe ser motor, amplificador compatible, adaptacion critica o supervivencia necesaria. Evita motores incompatibles y objetos buenos individualmente pero irrelevantes para esta partida.
+6a. Audita falsos positivos contextuales: si la reason menciona vida alta, tanques, curacion, escudos, resistencias u otra condicion, verifica evidencia literal en MATCH_CONTEXT. Si no existe, reemplaza el objeto por una alternativa cuyo valor si se active contra esa composicion. Popularidad, build estandar y costumbre no son evidencia.
 7. EvaluÃ¡ el RESULTADO FINAL, incluidas conversiones o efectos transformativos descritos por los items. No inventes interacciones mecÃ¡nicas. La sinergia estratÃ©gica sÃ­ es vÃ¡lida cuando dos piezas resuelven necesidades distintas del mismo plan.
 8. OrdenÃ¡ secuencialmente. Para cada slot N, preguntate quÃ© aporta comprar ese item despuÃ©s de 1..N-1: acceso temprano al patrÃ³n central, power spike, dependencia, urgencia de counter, curva y coste. Una adaptaciÃ³n crÃ­tica puede ir antes del cuarto slot. La reason de cada item debe indicar su funciÃ³n en el conjunto y por quÃ© corresponde en esa posiciÃ³n.
 8a. ClasificÃ¡ internamente cada candidato como habilitador temprano, pieza de transiciÃ³n, multiplicador, payoff tardÃ­o, adaptaciÃ³n urgente o defensa usando situational_role, precio, stats, effect_tags y descripciÃ³n. ConsultÃ¡ ITEM_ORDERING_INDEX antes de ordenar. La etiqueta late es una seÃ±al de orden de gran peso: su ubicaciÃ³n esperada es slot 4 o 5 porque presupone una base ya construida. Que un objeto sea esencial, tenga mucho daÃ±o final, amplifique el arquetipo o aparezca en la build terminada NO demuestra que sea una buena primera compra.
