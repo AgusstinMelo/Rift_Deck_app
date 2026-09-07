@@ -53,10 +53,32 @@ test('rechaza hechizos duplicados', () => assert.equal(check(x => ({ ...x, spell
 test('rechaza hechizo inexistente', () => assert.equal(check(x => ({ ...x, spells: [pick('flash'), pick('missing')] })).ok, false));
 test('jungler requiere Castigo', () => assert.equal(check(x => x, { role: 'jungler' }).ok, false));
 test('jungler acepta Castigo', () => assert.equal(check(x => ({ ...x, spells: [pick('flash'), pick('smite')] }), { role: 'jungler' }).ok, true));
+test('rechaza Castigo fuera de jungla', () => assert.equal(check(x => ({ ...x, spells: [pick('flash'), pick('smite')] }), { role: 'mid' }).ok, false));
 test('rechaza textos requeridos vacÃ­os', () => assert.equal(check(x => ({ ...x, build_theme: '' })).ok, false));
 test('la razÃ³n queda unida a su ID', () => assert.equal(check().data.core_items[0].reason, 'RazÃ³n i1'));
 test('ninguna entidad ajena al snapshot pasa', () => assert.equal(check(x => ({ ...x, core_items: [pick('inventado'), ...x.core_items.slice(1)] })).ok, false));
 
+
+test('el schema prohíbe Castigo fuera de jungla', () => {
+  const schema = createV2BuildJsonSchema({
+    coreItems: snapshot.items.filter(item => item.id.startsWith('i')),
+    movementItems: [movement],
+    runes,
+    spells,
+  }, { role: 'top' });
+  assert.equal(schema.properties.spells.items.properties.id.enum.includes('smite'), false);
+});
+
+test('el schema obliga Castigo en jungla', () => {
+  const schema = createV2BuildJsonSchema({
+    coreItems: snapshot.items.filter(item => item.id.startsWith('i')),
+    movementItems: [movement],
+    runes,
+    spells,
+  }, { role: 'jungler' });
+  assert.deepEqual(schema.properties.spells.prefixItems[0].properties.id.enum, ['smite']);
+  assert.equal(schema.properties.spells.prefixItems[1].properties.id.enum.includes('smite'), false);
+});
 
 test('el schema limita IDs a su catÃ¡logo estructural', () => {
   const schema = createV2BuildJsonSchema({
@@ -70,10 +92,8 @@ test('el schema limita IDs a su catÃ¡logo estructural', () => {
   assert.deepEqual(schema.properties.keystone.properties.id.enum, ['key']);
   assert.equal(schema.properties.keystone.properties.id.enum.includes('p1'), false);
   assert.equal(schema.properties.spells.items.properties.id.enum.includes('missing'), false);
-  assert.equal(schema.anyOf.length, 2);
-  const precisionRule = schema.anyOf.find(rule => rule.properties.primary_runes.prefixItems[0].properties.id.enum.includes('p1'));
-  assert.deepEqual(precisionRule.properties.primary_runes.prefixItems.map(item => item.properties.id.enum), [['p1'], ['p2', 'p2b'], ['p3']]);
-  assert.deepEqual(precisionRule.properties.secondary_rune.properties.id.enum, ['other']);
+  assert.deepEqual(schema.properties.primary_runes.items.properties.id.enum, ['p1', 'p2', 'p3', 'p2b', 'other']);
+  assert.equal('anyOf' in schema, false);
 });
 test('rechaza una build sin auditorÃ­a de coherencia', () => {
   const candidate = valid();

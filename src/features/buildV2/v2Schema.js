@@ -95,29 +95,28 @@ function selectionSchema(ids) {
   };
 }
 
-export function createV2BuildJsonSchema(snapshot) {
+export function createV2BuildJsonSchema(snapshot, context = {}) {
   const keystoneIds = snapshot.runes.filter(rune => rune.branch === 'Clave').map(rune => rune.id);
   const regularRunes = snapshot.runes.filter(rune => rune.branch !== 'Clave');
   const regularRuneIds = regularRunes.map(rune => rune.id);
-  const branches = [...new Set(regularRunes.map(rune => rune.branch))];
-  const branchRules = branches.map(branch => {
-    const inBranch = regularRunes.filter(rune => rune.branch === branch);
-    const groupIds = [1, 2, 3].map(group => inBranch.filter(rune => Number(rune.group) === group).map(rune => rune.id));
-    const secondaryIds = regularRunes.filter(rune => rune.branch !== branch).map(rune => rune.id);
-    return {
-      type: 'object',
-      properties: {
-        primary_runes: {
-          type: 'array',
-          minItems: 3,
-          maxItems: 3,
-          prefixItems: groupIds.map(ids => selectionSchema(ids)),
-        },
-        secondary_rune: selectionSchema(secondaryIds),
-      },
-    };
-  });
-
+  const spellIds = snapshot.spells.map(spell => spell.id);
+  const smiteIds = snapshot.spells
+    .filter(spell => String(spell.name || '').localeCompare('Castigo', 'es', { sensitivity: 'base' }) === 0)
+    .map(spell => spell.id);
+  const smiteIdSet = new Set(smiteIds.map(String));
+  const nonSmiteIds = spellIds.filter(id => !smiteIdSet.has(String(id)));
+  const role = String(context.role || '').toLowerCase();
+  const spellSchema = role === 'jungler' && smiteIds.length
+    ? {
+        type: 'array',
+        minItems: 2,
+        maxItems: 2,
+        prefixItems: [selectionSchema(smiteIds), selectionSchema(nonSmiteIds)],
+      }
+    : {
+        ...v2BuildJsonSchema.properties.spells,
+        items: selectionSchema(role ? nonSmiteIds : spellIds),
+      };
   return {
     ...v2BuildJsonSchema,
     properties: {
@@ -127,8 +126,7 @@ export function createV2BuildJsonSchema(snapshot) {
       keystone: selectionSchema(keystoneIds),
       primary_runes: { ...v2BuildJsonSchema.properties.primary_runes, items: selectionSchema(regularRuneIds) },
       secondary_rune: selectionSchema(regularRuneIds),
-      spells: { ...v2BuildJsonSchema.properties.spells, items: selectionSchema(snapshot.spells.map(spell => spell.id)) },
+      spells: spellSchema,
     },
-    anyOf: branchRules,
   };
 }

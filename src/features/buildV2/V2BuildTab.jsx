@@ -5,6 +5,7 @@ import { loadV2Snapshot } from './v2DataLoader';
 import { buildV2Prompt, estimatePromptTokens } from './v2PromptBuilder';
 import { requestV2Build } from './v2AiClient';
 import { validateV2Result } from './v2Validation';
+import { stabilizeV2Result } from './v2ResultStabilizer';
 import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
 
@@ -42,13 +43,47 @@ export default function V2BuildTab() {
     if (new Set(Object.values(allies)).size !== 5 || new Set(Object.values(enemies)).size !== 5) { setState('validation_error'); setError('No puede repetirse un campeón dentro del mismo equipo.'); return; }
     setState('loading'); setError(''); setResult(null);
     try {
-      const prompt = buildV2Prompt({ snapshot, championId, role, allies, enemies, buildPreference });
-      if (import.meta.env.DEV) console.debug('[Build IA V2] request', { snapshot, counts: { champions: snapshot.champions.length, coreItems: snapshot.coreItems.length, movementItems: snapshot.movementItems.length, runes: snapshot.runes.length, spells: snapshot.spells.length }, prompt, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
-      const response = await requestV2Build(prompt, snapshot);
-      if (import.meta.env.DEV) console.debug('[Build IA V2] response', { raw: response.raw, parsed: response.parsed });
-      const validation = validateV2Result(response.parsed, snapshot, { role });
-      if (!validation.ok) { if (import.meta.env.DEV) console.debug('[Build IA V2] validation', validation); setState('validation_error'); setError([...validation.schemaErrors, ...validation.validationErrors].join(' ')); return; }
-      setResult({ ...resolveV2Result(validation.data, snapshot), champion: snapshot.champions.find(c => String(c.id) === championId), role }); setState('success');
+      const requestContext = { snapshot, championId, role, allies, enemies, buildPreference };
+      let prompt = buildV2Prompt(requestContext);
+      let lastValidation = null;
+
+      for (let attempt = 1; attempt <= 2; attempt += 1) {
+        if (import.meta.env.DEV) console.debug('[Build IA V2] request', { attempt, counts: { champions: snapshot.champions.length, coreItems: snapshot.coreItems.length, movementItems: snapshot.movementItems.length, runes: snapshot.runes.length, spells: snapshot.spells.length }, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
+        let response;
+        try {
+          response = await requestV2Build(prompt, snapshot, { role, attempt });
+        } catch (cause) {
+          if (attempt === 1 && cause.retryable) {
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            continue;
+          }
+          throw cause;
+        }
+
+        if (import.meta.env.DEV) console.debug('[Build IA V2] response', { attempt, raw: response.raw, parsed: response.parsed });
+        const stabilized = stabilizeV2Result(response.parsed, snapshot, { role });
+        const validation = validateV2Result(stabilized, snapshot, { role });
+        if (validation.ok) {
+          setResult({ ...resolveV2Result(validation.data, snapshot), champion: snapshot.champions.find(c => String(c.id) === championId), role });
+          setState('success');
+          return;
+        }
+
+        lastValidation = validation;
+        if (import.meta.env.DEV) console.debug('[Build IA V2] validation', { attempt, validation });
+        if (attempt === 1) {
+          prompt = buildV2Prompt({
+            ...requestContext,
+            correction: {
+              errors: [...validation.schemaErrors, ...validation.validationErrors],
+              previousResult: response.parsed,
+            },
+          });
+        }
+      }
+
+      setState('validation_error');
+      setError([...lastValidation.schemaErrors, ...lastValidation.validationErrors].join(' '));
     } catch (cause) { setState(cause.kind === 'malformed_response' ? 'malformed_response' : 'provider_error'); setError(cause.message); if (import.meta.env.DEV) console.debug('[Build IA V2] error', { kind: cause.kind, raw: cause.raw, message: cause.message }); }
   }
 

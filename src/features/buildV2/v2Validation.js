@@ -54,9 +54,11 @@ export function validateV2Result(value, snapshot, context = {}) {
 
   if (duplicates(spellIds)) errors.push('Los dos hechizos deben ser distintos.');
   for (const id of spellIds) if (!spellMap.has(id)) errors.push(`Hechizo inexistente en el snapshot: ${id}.`);
+  const selectedSpellNames = result.spells.map(x => spellMap.get(x.id)?.name?.trim().toLowerCase());
   if (String(context.role || '').toLowerCase() === 'jungler') {
-    const selected = result.spells.map(x => spellMap.get(x.id)?.name?.toLowerCase());
-    if (!selected.includes('castigo')) errors.push('El rol Jungler requiere Castigo.');
+    if (!selectedSpellNames.includes('castigo')) errors.push('El rol Jungler requiere Castigo.');
+  } else if (selectedSpellNames.includes('castigo')) {
+    errors.push('Castigo solo puede seleccionarse para el rol Jungler.');
   }
 
   return { ok: errors.length === 0, data: result, schemaErrors: [], validationErrors: errors };
