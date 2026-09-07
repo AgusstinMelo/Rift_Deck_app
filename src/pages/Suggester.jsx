@@ -1299,16 +1299,16 @@ Devuelve exactamente 5 recomendaciones.`;
 }
 
 export default function Suggester() {
-  const [activeTab, setActiveTab] = useState('legacy');
+  const [activeTab, setActiveTab] = useState('v2');
   return (
     <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-5">
         <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
-          <button type="button" onClick={() => setActiveTab('legacy')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'legacy' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>Sugeridor actual</button>
-          <button type="button" onClick={() => setActiveTab('v2')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'v2' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>Build IA V2</button>
+          <button type="button" onClick={() => setActiveTab('legacy')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'legacy' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>Campeones</button>
+          <button type="button" onClick={() => setActiveTab('v2')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'v2' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>Builds V0.2</button>
         </div>
       </div>
-      {activeTab === 'legacy' ? <LegacySuggester /> : <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6"><V2BuildTab /></div>}
+      {activeTab === 'legacy' ? <LegacySuggester /> : <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6"><V2BuildTab /></div>}
     </div>
   );
 }
