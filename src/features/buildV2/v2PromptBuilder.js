@@ -90,10 +90,16 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies, bui
   const championData = champion => compactEntity(champion, FIELD_SETS.champion);
   const requestedTheme = buildPreference.trim() || null;
   const themeGuidance = requestedTheme ? deriveThemeGuidance(requestedTheme) : null;
+  const selectedAllies = Object.entries(allies).filter(([, id]) => Boolean(id));
+  const selectedEnemies = Object.entries(enemies).filter(([, id]) => Boolean(id));
   const context = {
     selected: { role, champion: championData(selected) },
-    allies: Object.entries(allies).map(([lane, id]) => ({ lane, champion: championData(championMap.get(String(id))) })),
-    enemies: Object.entries(enemies).map(([lane, id]) => ({ lane, champion: championData(championMap.get(String(id))) })),
+    allies: selectedAllies.map(([lane, id]) => ({ lane, champion: championData(championMap.get(String(id))) })),
+    enemies: selectedEnemies.map(([lane, id]) => ({ lane, champion: championData(championMap.get(String(id))) })),
+    draft_coverage: {
+      allies_provided: selectedAllies.length,
+      enemies_provided: selectedEnemies.length,
+    },
     requested_theme: requestedTheme,
     theme_guidance: themeGuidance,
   };
@@ -118,6 +124,11 @@ PRIORIDADES, EN ESTE ORDEN
 1. Cumplir exactamente el contrato estructural y usar solamente IDs del catálogo correcto.
 2. Si requested_theme tiene texto, usarlo como guía dominante de estadísticas y estilo. No exigir que sea el nombre exacto de un arquetipo.
 3. Mantener compatibilidad con el campeón y adaptar los espacios restantes al draft.
+
+COMPOSICIONES OPCIONALES
+- allies y enemies pueden estar completos, parciales o vacíos. Analizá exclusivamente los campeones presentes y tratá los espacios faltantes como desconocidos; nunca inventes integrantes, amenazas ni necesidades.
+- Si no hay enemigos cargados, basá la build en el campeón, el rol, sus traits, item_scalings y vulnerabilities. Si hay información parcial, usala como señal adicional sin asumir que representa al equipo completo.
+- No afirmes que el equipo tiene un perfil global físico, mágico, resistente o frágil cuando faltan integrantes. En ese caso describí solamente la evidencia disponible.
 
 GUÍA OPCIONAL
 - requested_theme es orientativa: puede ser una temática, una estadística, una combinación abreviada o una idea informal. theme_guidance traduce expresiones frecuentes a objetivos concretos.

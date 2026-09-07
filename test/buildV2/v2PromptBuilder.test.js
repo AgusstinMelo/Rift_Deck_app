@@ -95,3 +95,25 @@ test('prohíbe comprar Filo del Infinito antes del tercer slot', () => {
   assert.match(prompt, /Filo del Infinito/);
   assert.match(prompt, /exactamente el slot 3/);
 });
+
+test('acepta composiciones parciales sin inventar espacios vacíos', () => {
+  const prompt = buildV2Prompt({
+    ...input,
+    allies: { top: 'sion', jungler: '', mid: 'ally', adc: '', support: '' },
+    enemies: { top: '', jungler: '', mid: 'enemy', adc: '', support: '' },
+  });
+  assert.match(prompt, /\x22draft_coverage\x22:\{\x22allies_provided\x22:2,\x22enemies_provided\x22:1\}/);
+  assert.equal(prompt.includes('\x22champion\x22:{}'), false);
+  assert.match(prompt, /tratá los espacios faltantes como desconocidos/);
+});
+
+test('genera contexto válido sin ninguna composición enemiga', () => {
+  const prompt = buildV2Prompt({
+    ...input,
+    allies: { top: 'sion', jungler: '', mid: '', adc: '', support: '' },
+    enemies: { top: '', jungler: '', mid: '', adc: '', support: '' },
+  });
+  assert.match(prompt, /\x22enemies\x22:\[\]/);
+  assert.match(prompt, /\x22enemies_provided\x22:0/);
+  assert.match(prompt, /basá la build en el campeón, el rol/);
+});

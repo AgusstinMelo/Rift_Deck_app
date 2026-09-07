@@ -39,9 +39,11 @@ export default function V2BuildTab() {
   const changeRole = next => { setAllies(team => { const value = { ...team }; if (value[role] === championId) value[role] = ''; if (championId) value[next] = championId; return value; }); setRole(next); };
 
   async function generate() {
-    if (!snapshot || !championId || Object.values(allies).some(x => !x) || Object.values(enemies).some(x => !x)) { setState('validation_error'); setError('Completá campeón, rol y las dos composiciones.'); return; }
+    if (!snapshot || !championId) { setState('validation_error'); setError('Seleccioná un campeón y su rol.'); return; }
     if (allies[role] !== championId) { setState('validation_error'); setError('El campeón elegido debe ocupar el rol seleccionado en aliados.'); return; }
-    if (new Set(Object.values(allies)).size !== 5 || new Set(Object.values(enemies)).size !== 5) { setState('validation_error'); setError('No puede repetirse un campeón dentro del mismo equipo.'); return; }
+    const selectedAllies = Object.values(allies).filter(Boolean);
+    const selectedEnemies = Object.values(enemies).filter(Boolean);
+    if (new Set(selectedAllies).size !== selectedAllies.length || new Set(selectedEnemies).size !== selectedEnemies.length) { setState('validation_error'); setError('No puede repetirse un campeón dentro del mismo equipo.'); return; }
     setState('loading'); setError(''); setResult(null);
     try {
       const generationSnapshot = createEligibleV2Snapshot(snapshot, championId);
