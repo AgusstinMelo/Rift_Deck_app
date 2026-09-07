@@ -22,7 +22,7 @@ const snapshot = {
     champion('enemy', 'Enemigo'),
   ],
   coreItems: [
-    { id: 'armor-pen', name: 'Penetración', category: 'Mejorado', type: ['Daño Físico'], stats: ['Penetración de armadura'], description: 'Atraviesa armadura.', effect_tags: ['penetracion_armadura'], image_url: 'https://example.test/item.jpg' },
+    { id: 'armor-pen', name: 'Penetración', category: 'Mejorado', type: ['Daño Físico'], percentage_armor_penetration: 30, armor: 0, description: 'Atraviesa armadura.', effect_tags: ['penetracion_armadura'], image_url: 'https://example.test/item.jpg' },
     { id: 'health', name: 'Vida', category: 'Mejorado', type: ['Defensa'], stats: ['Vida'], description: 'Aporta vida.' },
   ],
   movementItems: [{ id: 'boots', name: 'Botas', type: ['Movimiento'], description: 'Movimiento.' }],
@@ -69,6 +69,8 @@ test('el prompt compacto omite imágenes y metadatos del parche', () => {
   assert.equal(prompt.includes('item.jpg'), false);
   assert.equal(prompt.includes('patch_id'), false);
   assert.equal(prompt.includes('ITEM_EFFECT_INDEX'), false);
+  assert.match(prompt, /percentage_armor_penetration/);
+  assert.equal(prompt.includes('\x22armor\x22'), false);
 });
 
 test('el segundo intento incluye errores y sólo las selecciones previas', () => {

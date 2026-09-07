@@ -6,6 +6,7 @@ import { buildV2Prompt, estimatePromptTokens } from './v2PromptBuilder';
 import { requestV2Build } from './v2AiClient';
 import { validateV2Result } from './v2Validation';
 import { stabilizeV2Result } from './v2ResultStabilizer';
+import { createEligibleV2Snapshot } from './v2Eligibility';
 import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
 
@@ -43,15 +44,16 @@ export default function V2BuildTab() {
     if (new Set(Object.values(allies)).size !== 5 || new Set(Object.values(enemies)).size !== 5) { setState('validation_error'); setError('No puede repetirse un campeón dentro del mismo equipo.'); return; }
     setState('loading'); setError(''); setResult(null);
     try {
-      const requestContext = { snapshot, championId, role, allies, enemies, buildPreference };
+      const generationSnapshot = createEligibleV2Snapshot(snapshot, championId);
+      const requestContext = { snapshot: generationSnapshot, championId, role, allies, enemies, buildPreference };
       let prompt = buildV2Prompt(requestContext);
       let lastValidation = null;
 
       for (let attempt = 1; attempt <= 2; attempt += 1) {
-        if (import.meta.env.DEV) console.debug('[Build IA V2] request', { attempt, counts: { champions: snapshot.champions.length, coreItems: snapshot.coreItems.length, movementItems: snapshot.movementItems.length, runes: snapshot.runes.length, spells: snapshot.spells.length }, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
+        if (import.meta.env.DEV) console.debug('[Build IA V2] request', { attempt, counts: { champions: generationSnapshot.champions.length, coreItems: generationSnapshot.coreItems.length, movementItems: generationSnapshot.movementItems.length, runes: generationSnapshot.runes.length, spells: generationSnapshot.spells.length }, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
         let response;
         try {
-          response = await requestV2Build(prompt, snapshot, { role, attempt });
+          response = await requestV2Build(prompt, generationSnapshot, { role, attempt });
         } catch (cause) {
           if (attempt === 1 && cause.retryable) {
             await new Promise(resolve => setTimeout(resolve, 1200));
@@ -61,10 +63,10 @@ export default function V2BuildTab() {
         }
 
         if (import.meta.env.DEV) console.debug('[Build IA V2] response', { attempt, raw: response.raw, parsed: response.parsed });
-        const stabilized = stabilizeV2Result(response.parsed, snapshot, { role });
-        const validation = validateV2Result(stabilized, snapshot, { role });
+        const stabilized = stabilizeV2Result(response.parsed, generationSnapshot, { role });
+        const validation = validateV2Result(stabilized, generationSnapshot, { role });
         if (validation.ok) {
-          setResult({ ...resolveV2Result(validation.data, snapshot), champion: snapshot.champions.find(c => String(c.id) === championId), role });
+          setResult({ ...resolveV2Result(validation.data, generationSnapshot), champion: snapshot.champions.find(c => String(c.id) === championId), role });
           setState('success');
           return;
         }

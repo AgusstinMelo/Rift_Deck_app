@@ -1,11 +1,11 @@
 const FIELD_SETS = {
-  champion: ['id', 'name', 'roles', 'damage_type', 'attack_type', 'range_type', 'attack_range', 'traits', 'item_scalings', 'vulnerabilities', 'tags', 'description'],
-  item: ['id', 'name', 'type', 'stats', 'base_stats', 'description', 'passive', 'passives', 'active_effect', 'tags', 'effect_tags', 'trigger_tags', 'situational_role', 'price', 'cost', 'total_price', 'total_cost'],
-  rune: ['id', 'name', 'branch', 'group', 'description', 'effect', 'tags', 'trigger_tags', 'benefit_tags'],
+  champion: ['id', 'name', 'roles', 'damage_type', 'scaling', 'strategic_notes', 'attack_type', 'range_type', 'attack_range', 'traits', 'item_scalings', 'vulnerabilities', 'tags', 'description'],
+  item: ['id', 'name', 'type', 'description', 'tags', 'effect_tags', 'trigger_tags', 'situational_role', 'price', 'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power', 'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact', 'critical_damage', 'physic_vamp', 'magic_vamp', 'ability_haste', 'tenacity', 'healing_and_shield', 'adaptable_ad', 'adaptable_ap', 'flat_armor_penetration', 'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration', 'good_against', 'avoid_against'],
+  rune: ['id', 'name', 'branch', 'group', 'description', 'tags', 'trigger_tags', 'benefit_tags', 'mana_reg', 'attack_damage', 'attack_speed', 'life', 'flat_armor_penetration', 'percentage_movement', 'percentage_armor_penetration', 'critical_damage', 'tenacity', 'percentage_magic_penetration', 'life_reg', 'ability_power', 'ability_haste', 'critical_impact', 'flat_magic_penetration', 'magic_res', 'physic_vamp', 'armor', 'mana', 'healing_and_shield', 'flat_movement', 'magic_vamp'],
   spell: ['id', 'name', 'description', 'effect', 'tags', 'cooldown'],
 };
 
-const hasValue = value => value !== null && value !== undefined && value !== '' && (!Array.isArray(value) || value.length > 0);
+const hasValue = value => value !== null && value !== undefined && value !== '' && value !== 0 && (!Array.isArray(value) || value.length > 0);
 
 const compactEntity = (entity, fields) => Object.fromEntries(
   fields.filter(field => hasValue(entity?.[field])).map(field => [field, entity[field]]),
@@ -55,7 +55,9 @@ function createThemeHints(guidance, entities, limit) {
   if (!guidance?.goals.length) return [];
   return entities
     .map(entity => {
-      const searchable = normalizeText(FIELD_SETS.item.map(field => entity?.[field]).flat().join(' '));
+      const searchable = normalizeText(FIELD_SETS.item.flatMap(field =>
+        hasValue(entity?.[field]) ? [field, entity[field]] : []
+      ).flat().join(' '));
       const matchedGoals = guidance.goals
         .filter(goal => goal.terms.some(term => searchable.includes(normalizeText(term))))
         .map(goal => goal.key);
@@ -135,6 +137,8 @@ CONTRATO INNEGOCIABLE
 - 1 secondary_rune no-Clave, de una branch diferente de las primarias. Ninguna runa repetida.
 - 2 spells distintos. Jungler debe incluir Castigo; Top, Mid, ADC y Support no pueden incluir Castigo.
 - Copiá cada ID literalmente. Todos los textos y reasons son obligatorios. key_adaptations debe tener entre 2 y 4 textos.
+- Elegir Support como posición no otorga capacidades de soporte al campeón. Un objeto o runa que sólo se activa cuando el propio campeón cura o escuda aliados requiere que traits o item_scalings del campeón declaren literalmente curacion_aliada, escudo_aliado, poder_curacion o poder_escudo. El catálogo ya excluye esas piezas cuando el campeón no puede activarlas. No las reconstruyas ni las reemplaces por IDs ausentes.
+- Un objeto con activación propia que cura, escuda o protege aliados no necesita una habilidad previa del campeón y sigue siendo elegible.
 
 MÉTODO BREVE
 1. Convertí la guía opcional en objetivos de estadísticas/mecánicas, o inferí el arquetipo si no existe, y definí el perfil de daño final.
