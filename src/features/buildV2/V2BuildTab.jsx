@@ -33,7 +33,6 @@ export default function V2BuildTab() {
   const [error, setError] = useState('');
   const [buildPreference, setBuildPreference] = useState('');
   const champions = useMemo(() => [...(snapshot?.champions || [])].sort((a, b) => a.name.localeCompare(b.name)), [snapshot]);
-  const selectedChampion = champions.find(champion => String(champion.id) === championId);
   const setMember = (setter, lane, value) => setter(team => ({ ...team, [lane]: value }));
   const selectMain = id => { setChampionId(id); setAllies(team => ({ ...team, [role]: id })); };
   const changeRole = next => { setAllies(team => { const value = { ...team }; if (value[role] === championId) value[role] = ''; if (championId) value[next] = championId; return value; }); setRole(next); };
@@ -94,7 +93,20 @@ export default function V2BuildTab() {
   if (isLoading) return <div className="rd-card p-8 text-center text-muted-foreground">Cargando snapshot del parche activo…</div>;
   if (loadError) return <V2BuildResult state="provider_error" error={`No se pudo cargar Supabase: ${loadError.message}`} />;
   return <div className="space-y-4">
-    <header className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 px-6 py-6 md:px-8 md:py-7">{selectedChampion?.image_url_card && <div className="pointer-events-none absolute inset-y-0 right-0 hidden h-full overflow-hidden sm:block"><div className="relative h-full w-fit overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to left, black 0%, black 78%, transparent 100%)', maskImage: 'linear-gradient(to left, black 0%, black 78%, transparent 100%)' }}><img src={selectedChampion.image_url_card} alt="" className="h-full w-auto max-w-none object-contain object-right [filter:brightness(.72)_saturate(1.2)]" /><div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background via-background/70 to-transparent" /></div></div>}<div className="relative z-10"><div className="mb-3 flex items-center gap-2 text-primary"><BrainCircuit size={17} /><span className="text-[10px] font-semibold uppercase tracking-[0.28em]">AI Build Suggester V2</span></div><h1 className="max-w-xl font-rajdhani text-4xl font-bold uppercase leading-[0.9] tracking-[-0.06em] text-foreground md:text-6xl">Sugeridor<br />de builds</h1><p className="mt-3 max-w-md text-sm text-muted-foreground md:text-base">Objetos, runas y hechizos adaptados al campeón, rol y draft completo.</p><div className="mt-4 flex flex-wrap gap-2"><span className="rd-status-pill">Datos del parche actual</span><span className="rd-status-pill">Build contextual con IA</span><span className="rd-status-pill">Explicaciones y sinergias</span></div></div></header>
+    <header className="flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="h-px w-8 bg-primary/50" />
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Build Intelligence</span>
+          </div>
+          <h1 className="font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de builds</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Objetos, runas y hechizos adaptados al campeón, rol y draft disponible.</p>
+        </div>
+        <div className="rd-status-pill hidden items-center gap-3 sm:flex">
+          <BrainCircuit size={16} className="text-primary" />
+          <span className="text-xs text-muted-foreground">Build Intelligence</span>
+        </div>
+    </header>
     <div className="flex justify-end"><button onClick={generate} disabled={state === 'loading'} className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 sm:w-auto">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? 'Analizando draft…' : 'Generar build'}</button></div>
     <div className="grid items-start gap-5 xl:grid-cols-[310px_minmax(0,1fr)]">
       <aside className="space-y-4 xl:sticky xl:top-6">
