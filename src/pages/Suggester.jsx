@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Champion } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
@@ -9,7 +9,8 @@ import {
   Sparkles,
   X,
   Loader2,
-  Search,
+  Check,
+  ChevronDown,
   Brain,
   Target,
   Shield,
@@ -340,6 +341,13 @@ function buildRecommendationCandidates({ champions, tierlist, pool, lane }) {
         damage_type: champ.damage_type,
         scaling: champ.scaling,
         difficulty: champ.difficulty,
+        attack_type: champ.attack_type,
+        range_type: champ.range_type,
+        traits: toArray(champ.traits),
+        item_scalings: toArray(champ.item_scalings),
+        vulnerabilities: toArray(champ.vulnerabilities),
+        strategic_notes: champ.strategic_notes,
+        tags: toArray(champ.tags),
         tier: tier?.tier || 'sin tier',
         meta_lane: tier?.lane || null,
         score: tier?.ranking_final || 0,
@@ -359,39 +367,56 @@ function normalizeRecommendations(recommendations, candidates) {
     .slice(0, 5);
 }
 
-function ChampionSuggestionOption({ champ, onClick, imageUrl }) {
-  return (
-    <button
-      onClick={onClick}
-      className="
-        w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground
-                hover:bg-secondary transition-colors text-left
-        "
-      >
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={champ.name}
-            className="w-8 h-8 rounded-lg object-cover border border-primary/15"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs font-bold text-primary">
-            {champ.name?.[0]}
+  function PoolChampionSelect({ champions, pool, onToggle }) {
+    const [open, setOpen] = useState(false);
+    const rootRef = useRef(null);
+
+    useEffect(() => {
+      const close = event => {
+        if (!rootRef.current?.contains(event.target)) setOpen(false);
+      };
+      document.addEventListener('mousedown', close);
+      return () => document.removeEventListener('mousedown', close);
+    }, []);
+
+    return (
+      <div ref={rootRef} className="relative mb-4" style={{ zIndex: open ? 60 : 1 }}>
+        <button type="button" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(current => !current)} className="flex min-h-12 w-full items-center gap-2.5 rounded-xl border border-border/70 bg-secondary/55 px-3 py-2 text-left text-sm text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50">
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            {pool.length > 0 && <span className="flex shrink-0 -space-x-2">
+              {pool.slice(0, 3).map(name => {
+                const champion = getChampionData(champions, name);
+                return champion?.image_url
+                  ? <img key={name} src={champion.image_url} alt="" className="h-7 w-7 rounded-full border-2 border-[#151b28] object-cover" />
+                  : <span key={name} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#151b28] bg-secondary text-[10px] font-bold text-primary">{name[0]}</span>;
+              })}
+            </span>}
+            <span className={pool.length ? 'truncate font-medium' : 'truncate text-muted-foreground'}>
+              {pool.length ? `${pool.length} ${pool.length === 1 ? 'campeón seleccionado' : 'campeones seleccionados'}` : 'Seleccionar campeones…'}
+            </span>
+          </span>
+          <ChevronDown size={16} className={`shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+
+        {open && <div role="listbox" aria-multiselectable="true" className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border border-primary/20 bg-[#0f1420] p-1.5 shadow-2xl shadow-black/60">
+          <div className="max-h-80 overflow-y-auto">
+            {champions.map(champion => {
+              const active = pool.includes(champion.name);
+              const roles = getChampionRoles(champion);
+              return <button key={champion.id} type="button" role="option" aria-selected={active} onClick={() => onToggle(champion.name)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-secondary ${active ? 'bg-primary/8' : ''}`}>
+                {champion.image_url ? <img src={champion.image_url} alt="" loading="lazy" className="h-9 w-9 shrink-0 rounded-full border border-primary/20 object-cover" /> : <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-sm font-semibold text-primary">{champion.name?.[0]}</span>}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-foreground">{champion.name}</span>
+                  {roles.length > 0 && <span className="block truncate text-[11px] text-muted-foreground">{roles.join(' · ')}</span>}
+                </span>
+                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-secondary/50'}`}>
+                  {active && <Check size={13} />}
+                </span>
+              </button>;
+            })}
           </div>
-        )}
-
-        <div className="min-w-0">
-          <p className="font-medium truncate">
-            {champ.name}
-          </p>
-
-          {champ.roles && (
-            <p className="text-[10px] text-muted-foreground truncate">
-              {champ.roles}
-            </p>
-          )}
-        </div>
-      </button>
+        </div>}
+      </div>
     );
   }
 
@@ -647,7 +672,6 @@ function ChampionSuggestionOption({ champ, onClick, imageUrl }) {
   }
   function LegacySuggester() {
   const [pool, setPool] = useState([]);
-  const [input, setInput] = useState('');
   const [context, setContext] = useState('');
   const [lane, setLane] = useState('');
   const [goal, setGoal] = useState('ranked');
@@ -695,17 +719,6 @@ function ChampionSuggestionOption({ champ, onClick, imageUrl }) {
     });
   }, [pool, champions, matches, tierlist, lane]);
 
-  const suggestions =
-    input.length > 1
-      ? champions
-          .filter(
-            c =>
-              c.name.toLowerCase().includes(input.toLowerCase()) &&
-              !pool.includes(c.name)
-          )
-          .slice(0, 7)
-      : [];
-
   const topTierChamps = useMemo(() => {
     return tierlist
       .filter(t => t.tier === 'S+' || t.tier === 'S')
@@ -731,14 +744,10 @@ function ChampionSuggestionOption({ champ, onClick, imageUrl }) {
     });
   }, [champions, tierlist, pool, lane]);
 
-  const addToPool = (name) => {
-    const cleaned = name.trim();
-
-    if (cleaned && !pool.includes(cleaned)) {
-      setPool([...pool, cleaned]);
-    }
-
-    setInput('');
+  const togglePoolChampion = name => {
+    setPool(current => current.includes(name)
+      ? current.filter(champion => champion !== name)
+      : [...current, name]);
   };
 
   const removeFromPool = (name) => {
@@ -769,6 +778,13 @@ function ChampionSuggestionOption({ champ, onClick, imageUrl }) {
       role: p.role,
       scaling: p.scaling,
       difficulty: p.difficulty,
+      attack_type: p.champion?.attack_type,
+      range_type: p.champion?.range_type,
+      traits: toArray(p.champion?.traits),
+      item_scalings: toArray(p.champion?.item_scalings),
+      vulnerabilities: toArray(p.champion?.vulnerabilities),
+      strategic_notes: p.champion?.strategic_notes,
+      tags: toArray(p.champion?.tags),
       tier: p.tier?.tier || 'sin tier',
       meta_lane: p.tier?.lane || null,
       personal_wr:
@@ -907,7 +923,7 @@ Devuelve exactamente 5 recomendaciones.`;
 
       <div className="grid grid-cols-1 xl:grid-cols-[390px_1fr] gap-6">
         <div className="space-y-5">
-          <div className="rd-card rd-card-overflow-visible p-5">
+          <div className="rd-card rd-card-overflow-visible p-5 focus-within:z-40">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">
@@ -915,40 +931,7 @@ Devuelve exactamente 5 recomendaciones.`;
               </h2>
             </div>
 
-            <div className="relative z-30 mb-4">
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-
-              <input
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addToPool(input)}
-                placeholder="Buscar campeón..."
-                className="
-                  w-full bg-secondary/60 border border-border rounded-xl
-                  pl-10 pr-4 py-3 text-sm text-foreground
-                  placeholder:text-muted-foreground
-                  outline-none focus:border-primary/40
-                  focus:ring-2 focus:ring-primary/10
-                  transition-all
-                "
-              />
-
-              {suggestions.length > 0 && (
-                <div className="relative mt-2 bg-popover border border-border rounded-xl shadow-xl z-50 overflow-hidden">
-                  {suggestions.map(c => (
-                    <ChampionSuggestionOption
-                      key={c.id}
-                      champ={c}
-                      imageUrl={getChampionImage(champions, c.name)}
-                      onClick={() => addToPool(c.name)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <PoolChampionSelect champions={champions} pool={pool} onToggle={togglePoolChampion} />
 
             {pool.length === 0 ? (
               <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 text-center">

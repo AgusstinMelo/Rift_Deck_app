@@ -219,6 +219,14 @@
   overflow: visible;
 }
 
+.rd-card-overflow-visible:focus-within {
+  z-index: 70;
+}
+
+.rd-card-overflow-visible:has([aria-expanded="true"]) {
+  z-index: 70;
+}
+
 .rd-card::before {
   content: "";
   position: absolute;
