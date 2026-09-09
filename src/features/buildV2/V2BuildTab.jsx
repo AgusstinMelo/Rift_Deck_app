@@ -205,7 +205,7 @@ export default function V2BuildTab() {
         <div>
           <div className="mb-1 flex items-center gap-2">
             <span className="h-px w-8 bg-primary/50" />
-            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Build Intelligence</span>
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck consigliere</span>
           </div>
           <h1 className="font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de builds</h1>
           <p className="mt-1 text-sm text-muted-foreground">Objetos, runas y hechizos adaptados al campeón, rol y draft disponible.</p>

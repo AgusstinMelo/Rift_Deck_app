@@ -905,7 +905,7 @@ Devuelve exactamente 5 recomendaciones.`;
           </div>
 
           <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Sugeridor (BETA)
+            Sugeridor de campeones
           </h1>
 
           <p className="text-muted-foreground text-sm mt-1">
