@@ -21,7 +21,7 @@ const navItems = [
   { path: '/build-calculator', label: 'Builds', icon: Wrench },
   { path: '/matches', label: 'Partidas', icon: Swords },
   { path: '/stats', label: 'Estadísticas', icon: BarChart3 },
-  { path: '/suggester', label: 'Sugeridor (BETA)', icon: Sparkles },
+  { path: '/suggester', label: 'Sugeridor', icon: Sparkles },
 ];
 
 const infoItems = [

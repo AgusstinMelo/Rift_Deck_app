@@ -921,6 +921,31 @@ Devuelve exactamente 5 recomendaciones.`;
         </div>
       </div>
 
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generating || pool.length === 0}
+          className="
+            flex w-full items-center justify-center gap-2 rounded-xl
+            bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
+            transition-colors hover:bg-primary/90 disabled:cursor-not-allowed
+            disabled:opacity-50 sm:w-auto
+          "
+        >
+          {generating ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Analizando pool...
+            </>
+          ) : (
+            <>
+              <Sparkles size={18} />
+              Generar recomendaciones
+            </>
+          )}
+        </button>
+      </div>
       <div className="grid grid-cols-1 xl:grid-cols-[390px_1fr] gap-6">
         <div className="space-y-5">
           <div className="rd-card rd-card-overflow-visible p-5 focus-within:z-40">
