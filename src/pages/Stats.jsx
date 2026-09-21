@@ -851,12 +851,12 @@ export default function Stats() {
 
   const bestMatchups = [...matchupArr]
     .filter(m => m.wr > 50)
-    .sort((a, b) => b.wr - a.wr)
+    .sort((a, b) => b.total - a.total || b.wr - a.wr)
     .slice(0, 5);
 
   const worstMatchups = [...matchupArr]
     .filter(m => m.wr < 50)
-    .sort((a, b) => a.wr - b.wr)
+    .sort((a, b) => b.total - a.total || a.wr - b.wr)
     .slice(0, 5);
 
   const synergyStats = {};
@@ -886,12 +886,12 @@ export default function Stats() {
 
   const bestSynergies = [...synergyArr]
     .filter(m => m.wr > 50)
-    .sort((a, b) => b.wr - a.wr)
+    .sort((a, b) => b.total - a.total || b.wr - a.wr)
     .slice(0, 5);
 
   const worstSynergies = [...synergyArr]
     .filter(m => m.wr < 50)
-    .sort((a, b) => a.wr - b.wr)
+    .sort((a, b) => b.total - a.total || a.wr - b.wr)
     .slice(0, 5);
 
   // Matchups generales: contra cualquier campeón enemigo del equipo
@@ -920,12 +920,12 @@ export default function Stats() {
 
   const bestGeneralMatchups = [...generalMatchupArr]
     .filter(m => m.wr > 50)
-    .sort((a, b) => b.wr - a.wr)
+    .sort((a, b) => b.total - a.total || b.wr - a.wr)
     .slice(0, 5);
 
   const worstGeneralMatchups = [...generalMatchupArr]
     .filter(m => m.wr < 50)
-    .sort((a, b) => a.wr - b.wr)
+    .sort((a, b) => b.total - a.total || a.wr - b.wr)
     .slice(0, 5);
 
   const insights = computeInsights({ matches, tierlist, wrItems, builds: insightBuilds, champions, runes, spells });
