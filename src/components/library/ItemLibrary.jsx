@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
+import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 
 const CATEGORY_LABELS = {
   'Básico': 'Básico',
@@ -187,6 +188,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
     { key: 'percentage_movement', label: 'Vel. Mov. %', color: 'text-teal-300', unit: '%' },
     { key: 'critical_impact', label: 'Tasa de Críticos', color: 'text-amber-400', unit: '%' },
     { key: 'critical_damage', label: 'Daño Crítico', color: 'text-amber-300', unit: '%' },
+    { key: 'lifesteal', label: 'Robo de Vida', color: 'text-pink-400', unit: '%' },
     { key: 'physic_vamp', label: 'Vamp. Físico', color: 'text-pink-400', unit: '%' },
     { key: 'magic_vamp', label: 'Vamp. Mágico', color: 'text-pink-300', unit: '%' },
     { key: 'flat_armor_penetration', label: 'Pen. Armadura', color: 'text-red-300', unit: '' },
@@ -200,6 +202,10 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
 
   const activeStats = selected
     ? STAT_CONFIG.filter(stat => {
+        const unifiedLifesteal = usesUnifiedLifesteal(selected.patch_version);
+        if (unifiedLifesteal && (stat.key === 'physic_vamp' || stat.key === 'magic_vamp')) return false;
+        if (!unifiedLifesteal && stat.key === 'lifesteal') return false;
+
         const value = Number(selected[stat.key]);
         return !Number.isNaN(value) && value !== 0;
       })

@@ -32,7 +32,7 @@ const publicColumns = [
   'id', 'name', 'image_url', 'image_url_card', 'lane', 'roles', 'difficulty',
   'damage_type', 'scaling', 'strategic_notes', 'tags', 'life', 'mana', 'armor',
   'magic_res', 'attack_damage', 'attack_speed', 'movement', 'bonus_attack_speed',
-  'life_reg', 'mana_reg', 'physic_vamp', 'magic_vamp', 'damage', 'survive',
+  'life_reg', 'mana_reg', 'lifesteal', 'physic_vamp', 'magic_vamp', 'damage', 'survive',
   'assist', 'attack_range',
   'external_id', 'original_name', 'strong_against', 'weak_against', 'synergies',
 ];
@@ -57,7 +57,7 @@ const itemColumns = [
   'good_against', 'avoid_against',
   'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power',
   'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact',
-  'critical_damage', 'physic_vamp', 'magic_vamp', 'flat_armor_penetration',
+  'critical_damage', 'lifesteal', 'physic_vamp', 'magic_vamp', 'flat_armor_penetration',
   'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration',
   'ability_haste', 'tenacity', 'healing_and_shield',
 ];

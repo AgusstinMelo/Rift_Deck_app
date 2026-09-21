@@ -212,6 +212,7 @@ const itemStatGuidance = [
   { key: 'percentage_magic_penetration', label: 'penetración mágica', useful: 'rivales que acumulan resistencia mágica', weak: 'equipos con poca resistencia mágica adicional' },
   { key: 'flat_magic_penetration', label: 'penetración mágica', useful: 'objetivos frágiles con poca resistencia mágica', weak: 'varios rivales que acumulan mucha resistencia mágica' },
   { key: 'ability_haste', label: 'aceleración de habilidad', useful: 'peleas donde podés lanzar varias rotaciones', weak: 'intercambios que se deciden antes de una segunda rotación' },
+  { key: 'lifesteal', label: 'robo de vida', useful: 'peleas extendidas en las que podés mantenerte haciendo daño', weak: 'burst o control que no te dejan sostenerte atacando' },
   { key: 'physic_vamp', label: 'vampirismo físico', useful: 'peleas extendidas en las que podés hacer daño físico', weak: 'burst o control que no te dejan sostenerte pegando' },
   { key: 'magic_vamp', label: 'vampirismo mágico', useful: 'peleas extendidas en las que podés hacer daño mágico', weak: 'burst o control que no te dejan sostenerte usando habilidades' },
   { key: 'healing_and_shield', label: 'potencia de curaciones y escudos', useful: 'una build con curaciones o escudos frecuentes', weak: 'un kit que casi no aprovecha ese efecto' },

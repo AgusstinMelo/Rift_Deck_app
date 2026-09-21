@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { getComparableBuilds } from '@/api/buildsSupabase';
-import { ArrowLeft, ChevronDown, Trophy } from 'lucide-react';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
+import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 
 // ── stat calculation ──────────────────────────────────────────────────────────
 const NO_RESOURCE = ['Aatrox', 'Dr. Mundo', 'Garen', 'Katarina', 'Mordekaiser', 'Rengar', 'Riven', 'Rumble', 'Sett', 'Viego', 'Yasuo', 'Yone'];
@@ -27,6 +28,7 @@ function buildBaseStats(c) {
     armor: Number(c.armor || 0), magic_res: Number(c.magic_res || 0),
     movement_flat: Number(c.movement || 0), movement_pct: 0,
     ability_power: 0, ability_haste: 0, critical_impact: 0, critical_damage: 175,
+    lifesteal: Number(c.lifesteal || 0),
     physic_vamp: Number(c.physic_vamp || 0), magic_vamp: Number(c.magic_vamp || 0),
     flat_armor_penetration: 0, percentage_armor_penetration: 0,
     flat_magic_penetration: 0, percentage_magic_penetration: 0,
@@ -42,6 +44,7 @@ function applySource(s, src) {
   s.movement_flat += Number(src.flat_movement || 0); s.movement_pct += Number(src.percentage_movement || 0);
   s.ability_power += Number(src.ability_power || 0); s.ability_haste += Number(src.ability_haste || 0);
   s.critical_impact += Number(src.critical_impact || 0); s.critical_damage += Number(src.critical_damage || 0);
+  s.lifesteal += Number(src.lifesteal || 0);
   s.physic_vamp += Number(src.physic_vamp || 0); s.magic_vamp += Number(src.magic_vamp || 0);
   s.flat_armor_penetration += Number(src.flat_armor_penetration || 0);
   s.percentage_armor_penetration += Number(src.percentage_armor_penetration || 0);
@@ -85,6 +88,7 @@ function getAllRows(champion, computed) {
   if (!computed) return [];
   const { stats, attack_speed, movement } = computed;
   const ml = getManaLabel(champion?.name || '');
+  const unifiedLifesteal = usesUnifiedLifesteal(champion?.patch_version);
   return [
     { label: 'Vida', key: 'life', value: stats.life },
     { label: 'Reg. Vida', key: 'life_reg', value: stats.life_reg },
@@ -99,8 +103,12 @@ function getAllRows(champion, computed) {
     { label: 'Vel. hab.', key: 'ability_haste', value: stats.ability_haste },
     { label: 'Crítico %', key: 'critical_impact', value: stats.critical_impact, unit: '%' },
     { label: 'Daño crítico', key: 'critical_damage', value: stats.critical_damage, unit: '%' },
-    { label: 'Vamp. físico', key: 'physic_vamp', value: stats.physic_vamp, unit: '%' },
-    { label: 'Vamp. mágico', key: 'magic_vamp', value: stats.magic_vamp, unit: '%' },
+    ...(unifiedLifesteal
+      ? [{ label: 'Robo de vida', key: 'lifesteal', value: stats.lifesteal, unit: '%' }]
+      : [
+          { label: 'Vamp. físico', key: 'physic_vamp', value: stats.physic_vamp, unit: '%' },
+          { label: 'Vamp. mágico', key: 'magic_vamp', value: stats.magic_vamp, unit: '%' },
+        ]),
     { label: 'Pen. armad.', key: 'flat_armor_penetration', value: stats.flat_armor_penetration },
     { label: 'Pen. armad. %', key: 'percentage_armor_penetration', value: stats.percentage_armor_penetration, unit: '%' },
     { label: 'Pen. mágica', key: 'flat_magic_penetration', value: stats.flat_magic_penetration },

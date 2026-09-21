@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
+import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 
 const CATEGORIES = [
   { key: 'all', label: 'Todos' },
@@ -39,6 +40,7 @@ const ITEM_STATS = [
   { key: 'percentage_movement', label: 'Vel. de movimiento', unit: '%', color: 'text-white' },
   { key: 'critical_impact', label: 'Prob. de crítico', unit: '%', color: 'text-red-400' },
   { key: 'critical_damage', label: 'Daño crítico', unit: '%', color: 'text-red-400' },
+  { key: 'lifesteal', label: 'Robo de vida', unit: '%', color: 'text-green-300' },
   { key: 'physic_vamp', label: 'Vamp. físico', unit: '%', color: 'text-green-300' },
   { key: 'magic_vamp', label: 'Vamp. mágico', unit: '%', color: 'text-green-300' },
   { key: 'flat_armor_penetration', label: 'Pen. de armadura', color: 'text-red-300' },
@@ -53,6 +55,10 @@ const ITEM_STATS = [
 ];
 
 const getActiveStats = (item) => ITEM_STATS.filter(({ key }) => {
+  const unifiedLifesteal = usesUnifiedLifesteal(item?.patch_version);
+  if (unifiedLifesteal && (key === 'physic_vamp' || key === 'magic_vamp')) return false;
+  if (!unifiedLifesteal && key === 'lifesteal') return false;
+
   const value = Number(item?.[key]);
   return Number.isFinite(value) && value !== 0;
 });

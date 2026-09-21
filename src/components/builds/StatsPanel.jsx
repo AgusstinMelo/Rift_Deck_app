@@ -1,4 +1,6 @@
 // Campeones sin maná (sin recurso)
+import { usesUnifiedLifesteal } from '@/lib/gamePatch';
+
 const NO_RESOURCE = ['Aatrox', 'Dr. Mundo', 'Garen', 'Katarina', 'Mordekaiser', 'Rengar', 'Riven', 'Rumble', 'Sett', 'Viego', 'Yasuo', 'Yone'];
 // Campeones con Energía
 const ENERGY_CHAMPS = ['Akali', 'Ambessa', 'Kennen', 'Lee Sin', 'Shen', 'Zed'];
@@ -74,7 +76,8 @@ function buildBaseStats(c) {
     ability_power: 0,
     ability_haste: 0,
     critical_impact: 0,
-    critical_damage: 175,
+    critical_damage: 200,
+    lifesteal: Number(c.lifesteal || 0),
     physic_vamp: Number(c.physic_vamp || 0),
     magic_vamp: Number(c.magic_vamp || 0),
     flat_armor_penetration: 0,
@@ -103,6 +106,7 @@ function applySource(stats, source) {
   stats.ability_haste   += Number(source.ability_haste || 0);
   stats.critical_impact += Number(source.critical_impact || 0);
   stats.critical_damage += Number(source.critical_damage || 0);
+  stats.lifesteal       += Number(source.lifesteal || 0);
   stats.physic_vamp     += Number(source.physic_vamp || 0);
   stats.magic_vamp      += Number(source.magic_vamp || 0);
   stats.flat_armor_penetration        += Number(source.flat_armor_penetration || 0);
@@ -183,6 +187,7 @@ export default function StatsPanel({ champion, items, runes = [] }) {
   const { stats, attack_speed, movement } = calcStats(champion, items, runes);
   const champName = champion?.name || '';
   const manaLabels = getManaLabel(champName);
+  const unifiedLifesteal = usesUnifiedLifesteal(champion?.patch_version);
   const hasItems = items.length > 0;
 
   const rows = [
@@ -199,8 +204,12 @@ export default function StatsPanel({ champion, items, runes = [] }) {
     { label: 'Aceleración de habilidades',       value: stats.ability_haste },
     { label: 'Tasa de críticos',                value: stats.critical_impact,               unit: '%' },
     { label: 'Daño crítico',                   value: stats.critical_damage,               unit: '%' },
-    { label: 'Vampirismo físico',              value: stats.physic_vamp,                   unit: '%' },
-    { label: 'Vampirismo mágico',              value: stats.magic_vamp,                    unit: '%' },
+    ...(unifiedLifesteal
+      ? [{ label: 'Robo de vida', value: stats.lifesteal, unit: '%' }]
+      : [
+          { label: 'Vampirismo físico', value: stats.physic_vamp, unit: '%' },
+          { label: 'Vampirismo mágico', value: stats.magic_vamp, unit: '%' },
+        ]),
     { label: 'Penetración de armadura',        value: stats.flat_armor_penetration },
     { label: 'Penetración de armadura %',      value: stats.percentage_armor_penetration,  unit: '%' },
     { label: 'Penetración mágica',             value: stats.flat_magic_penetration },
