@@ -1,5 +1,5 @@
 // Campeones sin maná (sin recurso)
-import { usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { isPatchAtLeast, usesUnifiedLifesteal } from '@/lib/gamePatch';
 
 const NO_RESOURCE = ['Aatrox', 'Dr. Mundo', 'Garen', 'Katarina', 'Mordekaiser', 'Rengar', 'Riven', 'Rumble', 'Sett', 'Viego', 'Yasuo', 'Yone'];
 // Campeones con Energía
@@ -76,7 +76,7 @@ function buildBaseStats(c) {
     ability_power: 0,
     ability_haste: 0,
     critical_impact: 0,
-    critical_damage: 200,
+    critical_damage: isPatchAtLeast(c.patch_version, 7, 3) ? 200 : 175,
     lifesteal: Number(c.lifesteal || 0),
     physic_vamp: Number(c.physic_vamp || 0),
     magic_vamp: Number(c.magic_vamp || 0),

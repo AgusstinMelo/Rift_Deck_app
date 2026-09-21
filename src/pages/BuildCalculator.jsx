@@ -8,7 +8,6 @@ import BuildCompare from '@/components/builds/BuildCompare';
 import { getCurrentTierlistEntries } from '@/utils/tierlist';
 import { patchMatchesSelection } from '@/utils/patches';
 import { getGamePatchCatalog, getPublishedGamePatches } from '@/api/gameCatalogSupabase';
-import PatchSelect from '@/components/patches/PatchSelect';
 
 export default function BuildCalculator() {
   const [selectedChampion, setSelectedChampion] = useState(null);
@@ -117,7 +116,9 @@ export default function BuildCalculator() {
         tierEntries={currentTierlist}
         items={items}
         runes={runes}
+        patches={patches}
         patchVersion={selectedPatch}
+        onPatchChange={setSelectedPatch}
         existingBuild={editingBuild}
         onBack={() => { setEditingBuild(null); setView('builds'); }}
       />
@@ -128,7 +129,6 @@ export default function BuildCalculator() {
     return (
       <ChampionBuilds
         champion={selectedChampion}
-        patchVersion={selectedPatch}
         onNewBuild={handleNewBuild}
         onEditBuild={handleEditBuild}
         onBack={handleBack}
@@ -137,22 +137,5 @@ export default function BuildCalculator() {
     );
   }
 
-  return (
-    <div>
-      <div className="mx-5 mt-5 max-w-xs md:mx-6">
-        <label className="mb-1 block text-xs text-muted-foreground">Parche de la build</label>
-        <PatchSelect
-          value={selectedPatch}
-          patches={patches}
-          onChange={nextPatch => {
-            setSelectedPatch(nextPatch);
-            setSelectedChampion(null);
-            setEditingBuild(null);
-            setView('builds');
-          }}
-        />
-      </div>
-      <ChampionPicker champions={champions} tierlist={currentTierlist} onSelect={handleSelectChampion} />
-    </div>
-  );
+  return <ChampionPicker champions={champions} tierlist={currentTierlist} onSelect={handleSelectChampion} />;
 }

@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { getComparableBuilds } from '@/api/buildsSupabase';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
-import { usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { isPatchAtLeast, usesUnifiedLifesteal } from '@/lib/gamePatch';
 
 // ── stat calculation ──────────────────────────────────────────────────────────
 const NO_RESOURCE = ['Aatrox', 'Dr. Mundo', 'Garen', 'Katarina', 'Mordekaiser', 'Rengar', 'Riven', 'Rumble', 'Sett', 'Viego', 'Yasuo', 'Yone'];
@@ -27,7 +27,8 @@ function buildBaseStats(c) {
     attack_damage: Number(c.attack_damage || 0), bonus_attack_speed: Number(c.bonus_attack_speed || 0),
     armor: Number(c.armor || 0), magic_res: Number(c.magic_res || 0),
     movement_flat: Number(c.movement || 0), movement_pct: 0,
-    ability_power: 0, ability_haste: 0, critical_impact: 0, critical_damage: 175,
+    ability_power: 0, ability_haste: 0, critical_impact: 0,
+    critical_damage: isPatchAtLeast(c.patch_version, 7, 3) ? 200 : 175,
     lifesteal: Number(c.lifesteal || 0),
     physic_vamp: Number(c.physic_vamp || 0), magic_vamp: Number(c.magic_vamp || 0),
     flat_armor_penetration: 0, percentage_armor_penetration: 0,

@@ -11,8 +11,9 @@ import StatsPanel from './StatsPanel';
 import RunePicker from './RunePicker';
 import TierBadge from '@/components/ui/TierBadge';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
+import PatchSelect from '@/components/patches/PatchSelect';
 
-export default function BuildWorkspace({ champion, tierEntries, items, runes, patchVersion, existingBuild, onBack }) {
+export default function BuildWorkspace({ champion, tierEntries, items, runes, patches, patchVersion, onPatchChange, existingBuild, onBack }) {
   const isEditing = !!existingBuild;
   const { user } = useAuth();
   const { data: spells = [] } = useSpells();
@@ -165,6 +166,12 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
 
             {/* Build name & lane selector inline */}
             <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
+              <PatchSelect
+                value={patchVersion}
+                patches={patches}
+                onChange={onPatchChange}
+                className="sm:w-48"
+              />
               <input
                 value={buildName}
                 onChange={e => setBuildName(e.target.value)}
