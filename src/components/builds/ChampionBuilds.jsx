@@ -5,7 +5,7 @@ import { getBuildsForChampion, deleteBuild } from '@/api/buildsSupabase';
 import { Plus, Trash2, Wrench, ChevronRight, GitCompare, ArrowLeft } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
 
-export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBack, onCompare }) {
+export default function ChampionBuilds({ champion, patchVersion, onNewBuild, onEditBuild, onBack, onCompare }) {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [buildToDelete, setBuildToDelete] = useState(null);
@@ -19,8 +19,9 @@ export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBa
   });
 
   const builds = allBuilds.filter(b =>
-    b.champion_id === champion.id ||
-    b.champion_name?.toLowerCase() === champion.name?.toLowerCase()
+    (b.champion_id === champion.id ||
+    b.champion_name?.toLowerCase() === champion.name?.toLowerCase()) &&
+    (!patchVersion || b.patch === patchVersion)
   );
 
   const deleteMutation = useMutation({

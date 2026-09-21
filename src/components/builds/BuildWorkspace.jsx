@@ -9,11 +9,10 @@ import ItemPool from './ItemPool';
 import ItemBrowser from './ItemBrowser';
 import StatsPanel from './StatsPanel';
 import RunePicker from './RunePicker';
-import LaneBadge from '@/components/ui/LaneBadge';
 import TierBadge from '@/components/ui/TierBadge';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 
-export default function BuildWorkspace({ champion, tierEntries, items, existingBuild, onBack }) {
+export default function BuildWorkspace({ champion, tierEntries, items, runes, patchVersion, existingBuild, onBack }) {
   const isEditing = !!existingBuild;
   const { user } = useAuth();
   const { data: spells = [] } = useSpells();
@@ -107,7 +106,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, existingB
         items: selectedItems.map(i => i.name),
         additional_runes: selectedRunes.map(r => r.name),
         spells: selectedSpells,
-        patch: tierEntry?.patch || '',
+        patch: patchVersion || tierEntry?.patch || '',
         user_id: user?.id,
       };
       return isEditing
@@ -188,6 +187,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, existingB
 
           {/* Rune Picker */}
           <RunePicker
+            runes={runes}
             selectedRunes={selectedRunes}
             onToggleRune={toggleRune}
             initialRuneNames={initialRuneNames}

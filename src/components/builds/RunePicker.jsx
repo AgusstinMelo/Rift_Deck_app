@@ -40,15 +40,18 @@ function RuneIcon({ rune, selected, onClick }) {
 
 const PRIMARY_BRANCHES = ['Dominación', 'Precisión', 'Valor', 'Brujería'];
 
-export default function RunePicker({ selectedRunes, onToggleRune, initialRuneNames = [], onRunesInitialized, initialPrimaryBranch, initialSecondaryBranch }) {
+export default function RunePicker({ runes: providedRunes, selectedRunes, onToggleRune, initialRuneNames = [], onRunesInitialized, initialPrimaryBranch, initialSecondaryBranch }) {
   const [primaryBranch, setPrimaryBranch] = useState(initialPrimaryBranch || 'Dominación');
   const [secondaryBranch, setSecondaryBranch] = useState(initialSecondaryBranch || 'Precisión');
   const [initialized, setInitialized] = useState(false);
 
-  const { data: runes = [], isLoading } = useQuery({
+  const { data: queriedRunes = [], isLoading: queryLoading } = useQuery({
     queryKey: ['runes'],
     queryFn: () => Rune.list('branch'),
+    enabled: providedRunes == null,
   });
+  const runes = providedRunes ?? queriedRunes;
+  const isLoading = providedRunes == null && queryLoading;
 
   // Restore runes from saved names once rune data is loaded
   useEffect(() => {

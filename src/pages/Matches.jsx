@@ -11,6 +11,7 @@ import MatchCard from '@/components/matches/MatchCard';
 import { useAuth } from '@/lib/AuthContext';
 import { MATCH_TYPES } from '@/constants/matchTypes';
 import { toast } from '@/components/ui/use-toast';
+import { getPublishedGamePatches } from '@/api/gameCatalogSupabase';
 
 const showTemporaryToast = (options) => {
   const notification = toast(options);
@@ -82,7 +83,12 @@ export default function Matches() {
     queryFn: () => getTierlistExecutions(10),
   });
 
-  const latestTierlistPatch = tierlistExecutions.find(
+  const { data: gamePatches = [] } = useQuery({
+    queryKey: ['game-patches', 'published'],
+    queryFn: getPublishedGamePatches,
+  });
+
+  const latestTierlistPatch = gamePatches.find(patch => patch.status === 'active')?.version || tierlistExecutions.find(
     execution => execution.status === 'success' || execution.status === 'partial'
   )?.patch || '';
 
@@ -160,6 +166,7 @@ export default function Matches() {
       <div className="w-full max-w-none mx-0 p-5 md:p-6 rd-dashboard">
         <MatchBuilder
           champions={champions}
+          patches={gamePatches}
           defaultPatch={latestTierlistPatch}
           onSave={handleCreateMatch}
           onCancel={() => setShowForm(false)}
@@ -174,6 +181,7 @@ export default function Matches() {
       <div className="w-full max-w-none mx-0 p-5 md:p-6 rd-dashboard">
         <MatchForm
           match={editing}
+          patches={gamePatches}
           defaultPatch={latestTierlistPatch}
           onClose={() => setEditing(null)}
           onSaved={() => {

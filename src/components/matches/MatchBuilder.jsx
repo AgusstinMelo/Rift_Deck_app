@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
-import { WRItem, Rune } from '@/api/entitiesSupabase';
 import { ArrowLeft, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
+import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
+import PatchSelect from '@/components/patches/PatchSelect';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -120,12 +121,15 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
   );
 }
 
-export default function MatchBuilder({ champions, defaultPatch = '', onSave, onCancel, isSaving = false }) {
+export default function MatchBuilder({ champions: fallbackChampions = [], patches = [], defaultPatch = '', onSave, onCancel, isSaving = false }) {
   const clientRequestIdRef = useRef(null);
   if (!clientRequestIdRef.current) {
     clientRequestIdRef.current = globalThis.crypto?.randomUUID?.()
       || `match-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
+
+  const [patch, setPatch] = useState(defaultPatch);
+  const patchWasEdited = useRef(false);
 
   const [step, setStep] = useState('info'); // info, lane, myChamp, allies, enemies, build, stats
   const [lane, setLane] = useState('');
@@ -133,17 +137,16 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
   const [allyChampions, setAllyChampions] = useState([]);
   const [enemyChampions, setEnemyChampions] = useState([]);
 
-  const { data: items = [] } = useQuery({
-    queryKey: ['items'],
-    queryFn: () => WRItem.list('category'),
+  const { data: catalog } = useQuery({
+    queryKey: ['game-patch-catalog', patch],
+    queryFn: () => getGamePatchCatalog(patch),
+    enabled: Boolean(patch),
   });
+  const champions = catalog?.champions || fallbackChampions;
+  const items = catalog?.items || [];
+  const runes = catalog?.runes || [];
 
   const { data: spells = [] } = useSpells();
-
-  const { data: runes = [] } = useQuery({
-    queryKey: ['runes'],
-    queryFn: () => Rune.list('branch'),
-  });
 
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedRunes, setSelectedRunes] = useState([]);
@@ -185,15 +188,23 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const [date, setDate] = useState(todayStr);
   const [hour, setHour] = useState('');
-  const [patch, setPatch] = useState(defaultPatch);
   const [matchType, setMatchType] = useState(DEFAULT_MATCH_TYPE);
-  const patchWasEdited = useRef(false);
 
   useEffect(() => {
     if (defaultPatch && !patch && !patchWasEdited.current) {
       setPatch(defaultPatch);
     }
   }, [defaultPatch, patch]);
+
+  const handlePatchChange = (nextPatch) => {
+    patchWasEdited.current = true;
+    setPatch(nextPatch);
+    setMyChampion(null);
+    setAllyChampions([]);
+    setEnemyChampions([]);
+    setSelectedItems([]);
+    setSelectedRunes([]);
+  };
   const [primaryBranch, setPrimaryBranch] = useState('Dominación');
   const [secondaryBranch, setSecondaryBranch] = useState('Precisión');
 
@@ -489,11 +500,7 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Parche</label>
-              <input type="text" value={patch} onChange={e => {
-                patchWasEdited.current = true;
-                setPatch(e.target.value);
-              }} placeholder="ej: 5.3"
-                className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
+              <PatchSelect value={patch} onChange={handlePatchChange} patches={patches} />
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Tipo de partida</label>
@@ -633,7 +640,7 @@ export default function MatchBuilder({ champions, defaultPatch = '', onSave, onC
                 </p>
               </div>
 
-              <SavedBuildPicker champion={myChampion} onApply={applySavedBuild} />
+              <SavedBuildPicker champion={myChampion} patch={patch} onApply={applySavedBuild} />
 
               {/* Runas */}
               <div className="rd-card p-4">

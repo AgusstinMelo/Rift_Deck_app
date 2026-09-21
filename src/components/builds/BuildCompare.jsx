@@ -213,7 +213,7 @@ function ChampionHeader({ build, champion, side, itemCount }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function BuildCompare({ onBack, champions, items }) {
+export default function BuildCompare({ onBack, champions, items, patchVersion }) {
   const { user } = useAuth();
   const [buildA, setBuildA] = useState(null);
   const [buildB, setBuildB] = useState(null);
@@ -222,6 +222,9 @@ export default function BuildCompare({ onBack, champions, items }) {
     queryKey: ['builds-all', user?.id],
     queryFn: () => getComparableBuilds(user, 1000),
   });
+  const compatibleBuilds = patchVersion
+    ? allBuilds.filter(build => build.patch === patchVersion)
+    : allBuilds;
 
   const resolveItems = (build) => build ? (build.items || []).map(name => items.find(i => i.name === name)).filter(Boolean) : [];
   const resolveChampion = (build) => build ? champions.find(c => c.name === build.champion_name) || null : null;
@@ -256,8 +259,8 @@ export default function BuildCompare({ onBack, champions, items }) {
 
       {/* Selectors */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <BuildSelector slot="A" allBuilds={allBuilds} allChampions={champions} selected={buildA} onSelect={setBuildA} />
-        <BuildSelector slot="B" allBuilds={allBuilds} allChampions={champions} selected={buildB} onSelect={setBuildB} />
+        <BuildSelector slot="A" allBuilds={compatibleBuilds} allChampions={champions} selected={buildA} onSelect={setBuildA} />
+        <BuildSelector slot="B" allBuilds={compatibleBuilds} allChampions={champions} selected={buildB} onSelect={setBuildB} />
       </div>
 
       {/* Champion Headers */}

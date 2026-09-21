@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import { updateMatch } from '@/api/matchesSupabase';
 import { ArrowLeft, Save, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
@@ -9,6 +8,8 @@ import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
+import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
+import PatchSelect from '@/components/patches/PatchSelect';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -162,7 +163,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
   );
 }
 
-export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }) {
+export default function MatchForm({ match, patches = [], defaultPatch = '', onClose, onSaved }) {
   const [step, setStep] = useState('info');
 
   // Champion & composition
@@ -207,23 +208,28 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
 
   const { data: spells = [] } = useSpells();
 
-  const { data: champions = [] } = useQuery({
-    queryKey: ['champions'],
-    queryFn: () => Champion.list('name'),
+  const { data: catalog } = useQuery({
+    queryKey: ['game-patch-catalog', patch],
+    queryFn: () => getGamePatchCatalog(patch),
+    enabled: Boolean(patch),
   });
-
-  const { data: items = [] } = useQuery({
-    queryKey: ['items'],
-    queryFn: () => WRItem.list('category'),
-  });
-
-  const { data: runes = [] } = useQuery({
-    queryKey: ['runes'],
-    queryFn: () => Rune.list('branch'),
-  });
+  const champions = catalog?.champions || [];
+  const items = catalog?.items || [];
+  const runes = catalog?.runes || [];
 
   // Initialize champion/items/runes from match data once data is loaded
   const [initialized, setInitialized] = useState(false);
+
+  const handlePatchChange = (nextPatch) => {
+    patchWasEdited.current = true;
+    setPatch(nextPatch);
+    setInitialized(true);
+    setOwnChampion(null);
+    setAllyChampions([]);
+    setEnemyChampions([]);
+    setSelectedItems([]);
+    setSelectedRunes([]);
+  };
   if (!initialized && champions.length > 0 && items.length > 0 && runes.length > 0) {
     const initialOwnChampion = match?.own_champion_name
       ? champions.find(c => c.name === match.own_champion_name) || null
@@ -506,11 +512,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Parche</label>
-              <input value={patch} onChange={e => {
-                patchWasEdited.current = true;
-                setPatch(e.target.value);
-              }} placeholder="ej: 5.3"
-                className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
+              <PatchSelect value={patch} onChange={handlePatchChange} patches={patches} />
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Tipo de partida</label>
@@ -667,7 +669,7 @@ export default function MatchForm({ match, defaultPatch = '', onClose, onSaved }
             <p className="text-muted-foreground text-sm">Items, runas y hechizos que usaste</p>
           </div>
 
-          <SavedBuildPicker champion={ownChampion} onApply={applySavedBuild} />
+          <SavedBuildPicker champion={ownChampion} patch={patch} onApply={applySavedBuild} />
 
           {/* Runas */}
           <div className="rd-card p-4">

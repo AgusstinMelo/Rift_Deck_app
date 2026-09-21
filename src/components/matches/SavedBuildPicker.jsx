@@ -4,15 +4,16 @@ import { Layers3 } from 'lucide-react';
 import { getBuildsForChampion } from '@/api/buildsSupabase';
 import { useAuth } from '@/lib/AuthContext';
 
-export default function SavedBuildPicker({ champion, onApply }) {
+export default function SavedBuildPicker({ champion, patch, onApply }) {
   const { user } = useAuth();
   const [selectedBuildId, setSelectedBuildId] = useState('');
 
   const { data: builds = [], isLoading } = useQuery({
-    queryKey: ['match-saved-builds', user?.id, champion?.id, champion?.name],
+    queryKey: ['match-saved-builds', user?.id, champion?.id, champion?.name, patch],
     queryFn: () => getBuildsForChampion(user, champion, 1000),
     enabled: Boolean(user && champion),
   });
+  const compatibleBuilds = patch ? builds.filter(build => build.patch === patch) : builds;
 
   if (!champion) return null;
 
@@ -35,7 +36,7 @@ export default function SavedBuildPicker({ champion, onApply }) {
         </div>
       </div>
 
-      {builds.length > 0 ? (
+      {compatibleBuilds.length > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row">
           <select
             value={selectedBuildId}
@@ -43,7 +44,7 @@ export default function SavedBuildPicker({ champion, onApply }) {
             className="min-w-0 flex-1 rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50"
           >
             <option value="">Seleccionar build de {champion.name}</option>
-            {builds.map(build => (
+            {compatibleBuilds.map(build => (
               <option key={build.id} value={String(build.id)}>
                 {build.name}{build.lane ? ` · ${build.lane}` : ''}
               </option>
