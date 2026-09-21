@@ -117,6 +117,15 @@ function calculatePoolScore(champArr, totalMatches) {
     volumeScore * 0.25
   );
 
+  if (totalMatches < 10) {
+    return {
+      score,
+      grade: 'Inicial',
+      label: `${totalMatches} ${totalMatches === 1 ? 'partida' : 'partidas'} · provisional`,
+      tone: 'text-yellow-400',
+    };
+  }
+
   return {
     score,
     grade: getPoolGrade(score),
@@ -534,6 +543,13 @@ function LaneBarChart({ laneArr }) {
   );
 }
 
+function getSampleStatus(total) {
+  if (total === 1) return { label: 'Dato inicial', tone: 'text-yellow-300 border-yellow-500/25 bg-yellow-500/10' };
+  if (total < 3) return { label: 'Muestra baja', tone: 'text-yellow-300 border-yellow-500/25 bg-yellow-500/10' };
+  if (total < 6) return { label: 'Tendencia', tone: 'text-cyan-300 border-cyan-500/25 bg-cyan-500/10' };
+  return { label: 'Mayor respaldo', tone: 'text-green-300 border-green-500/25 bg-green-500/10' };
+}
+
 function MatchupList({ items, empty, getChampImg, positive = true }) {
   if (items.length === 0) {
     return <p className="text-muted-foreground text-sm">{empty}</p>;
@@ -549,8 +565,12 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
             {m.champ}
           </span>
 
-          <span className="text-xs text-muted-foreground">
-            {m.total}g
+          <span className={`rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-wide ${getSampleStatus(m.total).tone}`}>
+            {getSampleStatus(m.total).label}
+          </span>
+
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {m.total} {m.total === 1 ? 'partida' : 'partidas'}
           </span>
 
           <span className={`text-sm font-bold ${positive ? 'text-green-400' : 'text-red-400'}`}>
@@ -822,7 +842,7 @@ export default function Stats() {
   });
 
   const matchupArr = Object.entries(matchupStats)
-    .filter(([, v]) => v.total >= 3)
+    .filter(([, v]) => v.total >= 1)
     .map(([champ, v]) => ({
       champ,
       wr: (v.wins / v.total) * 100,
@@ -857,7 +877,7 @@ export default function Stats() {
   });
 
   const synergyArr = Object.entries(synergyStats)
-    .filter(([, v]) => v.total >= 3)
+    .filter(([, v]) => v.total >= 1)
     .map(([champ, v]) => ({
       champ,
       wr: (v.wins / v.total) * 100,
@@ -891,7 +911,7 @@ export default function Stats() {
   });
 
   const generalMatchupArr = Object.entries(generalMatchupStats)
-    .filter(([, v]) => v.total > 3)
+    .filter(([, v]) => v.total >= 1)
     .map(([champ, v]) => ({
       champ,
       wr: (v.wins / v.total) * 100,
@@ -961,9 +981,14 @@ export default function Stats() {
       {totalMatches < 10 && (
         <div className="rd-card p-4 flex items-start gap-3 border-yellow-500/20">
           <AlertCircle size={18} className="text-yellow-400 mt-0.5 shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            Pocos datos. Los resultados pueden no ser estadísticamente confiables todavía.
-          </p>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {totalMatches === 1 ? 'Tu primera lectura ya está lista.' : `Lectura inicial sobre ${totalMatches} partidas.`}
+            </p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Estos resultados describen lo que ocurrió hasta ahora. La precisión y la detección de tendencias mejorarán con cada partida que cargues.
+            </p>
+          </div>
         </div>
       )}
 
@@ -1043,7 +1068,7 @@ export default function Stats() {
           <SectionCard title="Mejores Matchups Directos" fixedHeight>
             <MatchupList
               items={bestMatchups}
-              empty="Necesitás al menos 3 partidas contra el mismo campeón."
+              empty="Todavía no hay resultados favorables contra un rival directo."
               getChampImg={getChampImg}
               positive
             />
@@ -1054,7 +1079,7 @@ export default function Stats() {
           <SectionCard title="Matchups Directos Problemáticos" fixedHeight>
             <MatchupList
               items={worstMatchups}
-              empty="Necesitás más partidas para detectar patrones."
+              empty="Todavía no hay resultados adversos en esta categoría."
               getChampImg={getChampImg}
               positive={false}
             />
@@ -1065,7 +1090,7 @@ export default function Stats() {
           <SectionCard title="Mejores Matchups Generales" fixedHeight>
             <MatchupList
               items={bestGeneralMatchups}
-              empty="Necesitás más de 3 partidas contra el mismo campeón enemigo."
+              empty="Todavía no hay resultados para mostrar en esta categoría."
               getChampImg={getChampImg}
               positive
             />
@@ -1076,7 +1101,7 @@ export default function Stats() {
           <SectionCard title="Peores Matchups Generales" fixedHeight>
             <MatchupList
               items={worstGeneralMatchups}
-              empty="Necesitás más de 3 partidas contra el mismo campeón enemigo."
+              empty="Todavía no hay resultados para mostrar en esta categoría."
               getChampImg={getChampImg}
               positive={false}
             />
@@ -1087,7 +1112,7 @@ export default function Stats() {
           <SectionCard title="Buena Sinergia Aliada" fixedHeight>
             <MatchupList
               items={bestSynergies}
-              empty="Necesitás al menos 3 partidas con el mismo aliado."
+              empty="Todavía no hay resultados favorables con un aliado repetido."
               getChampImg={getChampImg}
               positive
             />
@@ -1098,7 +1123,7 @@ export default function Stats() {
           <SectionCard title="Mala Sinergia Aliada" fixedHeight>
             <MatchupList
               items={worstSynergies}
-              empty="Necesitás más partidas para detectar patrones."
+              empty="Todavía no hay resultados adversos en esta categoría."
               getChampImg={getChampImg}
               positive={false}
             />

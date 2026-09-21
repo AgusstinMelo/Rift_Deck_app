@@ -61,7 +61,7 @@ const itemColumns = [
   'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration',
   'ability_haste', 'tenacity', 'healing_and_shield',
 ];
-const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description', 'tags'];
+const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description'];
 const items = await fetchPublicRows('current_wr_items', itemColumns, '&active=eq.true');
 const runes = await fetchPublicRows('current_runes', runeColumns);
 const executionParams = new URLSearchParams({
