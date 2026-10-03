@@ -183,7 +183,7 @@ const DICT_CHAMP: Record<string, string> = {
   "塔莉垭": "Taliyah",
   "斯卡纳": "Skarner",
   "芸阿娜": "Yunara",
-  "科加斯": "Cho'Gath"
+  "科加斯": "Cho'Gath",
   "彗": "Hwei"
 };
 

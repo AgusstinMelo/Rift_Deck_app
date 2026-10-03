@@ -118,6 +118,9 @@
     <loc>https://www.riftdeck.com.ar/campeones/heimerdinger</loc>
   </url>
   <url>
+    <loc>https://www.riftdeck.com.ar/campeones/hwei</loc>
+  </url>
+  <url>
     <loc>https://www.riftdeck.com.ar/campeones/irelia</loc>
   </url>
   <url>
@@ -439,9 +442,6 @@
     <loc>https://www.riftdeck.com.ar/objetos/agrietador</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/aguijon</loc>
-  </url>
-  <url>
     <loc>https://www.riftdeck.com.ar/objetos/al-filo-de-la-cordura</loc>
   </url>
   <url>
@@ -464,6 +464,9 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/arco-recurvado</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/arcoescudo-inmortal</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/armadura-de-tela</loc>
@@ -502,9 +505,6 @@
     <loc>https://www.riftdeck.com.ar/objetos/bendicion-de-mikael</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/blaster-magnetico</loc>
-  </url>
-  <url>
     <loc>https://www.riftdeck.com.ar/objetos/blindadas-de-avance</loc>
   </url>
   <url>
@@ -535,10 +535,10 @@
     <loc>https://www.riftdeck.com.ar/objetos/brisa-de-eter</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/canto-de-guerra-de-shurelya</loc>
+    <loc>https://www.riftdeck.com.ar/objetos/canon-de-fuego-rapido</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/capa-de-agilidad</loc>
+    <loc>https://www.riftdeck.com.ar/objetos/canto-de-guerra-de-shurelya</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/capa-de-negatrones</loc>
@@ -601,9 +601,6 @@
     <loc>https://www.riftdeck.com.ar/objetos/corazon-de-hielo</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/corona-abrazadora</loc>
-  </url>
-  <url>
     <loc>https://www.riftdeck.com.ar/objetos/cota-de-espinas</loc>
   </url>
   <url>
@@ -628,6 +625,9 @@
     <loc>https://www.riftdeck.com.ar/objetos/daga</loc>
   </url>
   <url>
+    <loc>https://www.riftdeck.com.ar/objetos/daga-de-statikk</loc>
+  </url>
+  <url>
     <loc>https://www.riftdeck.com.ar/objetos/danza-de-la-muerte</loc>
   </url>
   <url>
@@ -635,6 +635,9 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/desesperacion-eterna</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/diadema-musical</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/diente-de-nashor</loc>
@@ -647,6 +650,9 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/eco-de-luden</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/ecos-de-helia</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/egida-de-fuego-solar</loc>
@@ -662,9 +668,6 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/enfoque-al-horizonte</loc>
-  </url>
-  <url>
-    <loc>https://www.riftdeck.com.ar/objetos/escamas-emergentes</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/escudo-reliquia</loc>
@@ -685,6 +688,9 @@
     <loc>https://www.riftdeck.com.ar/objetos/espadon</loc>
   </url>
   <url>
+    <loc>https://www.riftdeck.com.ar/objetos/espejo-de-vitrobandle</loc>
+  </url>
+  <url>
     <loc>https://www.riftdeck.com.ar/objetos/fajin-de-mercurio</loc>
   </url>
   <url>
@@ -700,7 +706,13 @@
     <loc>https://www.riftdeck.com.ar/objetos/filo-de-la-noche</loc>
   </url>
   <url>
+    <loc>https://www.riftdeck.com.ar/objetos/filo-de-la-tormenta</loc>
+  </url>
+  <url>
     <loc>https://www.riftdeck.com.ar/objetos/filo-del-infinito</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/flechas-salvajes-de-yun-tal</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/fragmento-de-kircheis</loc>
@@ -713,9 +725,6 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/fuerza-del-viento</loc>
-  </url>
-  <url>
-    <loc>https://www.riftdeck.com.ar/objetos/garra-de-nashor</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/gemaluz</loc>
@@ -746,6 +755,12 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/habito-del-espectro</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/hacha-hogarena</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/hexoptica-c44</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/hidra-titanica</loc>
@@ -838,6 +853,9 @@
     <loc>https://www.riftdeck.com.ar/objetos/pebetero-ardiente</loc>
   </url>
   <url>
+    <loc>https://www.riftdeck.com.ar/objetos/picacha</loc>
+  </url>
+  <url>
     <loc>https://www.riftdeck.com.ar/objetos/placa-del-hombre-muerto</loc>
   </url>
   <url>
@@ -851,6 +869,9 @@
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/promesa-del-caballero</loc>
+  </url>
+  <url>
+    <loc>https://www.riftdeck.com.ar/objetos/proyectiles-cazademonios</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/punal-serrado</loc>
@@ -913,10 +934,10 @@
     <loc>https://www.riftdeck.com.ar/objetos/terminus</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/trampa-para-yordles</loc>
+    <loc>https://www.riftdeck.com.ar/objetos/tiara-susurrante</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/objetos/transferencia-de-alma</loc>
+    <loc>https://www.riftdeck.com.ar/objetos/trampa-para-yordles</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/objetos/tridente-de-la-oceanide</loc>
@@ -991,9 +1012,6 @@
     <loc>https://www.riftdeck.com.ar/runas/cazador-implacable</loc>
   </url>
   <url>
-    <loc>https://www.riftdeck.com.ar/runas/cazador-ingenioso</loc>
-  </url>
-  <url>
     <loc>https://www.riftdeck.com.ar/runas/celeridad</loc>
   </url>
   <url>
@@ -1057,13 +1075,13 @@
     <loc>https://www.riftdeck.com.ar/runas/inquebrantable</loc>
   </url>
   <url>
+    <loc>https://www.riftdeck.com.ar/runas/leyenda-aceleracion</loc>
+  </url>
+  <url>
     <loc>https://www.riftdeck.com.ar/runas/leyenda-celeridad</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/runas/leyenda-linaje</loc>
-  </url>
-  <url>
-    <loc>https://www.riftdeck.com.ar/runas/leyenda-tenacidad</loc>
   </url>
   <url>
     <loc>https://www.riftdeck.com.ar/runas/orbe-de-anulacion</loc>

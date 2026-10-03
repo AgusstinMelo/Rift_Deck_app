@@ -119,7 +119,7 @@ function DraftCard({ title, icon: Icon, team, setter, champions, onMemberChange,
   return <section className="rd-card rd-card-overflow-visible p-5 focus-within:z-30"><div className="mb-4 flex items-center gap-2"><Icon size={15} className="text-primary" /><h2 className="rd-card-title">{title}</h2></div><div className="space-y-3">{LANES.filter(lane => lane !== hiddenLane).map(lane => <ChampionSelect key={lane} label={LABELS[lane]} value={team[lane]} champions={champions} onChange={value => onMemberChange(setter, lane, value)} />)}</div></section>;
 }
 
-export default function V2BuildTab() {
+export default function V2BuildTab({ tabSelector }) {
   const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
   const [championId, setChampionId] = useState('');
   const [role, setRole] = useState('');
@@ -209,6 +209,7 @@ export default function V2BuildTab() {
           </div>
           <h1 className="font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de builds</h1>
           <p className="mt-1 text-sm text-muted-foreground">Objetos, runas y hechizos adaptados al campeón, rol y draft disponible.</p>
+          {tabSelector}
         </div>
         <div className="rd-status-pill hidden items-center gap-3 sm:flex">
           <BrainCircuit size={16} className="text-primary" />
