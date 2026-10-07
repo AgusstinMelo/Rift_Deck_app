@@ -27,7 +27,9 @@ export function normalizeV2Snapshot(raw) {
   requireColumns(raw.runes || [], ['trigger_tags', 'benefit_tags', 'branch', 'group'], 'current_runes');
   requireColumns(raw.spells || [], ['description'], 'spells');
   const champions = (raw.champions || []).filter(isValidCatalogEntity);
-  const items = (raw.items || []).filter(isValidCatalogEntity);
+  // Exclude historical rows from the complete snapshot so retired items cannot
+  // be selected, resolved, or mentioned as if they belonged to the live patch.
+  const items = (raw.items || []).filter(item => isValidCatalogEntity(item) && item?.active !== false);
   const runes = (raw.runes || []).filter(isValidCatalogEntity);
   const spells = (raw.spells || []).filter(isValidCatalogEntity);
   const patchIds = new Set([

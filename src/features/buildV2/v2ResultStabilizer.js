@@ -38,6 +38,50 @@ const fallbackReason = (entity, purpose, result) => {
   return `${purpose} Mantiene la selección coherente con ${result?.build_theme || 'el plan de la build'}.`;
 };
 
+const MAX_ITEM_EXPLANATION_LENGTH = 220;
+
+function cleanCatalogText(value, entityName = '') {
+  let text = String(value || '')
+    .replace(/\\[nr]+/gi, ' ')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const escapedName = String(entityName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (escapedName) text = text.replace(new RegExp(`^${escapedName}\\s*:\\s*`, 'i'), '');
+  if (text.length <= MAX_ITEM_EXPLANATION_LENGTH) return text;
+
+  const shortened = text.slice(0, MAX_ITEM_EXPLANATION_LENGTH + 1);
+  const boundary = Math.max(shortened.lastIndexOf('. '), shortened.lastIndexOf('; '), shortened.lastIndexOf(' '));
+  return `${shortened.slice(0, boundary > 120 ? boundary : MAX_ITEM_EXPLANATION_LENGTH).replace(/[,:;.]$/, '')}…`;
+}
+
+const selectionReason = (selection, entity, result) => cleanCatalogText(
+  selection?.reason,
+  entity?.name,
+) || fallbackReason(entity, 'Complementa el plan de la build.', result);
+
+function synchronizeItemExplanations(buildPlan, coreItems, snapshot, result) {
+  const itemMap = new Map(snapshot.coreItems.map(item => [String(item.id), item]));
+  const selected = coreItems
+    .map(selection => ({ selection, entity: itemMap.get(String(selection.id)) }))
+    .filter(entry => Boolean(entry.entity));
+  const firstItem = selected[0];
+  const infinitySlot = selected.findIndex(({ entity }) => normalizeText(entity.name) === 'filo del infinito');
+  const orderingNote = infinitySlot >= 2
+    ? ` Filo del Infinito se reserva para el slot ${infinitySlot + 1}, después de acumular una base de crítico.`
+    : '';
+  return {
+    ...buildPlan,
+    first_item_rationale: firstItem
+      ? `${firstItem.entity.name} se compra primero porque ${selectionReason(firstItem.selection, firstItem.entity, result)}${orderingNote}`
+      : buildPlan?.first_item_rationale,
+    // Generate this copy after stabilization. Text written for replaced IDs is stale.
+    item_relationships: selected.map(({ selection, entity }) =>
+      `${entity.name}: ${selectionReason(selection, entity, result)}`
+    ),
+  };
+}
+
 function stabilizeCoreItems(result, snapshot) {
   const itemMap = new Map(snapshot.coreItems.map(item => [String(item.id), item]));
   const used = new Set();
@@ -202,9 +246,11 @@ export function stabilizeV2Result(value, snapshot, context = {}) {
       }
     : result.build_plan;
 
+  const synchronizedBuildPlan = synchronizeItemExplanations(buildPlan, coreItems, snapshot, result);
+
   return {
     ...result,
-    build_plan: buildPlan,
+    build_plan: synchronizedBuildPlan,
     core_items: coreItems,
     keystone: runes.keystone,
     primary_runes: runes.primaryRunes,

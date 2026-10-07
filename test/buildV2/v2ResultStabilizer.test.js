@@ -62,6 +62,29 @@ const candidate = () => ({
   key_adaptations: ['Adaptación A', 'Adaptación B'],
 });
 
+test('sincroniza las explicaciones con los objetos finales del catálogo', () => {
+  const input = candidate();
+  input.core_items[2].reason = 'Objeto 2: Se elige para sostener el pico intermedio. \\n También acompaña el plan principal.';
+  input.build_plan.first_item_rationale = 'Corona de la Reina de los Quebrados abre la build.';
+  input.build_plan.item_relationships = [
+    'Corona de la Reina de los Quebrados aporta defensa.',
+    'Un objeto retirado combina con otro.',
+    'Texto desactualizado.',
+  ];
+
+  const stabilized = stabilizeV2Result(input, snapshot, { role: 'adc' });
+  const selectedNames = stabilized.core_items.map(selection =>
+    snapshot.coreItems.find(item => item.id === selection.id).name
+  );
+
+  assert.equal(stabilized.build_plan.item_relationships.length, 5);
+  assert.equal(stabilized.build_plan.item_relationships.every((text, index) => text.startsWith(`${selectedNames[index]}:`)), true);
+  assert.doesNotMatch(JSON.stringify(stabilized.build_plan), /Corona de la Reina/i);
+  assert.doesNotMatch(JSON.stringify(stabilized.build_plan), /\\\\n|Objeto 2: Objeto 2:/);
+  assert.match(stabilized.build_plan.item_relationships.join(' '), /Se elige para sostener el pico intermedio/);
+  assert.match(stabilized.build_plan.first_item_rationale, new RegExp(`^${selectedNames[0]} se compra primero porque`));
+});
+
 test('corrige ramas, secundaria, objetos y hechizos antes de validar', () => {
   const stabilized = stabilizeV2Result(candidate(), snapshot, { role: 'adc' });
   assert.deepEqual(stabilized.primary_runes.map(rune => rune.id), ['p1', 'p2', 'p3']);
