@@ -1,7 +1,9 @@
 import { SupabaseEntityFactory } from '@/api/supabaseApi';
 
 export const Champion = SupabaseEntityFactory('current_champions');
+export const AllChampions = SupabaseEntityFactory('champions');
 const WRItemEntity = SupabaseEntityFactory('current_wr_items');
+export const AllWRItems = SupabaseEntityFactory('wr_items');
 
 export const WRItem = {
   ...WRItemEntity,
@@ -16,6 +18,7 @@ export const TierlistEntry = SupabaseEntityFactory('tierlist_entries');
 export const TierlistExecution = SupabaseEntityFactory('tierlist_executions');
 export const TierlistConfig = SupabaseEntityFactory('tierlist_configs');
 export const Rune = SupabaseEntityFactory('current_runes');
+export const AllRunes = SupabaseEntityFactory('runes');
 export const Spell = SupabaseEntityFactory('spells');
 export const Profile = SupabaseEntityFactory('profiles');
 export const BugReport = SupabaseEntityFactory('bug_reports');

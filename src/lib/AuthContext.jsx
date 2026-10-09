@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
     email: authUser.email,
     full_name: profile?.full_name || authUser.user_metadata?.full_name || '',
     visible_name: profile?.visible_name || '',
+    avatar_url: profile?.avatar_url || authUser.user_metadata?.avatar_url || '',
     role: profile?.role || 'user',
   });
 
@@ -151,8 +152,22 @@ export const AuthProvider = ({ children }) => {
   }, [checkAppState, checkUserAuth]);
 
   const updateUser = async (data) => {
-    const visibleName = typeof data?.visible_name === 'string' ? data.visible_name.trim() : '';
-    if (!visibleName) {
+    const profileUpdates = {};
+    let avatarUrl;
+
+    if (Object.prototype.hasOwnProperty.call(data || {}, 'visible_name')) {
+      const visibleName = typeof data.visible_name === 'string' ? data.visible_name.trim() : '';
+      if (!visibleName) {
+        throw new Error('Nombre de usuario requerido.');
+      }
+      profileUpdates.visible_name = visibleName;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data || {}, 'avatar_url')) {
+      avatarUrl = typeof data.avatar_url === 'string' ? data.avatar_url.trim() : '';
+    }
+
+    if (Object.keys(profileUpdates).length === 0 && avatarUrl === undefined) {
       throw new Error('Nombre de usuario requerido.');
     }
 
@@ -160,12 +175,22 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Usuario no autenticado.');
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ visible_name: visibleName })
-      .eq('id', user.id);
+    if (Object.keys(profileUpdates).length > 0) {
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', user.id);
 
-    if (error) throw error;
+      if (error) throw error;
+    }
+
+    if (avatarUrl !== undefined) {
+      const { error } = await supabase.auth.updateUser({
+        data: { avatar_url: avatarUrl || null },
+      });
+
+      if (error) throw error;
+    }
 
     const updatedUser = await checkUserAuth();
     setUser(updatedUser);

@@ -364,7 +364,11 @@ export default function Layout() {
           {user && (
             <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-                <User size={13} className="text-primary" />
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
+                ) : (
+                  <User size={13} className="text-primary" />
+                )}
               </div>
               {!collapsed && (
                 <Link to="/profile" className="flex-1 min-w-0 hover:opacity-80 transition-opacity">

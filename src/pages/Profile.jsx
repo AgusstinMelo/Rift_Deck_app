@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
+import { AllChampions, AllWRItems, AllRunes } from '@/api/entitiesSupabase';
 import {
   User,
   Save,
@@ -7,8 +9,19 @@ import {
   CheckCircle,
   Pencil,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Search,
+  Image
 } from 'lucide-react';
+
+const AVATAR_TYPES = [
+  { id: 'all', label: 'Todos' },
+  { id: 'champion', label: 'Campeones' },
+  { id: 'item', label: 'Ítems' },
+  { id: 'rune', label: 'Runas' },
+];
+
+const normalize = value => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
@@ -18,11 +31,54 @@ export default function Profile() {
   const [loadingData, setLoadingData] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [avatarQuery, setAvatarQuery] = useState('');
+  const [avatarType, setAvatarType] = useState('all');
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarSuccess, setAvatarSuccess] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
 
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteError, setDeleteError] = useState('');
 
   const DELETE_CONFIRM_TEXT = 'ELIMINAR MI CUENTA';
+
+  const { data: champions = [], isLoading: championsLoading } = useQuery({
+    queryKey: ['profile-avatars', 'champions'],
+    queryFn: () => AllChampions.list('name'),
+  });
+  const { data: items = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ['profile-avatars', 'items'],
+    queryFn: () => AllWRItems.list('name'),
+  });
+  const { data: runes = [], isLoading: runesLoading } = useQuery({
+    queryKey: ['profile-avatars', 'runes'],
+    queryFn: () => AllRunes.list('name'),
+  });
+
+  const avatarOptions = [
+    ...champions.map(entity => ({ ...entity, type: 'champion' })),
+    ...items.map(entity => ({ ...entity, type: 'item' })),
+    ...runes.map(entity => ({ ...entity, type: 'rune' })),
+  ].filter(entity => {
+    const imageUrl = entity.image_url || entity.image_url_card;
+    const matchesType = avatarType === 'all' || entity.type === avatarType;
+    return imageUrl && matchesType && normalize(entity.name).includes(normalize(avatarQuery.trim()));
+  });
+
+  const saveAvatar = async avatarUrl => {
+    setAvatarLoading(true);
+    setAvatarSuccess(false);
+    setAvatarError('');
+    try {
+      await updateUser({ avatar_url: avatarUrl });
+      setAvatarSuccess(true);
+      setTimeout(() => setAvatarSuccess(false), 3000);
+    } catch (err) {
+      setAvatarError(err?.message || 'Error al actualizar la imagen de perfil.');
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -67,7 +123,11 @@ export default function Profile() {
     <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
-          <User size={22} className="text-primary" />
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt="Imagen de perfil" className="h-full w-full rounded-full object-cover" />
+          ) : (
+            <User size={22} className="text-primary" />
+          )}
         </div>
 
         <div>
@@ -141,6 +201,70 @@ export default function Profile() {
             </button>
           </form>
         )}
+      </div>
+
+      <div className="rd-card p-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Image size={15} className="text-primary" />
+          <h2 className="rd-card-title">Imagen de perfil</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Elegí cualquier imagen disponible de campeones, ítems o runas.
+        </p>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
+          <div className="relative flex-1">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={avatarQuery}
+              onChange={event => setAvatarQuery(event.target.value)}
+              placeholder="Buscar imagen..."
+              className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto">
+            {AVATAR_TYPES.map(type => (
+              <button
+                key={type.id}
+                type="button"
+                onClick={() => setAvatarType(type.id)}
+                className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${avatarType === type.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/70 text-muted-foreground hover:text-foreground'}`}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {championsLoading || itemsLoading || runesLoading ? (
+          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" /> Cargando imágenes...</div>
+        ) : (
+          <div className="grid max-h-80 grid-cols-5 gap-2 overflow-y-auto pr-1 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
+            {avatarOptions.map(entity => {
+              const imageUrl = entity.image_url || entity.image_url_card;
+              const selected = user?.avatar_url === imageUrl;
+              return (
+                <button
+                  key={`${entity.type}-${entity.id}`}
+                  type="button"
+                  onClick={() => saveAvatar(imageUrl)}
+                  disabled={avatarLoading}
+                  title={entity.name}
+                  aria-label={`Usar ${entity.name} como imagen de perfil`}
+                  className={`aspect-square overflow-hidden rounded-full border-2 bg-secondary/60 transition-all hover:scale-105 hover:border-primary ${selected ? 'border-primary ring-2 ring-primary/30' : 'border-transparent'}`}
+                >
+                  <img src={imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {!championsLoading && !itemsLoading && !runesLoading && avatarOptions.length === 0 && (
+          <p className="py-6 text-center text-sm text-muted-foreground">No se encontraron imágenes.</p>
+        )}
+        {avatarError && <p className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">{avatarError}</p>}
+        {avatarSuccess && <p className="mt-4 flex items-center gap-2 text-sm text-green-400"><CheckCircle size={14} /> Imagen de perfil actualizada.</p>}
       </div>
 
       <div className="rd-card p-6 border-red-500/25 bg-red-500/[0.03]">

@@ -165,34 +165,54 @@ export default function Tierlist() {
 
       <div className="rd-card p-4">
         <div className="flex flex-wrap gap-3 items-center">
-          <select
-            value={laneFilter}
-            onChange={e => setLaneFilter(e.target.value)}
-            className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
-          >
-            <option value="all">Todas las líneas</option>
-            {LANES.map(l => (
-              <option key={l} value={l}>
-                {l.charAt(0).toUpperCase() + l.slice(1)}
-              </option>
-            ))}
-          </select>
+          <div className="w-full sm:w-auto min-w-0">
+            <div className="grid grid-cols-3 sm:flex sm:w-auto gap-1 bg-secondary/40 border border-border/50 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setLaneFilter('all')}
+                aria-pressed={laneFilter === 'all'}
+                className={`w-full sm:w-auto px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  laneFilter === 'all'
+                    ? 'bg-primary/15 text-primary border border-primary/20'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Todos
+              </button>
+
+              {LANES.map(lane => (
+                <button
+                  key={lane}
+                  type="button"
+                  onClick={() => setLaneFilter(lane)}
+                  aria-pressed={laneFilter === lane}
+                  className={`w-full sm:w-auto px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
+                    laneFilter === lane
+                      ? 'bg-primary/15 text-primary border border-primary/20'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {lane}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <select
             value={tierFilter}
-            onChange={e => setTierFilter(e.target.value)}
-            className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
+            onChange={event => setTierFilter(event.target.value)}
+            className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
           >
             <option value="all">Todos los tiers</option>
-            {availableTiers.map(t => (
-              <option key={t} value={t}>Tier {t}</option>
+            {availableTiers.map(tier => (
+              <option key={tier} value={tier}>Tier {tier}</option>
             ))}
           </select>
 
           <select
             value={diffFilter}
-            onChange={e => setDiffFilter(e.target.value)}
-            className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
+            onChange={event => setDiffFilter(event.target.value)}
+            className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
           >
             <option value="all">Dificultad</option>
             <option value="1">Fácil</option>
@@ -203,12 +223,12 @@ export default function Tierlist() {
           {successfulExecs.length > 1 && (
             <select
               value={patchFilter || latestExec?.id || ''}
-              onChange={e => setPatchFilter(e.target.value)}
-              className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
+              onChange={event => setPatchFilter(event.target.value)}
+              className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
             >
-              {successfulExecs.map(e => (
-                <option key={e.id} value={e.id}>
-                  {e.patch} · {formatSnapshotDate(e)}
+              {successfulExecs.map(execution => (
+                <option key={execution.id} value={execution.id}>
+                  {execution.patch} · {formatSnapshotDate(execution)}
                 </option>
               ))}
             </select>
