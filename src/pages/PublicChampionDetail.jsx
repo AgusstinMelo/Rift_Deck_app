@@ -69,7 +69,7 @@ export default function PublicChampionDetail({ initialChampions, initialExecutio
   const seo = getChampionSeo(champion, slug, getChampionLaneLabels(champion), displayList, DAMAGE_LABELS);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh bg-background text-foreground">
       <Seo {...seo} indexable />
       <PublicHeader />
       <main className="mx-auto w-full max-w-none px-5 py-8 md:px-6 md:py-12">

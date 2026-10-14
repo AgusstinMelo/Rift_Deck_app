@@ -894,7 +894,8 @@ Devuelve exactamente 5 recomendaciones.`;
   };
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
+    <div className="rd-page rd-dashboard rd-compact-page rd-suggester-layout">
+      <section className="rd-suggester-heading" aria-label="Configuración del sugeridor">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -922,32 +923,8 @@ Devuelve exactamente 5 recomendaciones.`;
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={generating || pool.length === 0}
-          className="
-            flex w-full items-center justify-center gap-2 rounded-xl
-            bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
-            transition-colors hover:bg-primary/90 disabled:cursor-not-allowed
-            disabled:opacity-50 sm:w-auto
-          "
-        >
-          {generating ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              Analizando pool...
-            </>
-          ) : (
-            <>
-              <Sparkles size={18} />
-              Generar recomendaciones
-            </>
-          )}
-        </button>
-      </div>
-      <div className="grid grid-cols-1 xl:grid-cols-[390px_1fr] gap-6">
+      </section>
+      <section className="rd-viewport-section grid grid-cols-1 xl:grid-cols-[minmax(320px,390px)_minmax(0,1fr)] gap-6 items-start" aria-label="Análisis y recomendaciones">
         <div className="space-y-5">
           <div className="rd-card rd-card-overflow-visible p-5 focus-within:z-40">
             <div className="flex items-center gap-2 mb-4">
@@ -1302,7 +1279,7 @@ Devuelve exactamente 5 recomendaciones.`;
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

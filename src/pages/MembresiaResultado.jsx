@@ -43,7 +43,7 @@ export default function MembresiaResultado() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background p-4">
         <div className="rd-card p-10 max-w-md w-full mx-4 text-center space-y-5">
           <div className="w-16 h-16 rounded-full bg-yellow-400/10 flex items-center justify-center mx-auto">
             <Clock size={32} className="text-yellow-400 animate-pulse" />
@@ -70,7 +70,7 @@ export default function MembresiaResultado() {
 
   if (membership?.hasAccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background p-4">
         <div className="rd-card p-10 max-w-md w-full mx-4 text-center space-y-5">
           <div className="w-16 h-16 rounded-full bg-green-400/10 flex items-center justify-center mx-auto">
             <CheckCircle2 size={32} className="text-green-400" />
@@ -94,7 +94,7 @@ export default function MembresiaResultado() {
 
   if (membership?.status === 'pending') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background p-4">
         <div className="rd-card p-10 max-w-md w-full mx-4 text-center space-y-5">
           <div className="w-16 h-16 rounded-full bg-yellow-400/10 flex items-center justify-center mx-auto">
             <Clock size={32} className="text-yellow-400" />
@@ -114,7 +114,7 @@ export default function MembresiaResultado() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-dvh flex items-center justify-center bg-background p-4">
       <div className="rd-card p-10 max-w-md w-full mx-4 text-center space-y-5">
         <div className="w-16 h-16 rounded-full bg-red-400/10 flex items-center justify-center mx-auto">
           <XCircle size={32} className="text-red-400" />

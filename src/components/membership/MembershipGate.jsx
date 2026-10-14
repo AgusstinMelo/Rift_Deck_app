@@ -116,7 +116,7 @@ function MercadoPagoCard() {
   };
 
   return (
-    <div className="rd-card h-full md:min-h-[665px] p-6 grid grid-rows-[28px_48px_132px_158px_172px_44px] gap-5 relative overflow-hidden border-primary/20">
+    <div className="rd-card h-full p-6 grid auto-rows-max gap-5 relative border-primary/20">
       <CardHeaderRow region="🇦🇷 Argentina" />
 
       <div className="h-12 flex items-center">
@@ -136,7 +136,7 @@ function MercadoPagoCard() {
         priceClass="text-primary" />
       
 
-      <div className="h-[158px] flex flex-col">
+      <div className="min-h-[158px] flex flex-col">
         <div className="min-h-[102px] space-y-2">
           <label className="rd-label">Tu email de Mercado Pago</label>
 
@@ -162,7 +162,7 @@ function MercadoPagoCard() {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 h-[172px]">
+      <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 min-h-[172px]">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
           Cómo funciona:
         </p>
@@ -195,7 +195,7 @@ function MercadoPagoCard() {
 
 function PayPalCard() {
   return (
-    <div className="rd-card h-full md:min-h-[665px] p-6 grid grid-rows-[28px_48px_132px_158px_172px_44px] gap-5 relative overflow-hidden border-border">
+    <div className="rd-card h-full p-6 grid auto-rows-max gap-5 relative border-border">
       <CardHeaderRow region="🌎 Internacional" variant="accent" />
 
       <div className="h-12 flex items-center">
@@ -215,7 +215,7 @@ function PayPalCard() {
         priceClass="text-accent" />
       
 
-      <div className="h-[158px] flex flex-col">
+      <div className="min-h-[158px] flex flex-col">
         <div className="min-h-[102px] space-y-2">
           <label className="rd-label">Pago manual por PayPal</label>
 
@@ -240,7 +240,7 @@ function PayPalCard() {
         </a>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 h-[172px]">
+      <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 min-h-[172px]">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
           Después de pagar:
         </p>

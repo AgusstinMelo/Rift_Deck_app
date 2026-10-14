@@ -160,7 +160,7 @@ export default function TierlistConfig() {
   ];
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6">
+    <div className="rd-page">
       <PageHeader
         title="Configuración de Tierlist"
         subtitle="Gestionar pesos y fuentes de datos para el cálculo automático"

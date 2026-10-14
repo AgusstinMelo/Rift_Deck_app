@@ -121,7 +121,7 @@ export default function Tierlist() {
   };
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
+    <div className="rd-page space-y-6 rd-dashboard">
 
       <div className="flex items-start justify-between gap-4">
         <div>

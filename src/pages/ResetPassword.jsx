@@ -67,7 +67,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-4">
+    <div className="relative min-h-dvh flex items-center justify-center overflow-x-hidden p-4">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${BG_URL})` }} />
       <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
       <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/10" />

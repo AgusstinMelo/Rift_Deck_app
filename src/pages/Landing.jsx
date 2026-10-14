@@ -163,7 +163,7 @@ export default function Landing() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <main className="relative min-h-dvh flex items-center justify-center overflow-x-hidden">
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

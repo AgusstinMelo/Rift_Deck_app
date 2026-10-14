@@ -136,13 +136,13 @@ function calculatePoolScore(champArr, totalMatches) {
 
 function HeroStat({ label, value, sub, tone }) {
   return (
-      <div className="flex flex-col items-center justify-center text-center px-6 py-8 border-b lg:border-b-0">
-      <p className="rd-label mb-5">{label}</p>
-      <p className={`font-rajdhani font-bold text-5xl md:text-4xl tracking-[-0.08em] ${tone}`}>
+      <div className="flex flex-col items-center justify-center text-center px-4 py-3 border-b lg:border-b-0">
+      <p className="rd-label mb-2">{label}</p>
+      <p className={`font-rajdhani font-bold text-4xl tracking-[-0.08em] ${tone}`}>
         {value}
       </p>
       {sub && (
-        <p className="text-sm text-muted-foreground mt-3">{sub}</p>
+        <p className="text-xs text-muted-foreground mt-1.5">{sub}</p>
       )}
     </div>
   );
@@ -150,7 +150,7 @@ function HeroStat({ label, value, sub, tone }) {
 
 function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, blueWins, blueLosses, redWins, redLosses, champImageUrl, poolScore }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border min-h-[280px]"
+    <div className="relative overflow-hidden rounded-2xl border border-border min-h-[150px]"
     style={{
       background: `
         radial-gradient(circle at 18% 0%, rgba(74, 222, 128, 0.08), transparent 32%),
@@ -160,17 +160,17 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
     }}>
       {champImageUrl && (
         <>
-          <div className="absolute inset-y-0 left-0 h-full pointer-events-none overflow-visible">
+          <div className="pointer-events-none absolute -bottom-[10%] -top-[10%] left-0 overflow-visible">
             <div
               className="relative h-full w-fit overflow-hidden"
               style={{
                 WebkitMaskImage:
                   window.innerWidth >= 768
-                    ? 'linear-gradient(to right, black 0%, black 80%, transparent 100%)'
+                    ? 'linear-gradient(to right, black 0%, black 90%, transparent 100%)'
                     : 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
                 maskImage:
                   window.innerWidth >= 768
-                    ? 'linear-gradient(to right, black 0%, black 80%, transparent 100%)'
+                    ? 'linear-gradient(to right, black 0%, black 90%, transparent 100%)'
                     : 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
               }}
             >
@@ -184,15 +184,15 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
               style={{
                 filter:
                   window.innerWidth >= 768
-                    ? 'brightness(0.72) saturate(1.2)'
+                    ? 'brightness(0.84) saturate(1.16)'
                     : 'brightness(0.55) saturate(1.1) opacity(0.25)',
 
               }}
             />
             <div
               className="
-                absolute inset-y-0 right-0 w-20
-                bg-gradient-to-l from-[hsl(222,36%,9%)] via-[hsl(222,36%,9%)]/75 to-transparent
+                absolute inset-y-0 right-0 w-10
+                bg-gradient-to-l from-[hsl(222,36%,9%)]/85 to-transparent
               "
             />
             </div>
@@ -200,9 +200,10 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
         </>
       )}
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[minmax(300px,400px)_1fr_1fr_1fr_1fr] min-h-[280px]">
-        <div className="flex flex-col items-center justify-center py-6 px-8 md:translate-x-10">
-          <div className="relative w-44 h-44 flex items-center justify-center">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[minmax(220px,290px)_1fr_1fr_1fr_1fr] min-h-[150px]">
+        <div className="flex flex-col items-center justify-center px-5 py-2 md:translate-x-6">
+          <p className="rd-label mb-1 text-center">WINRATE GENERAL</p>
+          <div className="relative flex h-20 w-20 items-center justify-center">
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 120 120">
               <circle
                 cx="60"
@@ -226,13 +227,12 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
               />
             </svg>
 
-            <span className="relative font-rajdhani font-bold text-3xl text-green-400 tracking-[-0.08em]">
+            <span className="relative font-rajdhani text-lg font-bold text-green-400 tracking-[-0.08em]">
               {winrate.toFixed(1)}%
             </span>
           </div>
 
-          <p className="rd-label mt-5 text-center">WINRATE GENERAL</p>
-          <p className="text-lg text-foreground mt-1">{wins}W - {losses}L</p>
+          <p className="mt-1.5 text-xs text-muted-foreground">{wins}W - {losses}L</p>
         </div>
 
         <div className="contents lg:[&>*]:-translate-x-8">
@@ -295,10 +295,13 @@ function WRBar({ value }) {
   );
 }
 
-function SectionCard({ title, children, watermark = false, fixedHeight = false, fullHeight = false }) {
+function SectionCard({ title, children, watermark = false, fixedHeight = false, fullHeight = false, headerExtra = null }) {
   return (
-    <div className={`rd-card p-5 flex flex-col ${fixedHeight ? 'h-[350px]' : ''} ${fullHeight ? 'h-full' : ''} ${watermark ? 'rd-card-watermark' : ''}`}>
-      <h2 className="rd-card-title mb-4 shrink-0">{title}</h2>
+    <div className={`rd-card min-h-0 p-3 flex flex-col ${fixedHeight || fullHeight ? 'h-full' : ''} ${watermark ? 'rd-card-watermark' : ''}`}>
+      <div className="mb-2 flex shrink-0 items-start justify-between gap-3">
+        <h2 className="rd-card-title">{title}</h2>
+        {headerExtra}
+      </div>
       <div className="flex-1 flex flex-col">
         {children}
       </div>
@@ -327,12 +330,12 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
 
   // Pack-placement: itera intentando colocar cada burbuja sin salirse
   // y con mínima superposición. Orden asimétrico por diseño.
-  const CONTAINER_W = 280;
-  const CONTAINER_H = 260;
+  const CONTAINER_W = 380;
+  const CONTAINER_H = 220;
   const CONTAINER_PADDING = 4;
-  const MIN_R = 15;
-  const MAX_R = 64;
-  const MIN_VISIBLE_R = 12;
+  const MIN_R = 11;
+  const MAX_R = 58;
+  const MIN_VISIBLE_R = 9;
 
   const gamesValues = champArr.map(c => c.games);
   const minGames = Math.min(...gamesValues, 1);
@@ -428,20 +431,19 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
   });
 
   return (
-    <SectionCard title="Pool de campeones" watermark>
-      <div className="min-h-[320px] flex flex-col">
-        <div className="text-center mb-4">
-          <p className="text-sm text-muted-foreground">
-            Diversidad del pool:{' '}
-            <span className={`font-bold ${diversityTone}`}>
-              {diversityLabel}
-            </span>
+    <SectionCard
+      title="Pool de campeones"
+      watermark
+      headerExtra={(
+        <div className="text-right leading-tight">
+          <p className="text-[11px] text-muted-foreground">
+            Diversidad: <span className={`font-bold ${diversityTone}`}>{diversityLabel}</span>
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {champArr.length} campeones usados
-          </p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">{champArr.length} campeones usados</p>
         </div>
-
+      )}
+    >
+      <div className="min-h-0 h-full flex flex-col">
         <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl">
           <div
             className="relative shrink-0"
@@ -491,54 +493,57 @@ const LANE_LABELS = {
   support: 'Supp',
 };
 
-const LANE_TICK_COLORS = {
-  top: '#4FC3F7',
-  jungler: '#B388FF',
-  mid: '#2EE6A6',
-  adc: '#FF6B6B',
-  support: '#FFC857',
-};
-
-const LANE_ICONS = {
-  top:     'https://media.base44.com/images/public/6a0005628d71002f05120013/abe747f2d_top.png',
-  jungler: 'https://media.base44.com/images/public/6a0005628d71002f05120013/0b50ba53f_jungle.png',
-  mid:     'https://media.base44.com/images/public/6a0005628d71002f05120013/9b1932129_mid.png',
-  adc:     'https://media.base44.com/images/public/6a0005628d71002f05120013/798004bb6_adc.png',
-  support: 'https://media.base44.com/images/public/6a0005628d71002f05120013/3e7bd0424_support.png',
-};
-
 const LANE_COLORS = {
   top: '#4FC3F7', jungler: '#B388FF', mid: '#2EE6A6', adc: '#FF6B6B', support: '#FFC857',
 };
 
 function LaneBarChart({ laneArr }) {
+  const orderedLanes = ['top', 'jungler', 'mid', 'adc', 'support'];
+  const data = orderedLanes.map(lane => {
+    const entry = laneArr.find(item => item.lane === lane);
+    return { lane, wr: entry?.wr || 0, games: entry?.games || 0 };
+  });
+  const centerX = 150;
+  const centerY = 105;
+  const radius = 70;
+  const pointAt = (index, distance) => {
+    const angle = -Math.PI / 2 + index * ((Math.PI * 2) / data.length);
+    return [centerX + Math.cos(angle) * distance, centerY + Math.sin(angle) * distance];
+  };
+  const polygon = (distance) => data.map((_, index) => pointAt(index, distance).join(',')).join(' ');
+  const valuePolygon = data.map((entry, index) => {
+    const normalized = Math.max(0.22, Math.min(1, entry.wr / 70));
+    return pointAt(index, radius * normalized).join(',');
+  }).join(' ');
+
   return (
-    <div className="flex flex-col justify-between h-full gap-3">
-      {laneArr.map(entry => {
-        const color = LANE_COLORS[entry.lane] || 'hsl(43,65%,58%)';
-        const icon = LANE_ICONS[entry.lane];
-        const label = LANE_LABELS[entry.lane] || entry.lane;
-        return (
-          <div key={entry.lane} className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 w-[68px] shrink-0">
-              {icon && <img src={icon} alt={label} className="w-5 h-5 shrink-0" />}
-              <span className="text-xs text-muted-foreground font-semibold">{label}</span>
-            </div>
-            <div className="flex-1 flex flex-col gap-0.5">
-              <div className="h-5 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${entry.wr}%`, background: color }}
-                />
-              </div>
-              <span className="text-[10px] text-muted-foreground pl-1">{entry.games} partidas</span>
-            </div>
-            <span className="text-xs font-bold w-9 text-right" style={{ color }}>
-              {entry.wr}%
-            </span>
-          </div>
-        );
-      })}
+    <div className="flex h-full min-h-0 items-center justify-center">
+      <svg viewBox="0 0 300 210" className="h-full max-h-[276px] w-full" role="img" aria-label="Winrate por línea">
+        {[0.33, 0.66, 1].map(level => (
+          <polygon key={level} points={polygon(radius * level)} fill="none" stroke="rgba(148,163,184,.16)" strokeWidth="1" />
+        ))}
+        {data.map((_, index) => {
+          const [x, y] = pointAt(index, radius);
+          return <line key={index} x1={centerX} y1={centerY} x2={x} y2={y} stroke="rgba(148,163,184,.13)" strokeWidth="1" />;
+        })}
+        <polygon points={valuePolygon} fill="rgba(77,166,255,.18)" stroke="#4da6ff" strokeWidth="2" />
+        {data.map((entry, index) => {
+          const [px, py] = pointAt(index, radius * Math.max(0.22, Math.min(1, entry.wr / 70)));
+          const [lx, ly] = pointAt(index, 94);
+          const color = LANE_COLORS[entry.lane] || '#d4af37';
+          return (
+            <g key={entry.lane}>
+              <circle cx={px} cy={py} r="3.5" fill={color} stroke="hsl(222,36%,11%)" strokeWidth="2" />
+              <text x={lx} y={ly - 2} textAnchor="middle" fill="hsl(40,53%,94%)" fontSize="10" fontWeight="700">
+                {LANE_LABELS[entry.lane]}
+              </text>
+              <text x={lx} y={ly + 10} textAnchor="middle" fill={color} fontSize="9" fontWeight="700">
+                {entry.wr}% · {entry.games}p
+              </text>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
@@ -556,24 +561,24 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
   }
 
   return (
-    <div className="space-y-2 overflow-hidden">
+    <div className="space-y-1.5 overflow-hidden">
       {items.map(m => (
-        <div key={m.champ} className="rd-list-row">
+        <div key={m.champ} className={`rd-list-row rd-matchup-row ${positive ? 'rd-matchup-row-positive' : 'rd-matchup-row-negative'}`}>
           <ChampionAvatar name={m.champ} src={getChampImg(m.champ)} rounded="rounded" />
 
-          <span className="text-sm text-foreground flex-1 truncate">
+          <span className="text-[13px] text-foreground flex-1 truncate">
             {m.champ}
           </span>
 
-          <span className={`rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-wide ${getSampleStatus(m.total).tone}`}>
+          <span className={`rounded-full border px-2 py-0.5 text-[8px] uppercase tracking-wide ${getSampleStatus(m.total).tone}`}>
             {getSampleStatus(m.total).label}
           </span>
 
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+          <span className="text-[11px] text-muted-foreground whitespace-nowrap">
             {m.total} {m.total === 1 ? 'partida' : 'partidas'}
           </span>
 
-          <span className={`text-sm font-bold ${positive ? 'text-green-400' : 'text-red-400'}`}>
+          <span className={`text-[13px] font-bold ${positive ? 'text-green-300' : 'text-red-300'}`}>
             {m.wr.toFixed(0)}%
           </span>
         </div>
@@ -586,6 +591,8 @@ export default function Stats() {
   const { user } = useAuth();
   const [matchTypeFilter, setMatchTypeFilter] = useState(DEFAULT_MATCH_TYPE);
   const [patchFilter, setPatchFilter] = useState('');
+  const [analyticsView, setAnalyticsView] = useState('overview');
+  const [coachPage, setCoachPage] = useState(0);
   const patchDefaultApplied = useRef(false);
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
@@ -695,7 +702,7 @@ export default function Stats() {
 
   if (membershipLoading || isLoading) {
     return (
-      <div className="w-full max-w-none mx-0 p-5 md:p-6">
+      <div className="rd-page">
         <div className="rd-card h-40 animate-pulse" />
       </div>
     );
@@ -707,7 +714,7 @@ export default function Stats() {
 
   if (allMatches.length === 0) {
     return (
-      <div className="w-full max-w-none mx-0 p-5 md:p-6">
+      <div className="rd-page">
         <PageHeader title="Estadísticas Personales" />
         <div className="rd-card p-6">
           <EmptyState
@@ -722,15 +729,17 @@ export default function Stats() {
 
   if (matches.length === 0) {
     return (
-      <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="rd-page space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <PageHeader title="Estadísticas Personales" />
-          <div className="flex flex-col items-stretch sm:items-end gap-3">
-            <div className="flex items-center gap-3 rd-status-pill">
-              <BarChart3 size={16} className="text-primary" />
-              <span className="text-xs text-muted-foreground">Performance personal</span>
-            </div>
-            <label className="min-w-64 text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 rd-status-pill">
+            <BarChart3 size={16} className="text-primary" />
+            <span className="text-xs text-muted-foreground">Performance personal</span>
+          </div>
+        </div>
+        <div className="rd-card overflow-hidden">
+          <div className="flex flex-col gap-3 border-b border-border/70 bg-secondary/20 p-4 sm:flex-row sm:items-end sm:justify-end">
+            <label className="min-w-0 flex-1 text-xs text-muted-foreground sm:max-w-64">
               Tipo de partida
               <select
                 value={matchTypeFilter}
@@ -747,16 +756,16 @@ export default function Stats() {
               value={patchFilter}
               onChange={handlePatchFilterChange}
               patches={patchOptions}
-              className="min-w-64"
+              className="min-w-0 flex-1 sm:max-w-64"
             />
           </div>
-        </div>
-        <div className="rd-card p-6">
-          <EmptyState
-            icon={BarChart3}
-            title="Sin partidas para estos filtros"
-            description="Elegí otro tipo de partida o parche para procesar sus estadísticas e insights."
-          />
+          <div className="flex min-h-[260px] items-center justify-center p-6">
+            <EmptyState
+              icon={BarChart3}
+              title="Sin partidas para estos filtros"
+              description="Elegí otro tipo de partida o parche para procesar sus estadísticas e insights."
+            />
+          </div>
         </div>
       </div>
     );
@@ -852,12 +861,12 @@ export default function Stats() {
   const bestMatchups = [...matchupArr]
     .filter(m => m.wr > 50)
     .sort((a, b) => b.total - a.total || b.wr - a.wr)
-    .slice(0, 5);
+    .slice(0, 10);
 
   const worstMatchups = [...matchupArr]
     .filter(m => m.wr < 50)
     .sort((a, b) => b.total - a.total || a.wr - b.wr)
-    .slice(0, 5);
+    .slice(0, 10);
 
   const synergyStats = {};
   matches.forEach(m => {
@@ -887,12 +896,12 @@ export default function Stats() {
   const bestSynergies = [...synergyArr]
     .filter(m => m.wr > 50)
     .sort((a, b) => b.total - a.total || b.wr - a.wr)
-    .slice(0, 5);
+    .slice(0, 10);
 
   const worstSynergies = [...synergyArr]
     .filter(m => m.wr < 50)
     .sort((a, b) => b.total - a.total || a.wr - b.wr)
-    .slice(0, 5);
+    .slice(0, 10);
 
   // Matchups generales: contra cualquier campeón enemigo del equipo
   const generalMatchupStats = {};
@@ -921,18 +930,22 @@ export default function Stats() {
   const bestGeneralMatchups = [...generalMatchupArr]
     .filter(m => m.wr > 50)
     .sort((a, b) => b.total - a.total || b.wr - a.wr)
-    .slice(0, 5);
+    .slice(0, 10);
 
   const worstGeneralMatchups = [...generalMatchupArr]
     .filter(m => m.wr < 50)
     .sort((a, b) => b.total - a.total || a.wr - b.wr)
-    .slice(0, 5);
+    .slice(0, 10);
 
   const insights = computeInsights({ matches, tierlist, wrItems, builds: insightBuilds, champions, runes, spells });
+  const coachPageCount = Math.max(1, Math.ceil(insights.length / 2));
+  const effectiveCoachPage = Math.min(coachPage, coachPageCount - 1);
+  const visibleInsights = insights.slice(effectiveCoachPage * 2, effectiveCoachPage * 2 + 2);
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
+    <div className="rd-page rd-dashboard rd-compact-page rd-stats-layout">
 
+      <section className="rd-viewport-section rd-stats-overview space-y-6" aria-label="Resumen de rendimiento">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -951,17 +964,13 @@ export default function Stats() {
           </p>
         </div>
 
-        <div className="flex flex-col items-stretch sm:items-end gap-3">
-          <div className="flex items-center gap-3 rd-status-pill">
-            <BarChart3 size={16} className="text-primary" />
-            <span className="text-xs text-muted-foreground">Performance personal</span>
-          </div>
-          <label className="min-w-64 text-xs text-muted-foreground">
-            Procesar estadísticas de
+        <div className="flex flex-wrap items-end justify-end gap-3">
+          <label className="min-w-52 text-xs text-muted-foreground">
+            Tipo de partida
             <select
               value={matchTypeFilter}
               onChange={event => setMatchTypeFilter(event.target.value)}
-              className="mt-1 w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40"
+              className="mt-1 h-9 w-full rounded-lg border border-border bg-secondary/90 px-3 text-xs font-medium text-foreground outline-none focus:border-primary/40"
             >
               <option value="all">Todas las partidas</option>
               {MATCH_TYPES.map(option => (
@@ -973,8 +982,12 @@ export default function Stats() {
             value={patchFilter}
             onChange={handlePatchFilterChange}
             patches={patchOptions}
-            className="min-w-64"
+            className="min-w-52"
           />
+          <div className="hidden items-center gap-3 rd-status-pill 2xl:flex">
+            <BarChart3 size={16} className="text-primary" />
+            <span className="text-xs text-muted-foreground">Performance personal</span>
+          </div>
         </div>
       </div>
 
@@ -992,52 +1005,71 @@ export default function Stats() {
         </div>
       )}
 
-      <StatsHeroCard
-        winrate={winrate}
-        wins={wins}
-        losses={losses}
-        avgKDA={avgKDA}
-        kdaLine={kdaLine}
-        blueWR={blueMatches.length > 0 ? blueWR : null}
-        redWR={redMatches.length > 0 ? redWR : null}
-        blueWins={blueWins}
-        blueLosses={blueLosses}
-        redWins={redWins}
-        redLosses={redLosses}
-        champImageUrl={mostPlayedChampCardImageUrl}
-        poolScore={poolScore}
-      />
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+      <div className="rd-panel-tabs" role="tablist" aria-label="Secciones de estadísticas">
+        {[
+          ['overview', 'Rendimiento'],
+          ['direct', 'Matchups directos'],
+          ['general', 'Matchups generales'],
+          ['synergy', 'Sinergias'],
+          ...(insights.length ? [['coach', 'Coach']] : []),
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={analyticsView === id}
+            onClick={() => setAnalyticsView(id)}
+            className={`rd-panel-tab ${analyticsView === id ? 'rd-panel-tab-active' : ''}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {analyticsView === 'overview' && <section className="rd-analytics-panel flex min-h-0 flex-col gap-3" aria-label="Rendimiento por campeón y línea">
+        <StatsHeroCard
+          winrate={winrate}
+          wins={wins}
+          losses={losses}
+          avgKDA={avgKDA}
+          kdaLine={kdaLine}
+          blueWR={blueMatches.length > 0 ? blueWR : null}
+          redWR={redMatches.length > 0 ? redWR : null}
+          blueWins={blueWins}
+          blueLosses={blueLosses}
+          redWins={redWins}
+          redLosses={redLosses}
+          champImageUrl={mostPlayedChampCardImageUrl}
+          poolScore={poolScore}
+        />
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-6">
         <div className="lg:col-span-2 flex flex-col">
           <SectionCard title="Winrate por campeón" watermark fullHeight>
-            <div className="space-y-3">
-              {champArr.slice(0, 5).map(c => {
+            <div className="grid h-full auto-rows-fr grid-cols-1 gap-1.5 xl:grid-cols-2">
+              {champArr.slice(0, 10).map(c => {
                 const tone =
                   c.wr >= 55 ? 'text-green-400' :
                   c.wr >= 45 ? 'text-primary' :
                   'text-red-400';
 
                 return (
-                  <div key={c.name} className="flex items-center gap-3">
+                  <div key={c.name} className="grid min-h-0 grid-cols-[auto_1fr] items-center gap-2 rounded-lg border border-border/50 bg-secondary/20 px-2 py-1.5">
                     <ChampionAvatar name={c.name} src={getChampImg(c.name)} rounded="rounded-lg" />
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-foreground truncate">
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <span className="truncate text-xs font-semibold text-foreground">
                           {c.name}
                         </span>
 
-                        <span className={`text-xs font-bold ${tone}`}>
-                          {c.wr.toFixed(0)}%
+                        <span className={`whitespace-nowrap text-[11px] font-bold ${tone}`}>
+                          {c.wr.toFixed(0)}% · {c.games}p
                         </span>
                       </div>
 
                       <WRBar value={c.wr} />
-
-                      <span className="text-xs text-muted-foreground">
-                        {c.games} partidas
-                      </span>
                     </div>
                   </div>
                 );
@@ -1047,7 +1079,7 @@ export default function Stats() {
         </div>
 
         <div className="lg:col-span-2 flex flex-col">
-          <SectionCard title="Winrate por línea" fullHeight>
+          <SectionCard title="Winrate por línea" fullHeight watermark>
             {laneArr.length > 0 ? (
               <LaneBarChart laneArr={laneArr} />
             ) : (
@@ -1063,8 +1095,11 @@ export default function Stats() {
             poolScore={poolScore}
           />
         </div>
+        </div>
+      </section>}
 
-        <div className="lg:col-span-3">
+      {analyticsView === 'direct' && <section className="rd-analytics-panel grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups directos">
+        <div>
           <SectionCard title="Mejores Matchups Directos" fixedHeight>
             <MatchupList
               items={bestMatchups}
@@ -1074,8 +1109,7 @@ export default function Stats() {
             />
           </SectionCard>
         </div>
-
-        <div className="lg:col-span-3">
+        <div>
           <SectionCard title="Matchups Directos Problemáticos" fixedHeight>
             <MatchupList
               items={worstMatchups}
@@ -1085,8 +1119,10 @@ export default function Stats() {
             />
           </SectionCard>
         </div>
+      </section>}
 
-        <div className="lg:col-span-3">
+      {analyticsView === 'general' && <section className="rd-analytics-panel grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups generales">
+        <div>
           <SectionCard title="Mejores Matchups Generales" fixedHeight>
             <MatchupList
               items={bestGeneralMatchups}
@@ -1097,7 +1133,7 @@ export default function Stats() {
           </SectionCard>
         </div>
 
-        <div className="lg:col-span-3">
+        <div>
           <SectionCard title="Peores Matchups Generales" fixedHeight>
             <MatchupList
               items={worstGeneralMatchups}
@@ -1108,7 +1144,11 @@ export default function Stats() {
           </SectionCard>
         </div>
 
-        <div className="lg:col-span-3">
+      </section>}
+
+      {analyticsView === 'synergy' && <section className="rd-analytics-panel grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Sinergias aliadas">
+
+        <div>
           <SectionCard title="Buena Sinergia Aliada" fixedHeight>
             <MatchupList
               items={bestSynergies}
@@ -1119,7 +1159,7 @@ export default function Stats() {
           </SectionCard>
         </div>
 
-        <div className="lg:col-span-3">
+        <div>
           <SectionCard title="Mala Sinergia Aliada" fixedHeight>
             <MatchupList
               items={worstSynergies}
@@ -1129,10 +1169,10 @@ export default function Stats() {
             />
           </SectionCard>
         </div>
-      </div>
+      </section>}
 
-      {insights.length > 0 && (
-        <section className="rd-card rd-card-watermark p-5 md:p-7 overflow-hidden">
+      {analyticsView === 'coach' && insights.length > 0 && (
+        <section className="rd-analytics-panel rd-card rd-card-watermark p-5 md:p-7 overflow-hidden" aria-label="Lectura estratégica">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
             <div className="flex items-center gap-4">
               <img
@@ -1149,19 +1189,46 @@ export default function Stats() {
                 <p className="text-xs text-muted-foreground mt-1">Hipótesis priorizadas para tu próximo bloque de partidas.</p>
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground max-w-sm md:text-right">
-              La confianza refleja cuánto respaldo tiene cada consejo en tu historial y en los datos del juego.
-            </p>
+            <div className="flex flex-col items-end gap-2">
+              <p className="text-[11px] text-muted-foreground max-w-sm md:text-right">
+                La confianza refleja cuánto respaldo tiene cada consejo en tu historial y en los datos del juego.
+              </p>
+              {coachPageCount > 1 && (
+                <div className="flex items-center gap-2" aria-label="Navegación de consejos">
+                  <button
+                    type="button"
+                    onClick={() => setCoachPage(Math.max(0, effectiveCoachPage - 1))}
+                    disabled={effectiveCoachPage === 0}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-secondary/50 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary disabled:opacity-30"
+                    aria-label="Consejos anteriores"
+                  >
+                    ‹
+                  </button>
+                  <span className="min-w-12 text-center text-[10px] text-muted-foreground">
+                    {effectiveCoachPage + 1} / {coachPageCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCoachPage(Math.min(coachPageCount - 1, effectiveCoachPage + 1))}
+                    disabled={effectiveCoachPage >= coachPageCount - 1}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-secondary/50 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary disabled:opacity-30"
+                    aria-label="Consejos siguientes"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            {insights.map((insight, i) => (
+            {visibleInsights.map((insight, i) => (
               <article key={insight.id} className={`relative flex flex-col rounded-2xl border p-5 overflow-hidden ${insightTone[insight.tone] || insightTone.neutral}`}>
                 <div className={`absolute inset-y-0 left-0 w-1 ${insightAccent[insight.tone] || insightAccent.neutral}`} />
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                      {String(i + 1).padStart(2, '0')} · {insight.domain}
+                      {String(effectiveCoachPage * 2 + i + 1).padStart(2, '0')} · {insight.domain}
                     </p>
                     <h3 className="font-rajdhani text-xl font-bold leading-tight text-foreground">{insight.title}</h3>
                   </div>

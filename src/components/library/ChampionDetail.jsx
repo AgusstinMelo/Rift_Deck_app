@@ -188,7 +188,7 @@ const getChampionProjection = ({
 };
 
 // ── Insight function (defined outside component, receives all values as params) ──
-const getChampionInsight = ({
+export const getChampionInsight = ({
   championName,
   totalGames,
   numericWr,

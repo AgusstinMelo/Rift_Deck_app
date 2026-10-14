@@ -167,7 +167,7 @@ export default function LegalInfoModal({ type, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="rd-card w-full max-w-2xl max-h-[88vh] flex flex-col">
+      <div className="rd-card rd-modal-panel w-full max-w-2xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
           <h2 className="font-rajdhani font-bold text-lg text-foreground uppercase">
             {content.title}

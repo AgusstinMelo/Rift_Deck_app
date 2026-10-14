@@ -21,7 +21,7 @@ export default function PublicItems({ initialItems, initialChampions }) {
 
   if (notFound) return <NotFound type="objeto" basePath="/objetos" />;
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh bg-background text-foreground">
       <Seo {...seo} indexable />
       <PublicHeader />
       <main className="mx-auto w-full max-w-[1800px] px-5 py-8 md:py-12">

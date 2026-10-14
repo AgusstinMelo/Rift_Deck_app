@@ -62,7 +62,7 @@ export default function BugReportModal({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="rd-card w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="rd-card rd-modal-panel w-full max-w-lg flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-2">

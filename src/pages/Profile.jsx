@@ -120,7 +120,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
+    <div className="rd-page space-y-6 rd-dashboard">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
           {user?.avatar_url ? (

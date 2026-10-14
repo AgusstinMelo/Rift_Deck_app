@@ -131,7 +131,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
             />
           </div>
-          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[calc(100vh-26rem)] overflow-y-auto pr-1">
+          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
             {filteredChampions.map(champ => {
               const selectedRole = Object.keys(selectedByRole).find(role => selectedByRole[role]?.name === champ.name);
               const isSelected = Boolean(selectedRole);
@@ -578,7 +578,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
             )}
             <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
               className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all mb-2" />
-            <div className="grid grid-cols-6 sm:grid-cols-9 gap-2 max-h-[calc(100vh-34rem)] overflow-y-auto p-1">
+            <div className="grid grid-cols-6 sm:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-34rem))] overflow-y-auto p-1">
               {filteredChamps.map(champ => (
                 <button key={champ.id} type="button" onClick={() => handleOwnChampionSelect(champ)}
                   className={`w-12 h-12 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all

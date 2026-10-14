@@ -140,4 +140,34 @@ where s.id = 1;
 
 -- ROLLBACK
 select public.activate_patch_by_version('7.2c');
+
+-- SCHEDULE
+SELECT cron.schedule(
+  'activate-patch-7-3b',
+  '0 4 15 10 *',
+  $job$
+    DO $task$
+    BEGIN
+      IF (now() AT TIME ZONE 'Europe/Madrid')::date = DATE '2026-10-15' THEN
+        PERFORM public.activate_patch_by_version('7.3b');
+      END IF;
+
+      PERFORM cron.unschedule('activate-patch-7-3b');
+    END
+    $task$;
+  $job$
+);
+
+-- CHECK
+SELECT jobid, jobname, schedule, active
+FROM cron.job
+WHERE jobname = 'activate-patch-7-3b';
+
+-- VERIFY
+SELECT *
+FROM cron.job_run_details
+WHERE command LIKE '%activate_patch_by_version%'
+ORDER BY start_time DESC
+LIMIT 5;
+
 ```

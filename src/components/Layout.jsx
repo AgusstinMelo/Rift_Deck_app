@@ -219,7 +219,7 @@ export default function Layout() {
   }, [location.pathname, location.search]);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden rd-app-shell">
+    <div className="flex h-dvh min-h-0 bg-background overflow-hidden rd-app-shell">
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/70 z-[250] lg:hidden backdrop-blur-sm"
@@ -268,12 +268,42 @@ export default function Layout() {
             />
           )}
 
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className={`hidden lg:flex mt-3 text-muted-foreground hover:text-primary transition-colors ${collapsed ? 'mx-auto' : 'self-start ml-5'}`}
-          >
-            <Menu size={16} />
-          </button>
+          <div className={`flex mt-3 items-center ${collapsed ? 'justify-center' : 'self-start ml-5 gap-1'}`}>
+            <button
+              type="button"
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
+              title={collapsed ? 'Desplegar barra lateral' : 'Contraer barra lateral'}
+              aria-label={collapsed ? 'Desplegar barra lateral' : 'Contraer barra lateral'}
+            >
+              <Menu size={16} />
+            </button>
+
+            {!collapsed && infoItems.map(({ type, label, icon: Icon }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setActiveInfoModal(type)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
+                title={label}
+                aria-label={label}
+              >
+                <Icon size={15} />
+              </button>
+            ))}
+
+            {!collapsed && (
+              <button
+                type="button"
+                onClick={() => setBugModalOpen(true)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
+                title="Reportar bug"
+                aria-label="Reportar bug"
+              >
+                <Bug size={15} />
+              </button>
+            )}
+          </div>
         </div>
 
         <nav className="flex-1 py-5 overflow-y-auto px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -326,41 +356,6 @@ export default function Layout() {
             </Link>
           )}
 
-          {infoItems.map(({ type, label, icon: Icon }) => (
-            <button
-              key={type}
-              onClick={() => setActiveInfoModal(type)}
-              className={`
-                flex items-center text-muted-foreground hover:text-primary
-                transition-colors text-sm
-                ${collapsed
-                  ? 'w-full justify-center gap-0 px-0'
-                  : 'w-full justify-start gap-3'
-                }
-              `}
-              title={label}
-            >
-              <Icon size={16} className="shrink-0" />
-              {!collapsed && <span>{label}</span>}
-            </button>
-          ))}
-
-          <button
-            onClick={() => setBugModalOpen(true)}
-            className={`
-              flex items-center text-muted-foreground hover:text-red-400 
-              transition-colors text-sm
-              ${collapsed 
-                ? 'w-full justify-center gap-0 px-0' 
-                : 'w-full justify-start gap-3'
-              }
-            `}
-            title="Reportar bug"
-          >
-            <Bug size={16} className="shrink-0" />
-            {!collapsed && <span>Reportar Bug</span>}
-          </button>
-
           {user && (
             <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
@@ -389,7 +384,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex min-h-0 flex-col min-w-0 overflow-hidden">
         <header className="relative lg:hidden flex items-center justify-center h-14 px-4 border-b border-primary/10 bg-card shrink-0">
           <button
             type="button"
@@ -434,7 +429,7 @@ export default function Layout() {
           </button>
         </header>
 
-        <main ref={mainRef} className="flex-1 overflow-y-auto rd-main-content">
+        <main ref={mainRef} className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto rd-main-content">
           <Outlet />
         </main>
       </div>

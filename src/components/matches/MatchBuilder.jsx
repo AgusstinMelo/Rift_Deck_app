@@ -87,7 +87,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar campeón..."
           className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
       </div>
-      <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[calc(100vh-26rem)] overflow-y-auto pr-1">
+      <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
         {filteredChampions.map(champ => {
           const isSelected = Object.values(selectedByRole).some(c => c && c.id === champ.id);
           return (
@@ -533,7 +533,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
             <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
           </div>
-          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[calc(100vh-15rem)] overflow-y-auto pr-1">
+          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-15rem))] overflow-y-auto pr-1">
             {champions.filter(c => !champSearch || c.name?.toLowerCase().includes(champSearch.toLowerCase())).map(champ => (
               <button
                 key={champ.id}

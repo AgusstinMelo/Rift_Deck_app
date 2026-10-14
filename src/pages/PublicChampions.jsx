@@ -62,7 +62,7 @@ export default function PublicChampions({ initialChampions, initialExecutions, i
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh bg-background text-foreground">
       <Seo {...CHAMPIONS_SEO} indexable />
       <PublicHeader />
       <main className="mx-auto w-full max-w-[1800px] px-3 py-8 md:px-5 md:py-10">

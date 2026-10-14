@@ -163,7 +163,7 @@ export default function Matches() {
 
   if (showForm && !editing) {
     return (
-      <div className="w-full max-w-none mx-0 p-5 md:p-6 rd-dashboard">
+      <div className="rd-page rd-dashboard">
         <MatchBuilder
           champions={champions}
           patches={gamePatches}
@@ -178,7 +178,7 @@ export default function Matches() {
 
   if (editing) {
     return (
-      <div className="w-full max-w-none mx-0 p-5 md:p-6 rd-dashboard">
+      <div className="rd-page rd-dashboard">
         <MatchForm
           match={editing}
           patches={gamePatches}
@@ -204,7 +204,7 @@ export default function Matches() {
     'red';
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
+    <div className="rd-page space-y-6 rd-dashboard">
 
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -265,7 +265,7 @@ export default function Matches() {
         {/* Modal de confirmación */}
         {confirmDeleteAll && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="rd-card p-6 w-full max-w-sm mx-4 space-y-4">
+            <div className="rd-card rd-modal-panel overflow-y-auto p-6 w-full max-w-sm mx-4 space-y-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
                   <Trash2 size={20} className="text-red-400" />
@@ -308,7 +308,7 @@ export default function Matches() {
 
         {matchToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="rd-card p-5 w-full max-w-xs mx-4 space-y-4">
+            <div className="rd-card rd-modal-panel overflow-y-auto p-5 w-full max-w-xs mx-4 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
                   <Trash2 size={20} className="text-red-400" />

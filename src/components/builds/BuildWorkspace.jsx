@@ -123,7 +123,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
   });
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6">
+    <div className="rd-page">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">

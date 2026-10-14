@@ -1,59 +1,100 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import {
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+  Sparkles,
+  Swords,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+} from 'lucide-react';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
-import {
-  Swords,
-  Wrench,
-  Trophy,
-  Target,
-  ChevronRight,
-  Sparkles,
-  BookOpen,
-  BarChart3,
-  TrendingUp
-} from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
-import { computeInsights } from '@/hooks/useInsights';
-import { useState } from 'react';
 import PatchFilter from '@/components/filters/PatchFilter';
+import { getChampionInsight } from '@/components/library/ChampionDetail';
+import { computeInsights } from '@/hooks/useInsights';
 import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
+
+const DASHBOARD_TABS = [
+  { id: 'summary', label: 'Resumen' },
+  { id: 'activity', label: 'Actividad' },
+  { id: 'meta', label: 'Meta' },
+];
+
+const DASHBOARD_HEADINGS = {
+  summary: {
+    title: 'Dashboard',
+    description: 'Analiza tu rendimiento, builds y meta actual.',
+  },
+  activity: {
+    title: 'Actividad',
+    description: 'Repasa tus últimas partidas, builds y matchups.',
+  },
+  meta: {
+    title: 'Meta',
+    description: 'Compara el parche actual con tus campeones principales.',
+  },
+};
+
+const LANE_LABELS = { top: 'TOP', jungler: 'JUNGLA', mid: 'MID', adc: 'ADC', support: 'SUPPORT' };
+const LANE_ICONS = {
+  top: 'https://media.base44.com/images/public/6a0005628d71002f05120013/abe747f2d_top.png',
+  jungler: 'https://media.base44.com/images/public/6a0005628d71002f05120013/0b50ba53f_jungle.png',
+  mid: 'https://media.base44.com/images/public/6a0005628d71002f05120013/9b1932129_mid.png',
+  adc: 'https://media.base44.com/images/public/6a0005628d71002f05120013/798004bb6_adc.png',
+  support: 'https://media.base44.com/images/public/6a0005628d71002f05120013/3e7bd0424_support.png',
+};
+
+const formatDate = (date) => {
+  if (!date) return '';
+  const [year, month, day] = String(date).slice(0, 10).split('-');
+  return `${day}-${month}-${year}`;
+};
+
+const getKda = (match) => {
+  const kills = Number(match?.kills) || 0;
+  const deaths = Number(match?.deaths) || 0;
+  const assists = Number(match?.assists) || 0;
+  return deaths === 0 ? kills + assists : (kills + assists) / deaths;
+};
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [patchFilter, setPatchFilter] = useState('');
+  const [activeTab, setActiveTab] = useState('summary');
+  const [mainIndex, setMainIndex] = useState(0);
+  const activeHeading = DASHBOARD_HEADINGS[activeTab];
 
   const { data: allMatches = [] } = useQuery({
     queryKey: ['matches', user?.email],
-    queryFn: () => user?.email
-      ? getUserMatches(user, 1000)
-      : [],
+    queryFn: () => user?.email ? getUserMatches(user, 1000) : [],
     enabled: !!user?.email,
   });
-
   const { data: allBuilds = [] } = useQuery({
     queryKey: ['builds-dashboard', user?.email],
-    queryFn: () => user?.email
-      ? getUserBuilds(user, 1000)
-      : [],
+    queryFn: () => user?.email ? getUserBuilds(user, 1000) : [],
     enabled: !!user?.email,
   });
-
   const { data: executions = [] } = useQuery({
     queryKey: ['executions', 'patch-filters'],
-    queryFn: () => getTierlistExecutions(100)
+    queryFn: () => getTierlistExecutions(100),
   });
 
   const successfulExecutions = executions
-    .filter(e => e.status === 'success' || e.status === 'partial')
-    .filter(e => patchMatchesSelection(e.patch, patchFilter));
+    .filter(execution => execution.status === 'success' || execution.status === 'partial')
+    .filter(execution => patchMatchesSelection(execution.patch, patchFilter));
   const latestSuccessExec = successfulExecutions[0];
-  const recentSnapshotKeys = executions
-    .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
-    .filter(execution => patchMatchesSelection(execution.patch, patchFilter))
+  const recentSnapshotKeys = successfulExecutions
+    .filter(execution => execution.snapshot_key)
     .slice(0, 3)
     .map(execution => execution.snapshot_key);
 
@@ -62,64 +103,67 @@ export default function Dashboard() {
     queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: recentSnapshotKeys }),
     enabled: recentSnapshotKeys.length > 0,
   });
-
   const tierlist = latestSuccessExec?.snapshot_key
     ? tierlistHistory.filter(entry => entry.snapshot_key === latestSuccessExec.snapshot_key)
     : [];
 
-  const { data: champions = [] } = useQuery({
-    queryKey: ['champions'],
-    queryFn: () => Champion.list('name')
-  });
+  const { data: champions = [] } = useQuery({ queryKey: ['champions'], queryFn: () => Champion.list('name') });
+  const { data: wrItems = [] } = useQuery({ queryKey: ['wr-items'], queryFn: () => WRItem.list('name') });
+  const { data: runes = [] } = useQuery({ queryKey: ['runes'], queryFn: () => Rune.list('name') });
+  const { data: spellsData = [] } = useQuery({ queryKey: ['spells'], queryFn: () => Spell.list('name') });
 
-  const { data: wrItems = [] } = useQuery({
-    queryKey: ['wr-items'],
-    queryFn: () => WRItem.list('name'),
-  });
-
-  const { data: runes = [] } = useQuery({
-    queryKey: ['runes'],
-    queryFn: () => Rune.list('name'),
-  });
-
-  const { data: spellsData = [] } = useQuery({
-    queryKey: ['spells'],
-    queryFn: () => Spell.list('name'),
-  });
-
-  const getSpellImg = (name) => spellsData.find(s => s.name === name)?.image_url;
-
-  const getChampImg = (name) =>
-    champions.find(c => c.name?.toLowerCase() === name?.toLowerCase())?.image_url;
-
+  const getChampImg = (name) => champions.find(
+    champion => champion.name?.toLowerCase() === name?.toLowerCase()
+  )?.image_url;
+  const getSpellImg = (name) => spellsData.find(spell => spell.name === name)?.image_url;
   const matches = filterByPatch(allMatches, patchFilter);
   const builds = filterByPatch(allBuilds, patchFilter);
 
   const getMatchTimestamp = (match) => {
     if (!match?.date) return 0;
-
-    const cleanDate = String(match.date).slice(0, 10);
-    const cleanHour = match?.hour ? String(match.hour).slice(0, 5) : '00:00';
-
-    const [year, month, day] = cleanDate.split('-').map(Number);
-    const [hours, minutes] = cleanHour.split(':').map(Number);
-
+    const [year, month, day] = String(match.date).slice(0, 10).split('-').map(Number);
+    const [hours, minutes] = String(match.hour || '00:00').slice(0, 5).split(':').map(Number);
     if (!year || !month || !day) return 0;
-
-    return new Date(
-      year,
-      month - 1,
-      day,
-      Number.isNaN(hours) ? 0 : hours,
-      Number.isNaN(minutes) ? 0 : minutes
-    ).getTime();
+    return new Date(year, month - 1, day, hours || 0, minutes || 0).getTime();
   };
 
-  const sortedMatches = [...matches].sort((a, b) => {
-    return getMatchTimestamp(b) - getMatchTimestamp(a);
-  });
+  const sortedMatches = [...matches].sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a));
+  const latestMatches = sortedMatches.slice(0, 10);
+  const totalMatches = sortedMatches.length;
+  const wins = sortedMatches.filter(match => match.result === 'win').length;
+  const winrate = totalMatches ? (wins / totalMatches) * 100 : null;
 
-  const latestMatches = sortedMatches.slice(0, 5);
+  const sevenDayCutoff = new Date();
+  sevenDayCutoff.setHours(0, 0, 0, 0);
+  sevenDayCutoff.setDate(sevenDayCutoff.getDate() - 6);
+  const recentSevenDayMatches = sortedMatches.filter(match => getMatchTimestamp(match) >= sevenDayCutoff.getTime());
+  const averageSevenDayKda = recentSevenDayMatches.length
+    ? recentSevenDayMatches.reduce((sum, match) => sum + getKda(match), 0) / recentSevenDayMatches.length
+    : null;
+  const lastTenMatches = sortedMatches.slice(0, 10);
+  const recentFormWr = lastTenMatches.length
+    ? (lastTenMatches.filter(match => match.result === 'win').length / lastTenMatches.length) * 100
+    : null;
+  const streakResult = sortedMatches[0]?.result || null;
+  const currentStreak = streakResult
+    ? sortedMatches.findIndex(match => match.result !== streakResult)
+    : 0;
+  const currentStreakCount = streakResult
+    ? (currentStreak === -1 ? sortedMatches.length : currentStreak)
+    : 0;
+
+  const championGroups = sortedMatches.reduce((groups, match) => {
+    const name = match.own_champion_name;
+    if (!name) return groups;
+    if (!groups[name]) groups[name] = [];
+    groups[name].push(match);
+    return groups;
+  }, {});
+  const topChamps = Object.entries(championGroups).sort((a, b) => b[1].length - a[1].length);
+  const mostUsed = topChamps[0];
+  const mostUsedWR = mostUsed
+    ? (mostUsed[1].filter(match => match.result === 'win').length / mostUsed[1].length) * 100
+    : null;
 
   const topInsight = computeInsights({
     matches: sortedMatches,
@@ -133,201 +177,165 @@ export default function Dashboard() {
     minimum: 1,
   })[0] || null;
 
-  const totalMatches = sortedMatches.length;
-  const wins = sortedMatches.filter(m => m.result === 'win').length;
-  const winrate = totalMatches > 0 ? (wins / totalMatches * 100) : null;
+  const bestRecentMatch = [...recentSevenDayMatches]
+    .filter(match => match.result === 'win')
+    .sort((a, b) => getKda(b) - getKda(a))[0] || sortedMatches[0] || null;
 
-  const last10 = sortedMatches.slice(0, 10);
-  const last10WR = last10.length > 0
-    ? (last10.filter(m => m.result === 'win').length / last10.length * 100)
-    : null;
-
-  const prev10 = sortedMatches.slice(10, 20);
-  const prev10WR = prev10.length > 0
-    ? (prev10.filter(m => m.result === 'win').length / prev10.length * 100)
-    : null;
-
-  const wrTrend = (last10WR !== null && prev10WR !== null)
-    ? (last10WR - prev10WR).toFixed(0)
-    : null;
-
-  const champCount = {};
-  sortedMatches.forEach(m => {
-    if (m.own_champion_name) {
-      champCount[m.own_champion_name] = (champCount[m.own_champion_name] || 0) + 1;
-    }
-  });
-
-  const topChamps = Object.entries(champCount).sort((a, b) => b[1] - a[1]);
-  const mostUsed = topChamps[0];
-
-  const mostUsedWR = mostUsed
-    ? (() => {
-        const ms = sortedMatches.filter(m => m.own_champion_name === mostUsed[0]);
-        return (ms.filter(m => m.result === 'win').length / ms.length * 100).toFixed(0);
-      })()
-    : null;
-
-  const buildMatchStats = {};
-  sortedMatches.forEach(m => {
-    if (m.build_id) {
-      if (!buildMatchStats[m.build_id]) buildMatchStats[m.build_id] = { wins: 0, total: 0 };
-      buildMatchStats[m.build_id].total++;
-      if (m.result === 'win') buildMatchStats[m.build_id].wins++;
-    }
-  });
-
-  const buildsWithStats = builds.map(b => ({
-    ...b,
-    matchStats: buildMatchStats[b.id] || null,
-    wr: buildMatchStats[b.id]
-      ? Math.round(buildMatchStats[b.id].wins / buildMatchStats[b.id].total * 100)
+  const buildMatchStats = sortedMatches.reduce((stats, match) => {
+    if (!match.build_id) return stats;
+    if (!stats[match.build_id]) stats[match.build_id] = { wins: 0, total: 0 };
+    stats[match.build_id].total += 1;
+    if (match.result === 'win') stats[match.build_id].wins += 1;
+    return stats;
+  }, {});
+  const buildsWithStats = builds.map(build => ({
+    ...build,
+    wr: buildMatchStats[build.id]
+      ? Math.round((buildMatchStats[build.id].wins / buildMatchStats[build.id].total) * 100)
       : null,
   }));
 
-  const matchupWins = {};
-  sortedMatches.forEach(m => {
-    if (m.enemy_champion_name) {
-      if (!matchupWins[m.enemy_champion_name]) {
-        matchupWins[m.enemy_champion_name] = { wins: 0, total: 0 };
-      }
-
-      matchupWins[m.enemy_champion_name].total++;
-
-      if (m.result === 'win') {
-        matchupWins[m.enemy_champion_name].wins++;
-      }
-    }
-  });
-
-  const matchupStats = Object.entries(matchupWins)
-    .filter(([, v]) => v.total >= 3)
-    .map(([champ, v]) => ({ champ, wr: v.wins / v.total * 100, total: v.total }));
-
+  const matchupStats = Object.entries(sortedMatches.reduce((stats, match) => {
+    if (!match.enemy_champion_name) return stats;
+    if (!stats[match.enemy_champion_name]) stats[match.enemy_champion_name] = { wins: 0, total: 0 };
+    stats[match.enemy_champion_name].total += 1;
+    if (match.result === 'win') stats[match.enemy_champion_name].wins += 1;
+    return stats;
+  }, {}))
+    .map(([champ, stat]) => ({ champ, total: stat.total, wr: (stat.wins / stat.total) * 100 }));
   const bestMatchups = matchupStats
-    .filter(m => m.wr > 50)
-    .sort((a, b) => b.wr - a.wr)
-    .slice(0, 3);
-
+    .filter(item => item.wr > 50)
+    .sort((a, b) => b.total - a.total || b.wr - a.wr)
+    .slice(0, 5);
   const worstMatchups = matchupStats
-    .filter(m => m.wr < 50)
-    .sort((a, b) => a.wr - b.wr)
-    .slice(0, 3);
+    .filter(item => item.wr < 50)
+    .sort((a, b) => b.total - a.total || a.wr - b.wr)
+    .slice(0, 5);
 
-  const laneHighlights = ['top', 'jungler', 'mid', 'adc', 'support']
-    .map(lane => {
-      const best = tierlist
-        .filter(t => t.lane === lane)
-        .sort((a, b) => b.ranking_final - a.ranking_final)
-        .slice(0, 3);
+  const laneHighlights = Object.keys(LANE_LABELS).map(lane => ({
+    lane,
+    champions: tierlist
+      .filter(entry => entry.lane === lane)
+      .sort((a, b) => Number(b.ranking_final || 0) - Number(a.ranking_final || 0))
+      .slice(0, 3),
+  }));
 
-      // Pad to always have 3 slots
-      while (best.length < 3) best.push(null);
+  const mainChampions = topChamps.slice(0, 3).map(([name, championMatches]) => {
+    const meta = tierlist
+      .filter(entry => entry.champion_name?.toLowerCase() === name.toLowerCase())
+      .sort((a, b) => Number(b.ranking_final || 0) - Number(a.ranking_final || 0))[0] || null;
+    const laneRanking = meta
+      ? tierlist
+        .filter(entry => entry.lane === meta.lane)
+        .sort((a, b) => Number(b.ranking_final || 0) - Number(a.ranking_final || 0))
+      : [];
+    const rankIndex = meta
+      ? laneRanking.findIndex(entry => entry.champion_name?.toLowerCase() === name.toLowerCase())
+      : -1;
+    const personalWins = championMatches.filter(match => match.result === 'win').length;
+    const totalKills = championMatches.reduce((sum, match) => sum + (Number(match.kills) || 0), 0);
+    const totalDeaths = championMatches.reduce((sum, match) => sum + (Number(match.deaths) || 0), 0);
+    const totalAssists = championMatches.reduce((sum, match) => sum + (Number(match.assists) || 0), 0);
+    const killsAvg = totalKills / championMatches.length;
+    const deathsAvg = totalDeaths / championMatches.length;
+    const assistsAvg = totalAssists / championMatches.length;
+    const personalWr = (personalWins / championMatches.length) * 100;
+    const personalKda = championMatches.reduce((sum, match) => sum + getKda(match), 0) / championMatches.length;
+    const recentMainMatches = [...championMatches]
+      .sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a))
+      .slice(0, 10);
+    const recentMainWins = recentMainMatches.filter(match => match.result === 'win').length;
+    const recentWr = recentMainMatches.length ? (recentMainWins / recentMainMatches.length) * 100 : personalWr;
+    const cleanRate = championMatches.filter(match => (Number(match.deaths) || 0) <= 3).length / championMatches.length;
+    const participationRatio = killsAvg > 0 && assistsAvg > 0 ? assistsAvg / killsAvg : null;
+    const insight = getChampionInsight({
+      championName: name,
+      totalGames: championMatches.length,
+      numericWr: Number(personalWr.toFixed(1)),
+      deathsAvg: Number(deathsAvg.toFixed(1)),
+      killsAvg: Number(killsAvg.toFixed(1)),
+      assistsAvg: Number(assistsAvg.toFixed(1)),
+      kdaNum: personalKda,
+      recentWrNum: recentWr,
+      recentMatchesCount: recentMainMatches.length,
+      cleanRate,
+      participationRatio,
+      selectedTierEntry: meta,
+    });
+    return {
+      name,
+      games: championMatches.length,
+      personalWr,
+      personalKda,
+      meta,
+      position: rankIndex >= 0 ? rankIndex + 1 : null,
+      insight,
+    };
+  });
+  const selectedMain = mainChampions[Math.min(mainIndex, Math.max(mainChampions.length - 1, 0))];
 
-      return { lane, champions: best };
-    })
-    .filter(l => l.champions.some(c => c !== null));
-
-  const lastExecution = patchFilter ? latestSuccessExec : executions[0];
+  const changeMain = (direction) => {
+    if (mainChampions.length < 2) return;
+    setMainIndex(current => (current + direction + mainChampions.length) % mainChampions.length);
+  };
 
   const wrColor = winrate === null
     ? 'text-muted-foreground'
-    : winrate >= 55
-      ? 'text-green-400'
-      : winrate >= 45
-        ? 'text-primary'
-        : 'text-red-400';
+    : winrate >= 55 ? 'text-green-400' : winrate >= 45 ? 'text-primary' : 'text-red-400';
 
-  const wrLabel = winrate === null
-    ? ''
-    : winrate >= 55
-      ? 'Buen rendimiento'
-      : winrate >= 45
-        ? 'Rendimiento normal'
-        : 'Rendimiento bajo';
-
-  const wrLabelColor = winrate === null
-    ? ''
-    : winrate >= 55
-      ? 'bg-green-500/15 text-green-400 border-green-400/20'
-      : winrate >= 45
-        ? 'bg-primary/15 text-primary border-primary/20'
-        : 'bg-red-500/15 text-red-400 border-red-400/20';
-
-  const LANE_LABELS = {
-    top: 'TOP',
-    jungler: 'JUNGLA',
-    mid: 'MID',
-    adc: 'ADC',
-    support: 'SUPPORT'
-  };
-
-  const LANE_ICONS = {
-    top: 'https://media.base44.com/images/public/6a0005628d71002f05120013/abe747f2d_top.png',
-    jungler: 'https://media.base44.com/images/public/6a0005628d71002f05120013/0b50ba53f_jungle.png',
-    mid: 'https://media.base44.com/images/public/6a0005628d71002f05120013/9b1932129_mid.png',
-    adc: 'https://media.base44.com/images/public/6a0005628d71002f05120013/798004bb6_adc.png',
-    support: 'https://media.base44.com/images/public/6a0005628d71002f05120013/3e7bd0424_support.png',
-  };
-
-  const formatDate = (date) => {
-    if (!date) return '';
-
-    const cleanDate = String(date).slice(0, 10);
-    const [year, month, day] = cleanDate.split('-');
-
-    return `${day}-${month}-${year}`;
+  const renderChampionAvatar = (name, className = 'w-9 h-9', fallbackImageUrl = '') => {
+    const imageUrl = getChampImg(name) || fallbackImageUrl;
+    return (
+    <div className={`${className} rounded-lg overflow-hidden bg-secondary shrink-0 ring-1 ring-primary/20`}>
+      {imageUrl
+        ? <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+        : <span className="w-full h-full flex items-center justify-center text-xs font-bold text-primary">{name?.[0]}</span>}
+    </div>
+    );
   };
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6 space-y-6 rd-dashboard">
-
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="rd-page rd-dashboard-tabs">
+      <header className="rd-dashboard-header">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
-            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
-              Rift Deck Centro Táctico
-            </span>
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Centro Táctico</span>
           </div>
-
-          <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Dashboard
-          </h1>
-
-          <p className="text-muted-foreground text-sm mt-1">
-            Analiza tu rendimiento, builds y meta actual.
-          </p>
+          <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{activeHeading.title}</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
         </div>
 
-        <div className="flex flex-col items-stretch sm:items-end gap-3">
-          <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground rd-status-pill">
-            {lastExecution?.status === 'success'
-              ? <span className="w-2 h-2 rounded-full bg-green-400 shrink-0 shadow-[0_0_12px_rgba(74,222,128,.65)]" />
-              : <span className="w-2 h-2 rounded-full bg-red-400 shrink-0 shadow-[0_0_12px_rgba(248,113,113,.65)]" />
-            }
+        <div className="rd-panel-tabs rd-dashboard-tablist" role="tablist" aria-label="Secciones del Dashboard">
+          {DASHBOARD_TABS.map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
+        <div className="flex flex-col items-end gap-2">
+          <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground rd-status-pill">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${latestSuccessExec ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,.65)]' : 'bg-red-400'}`} />
             <span>Datos actualizados</span>
-
-            {latestSuccessExec?.patch && (
-              <>
-                <span className="text-border">|</span>
-                <span>Parche {latestSuccessExec.patch}</span>
-              </>
-            )}
-
-            {latestSuccessExec?.snapshot_date && (
-              <>
-                <span className="text-border">|</span>
-                <span>Tierlist {formatDate(latestSuccessExec.snapshot_date)}</span>
-              </>
-            )}
-
+            <span className="text-border">|</span>
+            <span>{latestSuccessExec?.patch ? `Parche ${latestSuccessExec.patch}` : 'Sin parche'}</span>
+            {latestSuccessExec?.snapshot_date && <>
+              <span className="text-border">|</span>
+              <span>Tierlist {formatDate(latestSuccessExec.snapshot_date)}</span>
+            </>}
             <Sparkles size={14} className="text-primary" />
           </div>
           <PatchFilter
             value={patchFilter}
-            onChange={setPatchFilter}
+            onChange={(value) => { setPatchFilter(value); setMainIndex(0); }}
             patches={[
               ...allMatches.map(match => match.patch),
               ...allBuilds.map(build => build.patch),
@@ -335,539 +343,187 @@ export default function Dashboard() {
             ]}
           />
         </div>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rd-card rd-card-watermark p-4 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="rd-label">Partidas</span>
-            <Swords size={17} className="text-primary" />
-          </div>
-
-          <p className="font-rajdhani font-bold text-4xl text-primary tracking-[-0.08em]">
-            {totalMatches || '—'}
-          </p>
-
-          <p className="text-xs text-muted-foreground mt-1">
-            <span className="text-accent">{wins}V</span>
-            <span className="mx-1">/</span>
-            <span className="text-red-400">{totalMatches - wins}D</span>
-          </p>
-        </div>
-
-        <div className="rd-card p-4 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="rd-label">Winrate</span>
-            <Trophy size={17} className="text-primary" />
-          </div>
-
-          <p className={`font-rajdhani font-bold text-4xl tracking-[-0.08em] ${wrColor}`}>
-            {winrate !== null ? `${winrate.toFixed(1)}%` : '—'}
-          </p>
-
-          {winrate !== null && (
-            <span className={`text-xs px-2 py-0.5 rounded-md font-medium mt-1 inline-block border ${wrLabelColor}`}>
-              {wrLabel}
-            </span>
-          )}
-
-          {wrTrend !== null && (
-            <p className={`text-xs mt-1 ${Number(wrTrend) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {Number(wrTrend) >= 0 ? '+' : ''}{wrTrend}% vs últimas 10
-            </p>
-          )}
-        </div>
-
-        <div className="rd-card p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="rd-label">Campeón más usado</span>
-            <Target size={17} className="text-accent" />
-          </div>
-
-          <div className="flex items-center gap-3">
-            {mostUsed && getChampImg(mostUsed[0]) && (
-              <img
-                src={getChampImg(mostUsed[0])}
-                alt={mostUsed[0]}
-                className="w-12 h-12 rounded-full object-cover border border-accent/40 shadow-[0_0_18px_rgba(0,174,239,.16)] shrink-0"
-              />
-            )}
-
-            <div>
-              <p className="font-rajdhani font-bold text-2xl text-accent tracking-[-0.06em]">
-                {mostUsed?.[0] || '—'}
-              </p>
-
-              {mostUsed && (
-                <p className="text-xs text-muted-foreground">
-                  {mostUsed[1]} partidas
-                </p>
-              )}
-
-              {mostUsedWR && (
-                <p className="text-xs text-muted-foreground">
-                  {mostUsedWR}% WR
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="rd-card rd-card-watermark p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="rd-label">Builds creadas</span>
-            <Wrench size={17} className="text-primary" />
-          </div>
-
-          <p className="font-rajdhani font-bold text-4xl text-primary tracking-[-0.08em]">
-            {builds.length || '—'}
-          </p>
-
-          {builds.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {buildsWithStats.filter(b => b.matchStats).length} usada
-              {buildsWithStats.filter(b => b.matchStats).length !== 1 ? 's' : ''} en ranked
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 rd-card rd-card-watermark p-5">
-          <div className="flex items-start gap-4">
-          
-            <img
-              src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png"
-              alt="Rift Deck Coach"
-              className="w-[100px] object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]"
-            />
-
-            <div>
-              <p className="rd-section-kicker">Insight del día</p>
-
-              {topInsight ? (
-                <div className="max-w-2xl">
-                  <p className="font-rajdhani text-lg font-bold text-foreground leading-tight">
-                    {topInsight.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-                    {topInsight.thesis}
-                  </p>
-                  <p className="text-xs text-primary/90 mt-2">
-                    Consejo: {topInsight.action}
-                  </p>
+      <main className="rd-dashboard-panel rd-analytics-panel">
+        {activeTab === 'summary' && (
+          <section className="rd-dashboard-summary" aria-label="Resumen">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-h-0">
+              <article className="rd-card rd-dashboard-stat">
+                <div className="flex items-center justify-between"><span className="rd-label">Partidas</span><Swords size={17} className="text-primary" /></div>
+                <p className="font-rajdhani rd-dashboard-stat-value text-primary">{totalMatches || '—'}</p>
+                <p className="text-xs text-muted-foreground"><span className="text-green-400">{wins}V</span> / <span className="text-red-400">{totalMatches - wins}D</span></p>
+              </article>
+              <article className="rd-card rd-dashboard-stat">
+                <div className="flex items-center justify-between"><span className="rd-label">Winrate</span><Trophy size={17} className="text-primary" /></div>
+                <p className={`font-rajdhani rd-dashboard-stat-value ${wrColor}`}>{winrate === null ? '—' : `${winrate.toFixed(1)}%`}</p>
+                <p className="text-xs text-muted-foreground">Rendimiento global filtrado</p>
+              </article>
+              <article className="rd-card rd-dashboard-stat">
+                <div className="flex items-center justify-between"><span className="rd-label">Campeón más usado</span><Target size={17} className="text-accent" /></div>
+                <div className="flex items-center gap-3 min-h-0">
+                  {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10')}
+                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="text-xs text-muted-foreground">Pick principal del historial</p></div>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Registrá más partidas para recibir insights personalizados.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+                {mostUsed ? <div className="flex items-center gap-2">
+                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{mostUsed[1].length} partidas</span>
+                  <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${mostUsedWR >= 50 ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{mostUsedWR.toFixed(0)}% WR</span>
+                </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
+              </article>
+              <article className="rd-card rd-dashboard-stat rd-card-watermark">
+                <div className="flex items-center justify-between"><span className="rd-label">KDA promedio</span><BarChart3 size={17} className="text-primary" /></div>
+                <p className="font-rajdhani rd-dashboard-stat-value text-primary">{averageSevenDayKda === null ? '—' : averageSevenDayKda.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">{recentSevenDayMatches.length} partidas · últimos 7 días</p>
+              </article>
 
-        <div className="rd-card p-5">
-          <p className="text-xs text-green-400 uppercase tracking-[0.16em] font-semibold mb-3">
-            Mejor partida reciente
-          </p>
+              <article className="rd-card rd-dashboard-stat">
+                <div className="flex items-center justify-between"><span className="rd-label">Forma reciente</span><TrendingUp size={17} className="text-primary" /></div>
+                <p className={`font-rajdhani rd-dashboard-stat-value ${recentFormWr === null ? 'text-muted-foreground' : recentFormWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{recentFormWr === null ? '—' : `${recentFormWr.toFixed(0)}%`}</p>
+                <p className="text-xs text-muted-foreground">WR en las últimas {lastTenMatches.length} partidas</p>
+              </article>
 
-          {sortedMatches.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin partidas registradas.</p>
-          ) : (() => {
-            const recentMatches = sortedMatches.filter(m => {
-              const matchDate = new Date(m.date || m.created_date);
-              const sevenDaysAgo = new Date();
+              <article className="rd-card rd-dashboard-stat">
+                <div className="flex items-center justify-between"><span className="rd-label">Racha actual</span><Flame size={17} className={streakResult === 'win' ? 'text-green-400' : 'text-red-400'} /></div>
+                <p className={`font-rajdhani rd-dashboard-stat-value ${!streakResult ? 'text-muted-foreground' : streakResult === 'win' ? 'text-green-400' : 'text-red-400'}`}>{streakResult ? currentStreakCount : '—'}</p>
+                <p className="text-xs text-muted-foreground">{streakResult ? `${streakResult === 'win' ? 'Victorias' : 'Derrotas'} consecutivas` : 'Sin partidas registradas'}</p>
+              </article>
 
-              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              <article className="rd-card rd-dashboard-stat">
+                <div className="flex items-center justify-between"><span className="rd-label">Campeones utilizados</span><Users size={17} className="text-accent" /></div>
+                <p className="font-rajdhani rd-dashboard-stat-value text-accent">{topChamps.length || '—'}</p>
+                <p className="text-xs text-muted-foreground">Picks diferentes registrados</p>
+              </article>
 
-              return matchDate >= sevenDaysAgo;
-            });
-
-            const best = [...recentMatches]
-              .filter(m => m.result === 'win' && m.kills != null)
-              .sort((a, b) => {
-                const kdaA = (a.deaths || 0) === 0 ? (a.kills + a.assists) : (a.kills + a.assists) / a.deaths;
-                const kdaB = (b.deaths || 0) === 0 ? (b.kills + b.assists) : (b.kills + b.assists) / b.deaths;
-                return kdaB - kdaA;
-              })[0] || sortedMatches[0];
-
-            const kda = best.deaths === 0
-              ? (best.kills + best.assists).toFixed(2)
-              : ((best.kills + best.assists) / best.deaths).toFixed(2);
-
-            return (
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-11 h-11 rounded-lg overflow-hidden bg-primary/10 border border-primary/20 shrink-0">
-                    {getChampImg(best.own_champion_name)
-                      ? (
-                        <img
-                          src={getChampImg(best.own_champion_name)}
-                          alt={best.own_champion_name}
-                          className="w-full h-full object-cover"
-                        />
-                      )
-                      : (
-                        <span className="text-primary font-bold flex items-center justify-center w-full h-full">
-                          {best.own_champion_name?.[0]}
-                        </span>
-                      )
-                    }
+              <article className="rd-card rd-dashboard-stat rd-card-watermark">
+                <div className="flex items-center justify-between"><span className="rd-label">Mejor partida reciente</span><Trophy size={17} className="text-green-400" /></div>
+                {bestRecentMatch ? <div className="flex items-center gap-3 min-h-0">
+                  {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10')}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-rajdhani text-lg font-bold text-foreground truncate">{bestRecentMatch.own_champion_name}</p>
+                    <p className="text-xs text-muted-foreground">{bestRecentMatch.lane} · {formatDate(bestRecentMatch.date)}</p>
                   </div>
+                </div> : <p className="font-rajdhani rd-dashboard-stat-value text-muted-foreground">—</p>}
+                {bestRecentMatch ? <div className="flex items-center gap-2">
+                  <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${bestRecentMatch.result === 'win' ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{bestRecentMatch.result === 'win' ? 'Victoria' : 'Derrota'}</span>
+                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{bestRecentMatch.kills}/{bestRecentMatch.deaths}/{bestRecentMatch.assists} · KDA {getKda(bestRecentMatch).toFixed(2)}</span>
+                </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
+              </article>
+            </div>
 
-                  <div>
-                    <p className="font-semibold text-foreground text-base">
-                      {best.own_champion_name}
-                    </p>
-
-                    <p className="text-xs text-muted-foreground">
-                      {best.lane}
-                      {best.date && ` · ${formatDate(best.date)}`}
-                      {best.hour && ` · ${best.hour}`}
-                    </p>
+            <div className="grid grid-cols-1 min-h-0">
+              <article className="rd-card rd-card-watermark p-5 min-h-0 overflow-hidden">
+                <div className="flex items-start gap-4 h-full">
+                  <img src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png" alt="Rift Deck Coach" className="w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
+                  <div className="min-w-0 self-center">
+                    <p className="rd-section-kicker">Insight del día</p>
+                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
                   </div>
                 </div>
+              </article>
+            </div>
+          </section>
+        )}
 
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="bg-green-500/15 border border-green-400/20 text-green-400 text-xs font-bold px-2 py-1 rounded">
-                    Victoria
-                  </span>
-
-                  <span className="bg-secondary/80 border border-border text-muted-foreground text-xs px-2 py-1 rounded">
-                    KDA {best.kills}/{best.deaths}/{best.assists} ({kda})
-                  </span>
-                </div>
+        {activeTab === 'activity' && (
+          <section className="rd-dashboard-activity" aria-label="Actividad">
+            <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
+              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Últimas partidas</h2><Link to="/matches" className="rd-link">Ver todas</Link></div>
+              <div className="rd-dashboard-list rd-dashboard-match-list">
+                {latestMatches.length ? latestMatches.map(match => <div key={match.id} className="font-rajdhani rd-dashboard-row">
+                  {renderChampionAvatar(match.own_champion_name, 'w-9 h-9')}
+                  <div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{match.own_champion_name}</p><p className="text-[11px] text-muted-foreground">{match.lane} · {match.kills}/{match.deaths}/{match.assists}</p></div>
+                  <div className="text-right"><p className={`text-xs font-bold ${match.result === 'win' ? 'text-green-400' : 'text-red-400'}`}>{match.result === 'win' ? 'Victoria' : 'Derrota'}</p><p className="text-[10px] text-muted-foreground">{formatDate(match.date)}</p></div>
+                </div>) : <p className="text-sm text-muted-foreground text-center my-auto">No hay partidas registradas.</p>}
               </div>
-            );
-          })()}
-        </div>
-      </div>
+            </article>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        <div className="rd-card p-5 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="rd-card-title">Últimas Partidas</h2>
-            <Link to="/matches" className="rd-link">Ver todas</Link>
-          </div>
-
-          {sortedMatches.length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-6">
-              No hay partidas registradas aún.
-            </p>
-          ) : (
-            <div className="flex flex-col divide-y divide-border/70 flex-1">
-              {latestMatches.map(m => (
-                <div key={m.id} className="flex items-center gap-3 flex-1 py-0 min-h-[4rem]">
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-secondary shrink-0 ring-1 ring-primary/15">
-                    {getChampImg(m.own_champion_name)
-                      ? (
-                        <img
-                          src={getChampImg(m.own_champion_name)}
-                          alt={m.own_champion_name}
-                          className="w-full h-full object-cover"
-                        />
-                      )
-                      : (
-                        <div className="w-full h-full flex items-center justify-center text-xs font-bold text-primary">
-                          {m.own_champion_name?.[0]}
-                        </div>
-                      )
-                    }
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {m.own_champion_name}
-                    </p>
-
-                    <p className="text-xs text-muted-foreground">
-                      {m.lane} · KDA {m.kills}/{m.deaths}/{m.assists}
-                    </p>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <span className={`text-xs font-bold ${m.result === 'win' ? 'text-green-400' : 'text-red-400'}`}>
-                      {m.result === 'win' ? 'Victoria' : 'Derrota'}
-                    </span>
-
-                    {m.date && (
-                      <p className="text-[10px] text-muted-foreground">
-                        {formatDate(m.date)}{m.hour ? ` · ${m.hour}` : ''}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <Link to="/matches" className="mt-auto pt-3 block text-center rd-link">
-            Ver historial completo
-          </Link>
-        </div>
-
-        <div className="rd-card rd-card-watermark p-5 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="rd-card-title">Últimas Builds</h2>
-            <Link to="/build-calculator" className="rd-link">Ver todas</Link>
-          </div>
-
-          {builds.length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-6">
-              No hay builds creadas aún.
-            </p>
-          ) : (
-            <div className="flex flex-col divide-y divide-border/70 flex-1">
-              {buildsWithStats.slice(0, 5).map(b => {
-                const keystoneRune = runes.find(r => r.branch === 'Clave' && (b.additional_runes || []).includes(r.name));
-                return (
-                  <div key={b.id} className="flex items-center gap-3 flex-1 py-0 min-h-[4rem]">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-secondary shrink-0 ring-1 ring-primary/15">
-                      {getChampImg(b.champion_name)
-                        ? <img src={getChampImg(b.champion_name)} alt={b.champion_name} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-primary">{b.champion_name?.[0]}</div>
-                      }
+            <article className="rd-card rd-card-watermark p-4 flex flex-col min-h-0 overflow-hidden">
+              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Últimas builds</h2><Link to="/build-calculator" className="rd-link">Ver todas</Link></div>
+              <div className="rd-dashboard-list">
+                {buildsWithStats.length ? buildsWithStats.slice(0, 5).map(build => {
+                  const keystone = runes.find(rune => rune.branch === 'Clave' && (build.additional_runes || []).includes(rune.name));
+                  const itemSlots = Array.from({ length: 6 }, (_, index) => build.items?.[index] || null);
+                  const spellSlots = Array.from({ length: 2 }, (_, index) => build.spells?.[index] || null);
+                  return <div key={build.id} className="font-rajdhani rd-dashboard-row rd-dashboard-build-row">
+                    <div className="rd-dashboard-build-name">
+                      {renderChampionAvatar(build.champion_name, 'w-10 h-10')}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold truncate">{build.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{build.champion_name}</p>
+                      </div>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate leading-tight">
-                        {b.name}
-                      </p>
+                    <div className="rd-build-loadout">
+                      <div className="rd-build-keystone" title={keystone?.name || 'Sin runa clave'}>
+                        {keystone?.image_url
+                          ? <img src={keystone.image_url} alt={keystone.name} />
+                          : <span>R</span>}
+                      </div>
 
-                      <div className="flex items-center gap-1.5 mt-1">
-                        {keystoneRune?.image_url && (
-                          <>
-                            <img
-                              src={keystoneRune.image_url}
-                              alt={keystoneRune.name}
-                              title={keystoneRune.name}
-                              className="w-5 h-5 rounded-full object-cover ring-1 ring-primary/30 shrink-0"
-                            />
-                            <span className="w-px h-4 bg-border/70 shrink-0" />
-                          </>
-                        )}
-                        {b.items?.length > 0 && b.items.slice(0, 6).map((itemName, i) => {
-                          const item = wrItems.find(it => it.name === itemName);
+                      <div className="rd-build-spells">
+                        {spellSlots.map((spell, index) => getSpellImg(spell)
+                          ? <img key={spell || index} src={getSpellImg(spell)} alt={spell} title={spell} />
+                          : <span key={index} />)}
+                      </div>
+
+                      <div className="rd-build-items">
+                        {itemSlots.map((itemName, index) => {
+                          const item = wrItems.find(entry => entry.name === itemName);
                           return item?.image_url
-                            ? <img key={i} src={item.image_url} alt={itemName} title={itemName} className="w-5 h-5 rounded object-cover ring-1 ring-primary/10" />
-                            : <div key={i} className="w-5 h-5 rounded bg-secondary flex items-center justify-center text-[7px] text-muted-foreground font-bold">{itemName?.[0]}</div>;
+                            ? <img key={`${itemName}-${index}`} src={item.image_url} alt={itemName} title={itemName} />
+                            : <span key={index} />;
                         })}
                       </div>
                     </div>
 
-                    {/* Spells vertical + WR */}
-                    <div className="flex flex-col items-center gap-1 shrink-0">
-                      {(b.spells || []).map((spell, i) => (
-                        getSpellImg(spell)
-                          ? <img key={i} src={getSpellImg(spell)} alt={spell} title={spell} className="w-5 h-5 rounded-full object-cover" />
-                          : <span key={i} className="text-[10px] text-muted-foreground">{spell}</span>
-                      ))}
-                      {b.wr !== null && (
-                        <span className={`text-xs font-bold ${b.wr >= 55 ? 'text-green-400' : b.wr >= 45 ? 'text-primary' : 'text-red-400'}`}>
-                          {b.wr}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          <Link to="/build-calculator" className="mt-auto pt-3 block text-center rd-link">
-            Ver biblioteca completa
-          </Link>
-        </div>
-
-        <div className="rd-card p-5">
-          <h2 className="rd-card-title mb-4">Análisis de Matchups</h2>
-
-          {matchupStats.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">
-              Necesitás más partidas para detectar tus matchups.
-            </p>
-          ) : (
-            <>
-              <p className="rd-mini-label text-green-400">Favorables</p>
-
-              <div className="space-y-1.5 mb-4">
-                {bestMatchups.map(m => (
-                  <div key={m.champ} className="rd-list-row">
-                    <div className="w-7 h-7 rounded-full overflow-hidden bg-secondary shrink-0">
-                      {getChampImg(m.champ)
-                        ? <img src={getChampImg(m.champ)} alt={m.champ} className="w-full h-full object-cover" />
-                        : <span className="w-full h-full flex items-center justify-center text-[10px] font-bold text-primary">{m.champ[0]}</span>
-                      }
-                    </div>
-
-                    <span className="text-sm text-foreground flex-1 truncate">{m.champ}</span>
-                    <span className="text-xs font-bold text-green-400">{m.wr.toFixed(0)}% WR</span>
-                  </div>
-                ))}
+                    {build.wr !== null && <span className="rd-build-winrate">{build.wr}%</span>}
+                  </div>;
+                }) : <p className="text-sm text-muted-foreground text-center my-auto">No hay builds creadas.</p>}
               </div>
+            </article>
 
-              <p className="rd-mini-label text-red-400">Problemáticos</p>
-
-              <div className="space-y-1.5 mb-4">
-                {worstMatchups.map(m => (
-                  <div key={m.champ} className="rd-list-row">
-                    <div className="w-7 h-7 rounded-full overflow-hidden bg-secondary shrink-0">
-                      {getChampImg(m.champ)
-                        ? <img src={getChampImg(m.champ)} alt={m.champ} className="w-full h-full object-cover" />
-                        : <span className="w-full h-full flex items-center justify-center text-[10px] font-bold text-primary">{m.champ[0]}</span>
-                      }
-                    </div>
-
-                    <span className="text-sm text-foreground flex-1 truncate">{m.champ}</span>
-                    <span className="text-xs font-bold text-red-400">{m.wr.toFixed(0)}% WR</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="rd-card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="rd-card-title">Meta del Parche por Línea</h2>
-
-          <Link to="/tierlist" className="rd-link flex items-center gap-1">
-            Ver tierlist completa <ChevronRight size={12} />
-          </Link>
-        </div>
-
-        {laneHighlights.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-4">
-            Cargá la tierlist para ver campeones meta.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-            {laneHighlights.map(({ lane, champions: lchamps }) => (
-              <div key={lane} className="bg-secondary/30 border border-border/80 rounded-xl overflow-hidden">
-                <div className="px-3 pt-3 pb-2 flex items-center gap-2">
-                  <img src={LANE_ICONS[lane]} alt={lane} className="w-5 h-5 object-contain shrink-0" />
-                  <span className="text-xs font-bold text-muted-foreground tracking-wide">
-                    {LANE_LABELS[lane]}
-                  </span>
-                </div>
-
-                <div className="px-3 pb-3 space-y-1.5">
-                  {lchamps.map((champion, idx) => (
-                    <div key={champion?.id ?? `empty-${idx}`} className="rd-list-row h-11">
-                      <span className="text-[10px] text-muted-foreground font-bold w-3 shrink-0">
-                        {champion ? idx + 1 : ''}
-                      </span>
-
-                      <div className="w-8 h-8 rounded overflow-hidden bg-muted shrink-0">
-                        {champion?.image_url
-                          ? (
-                            <img
-                              src={champion.image_url}
-                              alt={champion.champion_name}
-                              className="w-full h-full object-cover object-top"
-                            />
-                          )
-                          : champion
-                          ? (
-                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-primary">
-                              {champion.champion_name[0]}
-                            </div>
-                          )
-                          : <div className="w-full h-full" />
-                        }
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        {champion && (
-                          <>
-                            <p className="text-xs font-semibold text-foreground truncate">
-                              {champion.champion_name}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {champion.winrate?.toFixed(1)}% WR
-                            </p>
-                          </>
-                        )}
-                      </div>
-
-                      {champion && <TierBadge tier={champion.tier} size="sm" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+            <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
+              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Análisis de matchups</h2><Link to="/stats" className="rd-link">Ampliar</Link></div>
+              {matchupStats.length ? <div className="grid grid-rows-2 gap-3 min-h-0 flex-1">
+                {[{ title: 'Favorables', rows: bestMatchups, positive: true }, { title: 'Problemáticos', rows: worstMatchups, positive: false }].map(group => <div key={group.title} className={`rd-dashboard-matchup-group rounded-xl border p-2 min-h-0 overflow-hidden ${group.positive ? 'bg-green-500/[0.05] border-green-400/15' : 'bg-red-500/[0.05] border-red-400/15'}`}><p className={`rd-mini-label ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{group.title}</p>{group.rows.map(item => <div key={item.champ} className="rd-dashboard-matchup-row flex items-center gap-2 min-h-0">{renderChampionAvatar(item.champ, 'w-6 h-6')}<span className="text-sm flex-1 truncate">{item.champ}</span><span className="text-[10px] text-muted-foreground">{item.total}p</span><span className={`text-xs font-bold ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{item.wr.toFixed(0)}%</span></div>)}</div>)}
+              </div> : <p className="text-sm text-muted-foreground text-center my-auto">Necesitás más partidas para detectar matchups.</p>}
+            </article>
+          </section>
         )}
-      </div>
 
-      <div>
-        <h2 className="rd-card-title mb-3">Acciones Rápidas</h2>
+        {activeTab === 'meta' && (
+          <section className="rd-dashboard-meta" aria-label="Meta">
+            <article className="rd-card p-4 min-h-0 overflow-hidden">
+              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">Meta por línea</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Parche {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">Tierlist completa <ChevronRight size={12} /></Link></div>
+              <div className="grid grid-cols-5 gap-2 h-[calc(100%-2.75rem)]">
+                {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className="rd-meta-lane-card rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-2 mb-1.5"><img src={LANE_ICONS[lane]} alt="" className="w-5 h-5 object-contain" /><span className="text-[11px] font-bold text-muted-foreground">{LANE_LABELS[lane]}</span></div>
+                  {laneChampions.length ? laneChampions.map((champion, index) => <div key={champion.id || `${champion.champion_name}-${index}`} className="rd-meta-lane-row font-rajdhani flex items-center gap-2 border-t border-border/50 first:border-0">
+                    <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(1)}% WR</p></div><TierBadge tier={champion.tier} size="sm" />
+                  </div>) : <p className="text-[11px] text-muted-foreground mt-4 text-center">Sin datos</p>}
+                </div>)}
+              </div>
+            </article>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-          <Link to="/build-calculator" className="rd-action-card group">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <Wrench size={20} className="text-primary" />
-            </div>
+            <article className="rd-card rd-card-watermark rd-main-card p-5 min-h-0 overflow-hidden">
+              <div className="rd-main-card-header">
+                <div className="rd-inline-section-heading"><h2 className="rd-card-title">Mis mains en el meta</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Pool personal</p></div>
+                <div className="rd-main-navigation"><button type="button" onClick={() => changeMain(-1)} disabled={mainChampions.length < 2} className="rd-main-arrow" aria-label="Main anterior"><ChevronLeft size={18} /></button><span className="font-rajdhani text-xs text-muted-foreground tabular-nums">{mainChampions.length ? mainIndex + 1 : 0} / {mainChampions.length}</span><button type="button" onClick={() => changeMain(1)} disabled={mainChampions.length < 2} className="rd-main-arrow" aria-label="Main siguiente"><ChevronRight size={18} /></button></div>
+              </div>
 
-            <div className="flex-1">
-              <p className="font-semibold text-sm text-foreground group-hover:text-primary">
-                Nueva Build
-              </p>
-
-              <p className="text-xs text-muted-foreground">
-                Crear build personalizada
-              </p>
-            </div>
-
-            <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary" />
-          </Link>
-
-          <Link to="/matches" className="rd-action-card group">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <Swords size={20} className="text-primary" />
-            </div>
-
-            <div className="flex-1">
-              <p className="font-semibold text-sm text-foreground group-hover:text-primary">
-                Registrar Partida
-              </p>
-
-              <p className="text-xs text-muted-foreground">
-                Añadir nueva partida
-              </p>
-            </div>
-
-            <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { to: '/library', label: 'Biblioteca', icon: BookOpen, desc: 'Campeones, objetos y runas' },
-            { to: '/tierlist', label: 'Tierlist', icon: TrendingUp, desc: 'Meta actual por parche' },
-            { to: '/stats', label: 'Mis Estadísticas', icon: BarChart3, desc: 'Análisis personal' },
-            { to: '/suggester', label: 'Sugeridor', icon: Sparkles, desc: 'Recomendaciones' },
-          ].map(item => {
-            const Icon = item.icon;
-
-            return (
-              <Link key={item.to} to={item.to} className="rd-mini-action group">
-                <Icon size={20} className="mx-auto mb-2 text-primary" />
-
-                <p className="font-semibold text-xs text-foreground group-hover:text-primary">
-                  {item.label}
-                </p>
-
-                <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">
-                  {item.desc}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+              {selectedMain ? <div className="rd-main-meta-layout">
+                <div className="rd-main-identity">
+                  {renderChampionAvatar(selectedMain.name, 'w-20 h-20')}
+                  <div className="min-w-0"><p className="font-rajdhani text-[11px] uppercase tracking-[0.18em] text-muted-foreground">#{selectedMain.position || '—'} en {LANE_LABELS[selectedMain.meta?.lane] || 'sin línea'}</p><h3 className="font-rajdhani text-3xl font-bold tracking-tight truncate">{selectedMain.name}</h3><div className="flex items-center gap-2 mt-1.5"><TierBadge tier={selectedMain.meta?.tier || '—'} /><span className="font-rajdhani text-xs text-muted-foreground">Score {Number(selectedMain.meta?.ranking_final || 0).toFixed(1)}</span></div></div>
+                </div>
+                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">Estadísticas del meta</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{Number(selectedMain.meta?.winrate || 0).toFixed(1)}%</strong><span>Winrate</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.pickrate || 0).toFixed(1)}%</strong><span>Pickrate</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.banrate || 0).toFixed(1)}%</strong><span>Banrate</span></div></div></div>
+                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">Tu rendimiento</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{selectedMain.games}</strong><span>Partidas</span></div><div><strong className={`font-rajdhani ${selectedMain.personalWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{selectedMain.personalWr.toFixed(1)}%</strong><span>Winrate</span></div><div><strong className="font-rajdhani text-primary">{selectedMain.personalKda.toFixed(2)}</strong><span>KDA</span></div></div></div>
+                {selectedMain.insight && <div className="rd-main-insight"><p className="rd-mini-label text-primary">Insight con {selectedMain.name}</p><p className="line-clamp-2">{selectedMain.insight}</p></div>}
+              </div> : <p className="text-sm text-muted-foreground text-center mt-10">Registrá partidas para comparar tus mains con el meta.</p>}
+            </article>
+          </section>
+        )}
+      </main>
     </div>
   );
 }

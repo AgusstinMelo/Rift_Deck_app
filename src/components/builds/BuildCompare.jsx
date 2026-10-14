@@ -249,7 +249,7 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
   const categoryWinners = getCategoryWinners(computedA, computedB, buildA, buildB);
 
   return (
-    <div className="w-full max-w-none mx-0 p-5 md:p-6">
+    <div className="rd-page">
       <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-6">
         <ArrowLeft size={16} /> Volver
       </button>
