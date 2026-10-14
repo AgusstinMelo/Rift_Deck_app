@@ -32,7 +32,7 @@ export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBa
   });
 
   return (
-    <div className="rd-page">
+    <div className="rd-page rd-saved-builds-layout">
       <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-5">
         <ArrowLeft size={15} /> Cambiar campeón
       </button>

@@ -101,10 +101,10 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* FILTERS */}
-      <div className="rd-card p-3">
-        <div className="flex flex-wrap gap-3 items-center">
+      <div className="rd-library-filters rd-card p-4">
+        <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[220px]">
             <Search
               size={15}

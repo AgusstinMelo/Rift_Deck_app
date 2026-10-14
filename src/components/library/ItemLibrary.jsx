@@ -439,9 +439,9 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   }
 
   return (
-    <div className="space-y-5">
-      <div className="rd-card p-4">
-        <div className="flex flex-wrap gap-3 items-center">
+    <div className="space-y-6">
+      <div className="rd-library-filters rd-card p-4">
+        <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[220px]">
             <Search
               size={15}

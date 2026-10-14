@@ -25,12 +25,14 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
   };
 
   return (
-    <div className="w-full max-w-none mx-0 overflow-x-hidden p-5 md:p-6">
-      <div className="flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Calculadora de Builds</span></div>
-      <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Seleccionar Campeón</h1>
-      <p className="text-muted-foreground text-sm mb-5">Elegí el campeón para crear la build</p>
+    <div className="rd-build-picker w-full max-w-none mx-0 overflow-x-hidden p-5 md:p-6">
+      <div className="rd-build-picker-header">
+        <div className="flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Calculadora de Builds</span></div>
+        <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Seleccionar Campeón</h1>
+        <p className="text-muted-foreground text-sm">Elegí el campeón para crear la build</p>
+      </div>
 
-      <div className="rd-card p-3 mb-5 w-full max-w-full overflow-hidden">
+      <div className="rd-card rd-build-picker-filters p-3 w-full max-w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full min-w-0">
           <div className="relative w-full sm:flex-1 min-w-0">
             <Search
@@ -77,27 +79,27 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-12 xl:grid-cols-14 gap-1.5 w-full max-w-full min-w-0">
-        {filtered.map(champ => {
-          const tier = getTier(champ);
-          return (
-            <button key={champ.id} onClick={() => onSelect(champ)}
-              className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/40 hover:bg-primary/5 transition-all group aspect-square relative">
-              {champ.image_url
-                ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-lg font-bold text-primary bg-secondary">{champ.name[0]}</div>}
-              {tier && (
-                <div className="absolute top-0.5 right-0.5">
-                  <TierBadge tier={tier.tier} size="sm" />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="flex flex-col items-center py-16 text-center">
+      {filtered.length > 0 ? <div className="rd-build-picker-list">
+        <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-12 xl:grid-cols-14 gap-1.5 w-full max-w-full min-w-0">
+          {filtered.map(champ => {
+            const tier = getTier(champ);
+            return (
+              <button key={champ.id} onClick={() => onSelect(champ)}
+                className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/40 hover:bg-primary/5 transition-all group aspect-square relative">
+                {champ.image_url
+                  ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-lg font-bold text-primary bg-secondary">{champ.name[0]}</div>}
+                {tier && (
+                  <div className="absolute top-0.5 right-0.5">
+                    <TierBadge tier={tier.tier} size="sm" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div> : (
+        <div className="rd-build-picker-list flex flex-col items-center py-16 text-center">
           <p className="text-muted-foreground">No se encontraron campeones</p>
         </div>
       )}

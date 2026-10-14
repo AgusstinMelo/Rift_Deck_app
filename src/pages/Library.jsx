@@ -29,8 +29,8 @@ export default function Library() {
   };
 
   return (
-    <div className="rd-page space-y-6 rd-dashboard">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rd-page rd-dashboard rd-library-layout">
+      <div className="rd-library-header flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
@@ -56,7 +56,7 @@ export default function Library() {
         </div>
       </div>
 
-      <div className="rd-card p-2 w-fit">
+      <div className="rd-card rd-library-tabs p-2 w-fit">
         <div className="flex flex-wrap gap-1">
           {tabs.map(({ id, label, icon: Icon, desc }) => {
             const active = activeTab === id;
@@ -95,7 +95,7 @@ export default function Library() {
         </div>
       </div>
 
-      <div>
+      <div className={`rd-library-content ${selectedId ? 'rd-library-detail' : 'rd-library-catalog'}`}>
         {activeTab === 'champions' && (
           <ChampionLibrary
             selectedId={selectedId}

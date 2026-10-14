@@ -204,9 +204,9 @@ export default function Matches() {
     'red';
 
   return (
-    <div className="rd-page space-y-6 rd-dashboard">
+    <div className="rd-page rd-dashboard rd-matches-layout">
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="rd-matches-header flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
@@ -346,7 +346,7 @@ export default function Matches() {
       </div>
 
       {matches.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rd-matches-metrics grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MatchMetric
             label="Partidas"
             value={filtered.length}
@@ -373,7 +373,7 @@ export default function Matches() {
         </div>
       )}
 
-      <div className="rd-card p-4">
+      <div className="rd-matches-filters rd-card p-4">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-48">
             <Search
@@ -425,46 +425,48 @@ export default function Matches() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array(5).fill(0).map((_, i) => (
-            <div key={i} className="rd-card h-24 animate-pulse" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="rd-card p-6">
-          <EmptyState
-            icon={Swords}
-            title="Sin partidas registradas"
-            description="Registrá tu primera partida para comenzar a trackear tu rendimiento."
-            action={
-              <button
-                onClick={() => setShowForm(true)}
-                className="rd-action-card group px-4 py-3 mt-3"
-              >
-                <Plus size={16} className="text-primary" />
-                <span className="text-sm font-semibold text-foreground group-hover:text-primary">
-                  Registrar Partida
-                </span>
-              </button>
-            }
-          />
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map(match => (
-            <div key={match.id} className="rd-card overflow-visible">
-              <MatchCard
-                match={match}
-                champions={champions}
-                items={items}
-                onEdit={setEditing}
-                onDelete={(id) => setMatchToDelete(matches.find(match => match.id === id) || null)}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="rd-matches-scroll">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array(5).fill(0).map((_, i) => (
+              <div key={i} className="rd-card h-24 animate-pulse" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rd-card p-6">
+            <EmptyState
+              icon={Swords}
+              title="Sin partidas registradas"
+              description="Registrá tu primera partida para comenzar a trackear tu rendimiento."
+              action={
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="rd-action-card group px-4 py-3 mt-3"
+                >
+                  <Plus size={16} className="text-primary" />
+                  <span className="text-sm font-semibold text-foreground group-hover:text-primary">
+                    Registrar Partida
+                  </span>
+                </button>
+              }
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map(match => (
+              <div key={match.id} className="rd-card overflow-visible">
+                <MatchCard
+                  match={match}
+                  champions={champions}
+                  items={items}
+                  onEdit={setEditing}
+                  onDelete={(id) => setMatchToDelete(matches.find(match => match.id === id) || null)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
