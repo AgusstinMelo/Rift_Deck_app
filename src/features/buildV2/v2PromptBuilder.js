@@ -22,6 +22,14 @@ const compactTable = (entities, fields) => {
 
 const normalizeText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
+// Mec\u00e1nicas de Wild Rift que difieren de League of Legends PC y que el modelo tiende a
+// confundir. Se inyectan s\u00f3lo cuando el campe\u00f3n seleccionado es el afectado.
+const CHAMPION_MECHANICS = {
+  "kai'sa": "Kai'Sa evoluciona sus habilidades al COMPLETAR objetos mejorados (objetos finales completos), no por acumular estad\u00edsticas: con 3 objetos completos tiene las 3 habilidades evolucionadas. No existen umbrales de poder de habilidad, da\u00f1o de ataque ni velocidad de ataque para evolucionar. Nunca justifiques un objeto con que aporta estad\u00edsticas para evolucionar la Q, W o E; si mencion\u00e1s las evoluciones, habl\u00e1 de completar objetos (por ejemplo, objetos de curva r\u00e1pida para llegar antes al tercer objeto completo).",
+};
+
+const championMechanicsNote = champion => CHAMPION_MECHANICS[normalizeText(champion?.name).trim()] || null;
+
 const THEME_GOALS = [
   { key: 'armor_penetration', label: 'penetración o reducción de armadura', patterns: [/penetracion(?: de)? armadura/, /letalidad/], terms: ['penetracion de armadura', 'reduccion de armadura', 'armor_penetration', 'armor_reduction', 'letalidad'] },
   { key: 'magic_penetration', label: 'penetración mágica', patterns: [/penetracion magica/], terms: ['penetracion magica', 'magic_penetration'] },
@@ -110,6 +118,11 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies, bui
     SPELLS: compactTable(snapshot.spells, FIELD_SETS.spell),
   };
   const themeHints = createThemeHints(themeGuidance, snapshot.coreItems, 20);
+  const mechanicsNote = championMechanicsNote(selected);
+  const mechanicsBlock = `
+REGLAS DE WILD RIFT
+- Esto es League of Legends: Wild Rift, no League of Legends PC. Kits, objetos, runas, valores y mecánicas pueden ser distintos. Usá sólo los datos entregados y nunca justifiques decisiones con mecánicas exclusivas de PC.
+${mechanicsNote ? `- ${selected.name}: ${mechanicsNote}\n` : ''}`;
   const correctionBlock = correction ? `
 CORRECCIÓN DEL SEGUNDO Y ÚLTIMO INTENTO
 La respuesta anterior no superó la validación local. Corregí únicamente lo necesario y devolvé el objeto completo.
@@ -124,7 +137,7 @@ PRIORIDADES, EN ESTE ORDEN
 1. Cumplir exactamente el contrato estructural y usar solamente IDs del catálogo correcto.
 2. Si requested_theme tiene texto, usarlo como guía dominante de estadísticas y estilo. No exigir que sea el nombre exacto de un arquetipo.
 3. Mantener compatibilidad con el campeón y adaptar los espacios restantes al draft.
-
+${mechanicsBlock}
 COMPOSICIONES OPCIONALES
 - allies y enemies pueden estar completos, parciales o vacíos. Analizá exclusivamente los campeones presentes y tratá los espacios faltantes como desconocidos; nunca inventes integrantes, amenazas ni necesidades.
 - Si no hay enemigos cargados, basá la build en el campeón, el rol, sus traits, item_scalings y vulnerabilities. Si hay información parcial, usala como señal adicional sin asumir que representa al equipo completo.
@@ -161,8 +174,19 @@ MÉTODO BREVE
 
 CONTENIDO DE LA RESPUESTA
 - Razones breves, concretas y basadas en datos; no expongas deliberación interna.
-- composition_analysis: perfil aliado, entre 2 y 5 amenazas, entre 1 y 5 respuestas y encaje del arquetipo.
-- build_plan: arquetipo, daño final, razón del primer objeto, auditoría breve de conversiones y entre 3 y 6 relaciones entre objetos.
+- Cada reason de core_items, movement_item, keystone, primary_runes, secondary_rune y spells debe justificar POR QUÉ se elige esa pieza en esta partida: qué parte del kit del campeón potencia, qué amenaza enemiga responde, qué sinergia tiene con otros objetos/runas o en qué momento de la partida rinde. Nunca copies ni parafrasees la description del catálogo, y no empieces repitiendo el nombre de la pieza.
+- Cada reason debe tener 1 o 2 frases y como máximo 150 caracteres.
+- composition_analysis: perfil aliado, amenazas, respuestas y encaje del arquetipo.
+- enemy_priority_threats: a pesar del nombre, son los RIESGOS DE LA PROPIA BUILD Y DEL CAMPEÓN, no de campeones enemigos. Entre 2 y 3 entradas con el formato "Debilidad: por qué es un riesgo en esta partida y cómo manejarlo" (por ejemplo, "Pico tardío: ...", "Sin defensas: ...", "Dependencia del primer objeto: ..."). Pueden mencionar el draft como contexto, pero el título nunca es el nombre de un enemigo; las amenazas de cada enemigo van en enemy_tips.
+- required_responses: entre 2 y 3 entradas con el formato "Necesidad: por qué hace falta en este draft y qué objeto, runa o hechizo la cubre". Nunca devuelvas sólo una estadística suelta.
+- allied_damage_profile y build_plan.target_damage_profile: una frase explicativa cada uno sobre qué aporta ese perfil de daño y por qué es una fortaleza en esta partida, no una etiqueta.
+- ally_tips y enemy_tips son consejos para EL USUARIO, que juega ${selected.name} (${role}). Están escritos en segunda persona y describen qué hace ${selected.name}, nunca qué debería hacer el campeón mencionado. El nombre del título sólo indica sobre quién trata el consejo.
+- composition_analysis.ally_tips: UNA entrada por CADA aliado cargado (sin contar a ${selected.name}), ordenadas de mayor a menor impacto, con el formato "Aliado: cómo jugás ${selected.name} junto a él" (cuándo seguir su iniciación, cómo aprovechar su control o sus habilidades para tu daño, cuándo protegerlo o agruparte). Si hay menos de 2 aliados cargados, completá hasta 2 entradas con consejos de juego en equipo para tu rol (formato "Idea: consejo").
+- composition_analysis.enemy_tips: UNA entrada por CADA enemigo cargado, ordenadas del más al menos peligroso, con el formato "Enemigo: cómo jugás ${selected.name} contra él" (qué habilidad suya esquivar o esperar antes de entrar, cuándo evitarlo, cómo castigar sus ventanas, qué parte de tu build lo responde). Si hay menos de 2 enemigos cargados, completá hasta 2 entradas con consejos generales del matchup de tu rol.
+- Ejemplo correcto en enemy_tips: "Amumu: esperá a que use su definitiva antes de entrar y mantené distancia de sus vendas." Incorrecto (consejo dirigido a Amumu): "Amumu: fuerza peleas en pasillos donde el rival no pueda abrirse."
+- Cada entrada de ally_tips y enemy_tips: entre 90 y 150 caracteres, concreta y específica de ese campeón.
+- Cada entrada de enemy_priority_threats, required_responses, allied_damage_profile y target_damage_profile: máximo 120 caracteres.
+- build_plan: arquetipo, daño final, razón del primer objeto y auditoría breve de conversiones.
 - matchup_read en 2-4 frases; win_condition en 1-3 frases.
 ${correctionBlock}
 MATCH_CONTEXT

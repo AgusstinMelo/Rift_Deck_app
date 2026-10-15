@@ -14,13 +14,19 @@ export const v2BuildSchema = z.object({
     enemy_priority_threats: z.array(z.string().trim().min(1)).min(2).max(5),
     required_responses: z.array(z.string().trim().min(1)).min(1).max(5),
     archetype_rationale: z.string().trim().min(1),
+    // Opcionales localmente: si faltan, la UI no muestra los recuadros de consejos. Sin máximo:
+    // un maxItems mayor a 3 supera el límite de complejidad del schema de Gemini (la UI muestra 5).
+    ally_tips: z.array(z.string().trim().min(1)).default([]),
+    enemy_tips: z.array(z.string().trim().min(1)).default([]),
   }).strict(),
   build_plan: z.object({
     primary_archetype: z.string().trim().min(1),
     target_damage_profile: z.string().trim().min(1),
     first_item_rationale: z.string().trim().min(1),
     transformation_audit: z.string().trim().min(1),
-    item_relationships: z.array(z.string().trim().min(1)).min(3).max(6),
+    // Ya no se le pide a Gemini (el schema de respuesta tiene un límite de complejidad y
+    // estos textos los regenera el estabilizador desde las razones de cada objeto).
+    item_relationships: z.array(z.string().trim().min(1)).max(6).default([]),
   }).strict(),  core_items: z.array(selectedEntitySchema).length(5),
   movement_item: selectedEntitySchema,
   keystone: selectedEntitySchema,
@@ -55,24 +61,25 @@ export const v2BuildJsonSchema = {
     composition_analysis: {
       type: 'object',
       additionalProperties: false,
-      required: ['allied_damage_profile', 'enemy_priority_threats', 'required_responses', 'archetype_rationale'],
+      required: ['allied_damage_profile', 'enemy_priority_threats', 'required_responses', 'archetype_rationale', 'ally_tips', 'enemy_tips'],
       properties: {
         allied_damage_profile: { type: 'string' },
         enemy_priority_threats: { type: 'array', minItems: 2, maxItems: 5, items: { type: 'string' } },
         required_responses: { type: 'array', minItems: 1, maxItems: 5, items: { type: 'string' } },
         archetype_rationale: { type: 'string' },
+        ally_tips: { type: 'array', minItems: 2, items: { type: 'string' } },
+        enemy_tips: { type: 'array', minItems: 2, items: { type: 'string' } },
       },
     },
     build_plan: {
       type: 'object',
       additionalProperties: false,
-      required: ['primary_archetype', 'target_damage_profile', 'first_item_rationale', 'transformation_audit', 'item_relationships'],
+      required: ['primary_archetype', 'target_damage_profile', 'first_item_rationale', 'transformation_audit'],
       properties: {
         primary_archetype: { type: 'string' },
         target_damage_profile: { type: 'string' },
         first_item_rationale: { type: 'string' },
         transformation_audit: { type: 'string' },
-        item_relationships: { type: 'array', minItems: 3, maxItems: 6, items: { type: 'string' } },
       },
     },    core_items: { type: 'array', minItems: 5, maxItems: 5, items: entitySelectionJsonSchema },
     movement_item: entitySelectionJsonSchema,

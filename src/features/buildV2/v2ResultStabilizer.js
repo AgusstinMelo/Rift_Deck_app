@@ -32,10 +32,13 @@ function bestCandidate(candidates, result, usedIds = new Set()) {
     .sort((a, b) => b.score - a.score || a.index - b.index)[0]?.candidate;
 }
 
+// Las piezas reemplazadas pierden la razón que escribió la IA. No se rellena con la
+// descripción del catálogo: se explica el motivo del reemplazo y su encaje con el plan.
 const fallbackReason = (entity, purpose, result) => {
-  const detail = String(entity?.description || entity?.effect || '').trim();
-  if (detail) return `${purpose} ${detail}`;
-  return `${purpose} Mantiene la selección coherente con ${result?.build_theme || 'el plan de la build'}.`;
+  const plan = result?.build_plan?.primary_archetype || result?.build_theme;
+  return plan
+    ? `${purpose} Es la opción disponible que mejor encaja con el plan ${plan}.`
+    : `${purpose} Es la opción disponible que mejor encaja con el plan de la build.`;
 };
 
 const MAX_ITEM_EXPLANATION_LENGTH = 220;
@@ -55,7 +58,10 @@ function cleanCatalogText(value, entityName = '') {
   return `${shortened.slice(0, boundary > 120 ? boundary : MAX_ITEM_EXPLANATION_LENGTH).replace(/[,:;.]$/, '')}…`;
 }
 
-const selectionReason = (selection, entity, result) => cleanCatalogText(
+// Para encadenar la razón dentro de una frase ("... porque aporta"), sin tocar siglas como "AP".
+const lowerFirst = text => /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(text) ? text[0].toLowerCase() + text.slice(1) : text;
+
+const selectionReason =(selection, entity, result) => cleanCatalogText(
   selection?.reason,
   entity?.name,
 ) || fallbackReason(entity, 'Complementa el plan de la build.', result);
@@ -73,7 +79,7 @@ function synchronizeItemExplanations(buildPlan, coreItems, snapshot, result) {
   return {
     ...buildPlan,
     first_item_rationale: firstItem
-      ? `${firstItem.entity.name} se compra primero porque ${selectionReason(firstItem.selection, firstItem.entity, result)}${orderingNote}`
+      ? `${firstItem.entity.name} se compra primero porque ${lowerFirst(selectionReason(firstItem.selection, firstItem.entity, result))}${orderingNote}`
       : buildPlan?.first_item_rationale,
     // Generate this copy after stabilization. Text written for replaced IDs is stale.
     item_relationships: selected.map(({ selection, entity }) =>

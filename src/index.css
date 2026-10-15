@@ -897,6 +897,148 @@
   }
 }
 
+.rd-v2-build-page,
+.rd-v2-build,
+.rd-v2-build-body,
+.rd-v2-build-aside,
+.rd-v2-build-result {
+  min-width: 0;
+  min-height: 0;
+}
+
+.rd-v2-build {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Explicaciones de objetos, runas y hechizos: se recortan para que el panel entre
+   sin scroll; el texto completo queda en el tooltip. */
+.rd-v2-reason {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (max-height: 820px) {
+  .rd-v2-reason {
+    -webkit-line-clamp: 2;
+  }
+}
+
+.rd-v2-build-aside,
+.rd-v2-build-aside-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* El layout de dos columnas aparece en xl: a partir de ahí la página entra en el
+   viewport y cada columna scrollea por separado. */
+@media (min-width: 1280px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-v2-build-page) {
+    overflow: hidden;
+  }
+
+  .rd-v2-build-page {
+    height: 100%;
+    padding-block: 1.25rem;
+  }
+
+  .rd-v2-build {
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 1.25rem;
+    overflow: hidden;
+  }
+
+  .rd-v2-build-body {
+    height: 100%;
+    align-items: stretch;
+  }
+
+  .rd-v2-build-aside {
+    position: static;
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-v2-build-aside-scroll,
+  .rd-v2-build-result {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-gutter: stable;
+  }
+
+  .rd-v2-build-aside-scroll {
+    flex: 1 1 auto;
+  }
+
+  /* Cada paso ocupa todo el alto de la columna (sin hueco abajo). */
+  .rd-v2-build-aside-scroll > .rd-v2-step-card {
+    flex-grow: 1;
+  }
+
+  .rd-v2-build-aside-scroll > *,
+  .rd-v2-build-aside > :not(.rd-v2-build-aside-scroll) {
+    flex: none;
+  }
+
+  .rd-v2-build-placeholder {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .rd-v2-build-placeholder > div {
+    min-height: 0;
+  }
+
+  /* El resultado ocupa el alto disponible: íconos fijos arriba y el análisis
+     absorbe el resto con scroll propio (solo si el texto de la IA no entra). */
+  .rd-v2-build-success {
+    height: 100%;
+  }
+
+  .rd-v2-build-success > * {
+    flex-shrink: 0;
+  }
+
+  .rd-v2-build-success > .rd-v2-build-analysis {
+    flex: 1 1 auto;
+    min-height: 11rem;
+  }
+
+  .rd-v2-build-analysis-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+  }
+}
+
+@media (min-width: 1280px) and (min-height: 700px) and (max-height: 820px) {
+  .rd-v2-build-aside-scroll > .rd-card {
+    padding: 1rem;
+  }
+
+  .rd-v2-build-aside-scroll {
+    gap: 0.75rem;
+  }
+
+  .rd-v2-build-header h1 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .rd-v2-build-header > div > :last-child {
+    margin-top: 0.75rem;
+  }
+}
+
 @media (min-width: 1024px) and (min-height: 700px) {
   .rd-main-content:has(.rd-stats-layout) {
     overflow: hidden;
