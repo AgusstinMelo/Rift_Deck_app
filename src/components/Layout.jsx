@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, BookOpen, TrendingUp, Wrench, Swords,
-  BarChart3, Sparkles, Settings, Menu, LogOut, User, Bug, Info, Scale, ShieldCheck, Search
+  BarChart3, Sparkles, Settings, Menu, LogOut, User, Bug, Info, Scale, ShieldCheck, Search, Target
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
@@ -21,6 +21,7 @@ const navItems = [
   { path: '/build-calculator', label: 'Builds', icon: Wrench },
   { path: '/matches', label: 'Partidas', icon: Swords },
   { path: '/stats', label: 'Estadísticas', icon: BarChart3 },
+  { path: '/objetivos', label: 'Objetivos', icon: Target },
   { path: '/suggester', label: 'Sugeridor', icon: Sparkles },
 ];
 

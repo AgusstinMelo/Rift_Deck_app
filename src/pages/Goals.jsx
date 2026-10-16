@@ -1,0 +1,164 @@
+import { Link, Route, Routes, useParams } from 'react-router-dom';
+import { AlertCircle, ArrowLeft, Plus, Target } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
+import MembershipGate from '@/components/membership/MembershipGate';
+import { useGoalsAccess } from '@/features/goals/access';
+import { useEvaluatedGoals } from '@/features/goals/hooks/useGoals';
+import { partitionGoals } from '@/features/goals/model/goalLists';
+import GoalCard from '@/features/goals/components/GoalCard';
+import GoalDetail from '@/features/goals/components/GoalDetail';
+import GoalEditor from '@/features/goals/components/GoalEditor';
+import GoalsHistory from '@/features/goals/components/GoalsHistory';
+import GoalsSummary from '@/features/goals/components/GoalsSummary';
+import GoalWizard from '@/features/goals/components/wizard/GoalWizard';
+import { BUTTON_SECONDARY } from '@/features/goals/components/goalUi';
+
+function CreateGoalButton() {
+  return (
+    <Link to="/objetivos/nuevo" className="rd-action-card group px-4 py-3">
+      <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+        <Plus size={18} className="text-primary" />
+      </div>
+      <div className="text-left">
+        <p className="font-semibold text-sm text-foreground group-hover:text-primary">Nuevo objetivo</p>
+        <p className="hidden sm:block text-xs text-muted-foreground">Elegí una meta y medila</p>
+      </div>
+    </Link>
+  );
+}
+
+function GoalsHeader() {
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="w-8 h-px bg-primary/50" />
+          <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Metas personales</span>
+        </div>
+        <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
+        <p className="text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
+      </div>
+      <CreateGoalButton />
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="space-y-4" aria-busy="true" aria-label="Cargando objetivos">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        {Array.from({ length: 5 }, (_, i) => <div key={i} className="rd-card h-20 animate-pulse" />)}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }, (_, i) => <div key={i} className="rd-card h-48 animate-pulse" />)}
+      </div>
+    </div>
+  );
+}
+
+function ErrorState({ onRetry }) {
+  return (
+    <div className="rd-card p-6">
+      <EmptyState
+        icon={AlertCircle}
+        title="No se pudieron cargar tus objetivos"
+        description="Revisá tu conexión e intentá nuevamente."
+        action={<button type="button" onClick={onRetry} className={BUTTON_SECONDARY}>Reintentar</button>}
+      />
+    </div>
+  );
+}
+
+function GoalsOverview({ items }) {
+  const { current, finished, archived } = partitionGoals(items);
+  return (
+    <div className="space-y-6">
+      <GoalsHeader />
+      <GoalsSummary current={current} />
+
+      <section className="space-y-3" aria-label="Objetivos activos">
+        <div className="flex items-center gap-2">
+          <span className="h-px w-4 bg-primary/50" />
+          <h2 className="rd-card-title">Objetivos activos</h2>
+        </div>
+        {current.length === 0 ? (
+          <div className="rd-card p-6">
+            <EmptyState
+              icon={Target}
+              title="Sin objetivos activos"
+              description="Creá un objetivo para seguir tu progreso con tus partidas registradas."
+              action={<CreateGoalButton />}
+            />
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {current.map(item => <GoalCard key={item.goal.id} item={item} />)}
+          </div>
+        )}
+      </section>
+
+      <GoalsHistory finished={finished} archived={archived} />
+    </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="rd-card p-6">
+      <EmptyState
+        icon={Target}
+        title="Objetivo no encontrado"
+        description="Puede que no exista o que no te pertenezca."
+        action={<Link to="/objetivos" className={BUTTON_SECONDARY}><ArrowLeft size={15} /> Volver a Objetivos</Link>}
+      />
+    </div>
+  );
+}
+
+function GoalRoute({ items, matches, now, editing = false }) {
+  const { goalId } = useParams();
+  const item = items.find(entry => String(entry.goal.id) === goalId);
+  if (!item) return <NotFound />;
+  return editing
+    ? <GoalEditor goal={item.goal} matches={matches} now={now} />
+    : <GoalDetail item={item} matches={matches} now={now} />;
+}
+
+function NewGoal({ matches }) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
+          <ArrowLeft size={14} /> Objetivos
+        </Link>
+        <h1 className="font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">Nuevo objetivo</h1>
+      </div>
+      <GoalWizard matches={matches} />
+    </div>
+  );
+}
+
+export default function Goals() {
+  const access = useGoalsAccess();
+  const { items, matches, now, isLoading, error, refetch } = useEvaluatedGoals();
+
+  if (access.isLoading) return <div className="rd-page rd-dashboard"><LoadingState /></div>;
+  if (!access.hasAccess) return <MembershipGate />;
+
+  let content;
+  if (isLoading) content = <LoadingState />;
+  else if (error) content = <ErrorState onRetry={refetch} />;
+  else {
+    content = (
+      <Routes>
+        <Route index element={<GoalsOverview items={items} />} />
+        <Route path="nuevo" element={<NewGoal matches={matches} />} />
+        <Route path=":goalId" element={<GoalRoute items={items} matches={matches} now={now} />} />
+        <Route path=":goalId/editar" element={<GoalRoute items={items} matches={matches} now={now} editing />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    );
+  }
+
+  return <div className="rd-page rd-dashboard">{content}</div>;
+}

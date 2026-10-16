@@ -125,17 +125,30 @@ export function useGoalMutations() {
   const invalidateCheckins = () => qc.invalidateQueries({ queryKey: goalKeys.checkins(user?.id) });
 
   return {
-    create: useMutation({ mutationFn: input => createGoal(user?.id, input), onSuccess: invalidateGoals }),
-    update: useMutation({ mutationFn: ({ goal, input }) => updateGoal(goal, input), onSuccess: invalidateGoals }),
-    setLifecycle: useMutation({
-      mutationFn: ({ goal, lifecycle }) => setGoalLifecycle(goal, lifecycle),
+    create: useMutation({
+      mutationFn: (/** @type {any} */ input) => createGoal(user?.id, input),
       onSuccess: invalidateGoals,
     }),
-    createCheckin: useMutation({ mutationFn: ({ goal, input }) => createCheckin(goal, input), onSuccess: invalidateCheckins }),
-    updateCheckin: useMutation({
-      mutationFn: ({ goal, checkinId, input }) => updateCheckin(goal, checkinId, input),
+    update: useMutation({
+      mutationFn: (/** @type {{ goal: any, input: any }} */ { goal, input }) => updateGoal(goal, input),
+      onSuccess: invalidateGoals,
+    }),
+    setLifecycle: useMutation({
+      mutationFn: (/** @type {{ goal: any, lifecycle: string }} */ { goal, lifecycle }) => setGoalLifecycle(goal, lifecycle),
+      onSuccess: invalidateGoals,
+    }),
+    createCheckin: useMutation({
+      mutationFn: (/** @type {{ goal: any, input: any }} */ { goal, input }) => createCheckin(goal, input),
       onSuccess: invalidateCheckins,
     }),
-    deleteCheckin: useMutation({ mutationFn: checkinId => deleteCheckin(checkinId), onSuccess: invalidateCheckins }),
+    updateCheckin: useMutation({
+      mutationFn: (/** @type {{ goal: any, checkinId: string, input: any }} */ { goal, checkinId, input }) =>
+        updateCheckin(goal, checkinId, input),
+      onSuccess: invalidateCheckins,
+    }),
+    deleteCheckin: useMutation({
+      mutationFn: (/** @type {string} */ checkinId) => deleteCheckin(checkinId),
+      onSuccess: invalidateCheckins,
+    }),
   };
 }

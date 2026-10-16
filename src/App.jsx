@@ -17,6 +17,7 @@ const Tierlist = lazy(() => import('@/pages/Tierlist'));
 const BuildCalculator = lazy(() => import('@/pages/BuildCalculator'));
 const Matches = lazy(() => import('@/pages/Matches'));
 const Stats = lazy(() => import('@/pages/Stats'));
+const Goals = lazy(() => import('@/pages/Goals'));
 const Suggester = lazy(() => import('@/pages/Suggester'));
 const TierlistConfig = lazy(() => import('@/pages/TierlistConfig'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
           <Route path="/build-calculator" element={<BuildCalculator />} />
           <Route path="/matches" element={<Matches />} />
           <Route path="/stats" element={<Stats />} />
+          <Route path="/objetivos/*" element={<Goals />} />
           <Route path="/suggester" element={<Suggester />} />
           <Route path="/admin/tierlist-config" element={user?.role === 'admin' ? <TierlistConfig /> : <Navigate to="/" replace />} />
           <Route path="/membresia/resultado" element={<MembresiaResultado />} />

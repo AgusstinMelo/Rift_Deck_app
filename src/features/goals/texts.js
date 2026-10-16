@@ -28,6 +28,7 @@ const REASON_LABELS = {
   [EXCLUSION_REASON.MISSING_CHAMPION]: 'No tiene campeón registrado',
 };
 
+/** @param {{ reason: string, field?: string }} exclusion */
 export function exclusionLabel({ reason, field }) {
   if (reason === EXCLUSION_REASON.FILTER_MISMATCH) return `No cumple el filtro de ${FILTER_LABELS[field] || field}`;
   if (reason === EXCLUSION_REASON.MISSING_FILTER_DATA) return `Falta el dato de ${FILTER_LABELS[field] || field}`;

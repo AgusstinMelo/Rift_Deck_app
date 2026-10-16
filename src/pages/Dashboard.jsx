@@ -24,6 +24,7 @@ import { getChampionInsight } from '@/components/library/ChampionDetail';
 import { computeInsights } from '@/hooks/useInsights';
 import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda } from '@/domain/matchStats';
+import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
 
 const DASHBOARD_TABS = [
   { id: 'summary', label: 'Resumen' },
@@ -411,7 +412,7 @@ export default function Dashboard() {
               </article>
             </div>
 
-            <div className="grid grid-cols-1 min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
               <article className="rd-card rd-card-watermark p-5 min-h-0 overflow-hidden">
                 <div className="flex items-start gap-4 h-full">
                   <img src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png" alt="Rift Deck Coach" className="w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
@@ -421,6 +422,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </article>
+              <GoalsDashboardWidget />
             </div>
           </section>
         )}
