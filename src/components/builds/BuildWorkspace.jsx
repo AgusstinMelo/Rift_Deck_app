@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSpells } from '@/hooks/useSpells';
 import { useAuth } from '@/lib/AuthContext';
 import { createBuild, updateBuild } from '@/api/buildsSupabase';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Info, Save, Trash2 } from 'lucide-react';
 import ItemPool from './ItemPool';
 import ItemBrowser from './ItemBrowser';
 import StatsPanel from './StatsPanel';
@@ -122,77 +122,119 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
     },
   });
 
+  const normalItemCount = selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length;
+  const recommendedItems = (champion.recommended_items || [])
+    .map(itemName => ({ itemName, item: items.find(it => it.name?.toLowerCase() === itemName?.toLowerCase() || it.id === itemName) }));
+
   return (
-    <div className="rd-page">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
-          <ArrowLeft size={16} /> Cambiar campeón
-        </button>
+    <div className="rd-page rd-buildws">
+      {/* Campeón y controles de la build en una sola franja. */}
+      <div className="rd-card rd-buildws-header flex flex-col gap-3 p-3 xl:flex-row xl:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <button
+            onClick={onBack}
+            title="Cambiar campeón"
+            aria-label="Cambiar campeón"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div className="w-12 h-12 rounded-full bg-muted overflow-hidden flex items-center justify-center text-lg font-bold text-primary shrink-0">
+            {champion.image_url
+              ? <img src={champion.image_url} alt={champion.name} className="w-full h-full object-cover" />
+              : champion.name?.[0]}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="font-rajdhani font-bold text-2xl leading-none text-foreground truncate max-w-full">
+                {champion.name}
+              </h2>
+              {tierEntry && <TierBadge tier={tierEntry.tier} size="md" />}
+              {(champion.lane || []).map(l => <span key={l} className="text-xs bg-secondary text-foreground px-2 py-0.5 rounded border border-border">{l}</span>)}
+              {champion.damage_type && <span className="text-xs text-muted-foreground">{champion.damage_type}</span>}
+              {champion.roles && <span className="text-xs text-muted-foreground">{champion.roles}</span>}
+            </div>
+            {tierEntry && (
+              <p className="text-xs text-muted-foreground mt-1">
+                WR: <span className="text-foreground">{tierEntry.winrate?.toFixed(1)}%</span>
+                <span className="mx-2">·</span>
+                PR: <span className="text-foreground">{tierEntry.pickrate?.toFixed(1)}%</span>
+                <span className="mx-2">·</span>
+                BR: <span className="text-foreground">{tierEntry.banrate?.toFixed(1)}%</span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 xl:flex-nowrap">
+          <PatchSelect
+            value={patchVersion}
+            patches={patches}
+            onChange={onPatchChange}
+            className="w-full sm:w-40"
+          />
+          <input
+            value={buildName}
+            onChange={e => setBuildName(e.target.value)}
+            placeholder="Nombre de la build"
+            aria-label="Nombre de la build"
+            className="bg-secondary/70 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 transition-all w-full sm:w-48"
+          />
+          <select
+            value={lane}
+            onChange={e => setLane(e.target.value)}
+            aria-label="Línea"
+            className="bg-secondary/70 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 transition-all w-full sm:w-32"
+          >
+            <option value="">Línea</option>
+            <option value="top">Top</option>
+            <option value="jungler">Jungler</option>
+            <option value="mid">Mid</option>
+            <option value="adc">ADC</option>
+            <option value="support">Support</option>
+          </select>
+          {selectedItems.length > 0 && (
+            <button onClick={() => setSelectedItems([])}
+              className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-500/10">
+              <Trash2 size={12} /> Limpiar
+            </button>
+          )}
+          <button
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending || !buildName}
+            className="flex shrink-0 items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">
+            <Save size={14} /> {saved ? '¡Guardado!' : 'Guardar Build'}
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Champion + Item Pool */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Champion Card */}
-          <div className="rd-card p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-muted overflow-hidden flex items-center justify-center text-xl font-bold text-primary shrink-0">
-              {champion.image_url
-                ? <img src={champion.image_url} alt={champion.name} className="w-full h-full object-cover" />
-                : champion.name?.[0]}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-rajdhani font-bold text-2xl text-foreground truncate max-w-full">
-                  {champion.name}
-                </h2>
-                {tierEntry && <TierBadge tier={tierEntry.tier} size="md" />}
+      {/* Espacio de trabajo: objetos · runas y hechizos · stats. */}
+      <div className="rd-buildws-body grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.75fr)]">
+        <div className="rd-buildws-items flex min-w-0 flex-col gap-4">
+          <div className="rd-card p-4">
+            <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Objetos ({normalItemCount}/5 + botas)</h3></div>
+            <ItemPool selectedItems={selectedItems} onRemove={removeItem} />
+            {recommendedItems.length > 0 && (
+              <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
+                <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recomendados</span>
+                <div className="flex min-w-0 flex-wrap gap-1.5">
+                  {recommendedItems.map(({ itemName, item }, i) => (
+                    <button key={i} onClick={() => item && selectedItems.length < 6 && addItem(item)}
+                      title={item?.name || itemName}
+                      className="flex items-center gap-1.5 bg-secondary border border-border px-2 py-1 rounded-lg text-xs text-foreground hover:border-primary/40 transition-colors">
+                      {item?.image_url && <img src={item.image_url} alt={item.name} className="w-5 h-5 object-contain" />}
+                      <span className="max-w-[8rem] truncate">{item?.name || itemName}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap mt-1">
-                {(champion.lane || []).map(l => <span key={l} className="text-xs bg-secondary text-foreground px-2 py-0.5 rounded border border-border">{l}</span>)}
-                {champion.damage_type && <span className="text-xs text-muted-foreground">{champion.damage_type}</span>}
-                {champion.roles && <span className="text-xs text-muted-foreground">{champion.roles}</span>}
-              </div>
-              {tierEntry && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  WR: <span className="text-foreground">{tierEntry.winrate?.toFixed(1)}%</span>
-                  <span className="mx-2">·</span>
-                  PR: <span className="text-foreground">{tierEntry.pickrate?.toFixed(1)}%</span>
-                  <span className="mx-2">·</span>
-                  BR: <span className="text-foreground">{tierEntry.banrate?.toFixed(1)}%</span>
-                </p>
-              )}
-            </div>
-
-            {/* Build name & lane selector inline */}
-            <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
-              <PatchSelect
-                value={patchVersion}
-                patches={patches}
-                onChange={onPatchChange}
-                className="sm:w-48"
-              />
-              <input
-                value={buildName}
-                onChange={e => setBuildName(e.target.value)}
-                className="bg-secondary/70 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 transition-all w-full sm:w-48"
-              />
-              <select
-                value={lane}
-                onChange={e => setLane(e.target.value)}
-                className="bg-secondary/70 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 transition-all w-full sm:w-48"
-              >
-                <option value="">Línea</option>
-                <option value="top">Top</option>
-                <option value="jungler">Jungler</option>
-                <option value="mid">Mid</option>
-                <option value="adc">ADC</option>
-                <option value="support">Support</option>
-              </select>
-            </div>
+            )}
           </div>
 
-          {/* Rune Picker */}
+          <ItemBrowser items={items} selectedItems={selectedItems} onSelect={addItem} />
+        </div>
+
+        <div className="rd-buildws-side flex min-w-0 flex-col gap-4">
           <RunePicker
             runes={runes}
             selectedRunes={selectedRunes}
@@ -201,98 +243,59 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             onRunesInitialized={setSelectedRunes}
           />
 
-          {/* Item Pool */}
-          <div className="rd-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Objetos ({selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length}/5 + botas)</h3></div>
-            </div>
-            <ItemPool selectedItems={selectedItems} onRemove={removeItem} />
-          </div>
-
-          {/* Item Browser */}
-          <ItemBrowser items={items} selectedItems={selectedItems} onSelect={addItem} />
-
-          {/* Hechizos */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-3">
+          <div className="rd-card p-4">
+            <p className="text-sm font-semibold text-foreground mb-3">
               Hechizos ({selectedSpells.length}/2)
-            </label>
+            </p>
             <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-nowrap">
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
                 return (
                   <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
-<button
-                    type="button"
-                    onClick={() => {
-                      if (selected) setSelectedSpells(prev => prev.filter(s => s !== spell.name));
-                      else if (selectedSpells.length < 2) setSelectedSpells(prev => [...prev, spell.name]);
-                    }}
-                    aria-disabled={disabled}
-                    className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
-                      selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                    } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  >
-                    {spell.image_url
-                      ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
-                      : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
-                    }
-                  </button>
-                      </EntityHoverCard>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selected) setSelectedSpells(prev => prev.filter(s => s !== spell.name));
+                        else if (selectedSpells.length < 2) setSelectedSpells(prev => [...prev, spell.name]);
+                      }}
+                      aria-disabled={disabled}
+                      className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
+                        selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                      } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                    >
+                      {spell.image_url
+                        ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
+                        : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                      }
+                    </button>
+                  </EntityHoverCard>
                 );
               })}
             </div>
           </div>
         </div>
 
-        {/* Right: Stats */}
-        <div className="space-y-4">
-          <div className="flex justify-end gap-2">
-            {selectedItems.length > 0 && (
-              <button onClick={() => setSelectedItems([])}
-                className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10">
-                <Trash2 size={12} /> Limpiar
-              </button>
-            )}
-            <button
-              onClick={() => saveMutation.mutate()}
-              disabled={saveMutation.isPending || !buildName}
-              className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">
-              <Save size={12} /> {saved ? '¡Guardado!' : 'Guardar Build'}
-            </button>
-          </div>
+        <div className="rd-buildws-stats flex min-w-0 flex-col gap-3 lg:col-span-2 xl:col-span-1">
           <StatsPanel champion={champion} items={selectedItems} runes={selectedRunes} />
 
-          {/* Champion strategic notes */}
           {champion.strategic_notes && (
-            <div className="rd-card p-4">
-              <div className="flex items-center gap-2 mb-2"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Notas Estratégicas</h3></div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{champion.strategic_notes}</p>
-            </div>
+            <details className="rd-card group p-4">
+              <summary className="flex cursor-pointer list-none items-center gap-2">
+                <span className="w-5 h-px bg-primary/50" />
+                <h3 className="rd-card-title">Notas Estratégicas</h3>
+                <span className="ml-auto text-xs text-muted-foreground group-open:hidden">Ver</span>
+              </summary>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{champion.strategic_notes}</p>
+            </details>
           )}
 
-          {/* Recommended items from champion data */}
-          {(champion.recommended_items || []).length > 0 && (
-            <div className="rd-card p-4">
-              <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Items Recomendados</h3></div>
-              <div className="flex flex-wrap gap-2">
-                {champion.recommended_items.map((itemName, i) => {
-                  const item = items.find(it => it.name?.toLowerCase() === itemName?.toLowerCase() || it.id === itemName);
-                  return (
-                    <button key={i} onClick={() => item && selectedItems.length < 6 && addItem(item)}
-                      className="flex items-center gap-1.5 bg-secondary border border-border px-2 py-1.5 rounded-lg text-xs text-foreground hover:border-primary/40 transition-colors">
-                      {item?.image_url && <img src={item.image_url} alt={item.name} className="w-5 h-5 object-contain" />}
-                      {item?.name || itemName}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          {/* Stats disclaimer */}
-          <p className="text-[12px] leading-relaxed text-muted-foreground/60 px-1">
-            Las estadísticas presentadas corresponden a cálculos teóricos realizados fuera de combate y bajo condiciones base del campeón a nivel 1. Esta calculadora no contempla determinadas interacciones dinámicas, efectos situacionales, escalados en combate ni modificaciones específicas derivadas de pasivas, acumulaciones o efectos únicos de campeones, objetos y runas.
+          <p
+            className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground/70"
+            title="Las estadísticas presentadas corresponden a cálculos teóricos realizados fuera de combate y bajo condiciones base del campeón a nivel 1. Esta calculadora no contempla determinadas interacciones dinámicas, efectos situacionales, escalados en combate ni modificaciones específicas derivadas de pasivas, acumulaciones o efectos únicos de campeones, objetos y runas."
+          >
+            <Info size={12} className="shrink-0" />
+            Cálculo teórico a nivel 1, fuera de combate (pasá el mouse para más detalle).
           </p>
         </div>
       </div>

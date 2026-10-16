@@ -881,18 +881,18 @@
     min-height: 0;
   }
 
-  .rd-item-browser > * {
+  .rd-buildstep-items > .rd-item-browser > * {
     flex: none;
   }
 
-  .rd-item-browser > .rd-item-browser-results {
+  .rd-buildstep-items > .rd-item-browser > .rd-item-browser-results {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     min-height: 0;
   }
 
-  .rd-item-browser-results > .rd-item-browser-grid {
+  .rd-buildstep-items .rd-item-browser-results > .rd-item-browser-grid {
     flex: 1 1 auto;
     min-height: 0;
     max-height: none;
@@ -933,6 +933,97 @@
   .rd-statsstep-body > * {
     min-height: 0;
     overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
+/* Creador de builds: franja del campeón arriba y tres columnas (objetos · runas y hechizos · stats)
+   que llenan el alto. Desde 1280px, porque tres columnas no entran bien en menos ancho. */
+@media (min-width: 1280px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-buildws) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-buildws {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-buildws > * {
+    flex: none;
+  }
+
+  .rd-buildws > .rd-buildws-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-buildws-items,
+  .rd-buildws-side,
+  .rd-buildws-stats {
+    min-height: 0;
+  }
+
+  .rd-buildws-items > *,
+  .rd-buildws-side > *,
+  .rd-buildws-stats > * {
+    flex: none;
+  }
+
+  /* Objetos: la grilla del buscador toma el alto restante. */
+  .rd-buildws-items > .rd-item-browser {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-buildws-items > .rd-item-browser > * {
+    flex: none;
+  }
+
+  .rd-buildws-items > .rd-item-browser > .rd-item-browser-results {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-buildws-items .rd-item-browser-results > .rd-item-browser-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    align-content: start;
+  }
+
+  /* Runas: llenan lo que dejan los hechizos. */
+  .rd-buildws-side > .rd-rune-picker {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* Stats: la lista scrollea por dentro si no entra. */
+  .rd-buildws-stats > .rd-stats-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-stats-panel > * {
+    flex: none;
+  }
+
+  .rd-stats-panel > .rd-stats-panel-rows {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.25rem;
     scrollbar-width: thin;
   }
 }

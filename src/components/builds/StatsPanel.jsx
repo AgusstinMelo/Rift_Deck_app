@@ -219,14 +219,14 @@ export default function StatsPanel({ champion, items, runes = [] }) {
   ];
 
   return (
-    <div className="rd-card p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="rd-card rd-stats-panel flex flex-col p-4">
+      <div className="flex items-center gap-2 mb-2">
         <span className="w-5 h-px bg-primary/50" />
         <h3 className="rd-card-title">Stats de la Build</h3>
       </div>
-      <div>
+      <div className="rd-stats-panel-rows">
         {rows.map((row, i) => (
-          <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/60 last:border-0">
+          <div key={i} className="flex items-center justify-between py-1 border-b border-border/60 last:border-0">
             <span className="text-xs text-muted-foreground">{row.label}</span>
             <span className={`text-sm font-bold font-rajdhani ${row.value > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
               {typeof row.value === 'number' ? row.value : 0}{row.unit || ''}
@@ -235,7 +235,7 @@ export default function StatsPanel({ champion, items, runes = [] }) {
         ))}
       </div>
       {(hasItems || runes.length > 0) && (
-        <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border/60">
+        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/60">
           Stats con {items.length} obj.{runes.length > 0 && ` y ${runes.length} runa${runes.length > 1 ? 's' : ''}`}
         </p>
       )}
