@@ -632,9 +632,9 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
           {/* Step: Build */}
           {step === 'build' && (
-            <div className="rd-build-step space-y-6">
+            <div className="rd-buildstep space-y-6">
               {/* Encabezado: título y build guardada en una sola franja. */}
-              <div className="rd-build-step-header flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+              <div className="rd-buildstep-header flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
                 <div>
                   <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">
                     Tu build
@@ -649,8 +649,8 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               </div>
 
               {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
-              <div className="rd-build-step-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-                <div className="rd-build-items flex min-w-0 flex-col gap-4">
+              <div className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                <div className="rd-buildstep-items flex min-w-0 flex-col gap-4">
                   {/* Item Pool */}
                   <div className="rd-card p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -677,23 +677,23 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
                 </div>
 
-                <div className="rd-build-side flex min-w-0 flex-col gap-4">
+                <div className="rd-buildstep-side flex min-w-0 flex-col gap-4">
                   {/* Runas */}
-                  <div className="rd-card rd-build-runes p-4">
-                    <div className="flex items-center gap-2 mb-5">
+                  <div className="rd-card rd-buildstep-runes p-4">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="w-5 h-px bg-primary/50" />
                       <h3 className="rd-card-title">Runas</h3>
                     </div>
 
-                    <div className="space-y-5">
+                    <div className="space-y-3">
                       {/* Clave */}
                       {claveRunes.length > 0 && (
                         <div>
-                          <p className="text-sm font-medium text-muted-foreground mb-3">
+                          <p className="text-sm font-medium text-muted-foreground mb-2">
                             Clave
                           </p>
 
-                          <div className="grid grid-cols-7 gap-x-3 gap-y-3">
+                          <div className="flex flex-wrap gap-1.5">
                             {claveRunes.map(rune => (
                               <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
     <button
@@ -735,14 +735,14 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                       <div className="grid grid-cols-2 gap-4">
                         {/* Rama Principal */}
                         <div className="min-w-0">
-                          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                          <label className="text-sm font-medium text-muted-foreground mb-1 block">
                             Rama Principal
                           </label>
 
                           <select
                             value={primaryBranch}
                             onChange={e => handlePrimaryBranchChange(e.target.value)}
-                            className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
+                            className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
                           >
                             {PRIMARY_BRANCHES.map(b => (
                               <option key={b} value={b}>
@@ -751,11 +751,11 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             ))}
                           </select>
 
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-                              <div key={group}>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  Grupo {group}
+                              <div key={group} className="flex items-center gap-3">
+                                <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>
+                                  G{group}
                                 </p>
 
                                 <div className="flex flex-wrap gap-2">
@@ -792,14 +792,14 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
                         {/* Rama Secundaria */}
                         <div className="min-w-0">
-                          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                          <label className="text-sm font-medium text-muted-foreground mb-1 block">
                             Rama Secundaria
                           </label>
 
                           <select
                             value={secondaryBranch}
                             onChange={e => handleSecondaryBranchChange(e.target.value)}
-                            className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
+                            className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
                           >
                             {PRIMARY_BRANCHES.map(b => (
                               <option key={b} value={b}>
@@ -808,11 +808,11 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             ))}
                           </select>
 
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-                              <div key={group}>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  Grupo {group}
+                              <div key={group} className="flex items-center gap-3">
+                                <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>
+                                  G{group}
                                 </p>
 
                                 <div className="flex flex-wrap gap-2">
@@ -851,7 +851,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                   </div>
 
                   {/* Spells */}
-                  <div className="rd-card rd-build-spells p-4">
+                  <div className="rd-card rd-buildstep-spells p-4">
                     <label className="text-sm font-semibold text-foreground block mb-3">
                       Hechizos ({selectedSpells.length}/2)
                     </label>

@@ -844,7 +844,7 @@
 /* Registrar partida, paso "Tu build": espacio de trabajo en dos columnas que entra en el viewport.
    Objetos a la izquierda (la grilla toma el alto restante); runas (con scroll propio) y hechizos a la derecha. */
 @media (min-width: 1024px) and (min-height: 700px) {
-  .rd-match-builder-fit > .rd-build-step {
+  .rd-match-builder-fit > .rd-buildstep {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -852,29 +852,29 @@
     min-height: 0;
   }
 
-  .rd-build-step > * {
+  .rd-buildstep > * {
     flex: none;
     margin-top: 0 !important;
   }
 
-  .rd-build-step > .rd-build-step-body {
+  .rd-buildstep > .rd-buildstep-body {
     flex: 1 1 auto;
     min-height: 0;
     grid-template-rows: minmax(0, 1fr);
   }
 
-  .rd-build-items,
-  .rd-build-side {
+  .rd-buildstep-items,
+  .rd-buildstep-side {
     min-height: 0;
   }
 
-  .rd-build-items > *,
-  .rd-build-side > * {
+  .rd-buildstep-items > *,
+  .rd-buildstep-side > * {
     flex: none;
   }
 
   /* Buscador de objetos: filtros fijos y grilla que llena el alto. */
-  .rd-build-items > .rd-item-browser {
+  .rd-buildstep-items > .rd-item-browser {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -900,7 +900,7 @@
   }
 
   /* Runas: ocupan lo que dejan los hechizos y scrollean por dentro si no entran. */
-  .rd-build-side > .rd-build-runes {
+  .rd-buildstep-side > .rd-buildstep-runes {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
