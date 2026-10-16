@@ -160,13 +160,16 @@ function GoalRoute({ items, matches, now, editing = false }) {
 
 function NewGoal({ matches }) {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-          <ArrowLeft size={14} /> Objetivos
-        </Link>
-        <h1 className="font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">Nuevo objetivo</h1>
-      </div>
+    <div className="rd-goal-flow space-y-4">
+      <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+        <div>
+          <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
+            <ArrowLeft size={14} /> Objetivos
+          </Link>
+          <h1 className="font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">Nuevo objetivo</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">Elegí una meta, configurala y revisá cómo se va a medir.</p>
+      </header>
       <GoalWizard matches={matches} />
     </div>
   );

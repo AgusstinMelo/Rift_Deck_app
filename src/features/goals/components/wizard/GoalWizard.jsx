@@ -10,6 +10,7 @@ import { validateGoalInput } from '../../validation/goalSchema';
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '../goalUi';
 import GoalConfigForm from '../form/GoalConfigForm';
 import GoalExplanation from '../GoalExplanation';
+import GoalPreview from '../GoalPreview';
 import StepSelect from './StepSelect';
 
 const STEPS = [
@@ -31,6 +32,15 @@ function StepIndicator({ current }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Acciones del paso: quedan fijas abajo mientras el contenido scrollea. */
+function StepFooter({ children }) {
+  return (
+    <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-between">
+      {children}
+    </div>
   );
 }
 
@@ -84,54 +94,65 @@ export default function GoalWizard({ matches }) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="rd-goal-flow-body flex flex-col gap-4">
       <StepIndicator current={step} />
 
       {step === 'select' && (
-        <StepSelect
-          suggestions={suggestions}
-          onPickSuggestion={suggestion => startFrom({ ...suggestion.input })}
-          onPickCustom={metricId => startFrom(blankDraft(metricId, { timezone }))}
-        />
+        <div className="rd-goal-step-fill">
+          <StepSelect
+            suggestions={suggestions}
+            onPickSuggestion={suggestion => startFrom({ ...suggestion.input })}
+            onPickCustom={metricId => startFrom(blankDraft(metricId, { timezone }))}
+          />
+        </div>
       )}
 
       {step === 'configure' && draft && (
-        <section className="rd-card p-4 md:p-5 space-y-5">
-          <GoalConfigForm
-            value={draft}
-            onChange={setDraft}
-            errors={errors}
-            mode="create"
-            championOptions={champions}
-            patchOptions={patchOptions}
-          />
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+        <section className="rd-card rd-goal-step flex flex-col gap-4 p-4 md:p-5">
+          <div className="rd-goal-step-content">
+            <GoalConfigForm
+              value={draft}
+              onChange={setDraft}
+              errors={errors}
+              mode="create"
+              championOptions={champions}
+              patchOptions={patchOptions}
+            />
+          </div>
+          <StepFooter>
             <button type="button" onClick={() => setStep('select')} className={BUTTON_SECONDARY}>
               <ArrowLeft size={15} /> Volver
             </button>
             <button type="button" onClick={goToConfirm} className={BUTTON_PRIMARY}>
               Revisar <ArrowRight size={15} />
             </button>
-          </div>
+          </StepFooter>
         </section>
       )}
 
       {step === 'confirm' && validated && (
-        <section className="rd-card p-4 md:p-5 space-y-5">
-          <div>
-            <p className="rd-section-kicker">Resumen</p>
-            <h2 className="mt-1 font-rajdhani text-2xl font-bold text-foreground">{validated.name}</h2>
-            {validated.description && <p className="mt-1 text-sm text-muted-foreground">{validated.description}</p>}
+        <section className="rd-card rd-goal-step flex flex-col gap-4 p-4 md:p-5">
+          <div className="rd-goal-step-content rd-goal-form grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+            <div className="rd-goal-form-pane space-y-4">
+              <div>
+                <p className="rd-section-kicker">Resumen</p>
+                <h2 className="mt-1 font-rajdhani text-2xl font-bold text-foreground">{validated.name}</h2>
+                {validated.description && <p className="mt-1 text-sm text-muted-foreground">{validated.description}</p>}
+              </div>
+              <GoalExplanation goal={validated} period={validated} />
+            </div>
+            <div className="rd-goal-form-pane rd-goal-form-filters">
+              <GoalPreview data={validated} matches={matches} />
+            </div>
           </div>
-          <GoalExplanation goal={validated} period={validated} />
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+          <StepFooter>
             <button type="button" onClick={() => setStep('configure')} className={BUTTON_SECONDARY}>
               <ArrowLeft size={15} /> Editar
             </button>
             <button type="button" onClick={submit} disabled={create.isPending} className={BUTTON_PRIMARY}>
               <Check size={15} /> {create.isPending ? 'Creando...' : 'Crear objetivo'}
             </button>
-          </div>
+          </StepFooter>
         </section>
       )}
     </div>

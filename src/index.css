@@ -781,6 +781,106 @@
   }
 }
 
+/* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
+   y las acciones del paso quedan siempre visibles abajo. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-goal-flow) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-goal-flow) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goal-flow {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-goal-flow > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-goal-flow > .rd-goal-flow-body,
+  .rd-goal-flow-body > .rd-goal-step,
+  .rd-goal-flow-body > .rd-goal-step-fill {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-goal-flow-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-goal-flow-body > * {
+    flex: none;
+  }
+
+  /* Paso 1: columnas de elección a todo el alto. */
+  .rd-goal-step-fill > .rd-goal-choices {
+    height: 100%;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .rd-goal-choice {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goal-choice > :not(.rd-goal-choice-body) {
+    flex: none;
+  }
+
+  .rd-goal-choice-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  /* Pasos 2 y 3 y edición: contenido en dos paneles con scroll propio y acciones fijas. */
+  .rd-goal-step {
+    overflow: hidden;
+  }
+
+  .rd-goal-step > * {
+    flex: none;
+  }
+
+  .rd-goal-step > .rd-goal-step-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-goal-step-content > .rd-goal-form,
+  .rd-goal-step-content.rd-goal-form {
+    height: 100%;
+  }
+
+  .rd-goal-form-pane {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.5rem;
+    scrollbar-width: thin;
+  }
+
+  .rd-goal-form-filters {
+    border-left: 1px solid hsl(var(--border) / 0.6);
+    padding-left: 1.25rem;
+  }
+}
+
 /* Objetivos: encabezado, pestañas y resumen fijos; los objetivos se recorren en un carril horizontal. */
 .rd-goals-layout,
 .rd-goals-panel {

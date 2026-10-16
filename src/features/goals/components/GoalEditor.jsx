@@ -40,25 +40,27 @@ export default function GoalEditor({ goal, matches, now }) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
+    <div className="rd-goal-flow space-y-4">
+      <div className="space-y-1">
         <Link to={`/objetivos/${goal.id}`} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
           <ArrowLeft size={14} /> Volver al objetivo
         </Link>
         <h1 className="font-rajdhani text-3xl font-bold uppercase tracking-[-0.06em] text-foreground md:text-4xl">Editar objetivo</h1>
       </div>
 
-      <section className="rd-card p-4 md:p-5 space-y-5">
-        <GoalConfigForm
-          value={draft}
-          onChange={setDraft}
-          errors={errors}
-          mode="edit"
-          canEditConfig={permissions.canEditConfig}
-          championOptions={champions}
-          patchOptions={patchOptions}
-        />
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <section className="rd-card rd-goal-flow-body rd-goal-step flex flex-col gap-4 p-4 md:p-5">
+        <div className="rd-goal-step-content">
+          <GoalConfigForm
+            value={draft}
+            onChange={setDraft}
+            errors={errors}
+            mode="edit"
+            canEditConfig={permissions.canEditConfig}
+            championOptions={champions}
+            patchOptions={patchOptions}
+          />
+        </div>
+        <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">
           <Link to={`/objetivos/${goal.id}`} className={BUTTON_SECONDARY}>Cancelar</Link>
           <button type="button" onClick={save} disabled={update.isPending} className={BUTTON_PRIMARY}>
             <Save size={15} /> {update.isPending ? 'Guardando...' : 'Guardar cambios'}
