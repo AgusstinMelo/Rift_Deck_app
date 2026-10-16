@@ -717,6 +717,69 @@
   }
 }
 
+/* Detalle de un objetivo: encabezado y franja de tarjetas fijos; sólo scrollea la lista de partidas o check-ins.
+   Se activa únicamente cuando la página contiene el detalle (no al editar una partida desde él). */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-goal-detail) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-goal-detail) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goal-detail {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-goal-detail > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-goal-detail-strip {
+    height: clamp(12.5rem, 30vh, 17rem);
+  }
+
+  .rd-goal-detail-strip > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goal-detail-strip > :first-child {
+    overflow-y: auto;
+  }
+
+  .rd-goal-detail > .rd-goal-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-goal-panel > * {
+    flex: none;
+  }
+
+  .rd-goal-panel > .rd-goal-panel-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-gutter: stable;
+  }
+}
+
 /* Objetivos: encabezado, pestañas y resumen fijos; los objetivos se recorren en un carril horizontal. */
 .rd-goals-layout,
 .rd-goals-panel {

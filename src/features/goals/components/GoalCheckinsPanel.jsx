@@ -83,7 +83,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
   });
 
   return (
-    <section className="rd-card p-4 space-y-4">
+    <section className="rd-card rd-goal-panel p-4 space-y-4">
       <h2 className="rd-card-title">Check-ins</h2>
 
       <CheckinForm
@@ -95,6 +95,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
         onCancel={null}
       />
 
+      <div className="rd-goal-panel-scroll">
       {sorted.length === 0 ? (
         <p className="text-sm text-muted-foreground">Todavía no registraste check-ins.</p>
       ) : (
@@ -129,6 +130,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
           ))}
         </ul>
       )}
+      </div>
 
       <ConfirmDialog
         open={!!toDelete}

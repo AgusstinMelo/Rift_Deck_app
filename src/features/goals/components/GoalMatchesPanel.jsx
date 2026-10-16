@@ -52,7 +52,7 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
   const handleDelete = id => onDeleteMatch(id);
 
   return (
-    <section className="rd-card p-4 space-y-4">
+    <section className="rd-card rd-goal-panel p-4 space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="rd-card-title">Partidas del objetivo</h2>
         <div className="rd-panel-tabs" role="tablist" aria-label="Partidas del objetivo">
@@ -77,6 +77,7 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
         </p>
       )}
 
+      <div className="rd-goal-panel-scroll">
       {tab === 'included' && (
         included.length === 0
           ? <EmptyState icon={Swords} title="Sin partidas que cuenten" description="Ninguna partida del período cumple las condiciones del objetivo." action={null} />
@@ -108,6 +109,7 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
             </div>
           )
       )}
+      </div>
     </section>
   );
 }
