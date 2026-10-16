@@ -44,7 +44,7 @@ const LIFECYCLE_ACTIONS = {
 export default function GoalDetail({ item, matches, now }) {
   const { goal, evaluation, checkins, truncated } = item;
   const metric = getMetric(goal.metric);
-  const permissions = editPermissions(goal, now);
+  const permissions = editPermissions(goal, now, evaluation);
   const qc = useQueryClient();
   const { champions, items, gamePatches } = useGoalCatalog();
   const { setLifecycle } = useGoalMutations();

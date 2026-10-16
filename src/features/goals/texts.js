@@ -11,6 +11,9 @@ export const OUTCOME_LABELS = {
   [OUTCOME.INCONCLUSIVE]: 'No concluyente',
 };
 
+/** Estado derivado: el período cerró o el objetivo ya se alcanzó. */
+export const FINISHED_LABEL = 'Finalizado';
+
 export const LIFECYCLE_LABELS = {
   [LIFECYCLE.ACTIVE]: 'Activo',
   [LIFECYCLE.CANCELLED]: 'Cancelado',

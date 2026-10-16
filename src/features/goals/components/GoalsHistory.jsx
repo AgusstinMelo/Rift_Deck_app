@@ -39,7 +39,7 @@ export default function GoalsHistory({ finished, archived }) {
           <EmptyState
             icon={History}
             title={tab === 'finished' ? 'Sin objetivos finalizados' : 'Sin objetivos archivados'}
-            description={tab === 'finished' ? 'Acá vas a ver los objetivos cuyo período cerró o que cancelaste.' : 'Archivá objetivos finalizados para ordenar tu historial.'}
+            description={tab === 'finished' ? 'Acá vas a ver los objetivos que alcanzaste, los que cerraron su período y los que cancelaste.' : 'Archivá objetivos finalizados para ordenar tu historial.'}
             action={null}
           />
         </div>

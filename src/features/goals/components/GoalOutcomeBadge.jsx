@@ -1,9 +1,12 @@
+import { CheckCheck } from 'lucide-react';
 import { LIFECYCLE } from '../model/goalConstants';
-import { LIFECYCLE_LABELS, OUTCOME_LABELS } from '../texts';
+import { isFinished } from '../model/goalLists';
+import { FINISHED_LABEL, LIFECYCLE_LABELS, OUTCOME_LABELS } from '../texts';
 import { OUTCOME_TONES } from './goalUi';
 
 /**
- * Resultado del objetivo. Un objetivo cancelado no muestra resultado; el provisional se marca aparte.
+ * Estado y resultado del objetivo: "Finalizado · Alcanzado", "En curso · Provisional", etc.
+ * Un objetivo cancelado no muestra resultado.
  * @param {{ lifecycle: string, evaluation: import('../model/goalConstants').GoalEvaluation, size?: 'sm' | 'md' }} props
  */
 export default function GoalOutcomeBadge({ lifecycle, evaluation, size = 'md' }) {
@@ -19,6 +22,11 @@ export default function GoalOutcomeBadge({ lifecycle, evaluation, size = 'md' })
 
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5">
+      {isFinished(evaluation) && (
+        <span className={`inline-flex items-center gap-1 rounded border border-border bg-secondary/80 px-2 py-0.5 font-bold uppercase tracking-wide text-foreground/80 ${text}`}>
+          <CheckCheck size={size === 'sm' ? 11 : 12} /> {FINISHED_LABEL}
+        </span>
+      )}
       <span className={`inline-flex items-center rounded border px-2 py-0.5 font-bold uppercase tracking-wide ${OUTCOME_TONES[evaluation.outcome]} ${text}`}>
         {OUTCOME_LABELS[evaluation.outcome]}
       </span>

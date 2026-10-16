@@ -1,7 +1,7 @@
 // Esquema compartido entre la UI y la capa de datos para crear y editar objetivos.
 import { z } from 'zod';
 import { getMetric, hasMetric, operatorOf } from '../metrics/index.js';
-import { GOAL_LIMITS, LIFECYCLE, METRIC_KIND, PERIOD_STATUS } from '../model/goalConstants.js';
+import { GOAL_LIMITS, LIFECYCLE, METRIC_KIND, OUTCOME, PERIOD_STATUS } from '../model/goalConstants.js';
 import { compactFilters, filtersSchemaFor, getFilter } from '../filters/filterRegistry.js';
 import {
   inclusiveDayCount, isIsoDate, isValidTimeZone, periodBounds, periodDates, periodStatus, todayIn,
@@ -183,17 +183,26 @@ export function goalToInput(goal) {
 }
 
 /** Qué se puede editar de un objetivo en este momento. */
-export function editPermissions(goal, now = new Date()) {
+/**
+ * Qué se puede hacer con un objetivo en este momento.
+ * Con la evaluación, un objetivo ya alcanzado antes del cierre cuenta como finalizado:
+ * se puede archivar (no cancelar) y su configuración sigue editable mientras el período esté abierto.
+ * @param {any} goal
+ * @param {Date} [now]
+ * @param {{ outcome: string } | null} [evaluation]
+ */
+export function editPermissions(goal, now = new Date(), evaluation = null) {
   const isActive = goal.lifecycle === LIFECYCLE.ACTIVE;
   const status = periodStatus(goal, now);
   const isClosed = status === PERIOD_STATUS.CLOSED;
+  const isFinished = isClosed || evaluation?.outcome === OUTCOME.ACHIEVED;
   return {
     canEditTexts: true,
     canEditConfig: isActive && !isClosed,
     canEditMetric: false,
-    // Un objetivo abierto se cancela; uno cerrado o cancelado se archiva.
-    canCancel: isActive && !isClosed,
-    canArchive: goal.lifecycle === LIFECYCLE.CANCELLED || (isActive && isClosed),
+    // Un objetivo en juego se cancela; uno finalizado (cerrado o alcanzado) o cancelado se archiva.
+    canCancel: isActive && !isFinished,
+    canArchive: goal.lifecycle === LIFECYCLE.CANCELLED || (isActive && isFinished),
   };
 }
 

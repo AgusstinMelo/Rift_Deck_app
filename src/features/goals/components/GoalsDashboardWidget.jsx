@@ -92,7 +92,8 @@ export default function GoalsDashboardWidget() {
         <>
           <div className="flex items-center justify-between gap-2">
             <p className="min-w-0 truncate text-xs text-muted-foreground">
-              {summary.total} activos · <span className="text-green-400">{summary.achieved} alcanzados</span>
+              {summary.total} activos
+              {summary.dueSoon > 0 && <> · <span className="text-amber-300">{summary.dueSoon} por vencer</span></>}
               {summary.atRisk > 0 && <> · <span className="text-red-400">{summary.atRisk} hoy no cumplirían</span></>}
             </p>
             {current.length > 1 && (

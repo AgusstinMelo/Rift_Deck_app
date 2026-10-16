@@ -1,4 +1,4 @@
-import { CalendarClock, CheckCircle2, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { CalendarClock, Hourglass, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { summarizeCurrent } from '../model/goalLists';
 
 function SummaryStat({ label, value, icon: Icon, tone }) {
@@ -20,7 +20,7 @@ export default function GoalsSummary({ current }) {
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
       <SummaryStat label="Activos" value={summary.total} icon={Target} tone="text-primary" />
-      <SummaryStat label="Alcanzados" value={summary.achieved} icon={CheckCircle2} tone="text-green-400" />
+      <SummaryStat label="Por vencer" value={summary.dueSoon} icon={Hourglass} tone="text-amber-300" />
       <SummaryStat label="Hoy cumplirían" value={summary.onTrack} icon={TrendingUp} tone="text-green-400" />
       <SummaryStat label="Hoy no cumplirían" value={summary.atRisk} icon={TrendingDown} tone="text-red-400" />
       <div className="col-span-2 lg:col-span-1">
