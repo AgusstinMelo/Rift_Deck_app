@@ -746,7 +746,7 @@
   }
 
   .rd-goal-detail-strip {
-    height: clamp(12.5rem, 30vh, 17rem);
+    height: clamp(15rem, 36vh, 20.5rem);
   }
 
   .rd-goal-detail-strip > * {
@@ -754,8 +754,9 @@
     overflow: hidden;
   }
 
+  /* La marca de agua de fondo no debe generar scroll en Progreso. */
   .rd-goal-detail-strip > :first-child {
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .rd-goal-detail > .rd-goal-panel {
