@@ -90,7 +90,7 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
         <fieldset disabled={configLocked} className="space-y-4 disabled:opacity-60">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {metric.source === 'checkins' && (
-              <Field label="Unidad" htmlFor="goal-unit" hint='Por ejemplo, "horas de replay".' error={errors.unit}>
+              <Field label="Unidad" htmlFor="goal-unit" hint='Por ejemplo, "horas de práctica".' error={errors.unit}>
                 <input
                   id="goal-unit"
                   value={value.unit || ''}

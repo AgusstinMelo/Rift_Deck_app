@@ -2,7 +2,7 @@ import { Percent, PenLine, Sigma, SlidersHorizontal, Sparkles, TrendingUp } from
 import { listMetrics } from '../../metrics/index';
 import { METRIC_FAMILY } from '../../model/goalConstants';
 import { GOAL_GROUPS } from '../../suggestions';
-import { CHIP_BASE, CHIP_OFF } from '../goalUi';
+import { INPUT_CLASS } from '../goalUi';
 
 const GROUP_ICONS = {
   [METRIC_FAMILY.CUMULATIVE]: Sigma,
@@ -15,11 +15,26 @@ function SuggestionButton({ suggestion, onPick }) {
     <button
       type="button"
       onClick={() => onPick(suggestion)}
-      className="rd-action-card group w-full justify-between px-3 py-2.5 text-left"
+      className="rd-action-card group w-full justify-between gap-2 px-3 py-2 text-left"
     >
-      <span className="text-sm font-semibold text-foreground group-hover:text-primary">{suggestion.title}</span>
-      <Sparkles size={14} className="shrink-0 text-primary/70" />
+      <span className="text-[13px] font-semibold leading-snug text-foreground group-hover:text-primary">{suggestion.title}</span>
+      <Sparkles size={13} className="shrink-0 text-primary/70" />
     </button>
+  );
+}
+
+/** Selector compacto de las métricas de un grupo: al elegir una, se pasa a configurarla. */
+function MetricPicker({ metrics, onPick, label }) {
+  return (
+    <select
+      value=""
+      onChange={event => event.target.value && onPick(event.target.value)}
+      aria-label={label}
+      className={`${INPUT_CLASS} cursor-pointer`}
+    >
+      <option value="" disabled>Elegí una métrica…</option>
+      {metrics.map(metric => <option key={metric.id} value={metric.id}>{metric.label}</option>)}
+    </select>
   );
 }
 
@@ -63,13 +78,7 @@ export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom
               </div>
               <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
                 <p className="rd-label">O elegí la métrica</p>
-                <div className="flex flex-wrap gap-2">
-                  {groupMetrics.map(metric => (
-                    <button key={metric.id} type="button" onClick={() => onPickCustom(metric.id)} className={`${CHIP_BASE} ${CHIP_OFF}`}>
-                      {metric.label}
-                    </button>
-                  ))}
-                </div>
+                <MetricPicker metrics={groupMetrics} onPick={onPickCustom} label={`Métricas de ${group.label}`} />
               </div>
             </div>
           </section>

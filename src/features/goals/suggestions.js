@@ -91,9 +91,6 @@ export function buildSuggestions({ timezone, now = new Date(), matches = [] }) {
     suggest('winrate-55', 'Winrate de 55% en clasificatorias este mes', 'winrate', {
       name: 'Winrate 55% en clasificatorias', target: 55, minSample: 15, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
     }),
-    suggest('manual-replays', '5 horas de replays en un mes', 'manual', {
-      name: 'Ver replays', target: 5, unit: 'horas de replay', ...period(30),
-    }),
   ];
 
   if (pool.length > 0) {

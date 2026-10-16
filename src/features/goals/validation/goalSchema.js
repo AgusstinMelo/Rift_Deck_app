@@ -65,7 +65,7 @@ function refineMinSample(input, metric, ctx) {
 
 function refineUnit(input, metric, ctx) {
   if (metric.source !== 'checkins') return;
-  if (!input.unit) return issue(ctx, ['unit'], 'Indicá la unidad (por ejemplo, "horas de replay").');
+  if (!input.unit) return issue(ctx, ['unit'], 'Indicá la unidad (por ejemplo, "horas de práctica").');
   if (input.unit.length > GOAL_LIMITS.UNIT_MAX) issue(ctx, ['unit'], `La unidad admite hasta ${GOAL_LIMITS.UNIT_MAX} caracteres.`);
 }
 
