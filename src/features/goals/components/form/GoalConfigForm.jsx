@@ -27,11 +27,10 @@ export function draftForMetric(draft, metricId) {
  * Paso de configuración de un objetivo (creación y edición).
  * @param {{
  *   value: any, onChange: (value: any) => void, errors: Record<string, string>,
- *   mode: 'create' | 'edit', canEditConfig?: boolean,
- *   championOptions: any[], patchOptions: { value: string, label: string }[],
+ *   mode: 'create' | 'edit', canEditConfig?: boolean, championOptions: any[],
  * }} props
  */
-export default function GoalConfigForm({ value, onChange, errors, mode, canEditConfig = true, championOptions, patchOptions }) {
+export default function GoalConfigForm({ value, onChange, errors, mode, canEditConfig = true, championOptions }) {
   const metric = getMetric(value.metric);
   const set = (key, fieldValue) => onChange({ ...value, [key]: fieldValue });
   const configLocked = mode === 'edit' && !canEditConfig;
@@ -48,6 +47,11 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
       || findMetric(listStats().find(stat => aggregationsFor(stat).includes(aggregation)), aggregation),
   );
 
+  const statLabel = STATS[metric.stat]?.label || metric.stat;
+  const availableCalculations = aggregationsFor(metric.stat).map(aggregation => AGGREGATION_LABELS[aggregation]).join(', ');
+  const targetLabel = `Valor (${operatorPhrase({ metric: value.metric, operator: value.operator })}${unit ? ` · ${unit}` : ''})`;
+  const rangeHint = `Entre ${metric.target.min} y ${metric.target.max}`;
+
   const lockNotice = configLocked && (
     <p className="flex items-start gap-2 rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-xs text-muted-foreground">
       <Lock size={14} className="mt-0.5 shrink-0" />
@@ -57,22 +61,35 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
 
   return (
     <div className="rd-goal-form grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-      {/* Panel izquierdo: qué se quiere lograr y cuándo. */}
-      <section className="rd-goal-form-pane space-y-4" aria-label="Objetivo">
+      {/* Panel izquierdo: qué se quiere lograr y cuándo. Filas compactas para entrar sin scroll. */}
+      <section className="rd-goal-form-pane space-y-3" aria-label="Objetivo">
         <p className="rd-section-kicker">Objetivo</p>
-        <Field label="Nombre" htmlFor="goal-name" error={errors.name}>
-          <input
-            id="goal-name"
-            value={value.name}
-            maxLength={GOAL_LIMITS.NAME_MAX}
-            onChange={event => set('name', event.target.value)}
-            placeholder="Por ejemplo: Morir menos en Mid"
-            className={INPUT_CLASS}
-          />
-        </Field>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Nombre" htmlFor="goal-name" error={errors.name}>
+            <input
+              id="goal-name"
+              value={value.name}
+              maxLength={GOAL_LIMITS.NAME_MAX}
+              onChange={event => set('name', event.target.value)}
+              placeholder="Por ejemplo: Morir menos en Mid"
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label="Descripción (opcional)" htmlFor="goal-description" error={errors.description}>
+            <input
+              id="goal-description"
+              value={value.description || ''}
+              maxLength={GOAL_LIMITS.DESCRIPTION_MAX}
+              onChange={event => set('description', event.target.value)}
+              placeholder="¿Por qué te importa?"
+              className={INPUT_CLASS}
+            />
+          </Field>
+        </div>
 
         <div className="space-y-1.5">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Dato" htmlFor="goal-stat" error={errors.metric}>
               <select
                 id="goal-stat"
@@ -90,6 +107,7 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
                 value={metric.aggregation}
                 disabled={mode === 'edit'}
                 onChange={event => changeAggregation(event.target.value)}
+                title={`Cálculos para ${statLabel}: ${availableCalculations}`}
                 className={INPUT_CLASS}
               >
                 {/* Todos los cálculos se pueden elegir; si el dato actual no lo admite, se cambia de dato. */}
@@ -99,36 +117,32 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
               </select>
             </Field>
           </div>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[11px] leading-snug text-muted-foreground line-clamp-2">
             {mode === 'edit'
               ? 'El dato y el cálculo no se pueden cambiar. Para medir otra cosa, creá un objetivo nuevo.'
-              : (
-                <>
-                  <span className="font-semibold text-foreground/80">{metric.label}:</span> {metric.description}
-                  {' '}Cálculos para {STATS[metric.stat]?.label || metric.stat}: {aggregationsFor(metric.stat).map(aggregation => AGGREGATION_LABELS[aggregation]).join(', ')}.
-                </>
-              )}
+              : <><span className="font-semibold text-foreground/80">{metric.label}:</span> {metric.description}</>}
           </p>
         </div>
 
         {lockNotice}
 
-        <fieldset disabled={configLocked} className="space-y-4 disabled:opacity-60">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <fieldset disabled={configLocked} className="space-y-3 disabled:opacity-60">
+          <div className="grid gap-3 sm:grid-cols-3">
             {metric.source === 'checkins' && (
-              <Field label="Unidad" htmlFor="goal-unit" hint='Por ejemplo, "horas de práctica".' error={errors.unit}>
+              <Field label="Unidad" htmlFor="goal-unit" error={errors.unit}>
                 <input
                   id="goal-unit"
                   value={value.unit || ''}
                   maxLength={GOAL_LIMITS.UNIT_MAX}
                   onChange={event => set('unit', event.target.value)}
+                  placeholder="horas de práctica"
                   className={INPUT_CLASS}
                 />
               </Field>
             )}
 
             {metric.operators.length > 1 && (
-              <Field label="Meta" htmlFor="goal-operator" hint="Por encima o por debajo del valor." error={errors.operator}>
+              <Field label="Meta" htmlFor="goal-operator" error={errors.operator}>
                 <select
                   id="goal-operator"
                   value={value.operator || metric.operator}
@@ -140,12 +154,7 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
               </Field>
             )}
 
-            <Field
-              label={`Valor (${operatorPhrase({ metric: value.metric, operator: value.operator })}${unit ? ` · ${unit}` : ''})`}
-              htmlFor="goal-target"
-              hint={`Entre ${metric.target.min} y ${metric.target.max}.`}
-              error={errors.target}
-            >
+            <Field label={targetLabel} htmlFor="goal-target" error={errors.target}>
               <input
                 id="goal-target"
                 type="number"
@@ -155,17 +164,13 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
                 step={metric.target.step}
                 value={value.target ?? ''}
                 onChange={event => set('target', event.target.value)}
+                title={rangeHint}
                 className={INPUT_CLASS}
               />
             </Field>
 
             {metric.kind === METRIC_KIND.PERFORMANCE && (
-              <Field
-                label="Muestra mínima"
-                htmlFor="goal-min-sample"
-                hint="Partidas para que sea concluyente."
-                error={errors.minSample}
-              >
+              <Field label="Muestra mínima" htmlFor="goal-min-sample" error={errors.minSample}>
                 <input
                   id="goal-min-sample"
                   type="number"
@@ -175,33 +180,25 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
                   step={1}
                   value={value.minSample ?? ''}
                   onChange={event => set('minSample', event.target.value)}
+                  title="Partidas válidas necesarias para que el resultado sea concluyente"
                   className={INPUT_CLASS}
                 />
               </Field>
             )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Fecha inicial" htmlFor="goal-start" error={errors.startDate}>
               <input id="goal-start" type="date" value={value.startDate} onChange={event => set('startDate', event.target.value)} className={INPUT_CLASS} />
             </Field>
-            <Field label="Fecha final (incluida)" htmlFor="goal-end" hint={`Zona horaria: ${value.timezone}`} error={errors.endDate || errors.timezone}>
+            <Field label="Fecha final (incluida)" htmlFor="goal-end" error={errors.endDate || errors.timezone}>
               <input id="goal-end" type="date" value={value.endDate} onChange={event => set('endDate', event.target.value)} className={INPUT_CLASS} />
             </Field>
           </div>
+          <p className="text-[11px] text-muted-foreground">
+            Valor: {rangeHint.toLowerCase()} · Zona horaria: {value.timezone}
+          </p>
         </fieldset>
-
-        <Field label="Descripción (opcional)" htmlFor="goal-description" error={errors.description}>
-          <textarea
-            id="goal-description"
-            value={value.description || ''}
-            maxLength={GOAL_LIMITS.DESCRIPTION_MAX}
-            rows={2}
-            onChange={event => set('description', event.target.value)}
-            placeholder="¿Por qué te importa este objetivo?"
-            className={`${INPUT_CLASS} resize-none`}
-          />
-        </Field>
       </section>
 
       {/* Panel derecho: qué partidas cuentan. */}
@@ -214,7 +211,6 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
               onChange={filters => set('filters', filters)}
               errors={errors}
               championOptions={championOptions}
-              patchOptions={patchOptions}
               disabled={configLocked}
             />
           </fieldset>

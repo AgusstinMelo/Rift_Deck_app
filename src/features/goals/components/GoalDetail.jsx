@@ -46,7 +46,7 @@ export default function GoalDetail({ item, matches, now }) {
   const metric = getMetric(goal.metric);
   const permissions = editPermissions(goal, now);
   const qc = useQueryClient();
-  const { champions, items, gamePatches } = useGoalCatalog(matches);
+  const { champions, items, gamePatches } = useGoalCatalog();
   const { setLifecycle } = useGoalMutations();
 
   const [pendingLifecycle, setPendingLifecycle] = useState(/** @type {string|null} */ (null));

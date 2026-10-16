@@ -154,7 +154,7 @@ function GoalRoute({ items, matches, now, editing = false }) {
   const item = items.find(entry => String(entry.goal.id) === goalId);
   if (!item) return <NotFound />;
   return editing
-    ? <GoalEditor goal={item.goal} matches={matches} now={now} />
+    ? <GoalEditor goal={item.goal} now={now} />
     : <GoalDetail item={item} matches={matches} now={now} />;
 }
 

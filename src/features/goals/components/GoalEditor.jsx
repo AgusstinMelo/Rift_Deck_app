@@ -10,11 +10,11 @@ import { BUTTON_PRIMARY, BUTTON_SECONDARY } from './goalUi';
 
 /**
  * Edición de un objetivo según las reglas de período y ciclo de vida.
- * @param {{ goal: any, matches: any[], now: Date }} props
+ * @param {{ goal: any, now: Date }} props
  */
-export default function GoalEditor({ goal, matches, now }) {
+export default function GoalEditor({ goal, now }) {
   const navigate = useNavigate();
-  const { champions, patchOptions } = useGoalCatalog(matches);
+  const { champions } = useGoalCatalog();
   const { update } = useGoalMutations();
   const permissions = editPermissions(goal, now);
   const [draft, setDraft] = useState(() => goalToInput(goal));
@@ -57,7 +57,6 @@ export default function GoalEditor({ goal, matches, now }) {
             mode="edit"
             canEditConfig={permissions.canEditConfig}
             championOptions={champions}
-            patchOptions={patchOptions}
           />
         </div>
         <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">

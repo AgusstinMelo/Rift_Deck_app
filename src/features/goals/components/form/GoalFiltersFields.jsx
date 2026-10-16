@@ -34,9 +34,9 @@ function ChipGroup({ options, value = [], onChange, disabled }) {
 /**
  * Solo muestra los filtros que admite la métrica elegida.
  * @param {{ metricId: string, filters: Record<string, any>, onChange: (filters: Record<string, any>) => void,
- *   errors: Record<string, string>, championOptions: any[], patchOptions: { value: string, label: string }[], disabled?: boolean }} props
+ *   errors: Record<string, string>, championOptions: any[], disabled?: boolean }} props
  */
-export default function GoalFiltersFields({ metricId, filters, onChange, errors, championOptions, patchOptions, disabled = false }) {
+export default function GoalFiltersFields({ metricId, filters, onChange, errors, championOptions, disabled = false }) {
   const metric = getMetric(metricId);
   if (metric.allowedFilters.length === 0) return null;
 
@@ -46,7 +46,7 @@ export default function GoalFiltersFields({ metricId, filters, onChange, errors,
   const championsAreTarget = metric.consumedFilters.includes('champions');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div>
         <p className="rd-section-kicker">Filtros</p>
         <p className="text-xs text-muted-foreground">Sin filtros cuentan todas tus partidas del período.</p>
@@ -81,12 +81,6 @@ export default function GoalFiltersFields({ metricId, filters, onChange, errors,
             onChange={value => set('lanes', value)}
             disabled={disabled}
           />
-        </Field>
-      )}
-
-      {allowed('patches') && patchOptions.length > 0 && (
-        <Field label="Parche" hint="Elegir 7.3 incluye 7.3a, 7.3b, etc." error={errorFor('patches')}>
-          <ChipGroup options={patchOptions} value={filters.patches} onChange={value => set('patches', value)} disabled={disabled} />
         </Field>
       )}
     </div>

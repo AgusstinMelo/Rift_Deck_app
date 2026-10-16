@@ -52,7 +52,7 @@ export default function GoalWizard({ matches }) {
   const navigate = useNavigate();
   const timezone = useMemo(() => detectTimeZone(), []);
   const suggestions = useMemo(() => buildSuggestions({ timezone, matches }), [timezone, matches]);
-  const { champions, patchOptions } = useGoalCatalog(matches);
+  const { champions } = useGoalCatalog();
   const { create } = useGoalMutations();
 
   const [step, setStep] = useState('select');
@@ -116,7 +116,6 @@ export default function GoalWizard({ matches }) {
               errors={errors}
               mode="create"
               championOptions={champions}
-              patchOptions={patchOptions}
             />
           </div>
           <StepFooter>

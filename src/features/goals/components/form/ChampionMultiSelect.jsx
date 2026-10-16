@@ -56,7 +56,7 @@ export default function ChampionMultiSelect({ options, value, onChange, disabled
               aria-label="Buscar campeón"
             />
           </div>
-          <div className="grid max-h-48 grid-cols-6 gap-2 overflow-y-auto pr-1 sm:grid-cols-8 md:grid-cols-10">
+          <div className="grid max-h-40 grid-cols-6 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-8 md:grid-cols-10 xl:grid-cols-12">
             {filtered.map(champion => {
               const selected = selectedNames.has(normalize(champion.name));
               return (
