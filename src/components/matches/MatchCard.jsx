@@ -70,13 +70,13 @@ function ChampionIcon({
   );
 }
 
-function ItemIcon({ name, items }) {
+function ItemIcon({ name, items, size = 'w-10 h-10' }) {
   const item = items.find(i => i.name === name);
 
   return (
     <div
-      className="
-        w-10 h-10
+      className={`
+        ${size}
         rounded-xl
         overflow-hidden
         bg-secondary/70
@@ -86,7 +86,7 @@ function ItemIcon({ name, items }) {
         transition-all
         hover:border-primary/40
         hover:scale-[1.03]
-      "
+      `}
       title={name}
     >
       {item?.image_url ? (
@@ -104,10 +104,31 @@ function ItemIcon({ name, items }) {
   );
 }
 
-function EmptyIconSlot() {
+function EmptyIconSlot({ size = 'w-10 h-10' }) {
   return (
-    <div className="w-10 h-10 rounded-xl bg-secondary/30 border border-border/20" />
+    <div className={`${size} rounded-xl bg-secondary/30 border border-border/20`} />
   );
+}
+
+/** Sexto slot de la build: encantamiento (con botas superpuestas), botas o vacío. */
+function SixthSlot({ enchantItem, movementItem, items, size = 'w-10 h-10' }) {
+  if (enchantItem && movementItem) {
+    return (
+      <div className={`relative ${size} rounded-xl border border-purple-400/50 bg-purple-400/10 flex items-center justify-center shrink-0 overflow-visible`} title={enchantItem.name}>
+        {enchantItem.image_url
+          ? <img src={enchantItem.image_url} alt={enchantItem.name} className="w-full h-full object-cover rounded-xl" />
+          : <span className="text-[9px] font-bold text-primary text-center px-0.5 leading-tight">{enchantItem.name?.slice(0, 3)}</span>}
+        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded border border-blue-400/50 bg-card overflow-hidden shadow-md z-10" title={movementItem.name}>
+          {movementItem.image_url
+            ? <img src={movementItem.image_url} alt={movementItem.name} className="w-full h-full object-contain" />
+            : <span className="text-[7px] font-bold text-blue-300">{movementItem.name?.[0]}</span>}
+        </div>
+      </div>
+    );
+  }
+  if (enchantItem) return <ItemIcon name={enchantItem.name} items={items} size={size} />;
+  if (movementItem) return <ItemIcon name={movementItem.name} items={items} size={size} />;
+  return <EmptyIconSlot size={size} />;
 }
 
 function placeChampionInRole(names, championName, role, roleOrder) {
@@ -140,12 +161,98 @@ function InfoStat({ label, value, valueClass = 'text-foreground' }) {
   );
 }
 
+const COMPACT_ICON = 'w-7 h-7';
+
+function TeamRow({ label, labelClass, names, champions, ownName = null }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`w-6 text-[8px] uppercase tracking-[0.14em] font-bold ${labelClass}`}>{label}</span>
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (names[i]
+          ? <ChampionIcon key={i} name={names[i]} champions={champions} size={COMPACT_ICON} highlight={names[i] === ownName} />
+          : <EmptyIconSlot key={i} size={COMPACT_ICON} />))}
+      </div>
+    </div>
+  );
+}
+
+/** Variante compacta (una franja de ~80px): misma información con íconos chicos y la build en una fila. */
+function CompactMatchCard({ match, champions, items, onEdit, onDelete, isWin, myChamp, orderedAllies, enemyNames, slots, movementItem, enchantItem, dateLabel }) {
+  const ownName = match.own_champion_name;
+  const meta = [
+    `KDA ${match.kills ?? '—'}/${match.deaths ?? '—'}/${match.assists ?? '—'}`,
+    match.patch,
+    dateLabel,
+    match.duration_minutes ? `${match.duration_minutes}m` : null,
+  ].filter(Boolean).join(' · ');
+
+  return (
+    <div
+      className={`
+        relative overflow-hidden transition-all duration-300 hover:border-primary/30
+        ${isWin ? 'before:bg-green-500' : 'before:bg-red-500'}
+        before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px]
+      `}
+    >
+      <div className="relative flex flex-col gap-3 px-4 py-2.5 md:grid md:grid-cols-[minmax(240px,1fr)_auto_auto_auto] md:items-center md:gap-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <p className={`w-6 shrink-0 text-center font-rajdhani text-2xl font-bold leading-none ${isWin ? 'text-green-400' : 'text-red-400'}`} title={isWin ? 'Victoria' : 'Derrota'}>
+            {isWin ? 'V' : 'D'}
+          </p>
+          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-primary/20">
+            {myChamp?.image_url
+              ? <img src={myChamp.image_url} alt={ownName} className="h-full w-full object-cover" />
+              : <div className="flex h-full w-full items-center justify-center font-bold text-primary">{ownName?.[0]}</div>}
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h2 className="max-w-[130px] truncate font-rajdhani text-lg font-bold leading-none tracking-[-0.05em] text-foreground">{ownName}</h2>
+              {match.lane && <LaneBadge lane={match.lane} />}
+              <span className="rounded-md border border-border/60 bg-secondary/70 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                {getMatchTypeLabel(match.type)}
+              </span>
+            </div>
+            <p className="truncate text-xs text-muted-foreground">{meta}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="w-9 text-[8px] font-bold uppercase tracking-[0.14em] text-primary/80">Build</span>
+          <div className="flex gap-1">
+            {slots.map((name, i) => (name
+              ? <ItemIcon key={i} name={name} items={items} size={COMPACT_ICON} />
+              : <EmptyIconSlot key={i} size={COMPACT_ICON} />))}
+            <SixthSlot enchantItem={enchantItem} movementItem={movementItem} items={items} size={COMPACT_ICON} />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <TeamRow label="Eq" labelClass="text-blue-400" names={orderedAllies} champions={champions} ownName={ownName} />
+          <TeamRow label="En" labelClass="text-red-400" names={enemyNames} champions={champions} />
+        </div>
+
+        <div className="flex justify-end gap-1.5">
+          <button type="button" onClick={() => onEdit(match)} aria-label="Editar partida"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-secondary/70 text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground">
+            <Edit size={14} />
+          </button>
+          <button type="button" onClick={() => onDelete(match.id)} aria-label="Eliminar partida"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-secondary/70 text-muted-foreground transition-all hover:border-red-500/30 hover:text-red-400">
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MatchCard({
   match,
   champions,
   items,
   onEdit,
   onDelete,
+  compact = false,
 }) {
   const isWin = match.result === 'win';
 
@@ -188,6 +295,16 @@ export default function MatchCard({
     g ? `${(g / 1000).toFixed(1)}k` : null;
 
   const { slots, movementItem, enchantItem } = buildMatchSlots(itemNames, items);
+
+  if (compact) {
+    return (
+      <CompactMatchCard
+        match={match} champions={champions} items={items} onEdit={onEdit} onDelete={onDelete}
+        isWin={isWin} myChamp={myChamp} orderedAllies={orderedAllies} enemyNames={enemyNames}
+        slots={slots} movementItem={movementItem} enchantItem={enchantItem} dateLabel={formatDate(match.date)}
+      />
+    );
+  }
 
   return (
     <div
@@ -358,25 +475,7 @@ export default function MatchCard({
               )}
 
               {/* 6th slot: movement/enchantment */}
-              {(() => {
-                if (enchantItem && movementItem) {
-                  return (
-                    <div className="relative w-10 h-10 rounded-xl border border-purple-400/50 bg-purple-400/10 flex items-center justify-center shrink-0 overflow-visible" title={enchantItem.name}>
-                      {enchantItem.image_url
-                        ? <img src={enchantItem.image_url} alt={enchantItem.name} className="w-full h-full object-cover rounded-xl" />
-                        : <span className="text-[9px] font-bold text-primary text-center px-0.5 leading-tight">{enchantItem.name?.slice(0, 3)}</span>}
-                      <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded border border-blue-400/50 bg-card overflow-hidden shadow-md z-10" title={movementItem.name}>
-                        {movementItem.image_url
-                          ? <img src={movementItem.image_url} alt={movementItem.name} className="w-full h-full object-contain" />
-                          : <span className="text-[7px] font-bold text-blue-300">{movementItem.name?.[0]}</span>}
-                      </div>
-                    </div>
-                  );
-                }
-                if (enchantItem) return <ItemIcon name={enchantItem.name} items={items} />;
-                if (movementItem) return <ItemIcon name={movementItem.name} items={items} />;
-                return <EmptyIconSlot />;
-              })()}
+              <SixthSlot enchantItem={enchantItem} movementItem={movementItem} items={items} />
             </div>
           </div>
         </div>

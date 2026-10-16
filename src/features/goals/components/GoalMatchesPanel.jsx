@@ -15,7 +15,7 @@ function MatchList({ rows, champions, items, onEditMatch, onDeleteMatch, renderB
       {rows.slice(0, visible).map(({ match, exclusion }) => (
         <div key={match.id} className="rd-card overflow-visible">
           {renderBadge && renderBadge(exclusion)}
-          <MatchCard match={match} champions={champions} items={items} onEdit={onEditMatch} onDelete={onDeleteMatch} />
+          <MatchCard match={match} champions={champions} items={items} onEdit={onEditMatch} onDelete={onDeleteMatch} compact />
         </div>
       ))}
       {rows.length > visible && (
@@ -103,7 +103,7 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
                 onEditMatch={onEditMatch}
                 onDeleteMatch={handleDelete}
                 renderBadge={exclusion => (
-                  <p className="border-b border-border/60 px-4 py-2 text-xs font-semibold text-amber-300">{exclusionLabel(exclusion)}</p>
+                  <p className="border-b border-border/60 px-4 py-1 text-[11px] font-semibold text-amber-300">{exclusionLabel(exclusion)}</p>
                 )}
               />
             </div>
