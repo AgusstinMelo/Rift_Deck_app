@@ -87,11 +87,11 @@ export function buildSuggestions({ timezone, now = new Date(), matches = [] }) {
     suggest('kda-3', 'KDA promedio de 3 o más', 'promedio_kda', {
       name: 'Subir mi KDA', target: 3, minSample: 10, ...period(21),
     }),
-    suggest('oro-10k', 'Promediar 10.000 de oro por partida', 'promedio_oro', {
-      name: 'Farmear más', target: 10000, minSample: 10, ...period(21),
-    }),
     suggest('duracion-18', 'Cerrar partidas en 18 minutos o menos en promedio', 'promedio_duracion', {
       name: 'Cerrar antes las partidas', operator: OPERATOR.LTE, target: 18, minSample: 10, ...period(21),
+    }),
+    suggest('oro-10k', 'Promediar 10.000 de oro por partida', 'promedio_oro', {
+      name: 'Farmear más', target: 10000, minSample: 10, ...period(21),
     }),
     suggest('unico-kda-10', 'Una partida con KDA de 10 o más', 'max_kda', {
       name: 'Partida de KDA 10', target: 10, ...period(30),
