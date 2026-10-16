@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { evolutionSeries } from '../engine/evolution';
+import { getMetric } from '../metrics/index';
 import { formatDate, formatMetricValue } from '../texts';
 
 /**
@@ -23,6 +24,12 @@ export default function GoalEvolutionChart({ goal, evaluation, compact = false, 
   }
 
   const tick = { fill: 'hsl(var(--muted-foreground))', fontSize: compact ? 10 : 11 };
+  const metric = getMetric(goal.metric);
+  // Porcentajes siempre entre 0 y 100; conteos (partidas) solo en enteros; el resto desde 0.
+  const isPercent = metric.unit === '%';
+  /** @type {import('recharts').YAxisProps['domain']} */
+  const yDomain = isPercent ? [0, 100] : [0, 'auto'];
+  const allowDecimals = !metric.target.integer;
 
   return (
     <div className={`w-full ${className}`} aria-label="Evolución del objetivo">
@@ -30,7 +37,16 @@ export default function GoalEvolutionChart({ goal, evaluation, compact = false, 
         <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: compact ? -24 : -12 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis dataKey="label" tick={tick} tickLine={false} axisLine={false} minTickGap={16} />
-          <YAxis tick={tick} tickLine={false} axisLine={false} width={44} domain={['auto', 'auto']} />
+          <YAxis
+            tick={tick}
+            tickLine={false}
+            axisLine={false}
+            width={44}
+            domain={yDomain}
+            allowDecimals={allowDecimals}
+            allowDataOverflow={isPercent}
+            tickFormatter={value => (isPercent ? `${value}%` : String(value))}
+          />
           {!compact && (
             <Tooltip
               contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 10, fontSize: 12 }}
@@ -38,7 +54,7 @@ export default function GoalEvolutionChart({ goal, evaluation, compact = false, 
               formatter={(value, _name, entry) => [formatMetricValue(goal, Number(value)), `Muestra: ${entry.payload.sample}`]}
             />
           )}
-          <ReferenceLine y={evaluation.target} stroke="rgba(212,175,55,0.7)" strokeDasharray="4 4" label={{ value: 'Meta', fill: 'rgba(212,175,55,0.9)', fontSize: compact ? 10 : 11, position: 'insideTopRight' }} />
+          <ReferenceLine y={evaluation.target} ifOverflow="extendDomain" stroke="rgba(212,175,55,0.7)" strokeDasharray="4 4" label={{ value: 'Meta', fill: 'rgba(212,175,55,0.9)', fontSize: compact ? 10 : 11, position: 'insideTopRight' }} />
           <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={compact ? false : { r: 2.5 }} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
