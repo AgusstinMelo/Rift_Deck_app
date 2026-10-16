@@ -679,13 +679,13 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
                 <div className="rd-buildstep-side flex min-w-0 flex-col gap-4">
                   {/* Runas */}
-                  <div className="rd-card rd-buildstep-runes p-4">
+                  <div className="rd-card rd-buildstep-runes flex flex-col p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="w-5 h-px bg-primary/50" />
                       <h3 className="rd-card-title">Runas</h3>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="rd-runes-content flex flex-1 flex-col gap-3">
                       {/* Clave */}
                       {claveRunes.length > 0 && (
                         <div>
@@ -693,7 +693,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             Clave
                           </p>
 
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap justify-between gap-1.5">
                             {claveRunes.map(rune => (
                               <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
     <button
@@ -706,7 +706,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                         rune,
                                       ])
                                 }
-                                className={`relative w-7 h-7 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                className={`relative w-7 h-7 xl:w-8 xl:h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                   isRuneSelected(rune)
                                     ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                                     : 'opacity-45 hover:opacity-85'
@@ -732,9 +732,9 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
                       <div className="h-px bg-border/50" />
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="rd-runes-branches grid flex-1 grid-cols-2 gap-4">
                         {/* Rama Principal */}
-                        <div className="min-w-0">
+                        <div className="flex min-w-0 flex-col">
                           <label className="text-sm font-medium text-muted-foreground mb-1 block">
                             Rama Principal
                           </label>
@@ -751,20 +751,20 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             ))}
                           </select>
 
-                          <div className="space-y-2">
+                          <div className="flex flex-1 flex-col justify-evenly gap-2">
                             {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
                               <div key={group} className="flex items-center gap-3">
                                 <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>
                                   G{group}
                                 </p>
 
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-1 flex-wrap justify-around gap-2">
                                   {runesInGroup.map(rune => (
                                     <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
     <button
                                       type="button"
                                       onClick={() => handleTogglePrimaryRune(rune)}
-                                      className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                      className={`w-8 h-8 xl:w-10 xl:h-10 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                         isRuneSelected(rune)
                                           ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                                           : 'opacity-45 hover:opacity-85'
@@ -791,7 +791,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                         </div>
 
                         {/* Rama Secundaria */}
-                        <div className="min-w-0">
+                        <div className="flex min-w-0 flex-col">
                           <label className="text-sm font-medium text-muted-foreground mb-1 block">
                             Rama Secundaria
                           </label>
@@ -808,20 +808,20 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             ))}
                           </select>
 
-                          <div className="space-y-2">
+                          <div className="flex flex-1 flex-col justify-evenly gap-2">
                             {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
                               <div key={group} className="flex items-center gap-3">
                                 <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>
                                   G{group}
                                 </p>
 
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-1 flex-wrap justify-around gap-2">
                                   {runesInGroup.map(rune => (
                                     <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
     <button
                                       type="button"
                                       onClick={() => handleToggleSecondaryRune(rune)}
-                                      className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                      className={`w-8 h-8 xl:w-10 xl:h-10 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                         isRuneSelected(rune)
                                           ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                                           : 'opacity-45 hover:opacity-85'
