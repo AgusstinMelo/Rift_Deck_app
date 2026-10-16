@@ -41,13 +41,13 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
   });
 
   return (
-    <div className="rd-card p-4">
+    <div className="rd-card rd-team-pool p-4">
       <div className={`flex items-center justify-between mb-4 ${mirrored ? 'flex-row-reverse' : ''}`}>
         <div className="flex items-center gap-2"><span className="w-4 h-px bg-primary/50" /><h3 className="rd-card-title">{title}</h3></div>
         <span className="text-xs text-muted-foreground">{selected.length}/{ROLES.length}</span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="rd-team-pool-body grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
       {/* Role slots */}
       <div className="space-y-3 pb-4 border-b border-border lg:border-b-0 lg:pb-0">
         {ROLES.map(role => {
@@ -80,14 +80,14 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
         })}
       </div>
 
-      <div className="min-w-0">
+      <div className="rd-team-pool-champions min-w-0">
       {/* Champion grid */}
       <div className="relative mb-2">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar campeón..."
           className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
       </div>
-      <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
+      <div className="rd-team-pool-grid grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
         {filteredChampions.map(champ => {
           const isSelected = Object.values(selectedByRole).some(c => c && c.id === champ.id);
           return (
@@ -437,8 +437,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
     });
   };
 
+  const fitsViewport = step === 'allies' || step === 'enemies';
+
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
       {/* Progress */}
       <div className="flex gap-2">
         {['info', 'lane', 'myChamp', 'allies', 'enemies', 'build', 'stats'].map((s, i) => (
@@ -565,7 +567,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
       {/* Step: Allies */}
       {step === 'allies' && (
-        <div className="space-y-4">
+        <div className="rd-team-step space-y-4">
           <div>
             <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Equipo aliado</h2>
             <p className="text-muted-foreground text-sm">Tu campeón ya está asignado, completa el resto del equipo</p>
@@ -598,7 +600,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
       {/* Step: Enemies */}
       {step === 'enemies' && (
-        <div className="space-y-4">
+        <div className="rd-team-step space-y-4">
           <div>
             <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Equipo enemigo</h2>
             <p className="text-muted-foreground text-sm">Selecciona los 5 campeones enemigos</p>

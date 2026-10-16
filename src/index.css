@@ -781,6 +781,66 @@
   }
 }
 
+/* Registrar partida, pasos de equipo aliado/enemigo: encabezado y botones fijos; la grilla de
+   campeones toma todo el alto restante y scrollea por dentro si hace falta. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-match-builder-fit) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-match-builder-fit) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-match-builder-fit,
+  .rd-match-builder-fit > .rd-team-step,
+  .rd-team-step > .rd-team-pool,
+  .rd-team-pool-champions {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-match-builder-fit {
+    flex: 1 1 auto;
+    gap: 1rem;
+  }
+
+  .rd-match-builder-fit > *,
+  .rd-team-step > *,
+  .rd-team-pool > *,
+  .rd-team-pool-champions > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-match-builder-fit > .rd-team-step {
+    flex: 1 1 auto;
+    gap: 1rem;
+  }
+
+  .rd-team-step > .rd-team-pool,
+  .rd-team-pool > .rd-team-pool-body,
+  .rd-team-pool-champions > .rd-team-pool-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* Una sola fila que ocupa todo el alto: slots a la izquierda, campeones a la derecha. */
+  .rd-team-pool > .rd-team-pool-body {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-team-pool-champions > .rd-team-pool-grid {
+    max-height: none;
+    align-content: start;
+  }
+}
+
 /* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
    y las acciones del paso quedan siempre visibles abajo. */
 @media (min-width: 1024px) and (min-height: 700px) {
