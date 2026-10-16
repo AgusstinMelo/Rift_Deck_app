@@ -1,7 +1,7 @@
 // Registro de métricas de objetivos. Una métrica nueva solo necesita una
 // definición tipada (operador, tipo, filtros, rangos) y sus funciones
 // `measure` y `aggregate`; el motor no cambia.
-import { METRIC_FAMILY, METRIC_KIND, OPERATOR } from '../model/goalConstants.js';
+import { AGGREGATION, METRIC_FAMILY, METRIC_KIND, OPERATOR } from '../model/goalConstants.js';
 import { listFilterKeys } from '../filters/filterRegistry.js';
 
 /**
@@ -16,6 +16,8 @@ import { listFilterKeys } from '../filters/filterRegistry.js';
  * @property {string} id
  * @property {string} label
  * @property {string} description
+ * @property {string} stat                 Dato que mide (asesinatos, oro, victorias…).
+ * @property {string} aggregation          AGGREGATION: cómo se combinan los valores (total, promedio…).
  * @property {string} family               METRIC_FAMILY (agrupación en la UI)
  * @property {string} kind                 METRIC_KIND
  * @property {string} operator             OPERATOR por defecto
@@ -40,6 +42,8 @@ function assertDefinition(def) {
   if (!def.id) errors.push('id');
   if (!Object.values(METRIC_KIND).includes(def.kind)) errors.push('kind');
   if (!Object.values(METRIC_FAMILY).includes(def.family)) errors.push('family');
+  if (!def.stat) errors.push('stat');
+  if (!Object.values(AGGREGATION).includes(def.aggregation)) errors.push('aggregation');
   if (!Object.values(OPERATOR).includes(def.operator)) errors.push('operator');
   if (!Array.isArray(def.operators) || !def.operators.includes(def.operator)
     || def.operators.some(op => !Object.values(OPERATOR).includes(op))) errors.push('operators');
@@ -60,6 +64,7 @@ function assertDefinition(def) {
 export function registerMetric(def) {
   assertDefinition(def);
   if (metrics.has(def.id)) throw new Error(`Métrica duplicada: ${def.id}`);
+  if (findMetric(def.stat, def.aggregation)) throw new Error(`Combinación duplicada: ${def.stat} × ${def.aggregation}`);
   metrics.set(def.id, Object.freeze({ ...def }));
 }
 
@@ -77,6 +82,21 @@ export function hasMetric(id) {
 /** @returns {MetricDefinition[]} */
 export function listMetrics() {
   return [...metrics.values()];
+}
+
+/** Métrica que corresponde a un dato y un tipo de cálculo, o null si la combinación no existe. */
+export function findMetric(stat, aggregation) {
+  return listMetrics().find(metric => metric.stat === stat && metric.aggregation === aggregation) || null;
+}
+
+/** Datos disponibles, en el orden en que se registraron. */
+export function listStats() {
+  return [...new Set(listMetrics().map(metric => metric.stat))];
+}
+
+/** Tipos de cálculo que admite un dato. */
+export function aggregationsFor(stat) {
+  return listMetrics().filter(metric => metric.stat === stat).map(metric => metric.aggregation);
 }
 
 /** Dirección efectiva de un objetivo: la elegida si la métrica la admite, o la por defecto. */

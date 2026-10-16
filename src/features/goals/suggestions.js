@@ -88,6 +88,9 @@ export function buildSuggestions({ timezone, now = new Date(), matches = [] }) {
     suggest('duracion-18', 'Cerrar partidas en 18 minutos o menos en promedio', 'promedio_duracion', {
       name: 'Cerrar antes las partidas', operator: OPERATOR.LTE, target: 18, minSample: 10, ...period(21),
     }),
+    suggest('record-asesinatos', 'Una partida con 15 asesinatos o más', 'max_asesinatos', {
+      name: 'Partida de 15 asesinatos', target: 15, ...period(30),
+    }),
     suggest('winrate-55', 'Winrate de 55% en clasificatorias este mes', 'winrate', {
       name: 'Winrate 55% en clasificatorias', target: 55, minSample: 15, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
     }),

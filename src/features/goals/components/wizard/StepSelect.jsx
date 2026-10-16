@@ -59,7 +59,8 @@ function ChoiceHeader({ icon: Icon, title, description, tone = 'primary' }) {
  */
 export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom }) {
   const metrics = listMetrics();
-  const manualSuggestions = suggestions.filter(suggestion => suggestion.category === METRIC_FAMILY.MANUAL);
+  // En "A medida" van las ideas que no encajan en los otros grupos (mejor partida y hábitos).
+  const customSuggestions = suggestions.filter(suggestion => [METRIC_FAMILY.RECORD, METRIC_FAMILY.MANUAL].includes(suggestion.category));
   const firstMatchMetric = metrics.find(metric => metric.source === 'matches');
 
   return (
@@ -90,21 +91,21 @@ export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom
           icon={SlidersHorizontal}
           tone="accent"
           title="A medida"
-          description='Cualquier métrica, meta "al menos" o "como máximo", filtros y período a tu gusto.'
+          description='Combiná dato y cálculo (total, promedio, mejor partida o porcentaje), meta, filtros y período.'
         />
         <div className="rd-goal-choice-body flex flex-1 flex-col gap-2">
           <button type="button" onClick={() => onPickCustom(firstMatchMetric.id)} className="rd-action-card group flex-col items-start gap-1 px-3 py-3 text-left">
             <span className="flex items-center gap-2 text-sm font-semibold text-foreground group-hover:text-primary"><SlidersHorizontal size={15} /> Configurar desde cero</span>
-            <span className="text-[11px] text-muted-foreground">Elegí la estadística y armá la meta.</span>
+            <span className="text-[11px] text-muted-foreground">Elegí el dato y el cálculo: total, promedio, mejor partida o porcentaje.</span>
           </button>
           <button type="button" onClick={() => onPickCustom('manual')} className="rd-action-card group flex-col items-start gap-1 px-3 py-3 text-left">
             <span className="flex items-center gap-2 text-sm font-semibold text-foreground group-hover:text-primary"><PenLine size={15} /> Hábito manual</span>
             <span className="text-[11px] text-muted-foreground">Una unidad propia que sumás con check-ins.</span>
           </button>
-          {manualSuggestions.length > 0 && (
+          {customSuggestions.length > 0 && (
             <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
-              <p className="rd-label">Hábitos sugeridos</p>
-              {manualSuggestions.map(suggestion => <SuggestionButton key={suggestion.id} suggestion={suggestion} onPick={onPickSuggestion} />)}
+              <p className="rd-label">Ideas</p>
+              {customSuggestions.map(suggestion => <SuggestionButton key={suggestion.id} suggestion={suggestion} onPick={onPickSuggestion} />)}
             </div>
           )}
         </div>

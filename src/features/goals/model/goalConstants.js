@@ -31,7 +31,16 @@ export const METRIC_FAMILY = Object.freeze({
   CUMULATIVE: 'acumulativos',
   AVERAGE: 'promedios',
   PERCENTAGE: 'porcentajes',
+  RECORD: 'mejor_partida',
   MANUAL: 'manual',
+});
+
+/** Tipo de cálculo de una métrica: cómo se combinan los valores de cada partida. */
+export const AGGREGATION = Object.freeze({
+  TOTAL: 'total',
+  AVERAGE: 'promedio',
+  BEST: 'mejor_partida',
+  PERCENTAGE: 'porcentaje',
 });
 
 export const PERIOD_STATUS = Object.freeze({

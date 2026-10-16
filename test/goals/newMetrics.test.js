@@ -109,7 +109,7 @@ test('cambiar la dirección es reconfigurar: solo con el período abierto', () =
 test('las sugerencias se agrupan por familia y la frase usa la dirección elegida', () => {
   const suggestions = buildSuggestions({ timezone: 'UTC', now: NOW, matches: [makeMatch()] });
   const families = new Set(suggestions.map(s => s.category));
-  assert.deepEqual([...families].sort(), ['acumulativos', 'porcentajes', 'promedios']);
+  assert.deepEqual([...families].sort(), ['acumulativos', 'mejor_partida', 'porcentajes', 'promedios']);
 
   const period = { startDate: '2026-10-01', endDate: '2026-10-31', timezone: 'UTC' };
   assert.equal(

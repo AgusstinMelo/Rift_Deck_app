@@ -1,6 +1,6 @@
 // Textos de la sección Objetivos. El proyecto no tiene i18n: se centralizan acá.
 import { MATCH_TYPES } from '../../constants/matchTypes.js';
-import { EXCLUSION_REASON, LIFECYCLE, METRIC_FAMILY, METRIC_KIND, OPERATOR, OUTCOME } from './model/goalConstants.js';
+import { AGGREGATION, EXCLUSION_REASON, LIFECYCLE, METRIC_FAMILY, METRIC_KIND, OPERATOR, OUTCOME } from './model/goalConstants.js';
 import { getMetric, operatorOf } from './metrics/index.js';
 
 export const OUTCOME_LABELS = {
@@ -86,6 +86,7 @@ export const FAMILY_LABELS = {
   [METRIC_FAMILY.CUMULATIVE]: 'Acumulativos',
   [METRIC_FAMILY.AVERAGE]: 'Promedios',
   [METRIC_FAMILY.PERCENTAGE]: 'Porcentajes',
+  [METRIC_FAMILY.RECORD]: 'Mejor partida',
   [METRIC_FAMILY.MANUAL]: 'Manuales',
 };
 
@@ -135,10 +136,22 @@ function objectivePhrase(goal) {
       return `Que tus partidas duren en promedio ${op} ${target}${withFilters}.`;
     case 'manual':
       return `Sumar al menos ${target} con check-ins manuales.`;
+    case 'suma_duracion':
+      return `Jugar al menos ${target} en total${withFilters}.`;
+    case 'max_kda':
+      return `Lograr una partida con KDA de al menos ${target}${withFilters}.`;
     default:
-      return getMetric(goal.metric).family === METRIC_FAMILY.AVERAGE
-        ? `Promediar ${op} ${target} por partida${withFilters}.`
-        : `Llegar a ${op} ${target}${withFilters}.`;
+      break;
+  }
+  switch (getMetric(goal.metric).aggregation) {
+    case AGGREGATION.AVERAGE:
+      return `Promediar ${op} ${target} por partida${withFilters}.`;
+    case AGGREGATION.TOTAL:
+      return `Sumar al menos ${target} en total${withFilters}.`;
+    case AGGREGATION.BEST:
+      return `Lograr una partida con al menos ${target}${withFilters}.`;
+    default:
+      return `Llegar a ${op} ${target}${withFilters}.`;
   }
 }
 
@@ -166,7 +179,14 @@ export function describeGoal(goal, period) {
   if (goal.metric === 'promedio_kda') {
     calculation.push('El KDA de cada partida es (asesinatos + asistencias) / muertes; con 0 muertes vale asesinatos + asistencias.');
   }
-  if (metric.family === METRIC_FAMILY.AVERAGE) {
+  if (metric.aggregation === AGGREGATION.TOTAL && metric.stat !== 'partidas' && metric.source === 'matches') {
+    calculation.push('Se suma el valor de cada partida.');
+  }
+  if (metric.aggregation === AGGREGATION.BEST) {
+    calculation.push('Cuenta tu mejor partida del período: alcanza con que una sola llegue a la meta.');
+  }
+  if (/** @type {string[]} */ ([AGGREGATION.AVERAGE, AGGREGATION.TOTAL, AGGREGATION.BEST]).includes(metric.aggregation)
+    && !['partidas', 'victorias', 'manual'].includes(metric.stat)) {
     calculation.push('Las partidas sin ese dato registrado no cuentan: no se toman como cero.');
   }
   if (goal.metric === 'porcentaje_campeones') {

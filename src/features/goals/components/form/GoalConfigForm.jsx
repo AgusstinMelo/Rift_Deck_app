@@ -1,7 +1,7 @@
 import { Lock } from 'lucide-react';
-import { getMetric, listMetrics } from '../../metrics/index';
-import { GOAL_LIMITS, METRIC_FAMILY, METRIC_KIND } from '../../model/goalConstants';
-import { FAMILY_LABELS, OPERATOR_LABELS, operatorPhrase, unitOf } from '../../texts';
+import { AGGREGATION_LABELS, STATS, aggregationsFor, findMetric, getMetric, listStats } from '../../metrics/index';
+import { GOAL_LIMITS, METRIC_KIND } from '../../model/goalConstants';
+import { OPERATOR_LABELS, operatorPhrase, unitOf } from '../../texts';
 import { INPUT_CLASS } from '../goalUi';
 import Field from './Field';
 import GoalFiltersFields from './GoalFiltersFields';
@@ -37,6 +37,12 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
   const configLocked = mode === 'edit' && !canEditConfig;
   const unit = unitOf({ metric: value.metric, unit: value.unit });
 
+  // Cambiar dato o cálculo equivale a elegir otra métrica: si el cálculo no aplica al dato, se usa el primero disponible.
+  const changeCombination = (stat, aggregation) => {
+    const next = findMetric(stat, aggregation) || findMetric(stat, aggregationsFor(stat)[0]);
+    if (next && next.id !== value.metric) onChange(draftForMetric(value, next.id));
+  };
+
   const lockNotice = configLocked && (
     <p className="flex items-start gap-2 rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-xs text-muted-foreground">
       <Lock size={14} className="mt-0.5 shrink-0" />
@@ -49,40 +55,49 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
       {/* Panel izquierdo: qué se quiere lograr y cuándo. */}
       <section className="rd-goal-form-pane space-y-4" aria-label="Objetivo">
         <p className="rd-section-kicker">Objetivo</p>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Nombre" htmlFor="goal-name" error={errors.name}>
-            <input
-              id="goal-name"
-              value={value.name}
-              maxLength={GOAL_LIMITS.NAME_MAX}
-              onChange={event => set('name', event.target.value)}
-              placeholder="Por ejemplo: Morir menos en Mid"
-              className={INPUT_CLASS}
-            />
-          </Field>
+        <Field label="Nombre" htmlFor="goal-name" error={errors.name}>
+          <input
+            id="goal-name"
+            value={value.name}
+            maxLength={GOAL_LIMITS.NAME_MAX}
+            onChange={event => set('name', event.target.value)}
+            placeholder="Por ejemplo: Morir menos en Mid"
+            className={INPUT_CLASS}
+          />
+        </Field>
 
-          <Field
-            label="Métrica"
-            htmlFor="goal-metric"
-            hint={mode === 'edit' ? 'La métrica no se puede cambiar. Para medir otra cosa, creá un objetivo nuevo.' : metric.description}
-            error={errors.metric}
-          >
-            <select
-              id="goal-metric"
-              value={value.metric}
-              disabled={mode === 'edit'}
-              onChange={event => onChange(draftForMetric(value, event.target.value))}
-              className={INPUT_CLASS}
-            >
-              {Object.values(METRIC_FAMILY).map(family => (
-                <optgroup key={family} label={FAMILY_LABELS[family]}>
-                  {listMetrics().filter(option => option.family === family).map(option => (
-                    <option key={option.id} value={option.id}>{option.label}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </Field>
+        <div className="space-y-1.5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Dato" htmlFor="goal-stat" error={errors.metric}>
+              <select
+                id="goal-stat"
+                value={metric.stat}
+                disabled={mode === 'edit'}
+                onChange={event => changeCombination(event.target.value, metric.aggregation)}
+                className={INPUT_CLASS}
+              >
+                {listStats().map(stat => <option key={stat} value={stat}>{STATS[stat]?.label || stat}</option>)}
+              </select>
+            </Field>
+            <Field label="Cálculo" htmlFor="goal-aggregation">
+              <select
+                id="goal-aggregation"
+                value={metric.aggregation}
+                disabled={mode === 'edit' || aggregationsFor(metric.stat).length < 2}
+                onChange={event => changeCombination(metric.stat, event.target.value)}
+                className={INPUT_CLASS}
+              >
+                {aggregationsFor(metric.stat).map(aggregation => (
+                  <option key={aggregation} value={aggregation}>{AGGREGATION_LABELS[aggregation]}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {mode === 'edit'
+              ? 'El dato y el cálculo no se pueden cambiar. Para medir otra cosa, creá un objetivo nuevo.'
+              : <><span className="font-semibold text-foreground/80">{metric.label}:</span> {metric.description}</>}
+          </p>
         </div>
 
         {lockNotice}
