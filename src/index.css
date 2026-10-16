@@ -825,9 +825,18 @@
     flex: none;
   }
 
-  /* Paso 1: columnas de elección a todo el alto. */
-  .rd-goal-step-fill > .rd-goal-choices {
+  /* Paso 1: barra "A medida" fija y columnas de elección a todo el alto restante. */
+  .rd-goal-step-fill > .rd-goal-choices-wrap {
     height: 100%;
+  }
+
+  .rd-goal-choices-wrap > * {
+    flex: none;
+  }
+
+  .rd-goal-choices-wrap > .rd-goal-choices {
+    flex: 1 1 auto;
+    min-height: 0;
     grid-auto-rows: minmax(0, 1fr);
   }
 

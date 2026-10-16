@@ -63,7 +63,7 @@ export const STATS = {
 export const AGGREGATION_LABELS = {
   [AGGREGATION.TOTAL]: 'Total (suma)',
   [AGGREGATION.AVERAGE]: 'Promedio por partida',
-  [AGGREGATION.BEST]: 'Mejor partida',
+  [AGGREGATION.BEST]: 'En una sola partida',
   [AGGREGATION.PERCENTAGE]: 'Porcentaje de partidas',
 };
 
@@ -135,24 +135,26 @@ function totalOfStat(statId, { id, label, description, decimals, target }) {
 }
 
 /**
- * Mejor partida del período: se alcanza en cuanto una partida llega a la meta.
+ * Objetivo único: lograr algo en una sola partida del período. Se alcanza en cuanto una partida llega a la meta.
+ * Con `lowest` se busca la partida con menos (por ejemplo, 0 muertes) y la meta es "como máximo".
  * @returns {import('./registry.js').MetricDefinition}
  */
-function bestOfStat(statId, { id, label, description, decimals, target }) {
+function bestOfStat(statId, { id, label, description, decimals, target, lowest = false, measure = null }) {
   const stat = STATS[statId];
+  const operator = lowest ? OPERATOR.LTE : OPERATOR.GTE;
   return {
     ...base(statId, AGGREGATION.BEST),
     id, label, description,
     family: METRIC_FAMILY.RECORD,
     kind: METRIC_KIND.CUMULATIVE,
-    operator: OPERATOR.GTE,
-    operators: [OPERATOR.GTE],
+    operator,
+    operators: [operator],
     unit: stat.unit,
     decimals,
     target,
     defaultMinSample: null,
-    measure: measureStat(stat),
-    aggregate: values => (values.length ? Math.max(...values) : null),
+    measure: measure || measureStat(stat),
+    aggregate: values => (values.length ? (lowest ? Math.min(...values) : Math.max(...values)) : null),
   };
 }
 
@@ -265,27 +267,46 @@ export const promedioDuracion = averageOfStat('duracion', {
 // ---------------------------------------------------------------- Mejor partida
 
 export const maxAsesinatos = bestOfStat('asesinatos', {
-  id: 'max_asesinatos', label: 'Récord de asesinatos', decimals: 0,
-  description: 'Asesinatos de tu mejor partida del período. Se cumple cuando una partida llega a la meta.',
-  target: range(1, 60, 1, true, 15),
+  id: 'max_asesinatos', label: 'Asesinatos en una partida', decimals: 0,
+  description: 'Se cumple cuando una sola partida del período llega a esa cantidad de asesinatos.',
+  target: range(1, 60, 1, true, 20),
 });
 
 export const maxAsistencias = bestOfStat('asistencias', {
-  id: 'max_asistencias', label: 'Récord de asistencias', decimals: 0,
-  description: 'Asistencias de tu mejor partida del período. Se cumple cuando una partida llega a la meta.',
+  id: 'max_asistencias', label: 'Asistencias en una partida', decimals: 0,
+  description: 'Se cumple cuando una sola partida del período llega a esa cantidad de asistencias.',
   target: range(1, 80, 1, true, 20),
 });
 
 export const maxOro = bestOfStat('oro', {
-  id: 'max_oro', label: 'Récord de oro', decimals: 0,
-  description: 'Oro de tu mejor partida del período. Se cumple cuando una partida llega a la meta.',
-  target: range(1000, 80000, 500, true, 18000),
+  id: 'max_oro', label: 'Oro en una partida', decimals: 0,
+  description: 'Se cumple cuando una sola partida del período llega a esa cantidad de oro.',
+  target: range(1000, 80000, 500, true, 20000),
 });
 
 export const maxKda = bestOfStat('kda', {
-  id: 'max_kda', label: 'Récord de KDA', decimals: 2,
-  description: 'KDA de tu mejor partida del período. Se cumple cuando una partida llega a la meta.',
+  id: 'max_kda', label: 'KDA en una partida', decimals: 2,
+  description: 'Se cumple cuando una sola partida del período llega a ese KDA.',
   target: range(0.5, 100, 0.5, false, 10),
+});
+
+export const minMuertes = bestOfStat('muertes', {
+  id: 'min_muertes', label: 'Muertes en una partida', decimals: 0, lowest: true,
+  description: 'Se cumple cuando una sola partida del período termina con esa cantidad de muertes o menos (0 = sin morir).',
+  target: range(0, 20, 1, true, 0),
+});
+
+export const minDuracion = bestOfStat('duracion', {
+  id: 'min_duracion', label: 'Victoria más rápida', decimals: 1, lowest: true,
+  description: 'Se cumple cuando ganás una partida que dura esos minutos o menos. Solo cuentan las victorias.',
+  target: range(5, 60, 0.5, false, 15),
+  measure: match => {
+    const result = resultOf(match);
+    if (!result) return { reason: EXCLUSION_REASON.MISSING_RESULT, field: 'result' };
+    if (result !== 'win') return { reason: EXCLUSION_REASON.NOT_A_WIN, field: 'result' };
+    const duration = durationOf(match);
+    return duration === null ? { reason: EXCLUSION_REASON.MISSING_DURATION, field: 'duration_minutes' } : { value: duration };
+  },
 });
 
 // ---------------------------------------------------------------- Porcentajes
@@ -365,7 +386,7 @@ export const manual = {
 export const MVP_METRICS = [
   partidasRegistradas, victorias, sumaAsesinatos, sumaAsistencias, sumaOro, sumaDuracion,
   promedioMuertes, promedioKda, promedioAsesinatos, promedioAsistencias, promedioOro, promedioDuracion,
-  maxAsesinatos, maxAsistencias, maxOro, maxKda,
+  maxAsesinatos, maxAsistencias, maxOro, maxKda, minMuertes, minDuracion,
   winrate, porcentajeCampeones,
   manual,
 ];

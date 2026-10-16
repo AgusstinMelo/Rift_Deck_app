@@ -47,8 +47,12 @@ function assertDefinition(def) {
   if (!Object.values(OPERATOR).includes(def.operator)) errors.push('operator');
   if (!Array.isArray(def.operators) || !def.operators.includes(def.operator)
     || def.operators.some(op => !Object.values(OPERATOR).includes(op))) errors.push('operators');
-  // Una métrica acumulativa solo puede crecer: su meta siempre es "al menos".
-  if (def.kind === METRIC_KIND.CUMULATIVE && def.operators.some(op => op !== OPERATOR.GTE)) errors.push('operators acumulativa');
+  // Las acumulativas evolucionan en un solo sentido, así que su dirección es fija:
+  // "al menos" (totales, mejor partida) o "como máximo" (la partida con menos).
+  if (def.kind === METRIC_KIND.CUMULATIVE && def.operators.length !== 1) errors.push('operators acumulativa');
+  if (def.kind === METRIC_KIND.CUMULATIVE && def.operator === OPERATOR.LTE && def.aggregation !== AGGREGATION.BEST) {
+    errors.push('solo "en una sola partida" admite "como máximo" siendo acumulativa');
+  }
   if (!['matches', 'checkins'].includes(def.source)) errors.push('source');
   if (typeof def.measure !== 'function' || typeof def.aggregate !== 'function') errors.push('measure/aggregate');
   const knownFilters = listFilterKeys();

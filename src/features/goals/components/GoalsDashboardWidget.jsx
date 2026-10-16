@@ -6,7 +6,7 @@ import { useEvaluatedGoals } from '../hooks/useGoals';
 import { partitionGoals, summarizeCurrent } from '../model/goalLists';
 import { getMetric } from '../metrics/index';
 import { formatDifference, formatMetricValue, formatPeriod, operatorPhrase } from '../texts';
-import { METRIC_KIND } from '../model/goalConstants';
+import { AGGREGATION } from '../model/goalConstants';
 import { cumulativeProgressPct } from '../engine/evaluateGoal';
 import GoalOutcomeBadge from './GoalOutcomeBadge';
 import { OUTCOME_BAR } from './goalUi';
@@ -17,8 +17,9 @@ const ARROW_CLASS =
 /** Un objetivo a la vez: nombre, valor contra meta y estado. */
 function GoalSlide({ item }) {
   const { goal, evaluation } = item;
-  const isCumulative = evaluation.kind === METRIC_KIND.CUMULATIVE;
-  const pct = isCumulative ? cumulativeProgressPct(evaluation) ?? 0 : null;
+  // Barra solo en totales; los objetivos únicos y de rendimiento muestran meta en texto.
+  const pct = cumulativeProgressPct(evaluation);
+  const isSingleMatch = evaluation.aggregation === AGGREGATION.BEST;
 
   return (
     <Link to={`/objetivos/${goal.id}`} className="block min-h-0 flex-1 space-y-2 rounded-lg px-2 py-1.5 hover:bg-primary/5">
@@ -32,10 +33,14 @@ function GoalSlide({ item }) {
         </span>
       </div>
 
-      {isCumulative ? (
+      {pct !== null ? (
         <div className="h-1.5 overflow-hidden rounded-full bg-primary/15">
           <div className={`h-full rounded-full ${OUTCOME_BAR[evaluation.outcome]}`} style={{ width: `${pct}%` }} />
         </div>
+      ) : isSingleMatch ? (
+        <p className="text-xs text-muted-foreground">
+          Objetivo único · Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)} en una partida
+        </p>
       ) : (
         <p className="text-xs text-muted-foreground">
           Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)}

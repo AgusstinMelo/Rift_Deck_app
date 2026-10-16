@@ -1,6 +1,6 @@
 // Motor de evaluación de objetivos: funciones puras, sin React ni base de datos.
 import { getMetric, operatorOf } from '../metrics/index.js';
-import { EXCLUSION_REASON, METRIC_KIND, OPERATOR, OUTCOME, PERIOD_STATUS } from '../model/goalConstants.js';
+import { AGGREGATION, EXCLUSION_REASON, METRIC_KIND, OPERATOR, OUTCOME, PERIOD_STATUS } from '../model/goalConstants.js';
 import { FILTER_RESULT, getFilter } from '../filters/filterRegistry.js';
 import { periodDates, periodStatus } from './period.js';
 import { playedDateOf } from './matchFacts.js';
@@ -140,18 +140,24 @@ export function evaluateGoal(goal, data, now) {
     periodStatus: status,
     period,
     kind: metric.kind,
+    aggregation: metric.aggregation,
     operator,
   };
 }
 
+/** Los objetivos únicos (una sola partida) no avanzan por suma: no tienen barra ni "faltan N". */
+function isSummable(evaluation) {
+  return evaluation.kind === METRIC_KIND.CUMULATIVE && evaluation.aggregation !== AGGREGATION.BEST;
+}
+
 /** Cuánto falta para el target en métricas acumulativas (nunca negativo). */
 export function remainingToTarget(evaluation) {
-  if (evaluation.kind !== METRIC_KIND.CUMULATIVE) return null;
+  if (!isSummable(evaluation)) return null;
   return Math.max(0, evaluation.target - (evaluation.value ?? 0));
 }
 
 /** Avance 0–100 de una métrica acumulativa, para barras de progreso. */
 export function cumulativeProgressPct(evaluation) {
-  if (evaluation.kind !== METRIC_KIND.CUMULATIVE || evaluation.target <= 0) return null;
+  if (!isSummable(evaluation) || evaluation.target <= 0) return null;
   return Math.min(100, ((evaluation.value ?? 0) / evaluation.target) * 100);
 }

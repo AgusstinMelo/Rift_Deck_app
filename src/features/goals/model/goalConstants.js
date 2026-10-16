@@ -62,6 +62,7 @@ export const EXCLUSION_REASON = Object.freeze({
   MISSING_ASSISTS: 'sin_asistencias',
   MISSING_GOLD: 'sin_oro',
   MISSING_DURATION: 'sin_duracion',
+  NOT_A_WIN: 'no_es_victoria',
 });
 
 export const LANES = Object.freeze(['top', 'jungler', 'mid', 'adc', 'support']);
@@ -127,5 +128,6 @@ export const GOAL_LIMITS = Object.freeze({
  * @property {string} periodStatus
  * @property {{ startDate: string, endDate: string }} period
  * @property {string} kind
+ * @property {string} aggregation
  * @property {string} operator
  */

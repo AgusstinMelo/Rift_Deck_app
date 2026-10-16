@@ -10,11 +10,15 @@ import { AFTER_CLOSE, MID_PERIOD, makeGoal, makeMatch, matches } from './helpers
 const NOW = new Date('2026-10-15T12:00:00Z');
 const perf = (metric, target, extra = {}) => makeGoal({ metric, target, minSample: 1, ...extra });
 
-test('todas las métricas declaran familia y direcciones válidas; las acumulativas solo "al menos"', () => {
+test('todas las métricas declaran familia y direcciones válidas; las acumulativas tienen dirección fija', () => {
   for (const metric of listMetrics()) {
     assert.ok(metric.family, metric.id);
     assert.ok(metric.operators.includes(metric.operator), metric.id);
-    if (metric.kind === 'acumulativa') assert.deepEqual(metric.operators, ['gte'], metric.id);
+    if (metric.kind === 'acumulativa') {
+      assert.equal(metric.operators.length, 1, metric.id);
+      // Solo los objetivos únicos "con menos" (sin morir, victoria rápida) apuntan a "como máximo".
+      if (metric.operator === 'lte') assert.equal(metric.aggregation, 'mejor_partida', metric.id);
+    }
   }
 });
 

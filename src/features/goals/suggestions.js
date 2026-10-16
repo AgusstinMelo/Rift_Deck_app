@@ -5,7 +5,7 @@ import { championOf } from './engine/matchFacts.js';
 import { getMetric } from './metrics/index.js';
 import { METRIC_FAMILY, OPERATOR } from './model/goalConstants.js';
 
-/** Grupos del paso 1. "A medida" (configuración libre y hábitos manuales) se muestra aparte. */
+/** Grupos del paso 1. "A medida" (configuración libre y hábitos manuales) se muestra aparte, en una barra. */
 export const GOAL_GROUPS = [
   {
     id: METRIC_FAMILY.CUMULATIVE,
@@ -21,6 +21,11 @@ export const GOAL_GROUPS = [
     id: METRIC_FAMILY.PERCENTAGE,
     label: 'Porcentajes',
     description: 'Winrate o qué parte de tus partidas jugás con ciertos campeones.',
+  },
+  {
+    id: METRIC_FAMILY.RECORD,
+    label: 'Únicos',
+    description: 'Lográ algo en una sola partida: un KDA alto, muchas kills o no morir.',
   },
 ];
 
@@ -88,8 +93,17 @@ export function buildSuggestions({ timezone, now = new Date(), matches = [] }) {
     suggest('duracion-18', 'Cerrar partidas en 18 minutos o menos en promedio', 'promedio_duracion', {
       name: 'Cerrar antes las partidas', operator: OPERATOR.LTE, target: 18, minSample: 10, ...period(21),
     }),
-    suggest('record-asesinatos', 'Una partida con 15 asesinatos o más', 'max_asesinatos', {
-      name: 'Partida de 15 asesinatos', target: 15, ...period(30),
+    suggest('unico-kda-10', 'Una partida con KDA de 10 o más', 'max_kda', {
+      name: 'Partida de KDA 10', target: 10, ...period(30),
+    }),
+    suggest('unico-20-kills', 'Una partida con 20 asesinatos', 'max_asesinatos', {
+      name: 'Partida de 20 asesinatos', target: 20, ...period(30),
+    }),
+    suggest('unico-sin-morir', 'Una partida sin morir', 'min_muertes', {
+      name: 'Partida sin morir', target: 0, ...period(30),
+    }),
+    suggest('unico-victoria-rapida', 'Ganar una partida en 15 minutos o menos', 'min_duracion', {
+      name: 'Victoria rápida', target: 15, ...period(30),
     }),
     suggest('winrate-55', 'Winrate de 55% en clasificatorias este mes', 'winrate', {
       name: 'Winrate 55% en clasificatorias', target: 55, minSample: 15, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),

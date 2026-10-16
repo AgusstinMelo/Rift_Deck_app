@@ -31,6 +31,7 @@ const REASON_LABELS = {
   [EXCLUSION_REASON.MISSING_ASSISTS]: 'No tiene asistencias registradas',
   [EXCLUSION_REASON.MISSING_GOLD]: 'No tiene oro registrado',
   [EXCLUSION_REASON.MISSING_DURATION]: 'No tiene duración registrada',
+  [EXCLUSION_REASON.NOT_A_WIN]: 'Es una derrota: solo cuentan las victorias',
 };
 
 /** @param {{ reason: string, field?: string }} exclusion */
@@ -86,7 +87,7 @@ export const FAMILY_LABELS = {
   [METRIC_FAMILY.CUMULATIVE]: 'Acumulativos',
   [METRIC_FAMILY.AVERAGE]: 'Promedios',
   [METRIC_FAMILY.PERCENTAGE]: 'Porcentajes',
-  [METRIC_FAMILY.RECORD]: 'Mejor partida',
+  [METRIC_FAMILY.RECORD]: 'Únicos',
   [METRIC_FAMILY.MANUAL]: 'Manuales',
 };
 
@@ -140,6 +141,12 @@ function objectivePhrase(goal) {
       return `Jugar al menos ${target} en total${withFilters}.`;
     case 'max_kda':
       return `Lograr una partida con KDA de al menos ${target}${withFilters}.`;
+    case 'min_muertes':
+      return Number(goal.target) === 0
+        ? `Lograr una partida sin morir${withFilters}.`
+        : `Lograr una partida con ${target} o menos${withFilters}.`;
+    case 'min_duracion':
+      return `Ganar una partida en ${target} o menos${withFilters}.`;
     default:
       break;
   }
@@ -183,7 +190,12 @@ export function describeGoal(goal, period) {
     calculation.push('Se suma el valor de cada partida.');
   }
   if (metric.aggregation === AGGREGATION.BEST) {
-    calculation.push('Cuenta tu mejor partida del período: alcanza con que una sola llegue a la meta.');
+    calculation.push(operatorOf(goal) === OPERATOR.LTE
+      ? 'Es un objetivo único: alcanza con que una sola partida quede en la meta o por debajo.'
+      : 'Es un objetivo único: alcanza con que una sola partida llegue a la meta.');
+  }
+  if (goal.metric === 'min_duracion') {
+    calculation.push('Solo cuentan las victorias: las derrotas se excluyen.');
   }
   if (/** @type {string[]} */ ([AGGREGATION.AVERAGE, AGGREGATION.TOTAL, AGGREGATION.BEST]).includes(metric.aggregation)
     && !['partidas', 'victorias', 'manual'].includes(metric.stat)) {

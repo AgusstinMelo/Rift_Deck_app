@@ -1,8 +1,34 @@
-import { CheckCircle2, CircleDashed, XCircle } from 'lucide-react';
-import { METRIC_KIND, OUTCOME, PERIOD_STATUS } from '../model/goalConstants';
+import { CheckCircle2, CircleDashed, Trophy, XCircle } from 'lucide-react';
+import { AGGREGATION, METRIC_KIND, OUTCOME, PERIOD_STATUS } from '../model/goalConstants';
 import { cumulativeProgressPct, remainingToTarget } from '../engine/evaluateGoal';
 import { formatDifference, formatMetricValue, operatorPhrase } from '../texts';
 import { OUTCOME_BAR } from './goalUi';
+
+/** Objetivo único: la mejor marca del período contra la meta, sin barra. */
+function SingleMatchProgress({ goal, evaluation, compact }) {
+  const achieved = evaluation.outcome === OUTCOME.ACHIEVED;
+  const noData = evaluation.value === null;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className={`font-rajdhani font-bold tracking-[-0.04em] text-foreground ${compact ? 'text-2xl' : 'text-3xl'}`}>
+          {formatMetricValue(goal, evaluation.value)}
+        </p>
+        <p className="text-xs text-muted-foreground text-right">
+          Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)}
+        </p>
+      </div>
+      <p className={`flex items-center gap-1.5 text-xs ${achieved ? 'text-green-400' : 'text-muted-foreground'}`}>
+        {achieved ? <Trophy size={14} /> : <CircleDashed size={14} />}
+        {achieved
+          ? 'Logrado en una partida'
+          : noData
+            ? 'Todavía no hay partidas válidas en el período'
+            : `Tu mejor partida hasta ahora · ${evaluation.sampleSize} ${evaluation.sampleSize === 1 ? 'partida jugada' : 'partidas jugadas'}`}
+      </p>
+    </div>
+  );
+}
 
 /** Barra de progreso para métricas acumulativas. */
 function CumulativeProgress({ goal, evaluation, compact }) {
@@ -90,6 +116,9 @@ function PerformanceProgress({ goal, evaluation, compact }) {
  * @param {{ goal: any, evaluation: import('../model/goalConstants').GoalEvaluation, compact?: boolean }} props
  */
 export default function GoalProgress({ goal, evaluation, compact = false }) {
+  if (evaluation.aggregation === AGGREGATION.BEST) {
+    return <SingleMatchProgress goal={goal} evaluation={evaluation} compact={compact} />;
+  }
   return evaluation.kind === METRIC_KIND.CUMULATIVE
     ? <CumulativeProgress goal={goal} evaluation={evaluation} compact={compact} />
     : <PerformanceProgress goal={goal} evaluation={evaluation} compact={compact} />;
