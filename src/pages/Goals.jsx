@@ -1,4 +1,4 @@
-import { Link, Route, Routes, useMatch, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Route, Routes, useLocation, useMatch, useParams, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Plus, Target } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import MembershipGate from '@/components/membership/MembershipGate';
@@ -6,6 +6,7 @@ import { useGoalsAccess } from '@/features/goals/access';
 import { useEvaluatedGoals } from '@/features/goals/hooks/useGoals';
 import { partitionGoals } from '@/features/goals/model/goalLists';
 import GoalsCarousel from '@/features/goals/components/GoalsCarousel';
+import GoalsErrorBoundary from '@/features/goals/components/GoalsErrorBoundary';
 import GoalDetail from '@/features/goals/components/GoalDetail';
 import GoalEditor from '@/features/goals/components/GoalEditor';
 import GoalsHistory from '@/features/goals/components/GoalsHistory';
@@ -172,6 +173,7 @@ function NewGoal({ matches }) {
 }
 
 export default function Goals() {
+  const location = useLocation();
   const isOverview = Boolean(useMatch('/objetivos'));
   const access = useGoalsAccess();
   const { items, matches, now, isLoading, error, refetch } = useEvaluatedGoals();
@@ -184,6 +186,7 @@ export default function Goals() {
   else if (error) content = <ErrorState onRetry={refetch} />;
   else {
     content = (
+      <GoalsErrorBoundary resetKey={location.pathname}>
       <Routes>
         <Route index element={<GoalsOverview items={items} />} />
         <Route path="nuevo" element={<NewGoal matches={matches} />} />
@@ -191,6 +194,7 @@ export default function Goals() {
         <Route path=":goalId/editar" element={<GoalRoute items={items} matches={matches} now={now} editing />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </GoalsErrorBoundary>
     );
   }
 
