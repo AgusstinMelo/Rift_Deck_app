@@ -121,9 +121,9 @@ export default function Tierlist() {
   };
 
   return (
-    <div className="rd-page space-y-6 rd-dashboard">
+    <div className="rd-page rd-dashboard rd-tierlist-layout">
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="rd-tierlist-header flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
@@ -163,7 +163,7 @@ export default function Tierlist() {
         </div>
       </div>
 
-      <div className="rd-card p-4">
+      <div className="rd-tierlist-filters rd-card p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <div className="w-full sm:w-auto min-w-0">
             <div className="grid grid-cols-3 sm:flex sm:w-auto gap-1 bg-secondary/40 border border-border/50 p-1 rounded-xl">
@@ -264,6 +264,7 @@ export default function Tierlist() {
         </div>
       </div>
 
+      <div className="rd-tierlist-scroll">
       {isLoading ? (
         <div className="space-y-4">
           {Array(5).fill(0).map((_, i) => (
@@ -358,7 +359,7 @@ export default function Tierlist() {
       ) : (
         <>
           {/* Desktop: tabla normal */}
-          <div className="rd-card overflow-hidden hidden md:block">
+          <div className="rd-card rd-tierlist-table overflow-hidden hidden md:block">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/70 bg-secondary/30">
@@ -458,6 +459,7 @@ export default function Tierlist() {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

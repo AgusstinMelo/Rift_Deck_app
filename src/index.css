@@ -717,6 +717,59 @@
   }
 }
 
+/* Tierlist: encabezado y filtros fijos; sólo scrollea la tierlist o la tabla. */
+.rd-tierlist-layout,
+.rd-tierlist-scroll {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-tierlist-layout) {
+    overflow: hidden;
+  }
+
+  .rd-tierlist-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-tierlist-header,
+  .rd-tierlist-filters {
+    flex: none;
+  }
+
+  .rd-tierlist-scroll {
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-gutter: stable;
+  }
+
+  /* overflow: clip (en vez de hidden) para que el encabezado de la tabla pueda ser sticky. */
+  .rd-tierlist-table {
+    overflow: clip;
+  }
+
+  .rd-tierlist-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: hsl(var(--card));
+  }
+}
+
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-tierlist-layout > * + * {
+    margin-top: 1.5rem;
+  }
+}
+
 .rd-build-picker,
 .rd-saved-builds-layout {
   min-height: 0;
@@ -879,22 +932,8 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.rd-stats-overview,
-.rd-suggester-heading {
+.rd-stats-overview {
   min-width: 0;
-}
-
-@media (min-width: 1280px) and (min-height: 820px) {
-  .rd-suggester-layout > section:last-child > div:first-child {
-    position: sticky;
-    top: 1.5rem;
-  }
-}
-
-@media (max-width: 1279px) {
-  .rd-suggester-layout > section:last-child {
-    align-items: stretch;
-  }
 }
 
 .rd-v2-build-page,

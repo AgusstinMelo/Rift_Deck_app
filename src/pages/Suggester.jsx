@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Champion } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
@@ -11,6 +12,9 @@ import {
   Loader2,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Search,
   Brain,
   Target,
   Shield,
@@ -30,6 +34,8 @@ import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import V2BuildTab from '@/features/buildV2/V2BuildTab';
+import StepNav from '@/components/suggester/StepNav';
+import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
@@ -66,6 +72,8 @@ const RECOMMENDATION_TYPES = {
   counter_pool: 'Cubre counters',
   pocket_pick: 'Pocket pick',
 };
+
+const PRIORITY_LABELS = { high: 'alta', medium: 'media', low: 'baja' };
 
 const PRIORITY_COLORS = {
   high: 'text-red-400 bg-red-500/10 border-red-500/20',
@@ -369,19 +377,20 @@ function normalizeRecommendations(recommendations, candidates) {
 
   function PoolChampionSelect({ champions, pool, onToggle }) {
     const [open, setOpen] = useState(false);
-    const rootRef = useRef(null);
+    const buttonRef = useRef(null);
+    const panelRef = useRef(null);
+    const panelStyle = useFloatingPanel(open, buttonRef, 380);
+    const [query, setQuery] = useState('');
+    const normalizedQuery = normalizeText(query.trim());
+    const filtered = normalizedQuery
+      ? champions.filter(champion => normalizeText(champion.name).includes(normalizedQuery))
+      : champions;
 
-    useEffect(() => {
-      const close = event => {
-        if (!rootRef.current?.contains(event.target)) setOpen(false);
-      };
-      document.addEventListener('mousedown', close);
-      return () => document.removeEventListener('mousedown', close);
-    }, []);
+    useCloseOnOutside(open, [buttonRef, panelRef], () => { setOpen(false); setQuery(''); });
 
     return (
-      <div ref={rootRef} className="relative mb-4" style={{ zIndex: open ? 60 : 1 }}>
-        <button type="button" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(current => !current)} className="flex min-h-12 w-full items-center gap-2.5 rounded-xl border border-border/70 bg-secondary/55 px-3 py-2 text-left text-sm text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50">
+      <div className="relative mb-3">
+        <button ref={buttonRef} type="button" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(current => !current)} className="flex min-h-12 w-full items-center gap-2.5 rounded-xl border border-border/70 bg-secondary/55 px-3 py-2 text-left text-sm text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50">
           <span className="flex min-w-0 flex-1 items-center gap-2">
             {pool.length > 0 && <span className="flex shrink-0 -space-x-2">
               {pool.slice(0, 3).map(name => {
@@ -398,9 +407,16 @@ function normalizeRecommendations(recommendations, candidates) {
           <ChevronDown size={16} className={`shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
 
-        {open && <div role="listbox" aria-multiselectable="true" className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border border-primary/20 bg-[#0f1420] p-1.5 shadow-2xl shadow-black/60">
-          <div className="max-h-80 overflow-y-auto">
-            {champions.map(champion => {
+        {open && panelStyle && createPortal(<div ref={panelRef} role="listbox" aria-multiselectable="true" style={panelStyle} className="flex flex-col overflow-hidden rounded-xl border border-primary/20 bg-[#0f1420] shadow-2xl shadow-black/60">
+          <div className="shrink-0 border-b border-border/70 bg-[#0f1420] p-2">
+            <div className="flex items-center gap-2 rounded-lg bg-secondary/70 px-2.5">
+              <Search size={14} className="text-muted-foreground" />
+              <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar campeón…" className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+            </div>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
+            {!filtered.length && <p className="px-3 py-5 text-center text-sm text-muted-foreground">No se encontraron campeones.</p>}
+            {filtered.map(champion => {
               const active = pool.includes(champion.name);
               const roles = getChampionRoles(champion);
               return <button key={champion.id} type="button" role="option" aria-selected={active} onClick={() => onToggle(champion.name)} className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-secondary ${active ? 'bg-primary/8' : ''}`}>
@@ -415,7 +431,7 @@ function normalizeRecommendations(recommendations, candidates) {
               </button>;
             })}
           </div>
-        </div>}
+        </div>, document.body)}
       </div>
     );
   }
@@ -429,53 +445,27 @@ function normalizeRecommendations(recommendations, candidates) {
     const RoleIcon = ROLE_ICONS[role] || Sparkles;
 
     return (
-      <div className="rd-card p-2.5 group">
-        <div className="flex items-center gap-3">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="w-11 h-11 rounded-xl object-cover border border-primary/15"
-            />
-          ) : (
-            <div className="w-11 h-11 rounded-xl bg-secondary border border-border flex items-center justify-center text-sm font-bold text-primary">
-              {name?.[0]}
-            </div>
-          )}
+      <div className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-secondary/25 px-2.5 py-1.5">
+        {imageUrl ? (
+          <img src={imageUrl} alt={name} className="h-8 w-8 shrink-0 rounded-lg border border-primary/15 object-cover" />
+        ) : (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-xs font-bold text-primary">{name?.[0]}</div>
+        )}
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className="font-rajdhani font-bold text-lg tracking-[-0.05em] text-foreground truncate">
-                {name}
-              </p>
-
-              {tier && <TierBadge tier={tier.tier} size="sm" />}
-            </div>
-
-            <div className="flex items-center gap-2 mt-1">
-              {champ?.lane?.slice?.(0, 2)?.map(l => (
-                <LaneBadge key={l} lane={l} />
-              ))}
-
-              <span className="text-[10px] text-muted-foreground">
-                {stats.games > 0 ? `${stats.wr}% WR · ${stats.games}g` : 'sin datos'}
-              </span>
-            </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-sm font-semibold text-foreground">{name}</p>
+            {tier && <TierBadge tier={tier.tier} size="sm" />}
           </div>
-
-          <div className="flex flex-col items-end gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-secondary/60 border border-border/50 flex items-center justify-center">
-              <RoleIcon size={14} className="text-primary" />
-            </div>
-
-            <button
-              onClick={() => onRemove(name)}
-              className="text-muted-foreground hover:text-red-400 transition-colors"
-            >
-              <X size={13} />
-            </button>
-          </div>
+          <p className="truncate text-[11px] text-muted-foreground">
+            {stats.games > 0 ? `${stats.wr}% WR · ${stats.games} partidas` : 'Sin partidas registradas'}
+          </p>
         </div>
+
+        <RoleIcon size={14} className="shrink-0 text-primary/80" />
+        <button type="button" onClick={() => onRemove(name)} aria-label={`Quitar ${name} del pool`} className="shrink-0 text-muted-foreground transition-colors hover:text-red-400">
+          <X size={13} />
+        </button>
       </div>
     );
   }
@@ -505,10 +495,11 @@ function normalizeRecommendations(recommendations, candidates) {
     );
   }
 
-  function StrategicGaps({ gaps }) {
+  function StrategicGaps({ gaps, bare = false }) {
+    const frame = bare ? '' : 'rd-card p-4';
     if (!gaps?.length) {
       return (
-        <div className="rd-card p-4">
+        <div className={frame}>
           <div className="flex items-start gap-3">
             <CheckCircle2 size={18} className="text-green-400 mt-0.5 shrink-0" />
             <div>
@@ -526,7 +517,7 @@ function normalizeRecommendations(recommendations, candidates) {
     }
 
     return (
-      <div className="rd-card p-4">
+      <div className={frame}>
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle size={17} className="text-yellow-400" />
           <h3 className="rd-card-title">
@@ -551,7 +542,7 @@ function normalizeRecommendations(recommendations, candidates) {
     );
   }
 
-  function RecommendationCard({ rec, champions, tierlist, lane }) {
+  function RecommendationCard({ rec, champions, tierlist, lane, bare = false }) {
     const champ = getChampionData(champions, rec.champion_name);
     const imageUrl = getChampionImage(champions, rec.champion_name);
     const tierEntry = getTierEntry(tierlist, rec.champion_name, lane);
@@ -559,117 +550,56 @@ function normalizeRecommendations(recommendations, candidates) {
     const RoleIcon = ROLE_ICONS[role] || Sparkles;
 
     return (
-      <div className="rd-card p-5 group hover:border-primary/25 transition-all">
-        <div className="flex items-start gap-4">
+      <div className={`flex h-full flex-col ${bare ? '' : 'rd-card p-5 group hover:border-primary/25 transition-all'}`}>
+        <div className="flex items-start gap-3">
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={rec.champion_name}
-              className="
-                w-16 h-16 rounded-2xl object-cover shrink-0
-                border border-primary/20
-                shadow-[0_0_20px_rgba(212,175,55,.08)]
-              "
-            />
+            <img src={imageUrl} alt={rec.champion_name} className="h-12 w-12 shrink-0 rounded-xl border border-primary/20 object-cover shadow-[0_0_20px_rgba(212,175,55,.08)]" />
           ) : (
-            <div className="w-16 h-16 rounded-2xl bg-secondary border border-border flex items-center justify-center shrink-0 text-lg font-bold text-primary">
-              {rec.champion_name?.[0]}
-            </div>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-lg font-bold text-primary">{rec.champion_name?.[0]}</div>
           )}
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h3 className="font-rajdhani font-bold text-2xl tracking-[-0.06em] text-foreground">
-                {rec.champion_name}
-              </h3>
-
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+              <h3 className="mr-1 font-rajdhani text-xl font-bold tracking-[-0.06em] text-foreground">{rec.champion_name}</h3>
               {tierEntry && <TierBadge tier={tierEntry.tier} size="sm" />}
-
               {tierEntry?.lane && <LaneBadge lane={tierEntry.lane} />}
+              <RoleIcon size={14} className="text-primary/80" />
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-1.5">
               {rec.final_recommendation && (
-                <span className={`text-xs px-2 py-1 rounded-lg border font-medium ${FINAL_COLORS[rec.final_recommendation] || ''}`}>
-                  {FINAL_LABELS[rec.final_recommendation] || rec.final_recommendation}
-                </span>
+                <span className={`rounded-md border px-1.5 py-0.5 text-[11px] font-medium ${FINAL_COLORS[rec.final_recommendation] || ''}`}>{FINAL_LABELS[rec.final_recommendation] || rec.final_recommendation}</span>
               )}
-
               {rec.priority_level && (
-                <span className={`text-xs px-2 py-1 rounded-lg border ${PRIORITY_COLORS[rec.priority_level] || ''}`}>
-                  Prioridad {rec.priority_level}
-                </span>
+                <span className={`rounded-md border px-1.5 py-0.5 text-[11px] ${PRIORITY_COLORS[rec.priority_level] || ''}`}>Prioridad {PRIORITY_LABELS[rec.priority_level] || rec.priority_level}</span>
               )}
-
               {rec.recommendation_type && (
-                <span className="rd-status-pill text-xs">
-                  {RECOMMENDATION_TYPES[rec.recommendation_type] || rec.recommendation_type}
-                </span>
+                <span className="rounded-md border border-border/60 bg-secondary/40 px-1.5 py-0.5 text-[11px] text-muted-foreground">{RECOMMENDATION_TYPES[rec.recommendation_type] || rec.recommendation_type}</span>
               )}
             </div>
-
-            <p className="text-sm text-foreground leading-relaxed">
-              {rec.reason}
-            </p>
-          </div>
-
-          <div className="hidden sm:flex w-9 h-9 rounded-lg bg-secondary/60 border border-border/50 items-center justify-center shrink-0">
-            <RoleIcon size={15} className="text-primary" />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-          {rec.strategic_gap && (
-            <div className="bg-accent/5 border border-accent/20 rounded-xl p-3">
-              <p className="text-[10px] text-accent uppercase tracking-[0.14em] font-semibold mb-1">
-                Gap cubierto
-              </p>
+        <p className="mt-2.5 text-[13px] leading-snug text-foreground">{rec.reason}</p>
 
-              <p className="text-xs text-foreground">
-                {rec.strategic_gap}
-              </p>
+        <div className="mt-3 grid flex-1 grid-cols-1 gap-2 md:grid-cols-2">
+          {[
+            ['Gap cubierto', rec.strategic_gap, 'border-accent/20 bg-accent/5', 'text-accent'],
+            ['Cuándo pickear', rec.when_to_pick, 'border-green-500/20 bg-green-500/5', 'text-green-400'],
+            ['Adaptación', rec.adaptation_difficulty, 'border-primary/20 bg-primary/5', 'text-primary'],
+            ['Primeros pasos', rec.first_steps, 'border-border/60 bg-secondary/40', 'text-muted-foreground'],
+          ].filter(([, text]) => text).map(([title, text, frame, tone]) => (
+            <div key={title} className={`rounded-xl border px-3 py-2 ${frame}`}>
+              <p className={`mb-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${tone}`}>{title}</p>
+              <p className="text-xs leading-snug text-foreground">{text}</p>
             </div>
-          )}
-
-          {rec.when_to_pick && (
-            <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-3">
-              <p className="text-[10px] text-green-400 uppercase tracking-[0.14em] font-semibold mb-1">
-                Cuándo pickear
-              </p>
-
-              <p className="text-xs text-foreground">
-                {rec.when_to_pick}
-              </p>
-            </div>
-          )}
-
-          {rec.adaptation_difficulty && (
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
-              <p className="text-[10px] text-primary uppercase tracking-[0.14em] font-semibold mb-1">
-                Adaptación
-              </p>
-
-              <p className="text-xs text-foreground">
-                {rec.adaptation_difficulty}
-              </p>
-            </div>
-          )}
-
-          {rec.first_steps && (
-            <div className="bg-secondary/40 border border-border/60 rounded-xl p-3">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-semibold mb-1">
-                Primeros pasos
-              </p>
-
-              <p className="text-xs text-foreground">
-                {rec.first_steps}
-              </p>
-            </div>
-          )}
+          ))}
         </div>
       </div>
     );
   }
+const LEGACY_STEPS = ['Pool', 'Parámetros'];
+
   function LegacySuggester({ tabSelector }) {
   const [pool, setPool] = useState([]);
   const [context, setContext] = useState('');
@@ -679,6 +609,9 @@ function normalizeRecommendations(recommendations, candidates) {
   const [recommendations, setRecommendations] = useState([]);
   const [strategicGaps, setStrategicGaps] = useState([]);
   const [error, setError] = useState('');
+  const [step, setStep] = useState(0);
+  const [view, setView] = useState('recs');
+  const [selectedRec, setSelectedRec] = useState(0);
   const { user } = useAuth();
 
   const { data: champions = [] } = useQuery({
@@ -886,6 +819,8 @@ Devuelve exactamente 5 recomendaciones.`;
 
       setStrategicGaps(localAnalysis.gaps || []);
       setRecommendations(normalizeRecommendations(result.recommendations, recommendationCandidates));
+      setView('recs');
+      setSelectedRec(0);
     } catch (err) {
       setError('No se pudo generar la recomendación. Probá de nuevo.');
     } finally {
@@ -893,393 +828,212 @@ Devuelve exactamente 5 recomendaciones.`;
     }
   };
 
+  const hasPool = pool.length > 0;
+  const hasRecommendations = recommendations.length > 0;
+  const currentView = view === 'recs' && !hasRecommendations ? 'gaps' : view;
+  const selected = recommendations[selectedRec] || recommendations[0];
+  const resultViews = [
+    ...(hasRecommendations ? [{ id: 'recs', label: `Recomendaciones (${recommendations.length})` }] : []),
+    { id: 'gaps', label: 'Gaps estratégicos' },
+    { id: 'pool', label: 'Lectura del pool' },
+  ];
+
   return (
-    <div className="rd-page rd-dashboard rd-compact-page rd-suggester-layout">
-      <section className="rd-suggester-heading" aria-label="Configuración del sugeridor">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rd-v2-build">
+      <header className="rd-v2-build-header flex items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-8 h-px bg-primary/50" />
-            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
-              Rift Deck Consigliere
-            </span>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="h-px w-8 bg-primary/50" />
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Consigliere</span>
           </div>
-
-          <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Sugeridor de campeones
-          </h1>
-
-          <p className="text-muted-foreground text-sm mt-1">
-            Analizá tu pool, detectá gaps y encontrá picks con sentido competitivo.
-          </p>
+          <h1 className="font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de campeones</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Analizá tu pool, detectá gaps y encontrá picks con sentido competitivo.</p>
           {tabSelector}
         </div>
-
-        <div className="hidden sm:flex items-center gap-3 rd-status-pill">
+        <div className="rd-status-pill hidden items-center gap-3 sm:flex">
           <Brain size={16} className="text-primary" />
-          <span className="text-xs text-muted-foreground">
-            Champion Intelligence
-          </span>
+          <span className="text-xs text-muted-foreground">Champion Intelligence</span>
         </div>
-      </div>
+      </header>
 
-      </section>
-      <section className="rd-viewport-section grid grid-cols-1 xl:grid-cols-[minmax(320px,390px)_minmax(0,1fr)] gap-6 items-start" aria-label="Análisis y recomendaciones">
-        <div className="space-y-5">
-          <div className="rd-card rd-card-overflow-visible p-5 focus-within:z-40">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">
-                Tu pool actual
-              </h2>
-            </div>
+      <div className="rd-v2-build-body grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="rd-v2-build-aside xl:sticky xl:top-6">
+          <StepNav steps={LEGACY_STEPS} label="Pasos del análisis" step={step} completed={[hasPool, hasRecommendations]} locked={!hasPool} onStep={setStep} />
 
-            <PoolChampionSelect champions={champions} pool={pool} onToggle={togglePoolChampion} />
+          <div className="rd-v2-build-aside-scroll">
+            {step === 0 && (
+              <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Target size={15} className="text-primary" />
+                  <h2 className="rd-card-title">Tu pool actual</h2>
+                </div>
 
-            {pool.length === 0 ? (
-              <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 text-center">
-                <Sparkles size={22} className="text-primary mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Agregá campeones que jugás regularmente.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {pool.map(name => (
-                  <PoolChampionChip
-                    key={name}
-                    name={name}
-                    champions={champions}
-                    matches={matches}
-                    tierlist={tierlist}
-                    onRemove={removeFromPool}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-                    <div className="rd-card p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">
-                Parámetros
-              </h2>
-            </div>
+                <PoolChampionSelect champions={champions} pool={pool} onToggle={togglePoolChampion} />
 
-            <div>
-              <label className="rd-label mb-2 block">
-                Línea prioritaria
-              </label>
-
-              <select
-                value={lane}
-                onChange={e => setLane(e.target.value)}
-                className="
-                  w-full bg-secondary/60 border border-border rounded-xl
-                  px-3 py-3 text-sm text-foreground
-                  outline-none focus:border-primary/40
-                "
-              >
-                <option value="">Todas las líneas</option>
-                {LANES.map(l => (
-                  <option key={l} value={l}>
-                    {LANE_LABELS[l]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="rd-label mb-2 block">
-                Objetivo
-              </label>
-
-              <div className="grid grid-cols-2 gap-2">
-                {GOALS.map(item => {
-                  const Icon = item.icon;
-                  const active = goal === item.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setGoal(item.id)}
-                      className={`
-                        flex items-center gap-2 rounded-xl border px-3 py-2.5
-                        text-xs font-medium transition-all text-left
-                        ${active
-                          ? 'bg-primary/15 border-primary/30 text-primary'
-                          : 'bg-secondary/40 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/20'}
-                      `}
-                    >
-                      <Icon size={14} />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="rd-label mb-2 block">
-                Contexto adicional
-              </label>
-
-              <textarea
-                value={context}
-                onChange={e => setContext(e.target.value)}
-                rows={4}
-                placeholder="Ej: soy main Kai’Sa y Xayah, quiero subir ranked, me cuesta jugar contra asesinos..."
-                className="
-                  w-full bg-secondary/60 border border-border rounded-xl
-                  px-3 py-3 text-sm text-foreground
-                  placeholder:text-muted-foreground
-                  outline-none focus:border-primary/40
-                  focus:ring-2 focus:ring-primary/10
-                  transition-all resize-none
-                "
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <InsightCard
-              icon={Target}
-              title="Pool"
-              value={`${pool.length} picks`}
-              tone="primary"
-            />
-
-            <InsightCard
-              icon={Zap}
-              title="Meta S/S+"
-              value={`${topTierChamps.length} picks`}
-              tone="accent"
-            />
-
-            <InsightCard
-              icon={Shield}
-              title="Gaps"
-              value={`${localAnalysis.gaps.length}`}
-              tone={localAnalysis.gaps.length ? 'yellow' : 'green'}
-            />
-
-            <InsightCard
-              icon={Trophy}
-              title="Meta overlap"
-              value={`${localAnalysis.metaOverlap.length}`}
-              tone="green"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
-              <p className="text-red-400 text-sm">
-                {error}
-              </p>
-            </div>
-          )}
-
-          <button
-            onClick={handleGenerate}
-            disabled={generating || pool.length === 0}
-            className="
-              w-full flex items-center justify-center gap-2
-              bg-primary text-primary-foreground py-3 rounded-xl
-              font-semibold text-sm hover:bg-primary/90
-              transition-colors disabled:opacity-50
-              disabled:cursor-not-allowed
-              shadow-[0_0_28px_rgba(212,175,55,.10)]
-            "
-          >
-            {generating ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Analizando pool...
-              </>
-            ) : (
-              <>
-                <Sparkles size={16} />
-                Generar recomendaciones
-              </>
-            )}
-          </button>
-        </div>
-
-        <div className="space-y-5">
-          {pool.length > 0 && recommendations.length === 0 && !generating && (
-            <StrategicGaps gaps={localAnalysis.gaps} />
-          )}
-
-          {generating ? (
-            <div className="rd-card rd-card-watermark p-10">
-              <div className="flex flex-col items-center justify-center min-h-[340px] gap-4 text-center">
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center">
-                    <Loader2 size={30} className="animate-spin text-primary" />
+                {hasPool ? (
+                  <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain pr-1">
+                    {pool.map(name => (
+                      <PoolChampionChip key={name} name={name} champions={champions} matches={matches} tierlist={tierlist} onRemove={removeFromPool} />
+                    ))}
                   </div>
+                ) : (
+                  <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-border/60 bg-secondary/30 p-4 text-center">
+                    <Sparkles size={22} className="mx-auto mb-2 text-primary" />
+                    <p className="text-sm text-muted-foreground">Agregá los campeones que jugás regularmente para analizar tu pool.</p>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {step === 1 && (
+              <section className="rd-card rd-v2-step-card flex flex-col gap-3 p-4">
+                <div className="flex items-center gap-2">
+                  <Compass size={15} className="text-primary" />
+                  <h2 className="rd-card-title">Parámetros</h2>
                 </div>
 
                 <div>
-                  <h2 className="font-rajdhani font-bold text-3xl tracking-[-0.07em] text-foreground uppercase">
-                    Analizando tu pool
-                  </h2>
-
-                  <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                    Cruzando campeones, gaps estratégicos, meta actual, rendimiento personal y objetivo de juego.
-                  </p>
+                  <label className="rd-label mb-1.5 block">Línea prioritaria</label>
+                  <select value={lane} onChange={e => setLane(e.target.value)} className="w-full rounded-xl border border-border bg-secondary/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40">
+                    <option value="">Todas las líneas</option>
+                    {LANES.map(l => <option key={l} value={l}>{LANE_LABELS[l]}</option>)}
+                  </select>
                 </div>
-              </div>
+
+                <div>
+                  <label className="rd-label mb-1.5 block">Objetivo</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {GOALS.map(item => {
+                      const Icon = item.icon;
+                      const active = goal === item.id;
+                      return (
+                        <button key={item.id} type="button" onClick={() => setGoal(item.id)} className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left text-xs font-medium transition-all ${active ? 'border-primary/30 bg-primary/15 text-primary' : 'border-border/60 bg-secondary/40 text-muted-foreground hover:border-primary/20 hover:text-foreground'}`}>
+                          <Icon size={14} className="shrink-0" />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex flex-1 flex-col">
+                  <label className="rd-label mb-1.5 block">Contexto adicional</label>
+                  <textarea value={context} onChange={e => setContext(e.target.value)} rows={3} placeholder="Ej: soy main Kai’Sa y Xayah, quiero subir ranked, me cuesta jugar contra asesinos..." className="min-h-[4.5rem] w-full flex-1 resize-none rounded-xl border border-border bg-secondary/60 px-3 py-2 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/10" />
+                </div>
+              </section>
+            )}
+          </div>
+
+          {error && <p className="rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-400">{error}</p>}
+
+          <div className="flex gap-2">
+            {step > 0 && <button type="button" onClick={() => setStep(current => current - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
+            {step < LEGACY_STEPS.length - 1
+              ? <button type="button" onClick={() => setStep(current => current + 1)} disabled={!hasPool} title={hasPool ? undefined : 'Agregá al menos un campeón a tu pool'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
+              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? 'Analizando pool…' : 'Generar recomendaciones'}</button>}
+          </div>
+        </aside>
+
+        <div className="rd-v2-build-result">
+          <main className="rd-v2-build-success flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <InsightCard icon={Target} title="Pool" value={`${pool.length} picks`} tone="primary" />
+              <InsightCard icon={Zap} title="Meta S/S+" value={`${topTierChamps.length} picks`} tone="accent" />
+              <InsightCard icon={Shield} title="Gaps" value={`${localAnalysis.gaps.length}`} tone={localAnalysis.gaps.length ? 'yellow' : 'green'} />
+              <InsightCard icon={Trophy} title="Meta overlap" value={`${localAnalysis.metaOverlap.length}`} tone="green" />
             </div>
-          ) : recommendations.length === 0 ? (
-            <div className="rd-card p-8">
-              <EmptyState
-                icon={Sparkles}
-                title="Sin recomendaciones aún"
-                description="Agregá campeones a tu pool, elegí un objetivo y generá sugerencias personalizadas."
-              />
-            </div>
-          ) : (
-            <>
-              <StrategicGaps gaps={strategicGaps} />
 
-              <div className="rd-card p-5">
-                <div className="flex items-center justify-between gap-3 mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="w-6 h-px bg-primary/50" />
-                      <h2 className="rd-card-title">
-                        Recomendaciones
-                      </h2>
-                    </div>
-
-                    <p className="text-xs text-muted-foreground">
-                      Picks ordenados por impacto estratégico y utilidad para tu pool.
-                    </p>
+            <section className="rd-card rd-v2-build-analysis flex min-h-[360px] flex-col p-4">
+              {generating ? (
+                <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
+                    <Loader2 size={30} className="animate-spin text-primary" />
+                  </div>
+                  <h2 className="font-rajdhani text-3xl font-bold uppercase tracking-[-0.07em] text-foreground">Analizando tu pool</h2>
+                  <p className="max-w-md text-sm text-muted-foreground">Cruzando campeones, gaps estratégicos, meta actual, rendimiento personal y objetivo de juego.</p>
+                </div>
+              ) : !hasPool && !hasRecommendations ? (
+                <div className="flex flex-1 items-center justify-center">
+                  <EmptyState icon={Sparkles} title="Sin recomendaciones aún" description="Agregá campeones a tu pool, elegí un objetivo y generá sugerencias personalizadas." />
+                </div>
+              ) : (
+                <>
+                  <div role="tablist" className="mb-2.5 flex shrink-0 flex-wrap gap-1 self-start rounded-xl border border-border bg-secondary/40 p-1">
+                    {resultViews.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={currentView === id} onClick={() => setView(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${currentView === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>)}
                   </div>
 
-                  <span className="rd-status-pill">
-                    {recommendations.length} picks
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {recommendations.map((rec, i) => (
-                    <RecommendationCard
-                      key={`${rec.champion_name}-${i}`}
-                      rec={rec}
-                      champions={champions}
-                      tierlist={tierlist}
-                      lane={lane}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {pool.length > 0 && (
-            <div className="rd-card p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-6 h-px bg-primary/50" />
-                <h2 className="rd-card-title">
-                  Lectura rápida del pool
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="rd-mini-action text-left">
-                  <p className="rd-label mb-2">
-                    Daños cubiertos
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {localAnalysis.damageTypes.length > 0 ? (
-                      localAnalysis.damageTypes.map(type => (
-                        <span key={type} className="rd-status-pill text-xs">
-                          {DAMAGE_LABELS[type] || type}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Sin datos
-                      </span>
+                  <div role="tabpanel" className="rd-v2-build-analysis-body text-sm text-muted-foreground">
+                    {currentView === 'recs' && selected && (
+                      <div className="grid min-h-full gap-3 md:grid-cols-[12.5rem_minmax(0,1fr)]">
+                        <ol className="space-y-1.5">
+                          {recommendations.map((rec, index) => {
+                            const imageUrl = getChampionImage(champions, rec.champion_name);
+                            const active = rec === selected;
+                            return (
+                              <li key={`${rec.champion_name}-${index}`}>
+                                <button type="button" onClick={() => setSelectedRec(index)} className={`flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-1.5 text-left transition-colors ${active ? 'border-primary/40 bg-primary/10' : 'border-border/50 bg-secondary/20 hover:border-primary/25'}`}>
+                                  {imageUrl ? <img src={imageUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg border border-primary/20 object-cover" /> : <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-xs font-bold text-primary">{rec.champion_name?.[0]}</span>}
+                                  <span className="min-w-0 flex-1">
+                                    <span className={`block truncate text-sm font-semibold ${active ? 'text-primary' : 'text-foreground'}`}>{rec.champion_name}</span>
+                                    <span className="block truncate text-[11px] text-muted-foreground">{FINAL_LABELS[rec.final_recommendation] || RECOMMENDATION_TYPES[rec.recommendation_type] || 'Recomendado'}</span>
+                                  </span>
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ol>
+                        <div className="rounded-xl border border-border/50 bg-secondary/10 p-3">
+                          <RecommendationCard bare rec={selected} champions={champions} tierlist={tierlist} lane={lane} />
+                        </div>
+                      </div>
                     )}
+
+                    {currentView === 'gaps' && <StrategicGaps bare gaps={hasRecommendations ? strategicGaps : localAnalysis.gaps} />}
+
+                    {currentView === 'pool' && (hasPool ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                          {[
+                            ['Daños cubiertos', localAnalysis.damageTypes.map(type => DAMAGE_LABELS[type] || type)],
+                            ['Roles detectados', localAnalysis.roles],
+                            ['Escalado', localAnalysis.scalings],
+                          ].map(([title, values]) => (
+                            <div key={title} className="rd-mini-action text-left">
+                              <p className="rd-label mb-2">{title}</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {values.length > 0
+                                  ? values.map(value => <span key={value} className="rd-status-pill text-xs">{value}</span>)
+                                  : <span className="text-xs text-muted-foreground">Sin datos</span>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {(localAnalysis.bestPersonal || localAnalysis.weakPersonal) && (
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            {localAnalysis.bestPersonal && (
+                              <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-3">
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-green-400">Mejor rendimiento personal</p>
+                                <p className="text-sm text-foreground">{localAnalysis.bestPersonal.name} · {localAnalysis.bestPersonal.stats.wr}% WR en {localAnalysis.bestPersonal.stats.games} partidas.</p>
+                              </div>
+                            )}
+                            {localAnalysis.weakPersonal && (
+                              <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-400">Pick a revisar</p>
+                                <p className="text-sm text-foreground">{localAnalysis.weakPersonal.name} · {localAnalysis.weakPersonal.stats.wr}% WR en {localAnalysis.weakPersonal.stats.games} partidas.</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : <p>Agregá campeones a tu pool para ver su lectura.</p>)}
                   </div>
-                </div>
-
-                <div className="rd-mini-action text-left">
-                  <p className="rd-label mb-2">
-                    Roles detectados
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {localAnalysis.roles.length > 0 ? (
-                      localAnalysis.roles.map(role => (
-                        <span key={role} className="rd-status-pill text-xs">
-                          {role}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Sin datos
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="rd-mini-action text-left">
-                  <p className="rd-label mb-2">
-                    Escalado
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {localAnalysis.scalings.length > 0 ? (
-                      localAnalysis.scalings.map(scaling => (
-                        <span key={scaling} className="rd-status-pill text-xs">
-                          {scaling}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Sin datos
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {(localAnalysis.bestPersonal || localAnalysis.weakPersonal) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                  {localAnalysis.bestPersonal && (
-                    <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-3">
-                      <p className="text-[10px] text-green-400 uppercase tracking-[0.14em] font-semibold mb-1">
-                        Mejor rendimiento personal
-                      </p>
-
-                      <p className="text-sm text-foreground">
-                        {localAnalysis.bestPersonal.name} · {localAnalysis.bestPersonal.stats.wr}% WR en {localAnalysis.bestPersonal.stats.games} partidas.
-                      </p>
-                    </div>
-                  )}
-
-                  {localAnalysis.weakPersonal && (
-                    <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-3">
-                      <p className="text-[10px] text-red-400 uppercase tracking-[0.14em] font-semibold mb-1">
-                        Pick a revisar
-                      </p>
-
-                      <p className="text-sm text-foreground">
-                        {localAnalysis.weakPersonal.name} · {localAnalysis.weakPersonal.stats.wr}% WR en {localAnalysis.weakPersonal.stats.games} partidas.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                </>
               )}
-            </div>
-          )}
+            </section>
+          </main>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
@@ -1294,8 +1048,8 @@ export default function Suggester() {
   );
 
   return (
-    activeTab === 'legacy'
-      ? <LegacySuggester tabSelector={tabSelector} />
-      : <div className="rd-v2-build-page max-w-[1600px] mx-auto px-4 sm:px-6 py-6"><V2BuildTab tabSelector={tabSelector} /></div>
+    <div className="rd-v2-build-page max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+      {activeTab === 'legacy' ? <LegacySuggester tabSelector={tabSelector} /> : <V2BuildTab tabSelector={tabSelector} />}
+    </div>
   );
 }

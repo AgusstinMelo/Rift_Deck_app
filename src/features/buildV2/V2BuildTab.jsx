@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BrainCircuit, Check, ChevronDown, ChevronLeft, ChevronRight, Loader2, Search, Sparkles, Swords, Users } from 'lucide-react';
@@ -10,66 +10,12 @@ import { stabilizeV2Result } from './v2ResultStabilizer';
 import { createEligibleV2Snapshot } from './v2Eligibility';
 import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
+import StepNav from '@/components/suggester/StepNav';
+import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const LABELS = { top: 'Top', jungler: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
 const emptyTeam = () => Object.fromEntries(LANES.map(lane => [lane, '']));
-
-// Los desplegables se renderizan en un portal con posición fija para que no queden
-// recortados por las columnas con scroll interno; se abren hacia arriba si no hay lugar.
-function useFloatingPanel(open, anchorRef, preferredHeight) {
-  const [style, setStyle] = useState(null);
-
-  useLayoutEffect(() => {
-    if (!open) { setStyle(null); return undefined; }
-    const update = () => {
-      const rect = anchorRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const gap = 6;
-      const margin = 12;
-      const below = window.innerHeight - rect.bottom - gap - margin;
-      const above = rect.top - gap - margin;
-      const placeAbove = below < Math.min(preferredHeight, 240) && above > below;
-      const maxHeight = Math.max(160, Math.min(preferredHeight, placeAbove ? above : below));
-      setStyle({
-        position: 'fixed',
-        left: rect.left,
-        width: rect.width,
-        maxHeight,
-        zIndex: 400,
-        ...(placeAbove ? { bottom: window.innerHeight - rect.top + gap } : { top: rect.bottom + gap }),
-      });
-    };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
-    };
-  }, [open, anchorRef, preferredHeight]);
-
-  return style;
-}
-
-function useCloseOnOutside(open, refs, onClose) {
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const close = event => {
-      if (!refs.some(ref => ref.current?.contains(event.target))) onCloseRef.current();
-    };
-    const closeOnEscape = event => { if (event.key === 'Escape') onCloseRef.current(); };
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [open]);
-}
 
 // Campo con la etiqueta al costado del selector, para ahorrar alto en los pasos.
 const INLINE_FIELD = 'relative grid grid-cols-[4.75rem_minmax(0,1fr)] items-center gap-2';
@@ -172,19 +118,6 @@ function DraftCard({ title, icon: Icon, team, setter, champions, onMemberChange,
 }
 
 const STEPS = ['Campeón', 'Aliados', 'Enemigos'];
-
-function StepNav({ step, completed, locked, onStep }) {
-  return <nav aria-label="Pasos del draft" className="rd-card p-1.5">
-    <ol className="grid grid-cols-3 gap-1">{STEPS.map((label, index) => {
-      const active = index === step;
-      const disabled = index > 0 && locked;
-      return <li key={label}><button type="button" aria-current={active ? 'step' : undefined} disabled={disabled} onClick={() => onStep(index)} className={`flex w-full flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${active ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-        <span className={`flex h-6 w-6 items-center justify-center rounded-full border text-[11px] ${active ? 'border-primary bg-primary text-primary-foreground' : completed[index] ? 'border-primary/50 text-primary' : 'border-border'}`}>{completed[index] && !active ? <Check size={12} /> : index + 1}</span>
-        {label}
-      </button></li>;
-    })}</ol>
-  </nav>;
-}
 
 export default function V2BuildTab({ tabSelector }) {
   const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
@@ -304,7 +237,7 @@ export default function V2BuildTab({ tabSelector }) {
     </header>
     <div className="rd-v2-build-body grid items-start gap-5 xl:grid-cols-[310px_minmax(0,1fr)]">
       <aside className="rd-v2-build-aside xl:sticky xl:top-6">
-        <StepNav step={step} completed={stepCompleted} locked={!pickReady} onStep={setStep} />
+        <StepNav steps={STEPS} label="Pasos del draft" step={step} completed={stepCompleted} locked={!pickReady} onStep={setStep} />
         <div className="rd-v2-build-aside-scroll">
         {step === 0 && <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4 focus-within:z-30">
           <div className="mb-3 flex items-center justify-between gap-3"><div className="flex items-center gap-2"><Sparkles size={15} className="text-primary" /><h2 className="rd-card-title">Tu selección</h2></div><span className="rd-status-pill">Parche {snapshot.patchVersion}</span></div>
