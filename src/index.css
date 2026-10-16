@@ -746,7 +746,7 @@
   }
 
   .rd-goal-detail-strip {
-    height: clamp(12.5rem, 30vh, 17rem);
+    height: clamp(10.5rem, 22vh, 13rem);
   }
 
   .rd-goal-detail-strip > * {
