@@ -1,9 +1,8 @@
-import { Percent, PenLine, Sigma, SlidersHorizontal, Sparkles, TrendingUp, Trophy } from 'lucide-react';
+import { Percent, PenLine, Settings2, Sigma, SlidersHorizontal, Sparkles, TrendingUp, Trophy } from 'lucide-react';
 import { listMetrics } from '../../metrics/index';
 import { METRIC_FAMILY } from '../../model/goalConstants';
 import { GOAL_GROUPS } from '../../suggestions';
-import { FAMILY_LABELS } from '../../texts';
-import { INPUT_CLASS } from '../goalUi';
+import { BUTTON_GOLD } from '../goalUi';
 import HorizontalRail from '../HorizontalRail';
 
 /** Sugeridos visibles por categoría; el resto de las métricas queda en el selector. */
@@ -26,29 +25,10 @@ function OptionButton({ title, onClick, icon: Icon = Sparkles }) {
 }
 
 /**
- * Selector compacto de métricas: al elegir una, se pasa a configurarla.
- * Con más de un grupo muestra las métricas agrupadas por familia.
- * @param {{ groups: { label: string, metrics: any[] }[], onPick: (metricId: string) => void, label: string }} props
+ * Tarjeta de categoría: encabezado, opciones y botón para configurar, con el mismo formato para todas.
+ * La métrica concreta (dato y cálculo) se elige en el paso de configuración.
  */
-function MetricPicker({ groups, onPick, label }) {
-  const options = metrics => metrics.map(metric => <option key={metric.id} value={metric.id}>{metric.label}</option>);
-  return (
-    <select
-      value=""
-      onChange={event => event.target.value && onPick(event.target.value)}
-      aria-label={label}
-      className={`${INPUT_CLASS} cursor-pointer`}
-    >
-      <option value="" disabled>Elegí una métrica…</option>
-      {groups.length === 1
-        ? options(groups[0].metrics)
-        : groups.map(group => <optgroup key={group.label} label={group.label}>{options(group.metrics)}</optgroup>)}
-    </select>
-  );
-}
-
-/** Tarjeta de categoría: encabezado, opciones y selector de métrica, con el mismo formato para todas. */
-function ChoiceCard({ icon: Icon, title, description, tone = 'primary', optionsLabel, children, picker }) {
+function ChoiceCard({ icon: Icon, title, description, tone = 'primary', optionsLabel, children, onConfigure }) {
   const toneClass = tone === 'accent' ? 'border-accent/30 bg-accent/10 text-accent' : 'border-primary/20 bg-primary/10 text-primary';
   return (
     <section className="rd-card rd-goal-choice flex h-full flex-col gap-3 p-4">
@@ -66,9 +46,10 @@ function ChoiceCard({ icon: Icon, title, description, tone = 'primary', optionsL
           <p className="rd-label">{optionsLabel}</p>
           {children}
         </div>
-        <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
-          <p className="rd-label">O elegí la métrica</p>
-          {picker}
+        <div className="mt-auto border-t border-border/60 pt-3">
+          <button type="button" onClick={onConfigure} className={BUTTON_GOLD}>
+            <Settings2 size={15} /> Configurar objetivo
+          </button>
         </div>
       </div>
     </section>
@@ -92,13 +73,7 @@ export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom
         title={group.label}
         description={group.description}
         optionsLabel="Sugeridos"
-        picker={(
-          <MetricPicker
-            groups={[{ label: group.label, metrics: metrics.filter(metric => metric.family === group.id) }]}
-            onPick={onPickCustom}
-            label={`Métricas de ${group.label}`}
-          />
-        )}
+        onConfigure={() => onPickCustom(metrics.find(metric => metric.family === group.id).id)}
       >
         {suggestions
           .filter(suggestion => suggestion.category === group.id)
@@ -116,19 +91,9 @@ export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom
         tone="accent"
         title="A medida"
         description="Combiná dato y cálculo (total, promedio, en una sola partida o porcentaje), meta, filtros y período."
-        optionsLabel="Empezar"
-        picker={(
-          <MetricPicker
-            groups={Object.values(METRIC_FAMILY).map(family => ({
-              label: FAMILY_LABELS[family],
-              metrics: metrics.filter(metric => metric.family === family),
-            }))}
-            onPick={onPickCustom}
-            label="Todas las métricas"
-          />
-        )}
+        optionsLabel="Otras opciones"
+        onConfigure={() => onPickCustom(firstMatchMetric.id)}
       >
-        <OptionButton title="Configurar desde cero" icon={SlidersHorizontal} onClick={() => onPickCustom(firstMatchMetric.id)} />
         <OptionButton title="Hábito manual con check-ins" icon={PenLine} onClick={() => onPickCustom('manual')} />
       </ChoiceCard>
     ),
