@@ -16,6 +16,12 @@ test('cada combinación dato × cálculo corresponde a una sola métrica', () =>
   }
 });
 
+test('cada tipo de cálculo tiene al menos un dato que lo admite (el formulario siempre puede cambiar)', () => {
+  for (const aggregation of ['total', 'promedio', 'mejor_partida', 'porcentaje']) {
+    assert.ok(listStats().some(stat => aggregationsFor(stat).includes(aggregation)), aggregation);
+  }
+});
+
 test('las métricas existentes conservan su id dentro de la grilla', () => {
   assert.equal(findMetric('victorias', 'porcentaje').id, 'winrate');
   assert.equal(findMetric('partidas', 'total').id, 'partidas_registradas');

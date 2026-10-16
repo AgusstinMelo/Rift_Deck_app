@@ -1,6 +1,6 @@
 import { Lock } from 'lucide-react';
 import { AGGREGATION_LABELS, STATS, aggregationsFor, findMetric, getMetric, listStats } from '../../metrics/index';
-import { GOAL_LIMITS, METRIC_KIND } from '../../model/goalConstants';
+import { AGGREGATION, GOAL_LIMITS, METRIC_KIND } from '../../model/goalConstants';
 import { OPERATOR_LABELS, operatorPhrase, unitOf } from '../../texts';
 import { INPUT_CLASS } from '../goalUi';
 import Field from './Field';
@@ -37,11 +37,16 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
   const configLocked = mode === 'edit' && !canEditConfig;
   const unit = unitOf({ metric: value.metric, unit: value.unit });
 
-  // Cambiar dato o cálculo equivale a elegir otra métrica: si el cálculo no aplica al dato, se usa el primero disponible.
-  const changeCombination = (stat, aggregation) => {
-    const next = findMetric(stat, aggregation) || findMetric(stat, aggregationsFor(stat)[0]);
+  const applyMetric = next => {
     if (next && next.id !== value.metric) onChange(draftForMetric(value, next.id));
   };
+  // Cambiar el dato conserva el cálculo si aplica; si no, usa el primero disponible para ese dato.
+  const changeStat = stat => applyMetric(findMetric(stat, metric.aggregation) || findMetric(stat, aggregationsFor(stat)[0]));
+  // Cambiar el cálculo conserva el dato si aplica; si no, pasa al primer dato que admite ese cálculo.
+  const changeAggregation = aggregation => applyMetric(
+    findMetric(metric.stat, aggregation)
+      || findMetric(listStats().find(stat => aggregationsFor(stat).includes(aggregation)), aggregation),
+  );
 
   const lockNotice = configLocked && (
     <p className="flex items-start gap-2 rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-xs text-muted-foreground">
@@ -73,7 +78,7 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
                 id="goal-stat"
                 value={metric.stat}
                 disabled={mode === 'edit'}
-                onChange={event => changeCombination(event.target.value, metric.aggregation)}
+                onChange={event => changeStat(event.target.value)}
                 className={INPUT_CLASS}
               >
                 {listStats().map(stat => <option key={stat} value={stat}>{STATS[stat]?.label || stat}</option>)}
@@ -83,11 +88,12 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
               <select
                 id="goal-aggregation"
                 value={metric.aggregation}
-                disabled={mode === 'edit' || aggregationsFor(metric.stat).length < 2}
-                onChange={event => changeCombination(metric.stat, event.target.value)}
+                disabled={mode === 'edit'}
+                onChange={event => changeAggregation(event.target.value)}
                 className={INPUT_CLASS}
               >
-                {aggregationsFor(metric.stat).map(aggregation => (
+                {/* Todos los cálculos se pueden elegir; si el dato actual no lo admite, se cambia de dato. */}
+                {Object.values(AGGREGATION).map(aggregation => (
                   <option key={aggregation} value={aggregation}>{AGGREGATION_LABELS[aggregation]}</option>
                 ))}
               </select>
@@ -96,7 +102,12 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
           <p className="text-[11px] text-muted-foreground">
             {mode === 'edit'
               ? 'El dato y el cálculo no se pueden cambiar. Para medir otra cosa, creá un objetivo nuevo.'
-              : <><span className="font-semibold text-foreground/80">{metric.label}:</span> {metric.description}</>}
+              : (
+                <>
+                  <span className="font-semibold text-foreground/80">{metric.label}:</span> {metric.description}
+                  {' '}Cálculos para {STATS[metric.stat]?.label || metric.stat}: {aggregationsFor(metric.stat).map(aggregation => AGGREGATION_LABELS[aggregation]).join(', ')}.
+                </>
+              )}
           </p>
         </div>
 
