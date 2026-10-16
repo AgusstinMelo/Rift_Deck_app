@@ -5,7 +5,7 @@ import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
-import { BarChart3, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { BarChart3, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { computeInsights } from '@/hooks/useInsights';
@@ -987,20 +987,6 @@ export default function Stats() {
           </div>
         </div>
       </div>
-
-      {totalMatches < 10 && (
-        <div className="rd-card p-4 flex items-start gap-3 border-yellow-500/20">
-          <AlertCircle size={18} className="text-yellow-400 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {totalMatches === 1 ? 'Tu primera lectura ya está lista.' : `Lectura inicial sobre ${totalMatches} partidas.`}
-            </p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Estos resultados describen lo que ocurrió hasta ahora. La precisión y la detección de tendencias mejorarán con cada partida que cargues.
-            </p>
-          </div>
-        </div>
-      )}
 
       </section>
 
