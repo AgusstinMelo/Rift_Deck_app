@@ -437,7 +437,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
     });
   };
 
-  const fitsViewport = step === 'allies' || step === 'enemies';
+  const fitsViewport = step === 'allies' || step === 'enemies' || step === 'build';
 
   return (
     <div className={`space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
@@ -632,241 +632,254 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
           {/* Step: Build */}
           {step === 'build' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">
-                  Tu build
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  Selecciona los items, runas y hechizos que usaste
-                </p>
+            <div className="rd-build-step space-y-6">
+              {/* Encabezado: título y build guardada en una sola franja. */}
+              <div className="rd-build-step-header flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                  <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">
+                    Tu build
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    Selecciona los items, runas y hechizos que usaste
+                  </p>
+                </div>
+                <div className="w-full xl:w-[min(36rem,55%)]">
+                  <SavedBuildPicker champion={myChampion} patch={patch} onApply={applySavedBuild} compact />
+                </div>
               </div>
 
-              <SavedBuildPicker champion={myChampion} patch={patch} onApply={applySavedBuild} />
+              {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
+              <div className="rd-build-step-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                <div className="rd-build-items flex min-w-0 flex-col gap-4">
+                  {/* Item Pool */}
+                  <div className="rd-card p-5">
+                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-px bg-primary/50" />
+                      <h3 className="rd-card-title">
+                        Objetos ({selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length}/5 + botas)
+                      </h3>
+                    </div>
+                    </div>
 
-              {/* Runas */}
-              <div className="rd-card p-4">
-                <div className="flex items-center gap-2 mb-5">
-                  <span className="w-5 h-px bg-primary/50" />
-                  <h3 className="rd-card-title">Runas</h3>
+                    <ItemPool
+                      selectedItems={selectedItems}
+                      onRemove={removeItem}
+                    />
+                  </div>
+
+                  {/* Item Browser */}
+                  <ItemBrowser
+                    items={items}
+                    selectedItems={selectedItems}
+                    onSelect={addItem}
+                  />
+
                 </div>
 
-                <div className="space-y-5">
-                  {/* Clave */}
-                  {claveRunes.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-3">
-                        Clave
-                      </p>
+                <div className="rd-build-side flex min-w-0 flex-col gap-4">
+                  {/* Runas */}
+                  <div className="rd-card rd-build-runes p-4">
+                    <div className="flex items-center gap-2 mb-5">
+                      <span className="w-5 h-px bg-primary/50" />
+                      <h3 className="rd-card-title">Runas</h3>
+                    </div>
 
-                      <div className="grid grid-cols-7 gap-x-3 gap-y-3">
-                        {claveRunes.map(rune => (
-                          <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
-<button
-                            type="button"
-                            onClick={() =>
-                              isRuneSelected(rune)
-                                ? setSelectedRunes(prev => prev.filter(r => r.id !== rune.id))
-                                : setSelectedRunes(prev => [
-                                    ...prev.filter(r => r.branch !== 'Clave'),
-                                    rune,
-                                  ])
-                            }
-                            className={`relative w-7 h-7 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                              isRuneSelected(rune)
-                                ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
-                                : 'opacity-45 hover:opacity-85'
-                            }`}
+                    <div className="space-y-5">
+                      {/* Clave */}
+                      {claveRunes.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground mb-3">
+                            Clave
+                          </p>
+
+                          <div className="grid grid-cols-7 gap-x-3 gap-y-3">
+                            {claveRunes.map(rune => (
+                              <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+    <button
+                                type="button"
+                                onClick={() =>
+                                  isRuneSelected(rune)
+                                    ? setSelectedRunes(prev => prev.filter(r => r.id !== rune.id))
+                                    : setSelectedRunes(prev => [
+                                        ...prev.filter(r => r.branch !== 'Clave'),
+                                        rune,
+                                      ])
+                                }
+                                className={`relative w-7 h-7 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                  isRuneSelected(rune)
+                                    ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
+                                    : 'opacity-45 hover:opacity-85'
+                                }`}
+                              >
+                                {rune.image_url ? (
+                                  <img
+                                    src={rune.image_url}
+                                    alt={rune.name}
+                                    className="w-full h-full object-cover rounded-full"
+                                  />
+                                ) : (
+                                  <span className="text-xs font-bold text-primary">
+                                    {rune.name?.[0]}
+                                  </span>
+                                )}
+                              </button>
+                          </EntityHoverCard>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="h-px bg-border/50" />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Rama Principal */}
+                        <div className="min-w-0">
+                          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                            Rama Principal
+                          </label>
+
+                          <select
+                            value={primaryBranch}
+                            onChange={e => handlePrimaryBranchChange(e.target.value)}
+                            className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
                           >
-                            {rune.image_url ? (
-                              <img
-                                src={rune.image_url}
-                                alt={rune.name}
-                                className="w-full h-full object-cover rounded-full"
-                              />
-                            ) : (
-                              <span className="text-xs font-bold text-primary">
-                                {rune.name?.[0]}
-                              </span>
-                            )}
-                          </button>
-                      </EntityHoverCard>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                            {PRIMARY_BRANCHES.map(b => (
+                              <option key={b} value={b}>
+                                {b}
+                              </option>
+                            ))}
+                          </select>
 
-                  <div className="h-px bg-border/50" />
+                          <div className="space-y-3">
+                            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
+                              <div key={group}>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Grupo {group}
+                                </p>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Rama Principal */}
-                    <div className="min-w-0">
-                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                        Rama Principal
-                      </label>
-
-                      <select
-                        value={primaryBranch}
-                        onChange={e => handlePrimaryBranchChange(e.target.value)}
-                        className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
-                      >
-                        {PRIMARY_BRANCHES.map(b => (
-                          <option key={b} value={b}>
-                            {b}
-                          </option>
-                        ))}
-                      </select>
-
-                      <div className="space-y-3">
-                        {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-                          <div key={group}>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              Grupo {group}
-                            </p>
-
-                            <div className="flex flex-wrap gap-2">
-                              {runesInGroup.map(rune => (
-                                <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
-<button
-                                  type="button"
-                                  onClick={() => handleTogglePrimaryRune(rune)}
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                                    isRuneSelected(rune)
-                                      ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
-                                      : 'opacity-45 hover:opacity-85'
-                                  }`}
-                                >
-                                  {rune.image_url ? (
-                                    <img
-                                      src={rune.image_url}
-                                      alt={rune.name}
-                                      className="w-full h-full object-cover rounded-full"
-                                    />
-                                  ) : (
-                                    <span className="text-xs font-bold text-primary">
-                                      {rune.name?.[0]}
-                                    </span>
-                                  )}
-                                </button>
-                      </EntityHoverCard>
-                              ))}
-                            </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {runesInGroup.map(rune => (
+                                    <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+    <button
+                                      type="button"
+                                      onClick={() => handleTogglePrimaryRune(rune)}
+                                      className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                        isRuneSelected(rune)
+                                          ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
+                                          : 'opacity-45 hover:opacity-85'
+                                      }`}
+                                    >
+                                      {rune.image_url ? (
+                                        <img
+                                          src={rune.image_url}
+                                          alt={rune.name}
+                                          className="w-full h-full object-cover rounded-full"
+                                        />
+                                      ) : (
+                                        <span className="text-xs font-bold text-primary">
+                                          {rune.name?.[0]}
+                                        </span>
+                                      )}
+                                    </button>
+                          </EntityHoverCard>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
 
-                    {/* Rama Secundaria */}
-                    <div className="min-w-0">
-                      <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                        Rama Secundaria
-                      </label>
+                        {/* Rama Secundaria */}
+                        <div className="min-w-0">
+                          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                            Rama Secundaria
+                          </label>
 
-                      <select
-                        value={secondaryBranch}
-                        onChange={e => handleSecondaryBranchChange(e.target.value)}
-                        className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
-                      >
-                        {PRIMARY_BRANCHES.map(b => (
-                          <option key={b} value={b}>
-                            {b}
-                          </option>
-                        ))}
-                      </select>
+                          <select
+                            value={secondaryBranch}
+                            onChange={e => handleSecondaryBranchChange(e.target.value)}
+                            className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
+                          >
+                            {PRIMARY_BRANCHES.map(b => (
+                              <option key={b} value={b}>
+                                {b}
+                              </option>
+                            ))}
+                          </select>
 
-                      <div className="space-y-3">
-                        {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-                          <div key={group}>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              Grupo {group}
-                            </p>
+                          <div className="space-y-3">
+                            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
+                              <div key={group}>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Grupo {group}
+                                </p>
 
-                            <div className="flex flex-wrap gap-2">
-                              {runesInGroup.map(rune => (
-                                <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
-<button
-                                  type="button"
-                                  onClick={() => handleToggleSecondaryRune(rune)}
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                                    isRuneSelected(rune)
-                                      ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
-                                      : 'opacity-45 hover:opacity-85'
-                                  }`}
-                                >
-                                  {rune.image_url ? (
-                                    <img
-                                      src={rune.image_url}
-                                      alt={rune.name}
-                                      className="w-full h-full object-cover rounded-full"
-                                    />
-                                  ) : (
-                                    <span className="text-xs font-bold text-primary">
-                                      {rune.name?.[0]}
-                                    </span>
-                                  )}
-                                </button>
-                      </EntityHoverCard>
-                              ))}
-                            </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {runesInGroup.map(rune => (
+                                    <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+    <button
+                                      type="button"
+                                      onClick={() => handleToggleSecondaryRune(rune)}
+                                      className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                        isRuneSelected(rune)
+                                          ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
+                                          : 'opacity-45 hover:opacity-85'
+                                      }`}
+                                    >
+                                      {rune.image_url ? (
+                                        <img
+                                          src={rune.image_url}
+                                          alt={rune.name}
+                                          className="w-full h-full object-cover rounded-full"
+                                        />
+                                      ) : (
+                                        <span className="text-xs font-bold text-primary">
+                                          {rune.name?.[0]}
+                                        </span>
+                                      )}
+                                    </button>
+                          </EntityHoverCard>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Item Pool */}
-              <div className="rd-card p-5">
-                <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-px bg-primary/50" />
-                  <h3 className="rd-card-title">
-                    Objetos ({selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length}/5 + botas)
-                  </h3>
-                </div>
-                </div>
+                  {/* Spells */}
+                  <div className="rd-card rd-build-spells p-4">
+                    <label className="text-sm font-semibold text-foreground block mb-3">
+                      Hechizos ({selectedSpells.length}/2)
+                    </label>
+                    <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-nowrap">
+                      {spells.map(spell => {
+                        const selected = selectedSpells.includes(spell.name);
+                        const disabled = selectedSpells.length >= 2 && !selected;
+                        return (
+                          <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
+    <button
+                            type="button"
+                            onClick={() => toggleSpell(spell.name)}
+                            aria-disabled={disabled}
+                            className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
+                              selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                            } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          >
+                            {spell.image_url
+                              ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
+                              : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                            }
+                          </button>
+                          </EntityHoverCard>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                <ItemPool
-                  selectedItems={selectedItems}
-                  onRemove={removeItem}
-                />
-              </div>
-
-              {/* Item Browser */}
-              <ItemBrowser
-                items={items}
-                selectedItems={selectedItems}
-                onSelect={addItem}
-              />
-
-              {/* Spells */}
-              <div>
-                <label className="text-sm font-semibold text-foreground block mb-3">
-                  Hechizos ({selectedSpells.length}/2)
-                </label>
-                <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-nowrap">
-                  {spells.map(spell => {
-                    const selected = selectedSpells.includes(spell.name);
-                    const disabled = selectedSpells.length >= 2 && !selected;
-                    return (
-                      <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
-<button
-                        type="button"
-                        onClick={() => toggleSpell(spell.name)}
-                        aria-disabled={disabled}
-                        className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
-                          selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                        } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
-                      >
-                        {spell.image_url
-                          ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
-                          : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
-                        }
-                      </button>
-                      </EntityHoverCard>
-                    );
-                  })}
                 </div>
               </div>
 

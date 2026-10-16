@@ -187,7 +187,7 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
   });
 
   return (
-    <div className="rd-card p-4">
+    <div className="rd-card rd-item-browser p-4">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-5 h-px bg-primary/50" />
         <h3 className="rd-card-title">Items</h3>
@@ -219,8 +219,8 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
         </select>
       </div>
 
-      <div className="relative">
-        <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-52 overflow-y-auto pr-1">
+      <div className="rd-item-browser-results relative">
+        <div className="rd-item-browser-grid grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-52 overflow-y-auto pr-1">
           {filtered.map(item => {
             const itemIsEnchant = isEnchant(item);
             const addable = canAddItem(item, selectedItems);
