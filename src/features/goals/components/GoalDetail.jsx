@@ -123,18 +123,18 @@ export default function GoalDetail({ item, matches, now }) {
 
       {/* Franja de tres tarjetas de alto fijo: progreso, evolución y método de cálculo. */}
       <div className="rd-goal-detail-strip grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(0,1fr)]">
-        <section className="rd-card rd-card-watermark flex flex-col gap-2 px-4 py-3">
+        <section className="rd-card rd-card-watermark flex flex-col gap-3 p-4">
           <p className="rd-label">Progreso</p>
           <GoalProgress goal={goal} evaluation={evaluation} compact />
           <InsufficientSampleNotice evaluation={evaluation} compact />
         </section>
 
-        <section className="rd-card flex min-h-[11rem] flex-col gap-1 px-4 py-3">
+        <section className="rd-card flex min-h-[13rem] flex-col gap-1 p-4">
           <p className="rd-label">Evolución</p>
           <GoalEvolutionChart goal={goal} evaluation={evaluation} compact={false} className="min-h-0 flex-1" />
         </section>
 
-        <section className="rd-card rd-goal-detail-explanation flex flex-col gap-1.5 px-4 py-3 md:col-span-2 lg:col-span-1">
+        <section className="rd-card rd-goal-detail-explanation flex flex-col gap-2 p-4 md:col-span-2 lg:col-span-1">
           <p className="rd-label">Cómo se calcula</p>
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <GoalExplanation goal={goal} period={period} compact />
