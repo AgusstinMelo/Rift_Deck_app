@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { notify } from '@/features/goals/notify';
 import { periodDates, todayIn } from '../engine/period';
 import { useGoalMutations } from '../hooks/useGoals';
 import { GOAL_LIMITS } from '../model/goalConstants';
@@ -69,7 +69,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
 
   const onError = setErrors => error => {
     if (error?.errors) setErrors(error.errors);
-    toast({ variant: 'destructive', title: 'No se pudo guardar el check-in', description: error?.message || 'Intentá nuevamente.' });
+    notify({ variant: 'destructive', title: 'No se pudo guardar el check-in', description: error?.message || 'Intentá nuevamente.' });
   };
 
   const create = (values, setErrors) => mutations.createCheckin.mutate({ goal, input: values }, {

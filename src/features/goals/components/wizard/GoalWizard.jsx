@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { notify } from '@/features/goals/notify';
 import { detectTimeZone } from '../../engine/period';
 import { useGoalMutations } from '../../hooks/useGoals';
 import { useGoalCatalog } from '../../hooks/useGoalCatalog';
@@ -70,7 +70,7 @@ export default function GoalWizard({ matches }) {
   const submit = () => {
     create.mutate(draft, {
       onSuccess: goal => {
-        toast({ title: 'Objetivo creado', description: 'Ya podés seguir su progreso.' });
+        notify({ title: 'Objetivo creado', description: 'Ya podés seguir su progreso.' });
         navigate(`/objetivos/${goal.id}`);
       },
       onError: error => {
@@ -78,7 +78,7 @@ export default function GoalWizard({ matches }) {
           setErrors(/** @type {any} */ (error).errors);
           setStep('configure');
         }
-        toast({ variant: 'destructive', title: 'No se pudo crear el objetivo', description: error?.message || 'Intentá nuevamente.' });
+        notify({ variant: 'destructive', title: 'No se pudo crear el objetivo', description: error?.message || 'Intentá nuevamente.' });
       },
     });
   };

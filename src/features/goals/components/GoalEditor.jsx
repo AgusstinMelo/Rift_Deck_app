@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { notify } from '@/features/goals/notify';
 import { useGoalCatalog } from '../hooks/useGoalCatalog';
 import { useGoalMutations } from '../hooks/useGoals';
 import { editPermissions, goalToInput, validateGoalUpdate } from '../validation/goalSchema';
@@ -29,12 +29,12 @@ export default function GoalEditor({ goal, matches, now }) {
     }
     update.mutate({ goal, input }, {
       onSuccess: () => {
-        toast({ title: 'Objetivo actualizado', description: 'El progreso se recalculó con la nueva configuración.' });
+        notify({ title: 'Objetivo actualizado', description: 'El progreso se recalculó con la nueva configuración.' });
         navigate(`/objetivos/${goal.id}`);
       },
       onError: error => {
         if (/** @type {any} */ (error)?.errors) setErrors(/** @type {any} */ (error).errors);
-        toast({ variant: 'destructive', title: 'No se pudo guardar', description: error?.message || 'Intentá nuevamente.' });
+        notify({ variant: 'destructive', title: 'No se pudo guardar', description: error?.message || 'Intentá nuevamente.' });
       },
     });
   };

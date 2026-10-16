@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Archive, ArrowLeft, Ban, CalendarDays, Pencil } from 'lucide-react';
 import { deleteMatch } from '@/api/matchesSupabase';
-import { toast } from '@/components/ui/use-toast';
+import { notify } from '@/features/goals/notify';
 import MatchForm from '@/components/matches/MatchForm';
 import { getMetric } from '../metrics/index';
 import { LIFECYCLE } from '../model/goalConstants';
@@ -63,10 +63,10 @@ export default function GoalDetail({ item, matches, now }) {
 
   const confirmLifecycle = () => setLifecycle.mutate({ goal, lifecycle: pendingLifecycle }, {
     onSuccess: () => {
-      toast({ title: LIFECYCLE_ACTIONS[pendingLifecycle].done });
+      notify({ title: LIFECYCLE_ACTIONS[pendingLifecycle].done });
       setPendingLifecycle(null);
     },
-    onError: error => toast({ variant: 'destructive', title: 'No se pudo actualizar el objetivo', description: error?.message || 'Intentá nuevamente.' }),
+    onError: error => notify({ variant: 'destructive', title: 'No se pudo actualizar el objetivo', description: error?.message || 'Intentá nuevamente.' }),
   });
 
   if (editingMatch) {
