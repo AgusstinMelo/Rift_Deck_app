@@ -32,9 +32,9 @@ const OVERVIEW_TABS = [
   { id: 'historial', label: 'Historial' },
 ];
 
-function GoalsHeader({ activeTab, onTabChange, counts }) {
+function GoalsHeader() {
   return (
-    <header className="rd-goals-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <header className="rd-goals-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="w-8 h-px bg-primary/50" />
@@ -43,25 +43,28 @@ function GoalsHeader({ activeTab, onTabChange, counts }) {
         <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
         <p className="text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
       </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="rd-panel-tabs" role="tablist" aria-label="Secciones de Objetivos">
-          {OVERVIEW_TABS.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
-            >
-              {tab.label} ({counts[tab.id]})
-            </button>
-          ))}
-        </div>
-        <CreateGoalButton />
-      </div>
+      <CreateGoalButton />
     </header>
+  );
+}
+
+/** Barra de pestañas de ancho completo, igual que en Estadísticas. */
+function GoalsTabs({ activeTab, onTabChange, counts }) {
+  return (
+    <div className="rd-goals-header rd-panel-tabs" role="tablist" aria-label="Secciones de Objetivos">
+      {OVERVIEW_TABS.map(tab => (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
+          onClick={() => onTabChange(tab.id)}
+          className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
+        >
+          {tab.label} ({counts[tab.id]})
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -123,7 +126,8 @@ function GoalsOverview({ items }) {
 
   return (
     <>
-      <GoalsHeader
+      <GoalsHeader />
+      <GoalsTabs
         activeTab={activeTab}
         onTabChange={changeTab}
         counts={{ activos: current.length, historial: finished.length + archived.length }}
