@@ -95,10 +95,10 @@ function ErrorState({ onRetry }) {
   );
 }
 
-function ActiveGoalsPanel({ current }) {
+function ActiveGoalsPanel({ current, all }) {
   return (
     <section className="rd-goals-panel" aria-label="Objetivos activos">
-      <GoalsSummary current={current} />
+      <GoalsSummary current={current} all={all} />
       {current.length === 0 ? (
         <div className="rd-card p-6">
           <EmptyState
@@ -130,7 +130,7 @@ function GoalsOverview({ items }) {
         counts={{ activos: current.length, historial: finished.length + archived.length }}
       />
       {activeTab === 'activos'
-        ? <ActiveGoalsPanel current={current} />
+        ? <ActiveGoalsPanel current={current} all={items} />
         : <GoalsHistory finished={finished} archived={archived} />}
     </>
   );

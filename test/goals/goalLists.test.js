@@ -24,14 +24,17 @@ test('agrupa en activos, finalizados y archivados', () => {
   assert.deepEqual(archived.map(i => i.goal.id), ['archived']);
 });
 
-test('resumen de activos: por vencer, en riesgo y programados', () => {
+test('resumen: activos, alcanzados en total, en riesgo y programados', () => {
+  const reached = item({ id: 'done', target: 2 }, { matches: matches(2) });
+  const cancelledReached = item({ id: 'cx', target: 2, lifecycle: 'cancelado' }, { matches: matches(2) });
   const current = [
-    item({ id: 'a', target: 5, endDate: '2026-10-17' }, { matches: matches(2) }),
+    item({ id: 'a', target: 5 }, { matches: matches(2) }),
     item({ id: 'b', metric: 'winrate', target: 60, minSample: 2 }, { matches: matches(2, { result: 'win' }) }),
     item({ id: 'c', metric: 'winrate', target: 60, minSample: 2 }, { matches: matches(2, { result: 'loss' }) }),
     item({ id: 'd', startDate: '2026-11-01', endDate: '2026-11-30' }),
   ];
-  assert.deepEqual(summarizeCurrent(current, MID_PERIOD), { total: 4, dueSoon: 1, onTrack: 1, atRisk: 1, scheduled: 1 });
+  const all = [...current, reached, cancelledReached];
+  assert.deepEqual(summarizeCurrent(current, all), { total: 4, achieved: 1, onTrack: 1, atRisk: 1, scheduled: 1 });
 });
 
 test('finalizado es derivado: alcanzar antes del cierre lo finaliza y borrar datos lo reactiva', () => {

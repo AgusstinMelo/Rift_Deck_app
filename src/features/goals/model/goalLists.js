@@ -1,9 +1,5 @@
 // Agrupaciones de objetivos evaluados para la página y el Dashboard.
 import { LIFECYCLE, OUTCOME, PERIOD_STATUS } from './goalConstants.js';
-import { inclusiveDayCount, todayIn } from '../engine/period.js';
-
-/** Días (incluido hoy) que se consideran "por vencer". */
-const DUE_SOON_DAYS = 3;
 
 /**
  * @typedef {{ goal: any, evaluation: import('./goalConstants.js').GoalEvaluation, checkins: any[], truncated: boolean }} GoalItem
@@ -45,18 +41,24 @@ export function partitionGoals(items) {
   return { current, finished, archived };
 }
 
-/** true si el período está abierto y cierra dentro de los próximos días. */
-export function isDueSoon(item, now = new Date()) {
-  if (item.evaluation.periodStatus !== PERIOD_STATUS.OPEN) return false;
-  const today = todayIn(item.goal.timezone, now);
-  return inclusiveDayCount(today, item.evaluation.period.endDate) <= DUE_SOON_DAYS;
+/**
+ * Objetivos alcanzados en total (finalizados y archivados; los cancelados no cuentan).
+ * Como un objetivo alcanzado pasa a finalizado, se cuenta sobre todos los objetivos.
+ * @param {GoalItem[]} items
+ */
+export function countAchieved(items) {
+  return items.filter(item => item.goal.lifecycle !== LIFECYCLE.CANCELLED && item.evaluation.outcome === OUTCOME.ACHIEVED).length;
 }
 
-/** Conteos para el resumen de objetivos activos. */
-export function summarizeCurrent(current, now = new Date()) {
+/**
+ * Conteos para el resumen de objetivos.
+ * @param {GoalItem[]} current  Objetivos activos.
+ * @param {GoalItem[]} all      Todos los objetivos, para contar los alcanzados.
+ */
+export function summarizeCurrent(current, all = current) {
   return {
     total: current.length,
-    dueSoon: current.filter(item => isDueSoon(item, now)).length,
+    achieved: countAchieved(all),
     onTrack: current.filter(item => item.evaluation.meetsToday === true).length,
     atRisk: current.filter(item => item.evaluation.meetsToday === false).length,
     scheduled: current.filter(item => item.evaluation.outcome === OUTCOME.SCHEDULED).length,

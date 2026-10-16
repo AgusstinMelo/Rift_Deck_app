@@ -67,7 +67,7 @@ export default function GoalsDashboardWidget() {
   if (!access.hasAccess) return null;
 
   const { current } = partitionGoals(items);
-  const summary = summarizeCurrent(current);
+  const summary = summarizeCurrent(current, items);
   // Si se archivan o cierran objetivos, el índice no puede quedar fuera de rango.
   const safeIndex = Math.min(index, Math.max(current.length - 1, 0));
   const go = delta => setIndex(Math.min(Math.max(safeIndex + delta, 0), current.length - 1));
@@ -92,8 +92,7 @@ export default function GoalsDashboardWidget() {
         <>
           <div className="flex items-center justify-between gap-2">
             <p className="min-w-0 truncate text-xs text-muted-foreground">
-              {summary.total} activos
-              {summary.dueSoon > 0 && <> · <span className="text-amber-300">{summary.dueSoon} por vencer</span></>}
+              {summary.total} activos · <span className="text-green-400">{summary.achieved} alcanzados</span>
               {summary.atRisk > 0 && <> · <span className="text-red-400">{summary.atRisk} hoy no cumplirían</span></>}
             </p>
             {current.length > 1 && (
