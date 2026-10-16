@@ -1,6 +1,6 @@
 // Esquema compartido entre la UI y la capa de datos para crear y editar objetivos.
 import { z } from 'zod';
-import { getMetric, hasMetric } from '../metrics/index.js';
+import { getMetric, hasMetric, operatorOf } from '../metrics/index.js';
 import { GOAL_LIMITS, LIFECYCLE, METRIC_KIND, PERIOD_STATUS } from '../model/goalConstants.js';
 import { compactFilters, filtersSchemaFor, getFilter } from '../filters/filterRegistry.js';
 import {
@@ -23,6 +23,7 @@ const goalInputBase = z.object({
     .max(GOAL_LIMITS.DESCRIPTION_MAX, `La descripción admite hasta ${GOAL_LIMITS.DESCRIPTION_MAX} caracteres.`)
     .nullable()),
   metric: z.string({ required_error: 'Elegí una métrica.' }).refine(hasMetric, 'La métrica no existe.'),
+  operator: z.preprocess(emptyToNull, z.string().nullable()).default(null),
   target: optionalNumber,
   minSample: optionalNumber,
   unit: z.preprocess(emptyToNull, z.string().trim().nullable()),
@@ -45,6 +46,12 @@ function refineTarget(input, metric, ctx) {
   }
   if (range.integer && !Number.isInteger(target)) return issue(ctx, ['target'], 'El valor objetivo debe ser un número entero.');
   if (!hasAtMostTwoDecimals(target)) issue(ctx, ['target'], 'El valor objetivo admite hasta dos decimales.');
+}
+
+function refineOperator(input, metric, ctx) {
+  if (input.operator !== null && !metric.operators.includes(input.operator)) {
+    issue(ctx, ['operator'], `La métrica ${metric.label} solo admite la meta "${metric.operator === 'lte' ? 'como máximo' : 'al menos'}".`);
+  }
 }
 
 function refineMinSample(input, metric, ctx) {
@@ -103,6 +110,7 @@ export function goalInputSchema({ now = new Date(), requireOpenEnd = true } = {}
 
     const metric = getMetric(input.metric);
     const today = isValidTimeZone(input.timezone) ? todayIn(input.timezone, now) : null;
+    refineOperator(input, metric, ctx);
     refineTarget(input, metric, ctx);
     refineMinSample(input, metric, ctx);
     refineUnit(input, metric, ctx);
@@ -112,6 +120,7 @@ export function goalInputSchema({ now = new Date(), requireOpenEnd = true } = {}
     const metric = getMetric(input.metric);
     return {
       ...input,
+      operator: input.operator ?? metric.operator,
       filters: metric.allowedFilters.length ? compactFilters(input.filters) : {},
       minSample: metric.kind === METRIC_KIND.PERFORMANCE ? input.minSample : null,
       unit: metric.source === 'checkins' ? input.unit : null,
@@ -145,6 +154,7 @@ export function toGoalRecord(data) {
     name: data.name,
     description: data.description,
     metric: data.metric,
+    operator: data.operator,
     target: data.target,
     min_sample: data.minSample,
     unit: data.unit,
@@ -161,6 +171,7 @@ export function goalToInput(goal) {
     name: goal.name,
     description: goal.description ?? '',
     metric: goal.metric,
+    operator: operatorOf(goal),
     target: Number(goal.target),
     minSample: goal.min_sample ?? null,
     unit: goal.unit ?? '',
@@ -186,7 +197,7 @@ export function editPermissions(goal, now = new Date()) {
   };
 }
 
-const CONFIG_KEYS = ['target', 'minSample', 'unit', 'filters', 'startDate', 'endDate', 'timezone'];
+const CONFIG_KEYS = ['operator', 'target', 'minSample', 'unit', 'filters', 'startDate', 'endDate', 'timezone'];
 
 function sameValue(a, b) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);

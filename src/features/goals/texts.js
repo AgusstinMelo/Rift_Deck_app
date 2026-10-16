@@ -1,7 +1,7 @@
 // Textos de la sección Objetivos. El proyecto no tiene i18n: se centralizan acá.
 import { MATCH_TYPES } from '../../constants/matchTypes.js';
-import { EXCLUSION_REASON, LIFECYCLE, METRIC_KIND, OPERATOR, OUTCOME } from './model/goalConstants.js';
-import { getMetric } from './metrics/index.js';
+import { EXCLUSION_REASON, LIFECYCLE, METRIC_FAMILY, METRIC_KIND, OPERATOR, OUTCOME } from './model/goalConstants.js';
+import { getMetric, operatorOf } from './metrics/index.js';
 
 export const OUTCOME_LABELS = {
   [OUTCOME.SCHEDULED]: 'Programado',
@@ -26,6 +26,11 @@ const REASON_LABELS = {
   [EXCLUSION_REASON.MISSING_RESULT]: 'No tiene resultado registrado',
   [EXCLUSION_REASON.MISSING_DEATHS]: 'No tiene muertes registradas',
   [EXCLUSION_REASON.MISSING_CHAMPION]: 'No tiene campeón registrado',
+  [EXCLUSION_REASON.MISSING_KDA]: 'No tiene asesinatos, muertes y asistencias registrados',
+  [EXCLUSION_REASON.MISSING_KILLS]: 'No tiene asesinatos registrados',
+  [EXCLUSION_REASON.MISSING_ASSISTS]: 'No tiene asistencias registradas',
+  [EXCLUSION_REASON.MISSING_GOLD]: 'No tiene oro registrado',
+  [EXCLUSION_REASON.MISSING_DURATION]: 'No tiene duración registrada',
 };
 
 /** @param {{ reason: string, field?: string }} exclusion */
@@ -75,9 +80,18 @@ export function formatPeriod({ startDate, endDate }) {
   return startDate === endDate ? formatDate(startDate) : `${formatDate(startDate)} – ${formatDate(endDate)}`;
 }
 
-/** "al menos" / "como máximo" según el operador. */
+export const OPERATOR_LABELS = { [OPERATOR.GTE]: 'Al menos', [OPERATOR.LTE]: 'Como máximo' };
+
+export const FAMILY_LABELS = {
+  [METRIC_FAMILY.CUMULATIVE]: 'Acumulativos',
+  [METRIC_FAMILY.AVERAGE]: 'Promedios',
+  [METRIC_FAMILY.PERCENTAGE]: 'Porcentajes',
+  [METRIC_FAMILY.MANUAL]: 'Manuales',
+};
+
+/** "al menos" / "como máximo" según la dirección del objetivo. */
 export function operatorPhrase(goal) {
-  return getMetric(goal.metric).operator === OPERATOR.LTE ? 'como máximo' : 'al menos';
+  return operatorOf(goal) === OPERATOR.LTE ? 'como máximo' : 'al menos';
 }
 
 function listPhrase(values) {
@@ -105,19 +119,26 @@ function objectivePhrase(goal) {
   const target = formatMetricValue(goal, Number(goal.target));
   const filters = describeFilters(goal);
   const withFilters = filters ? ` ${filters}` : '';
+  const op = operatorPhrase(goal);
   switch (goal.metric) {
     case 'partidas_registradas':
       return `Registrar al menos ${target}${withFilters}.`;
+    case 'victorias':
+      return `Ganar al menos ${target}${withFilters}.`;
     case 'winrate':
-      return `Tener un winrate de al menos ${target} en tus partidas${withFilters}.`;
-    case 'promedio_muertes':
-      return `Promediar como máximo ${target} por partida${withFilters}.`;
+      return `Tener un winrate de ${op} ${target} en tus partidas${withFilters}.`;
     case 'porcentaje_campeones':
-      return `Que al menos el ${target} de tus partidas${withFilters} sean con ${listPhrase((goal.filters?.champions || []).map(c => c.name))}.`;
+      return `Que ${op} el ${target} de tus partidas${withFilters} sean con ${listPhrase((goal.filters?.champions || []).map(c => c.name))}.`;
+    case 'promedio_kda':
+      return `Tener un KDA promedio de ${op} ${target}${withFilters}.`;
+    case 'promedio_duracion':
+      return `Que tus partidas duren en promedio ${op} ${target}${withFilters}.`;
     case 'manual':
       return `Sumar al menos ${target} con check-ins manuales.`;
     default:
-      return `Llegar a ${operatorPhrase(goal)} ${target}.`;
+      return getMetric(goal.metric).family === METRIC_FAMILY.AVERAGE
+        ? `Promediar ${op} ${target} por partida${withFilters}.`
+        : `Llegar a ${op} ${target}${withFilters}.`;
   }
 }
 
@@ -142,8 +163,11 @@ export function describeGoal(goal, period) {
     calculation.push('Se dividen las victorias por las partidas con resultado registrado.');
     calculation.push('El winrate registrado depende de las partidas que cargues: no equivale a tu rango real.');
   }
-  if (goal.metric === 'promedio_muertes') {
-    calculation.push('Las partidas sin muertes registradas no cuentan: no se toman como cero.');
+  if (goal.metric === 'promedio_kda') {
+    calculation.push('El KDA de cada partida es (asesinatos + asistencias) / muertes; con 0 muertes vale asesinatos + asistencias.');
+  }
+  if (metric.family === METRIC_FAMILY.AVERAGE) {
+    calculation.push('Las partidas sin ese dato registrado no cuentan: no se toman como cero.');
   }
   if (goal.metric === 'porcentaje_campeones') {
     calculation.push('El total son todas las partidas válidas del período que cumplen los demás filtros, juegues el campeón que juegues.');

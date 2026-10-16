@@ -1,5 +1,5 @@
 // Motor de evaluación de objetivos: funciones puras, sin React ni base de datos.
-import { getMetric } from '../metrics/index.js';
+import { getMetric, operatorOf } from '../metrics/index.js';
 import { EXCLUSION_REASON, METRIC_KIND, OPERATOR, OUTCOME, PERIOD_STATUS } from '../model/goalConstants.js';
 import { FILTER_RESULT, getFilter } from '../filters/filterRegistry.js';
 import { periodDates, periodStatus } from './period.js';
@@ -117,7 +117,8 @@ export function evaluateGoal(goal, data, now) {
   const target = Number(goal.target);
   const sampleSize = contributions.length;
   const minSample = metric.kind === METRIC_KIND.PERFORMANCE ? Number(goal.min_sample ?? metric.defaultMinSample) : null;
-  const meets = meetsTarget(value, target, metric.operator);
+  const operator = operatorOf(goal);
+  const meets = meetsTarget(value, target, operator);
   const { outcome, provisional } = deriveOutcome({ kind: metric.kind, status, meets, sampleSize, minSample });
 
   const isOpenPerformance = metric.kind === METRIC_KIND.PERFORMANCE && status === PERIOD_STATUS.OPEN;
@@ -139,7 +140,7 @@ export function evaluateGoal(goal, data, now) {
     periodStatus: status,
     period,
     kind: metric.kind,
-    operator: metric.operator,
+    operator,
   };
 }
 

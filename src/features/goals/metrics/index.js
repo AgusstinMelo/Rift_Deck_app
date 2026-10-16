@@ -6,4 +6,4 @@ MVP_METRICS.forEach(metric => {
   if (!hasMetric(metric.id)) registerMetric(metric);
 });
 
-export { getMetric, hasMetric, isPerformanceMetric, listMetrics, registerMetric } from './registry.js';
+export { getMetric, hasMetric, isPerformanceMetric, listMetrics, operatorOf, registerMetric } from './registry.js';

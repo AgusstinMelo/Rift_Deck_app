@@ -39,6 +39,18 @@ export function deathsOf(match) {
   return countStatOf(match, 'deaths');
 }
 
+/** Oro de la partida; 0 o vacío se consideran no registrados. */
+export function goldOf(match) {
+  const gold = countStatOf(match, 'gold');
+  return gold ? gold : null;
+}
+
+/** Duración en minutos; 0 o vacío se consideran no registrados. */
+export function durationOf(match) {
+  const duration = countStatOf(match, 'duration_minutes');
+  return duration ? duration : null;
+}
+
 /** Campeón propio de la partida, o null si no fue registrado. */
 export function championOf(match) {
   const id = String(match?.own_champion_id ?? '').trim();

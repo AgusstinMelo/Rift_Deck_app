@@ -1,7 +1,7 @@
 // Registro de métricas de objetivos. Una métrica nueva solo necesita una
 // definición tipada (operador, tipo, filtros, rangos) y sus funciones
 // `measure` y `aggregate`; el motor no cambia.
-import { METRIC_KIND, OPERATOR } from '../model/goalConstants.js';
+import { METRIC_FAMILY, METRIC_KIND, OPERATOR } from '../model/goalConstants.js';
 import { listFilterKeys } from '../filters/filterRegistry.js';
 
 /**
@@ -16,8 +16,10 @@ import { listFilterKeys } from '../filters/filterRegistry.js';
  * @property {string} id
  * @property {string} label
  * @property {string} description
+ * @property {string} family               METRIC_FAMILY (agrupación en la UI)
  * @property {string} kind                 METRIC_KIND
- * @property {string} operator             OPERATOR
+ * @property {string} operator             OPERATOR por defecto
+ * @property {string[]} operators          Direcciones que el usuario puede elegir (incluye la por defecto).
  * @property {'matches' | 'checkins'} source
  * @property {string} unit                 Unidad corta para mostrar ('partidas', '%', 'muertes', o '' si la define el usuario).
  * @property {number} decimals             Decimales al mostrar el valor.
@@ -37,7 +39,12 @@ function assertDefinition(def) {
   const errors = [];
   if (!def.id) errors.push('id');
   if (!Object.values(METRIC_KIND).includes(def.kind)) errors.push('kind');
+  if (!Object.values(METRIC_FAMILY).includes(def.family)) errors.push('family');
   if (!Object.values(OPERATOR).includes(def.operator)) errors.push('operator');
+  if (!Array.isArray(def.operators) || !def.operators.includes(def.operator)
+    || def.operators.some(op => !Object.values(OPERATOR).includes(op))) errors.push('operators');
+  // Una métrica acumulativa solo puede crecer: su meta siempre es "al menos".
+  if (def.kind === METRIC_KIND.CUMULATIVE && def.operators.some(op => op !== OPERATOR.GTE)) errors.push('operators acumulativa');
   if (!['matches', 'checkins'].includes(def.source)) errors.push('source');
   if (typeof def.measure !== 'function' || typeof def.aggregate !== 'function') errors.push('measure/aggregate');
   const knownFilters = listFilterKeys();
@@ -70,6 +77,12 @@ export function hasMetric(id) {
 /** @returns {MetricDefinition[]} */
 export function listMetrics() {
   return [...metrics.values()];
+}
+
+/** Dirección efectiva de un objetivo: la elegida si la métrica la admite, o la por defecto. */
+export function operatorOf(goal) {
+  const metric = getMetric(goal.metric);
+  return metric.operators.includes(goal.operator) ? goal.operator : metric.operator;
 }
 
 export function isPerformanceMetric(id) {

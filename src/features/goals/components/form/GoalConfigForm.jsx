@@ -1,7 +1,7 @@
 import { Lock } from 'lucide-react';
 import { getMetric, listMetrics } from '../../metrics/index';
-import { GOAL_LIMITS, METRIC_KIND } from '../../model/goalConstants';
-import { operatorPhrase, unitOf } from '../../texts';
+import { GOAL_LIMITS, METRIC_FAMILY, METRIC_KIND } from '../../model/goalConstants';
+import { FAMILY_LABELS, OPERATOR_LABELS, operatorPhrase, unitOf } from '../../texts';
 import { INPUT_CLASS } from '../goalUi';
 import Field from './Field';
 import GoalFiltersFields from './GoalFiltersFields';
@@ -15,6 +15,7 @@ export function draftForMetric(draft, metricId) {
   return {
     ...draft,
     metric: metricId,
+    operator: metric.operator,
     target: metric.target.default,
     minSample: metric.defaultMinSample,
     unit: metric.source === 'checkins' ? draft.unit : '',
@@ -63,10 +64,12 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
             onChange={event => onChange(draftForMetric(value, event.target.value))}
             className={INPUT_CLASS}
           >
-            {listMetrics().map(option => (
-              <option key={option.id} value={option.id}>
-                {option.label} ({option.kind === METRIC_KIND.CUMULATIVE ? 'acumulativa' : 'rendimiento'})
-              </option>
+            {Object.values(METRIC_FAMILY).map(family => (
+              <optgroup key={family} label={FAMILY_LABELS[family]}>
+                {listMetrics().filter(option => option.family === family).map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </Field>
@@ -105,8 +108,21 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
             </Field>
           )}
 
+          {metric.operators.length > 1 && (
+            <Field label="Meta" htmlFor="goal-operator" hint="Si el valor tiene que quedar por encima o por debajo." error={errors.operator}>
+              <select
+                id="goal-operator"
+                value={value.operator || metric.operator}
+                onChange={event => set('operator', event.target.value)}
+                className={INPUT_CLASS}
+              >
+                {metric.operators.map(op => <option key={op} value={op}>{OPERATOR_LABELS[op]}</option>)}
+              </select>
+            </Field>
+          )}
+
           <Field
-            label={`Valor objetivo (${operatorPhrase({ metric: value.metric })}${unit ? ` · ${unit}` : ''})`}
+            label={`Valor objetivo (${operatorPhrase({ metric: value.metric, operator: value.operator })}${unit ? ` · ${unit}` : ''})`}
             htmlFor="goal-target"
             hint={`Entre ${metric.target.min} y ${metric.target.max}.`}
             error={errors.target}

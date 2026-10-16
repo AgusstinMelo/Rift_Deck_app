@@ -26,6 +26,14 @@ export const OPERATOR = Object.freeze({
   LTE: 'lte',
 });
 
+/** Familia de una métrica: agrupa la elección de objetivos en la UI. */
+export const METRIC_FAMILY = Object.freeze({
+  CUMULATIVE: 'acumulativos',
+  AVERAGE: 'promedios',
+  PERCENTAGE: 'porcentajes',
+  MANUAL: 'manual',
+});
+
 export const PERIOD_STATUS = Object.freeze({
   SCHEDULED: 'scheduled',
   OPEN: 'open',
@@ -40,6 +48,11 @@ export const EXCLUSION_REASON = Object.freeze({
   MISSING_RESULT: 'sin_resultado',
   MISSING_DEATHS: 'sin_muertes',
   MISSING_CHAMPION: 'sin_campeon',
+  MISSING_KDA: 'sin_kda',
+  MISSING_KILLS: 'sin_asesinatos',
+  MISSING_ASSISTS: 'sin_asistencias',
+  MISSING_GOLD: 'sin_oro',
+  MISSING_DURATION: 'sin_duracion',
 });
 
 export const LANES = Object.freeze(['top', 'jungler', 'mid', 'adc', 'support']);
@@ -62,6 +75,7 @@ export const GOAL_LIMITS = Object.freeze({
  * @property {string} name
  * @property {string|null} [description]
  * @property {string} metric
+ * @property {string} [operator]    OPERATOR; si falta se usa el de la métrica.
  * @property {number} target
  * @property {number|null} min_sample
  * @property {string|null} [unit]
