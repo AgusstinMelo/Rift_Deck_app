@@ -5,7 +5,7 @@ import MembershipGate from '@/components/membership/MembershipGate';
 import { useGoalsAccess } from '@/features/goals/access';
 import { useEvaluatedGoals } from '@/features/goals/hooks/useGoals';
 import { partitionGoals } from '@/features/goals/model/goalLists';
-import GoalCard from '@/features/goals/components/GoalCard';
+import GoalsCarousel from '@/features/goals/components/GoalsCarousel';
 import GoalDetail from '@/features/goals/components/GoalDetail';
 import GoalEditor from '@/features/goals/components/GoalEditor';
 import GoalsHistory from '@/features/goals/components/GoalsHistory';
@@ -98,22 +98,18 @@ function ActiveGoalsPanel({ current }) {
   return (
     <section className="rd-goals-panel" aria-label="Objetivos activos">
       <GoalsSummary current={current} />
-      <div className="rd-goals-scroll">
-        {current.length === 0 ? (
-          <div className="rd-card p-6">
-            <EmptyState
-              icon={Target}
-              title="Sin objetivos activos"
-              description="Creá un objetivo para seguir tu progreso con tus partidas registradas."
-              action={<CreateGoalButton />}
-            />
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {current.map(item => <GoalCard key={item.goal.id} item={item} />)}
-          </div>
-        )}
-      </div>
+      {current.length === 0 ? (
+        <div className="rd-card p-6">
+          <EmptyState
+            icon={Target}
+            title="Sin objetivos activos"
+            description="Creá un objetivo para seguir tu progreso con tus partidas registradas."
+            action={<CreateGoalButton />}
+          />
+        </div>
+      ) : (
+        <GoalsCarousel items={current} label="Objetivos activos" />
+      )}
     </section>
   );
 }

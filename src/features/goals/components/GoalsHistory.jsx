@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { History } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
-import GoalCard from './GoalCard';
+import GoalsCarousel from './GoalsCarousel';
 
 /**
  * Panel de historial: objetivos finalizados (período cerrado o cancelados) y archivados.
- * La sub-selección queda fija y solo scrollea la grilla.
+ * La sub-selección queda fija y los objetivos se recorren en horizontal.
  * @param {{ finished: import('../model/goalLists').GoalItem[], archived: import('../model/goalLists').GoalItem[] }} props
  */
 export default function GoalsHistory({ finished, archived }) {
@@ -34,22 +34,18 @@ export default function GoalsHistory({ finished, archived }) {
         ))}
       </div>
 
-      <div className="rd-goals-scroll">
-        {rows.length === 0 ? (
-          <div className="rd-card p-4">
-            <EmptyState
-              icon={History}
-              title={tab === 'finished' ? 'Sin objetivos finalizados' : 'Sin objetivos archivados'}
-              description={tab === 'finished' ? 'Acá vas a ver los objetivos cuyo período cerró o que cancelaste.' : 'Archivá objetivos finalizados para ordenar tu historial.'}
-              action={null}
-            />
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {rows.map(item => <GoalCard key={item.goal.id} item={item} />)}
-          </div>
-        )}
-      </div>
+      {rows.length === 0 ? (
+        <div className="rd-card p-4">
+          <EmptyState
+            icon={History}
+            title={tab === 'finished' ? 'Sin objetivos finalizados' : 'Sin objetivos archivados'}
+            description={tab === 'finished' ? 'Acá vas a ver los objetivos cuyo período cerró o que cancelaste.' : 'Archivá objetivos finalizados para ordenar tu historial.'}
+            action={null}
+          />
+        </div>
+      ) : (
+        <GoalsCarousel key={tab} items={rows} label={tab === 'finished' ? 'Objetivos finalizados' : 'Objetivos archivados'} />
+      )}
     </section>
   );
 }

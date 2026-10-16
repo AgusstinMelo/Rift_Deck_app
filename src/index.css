@@ -717,10 +717,9 @@
   }
 }
 
-/* Objetivos: encabezado, pestañas y resumen fijos; sólo scrollea la lista de objetivos. */
+/* Objetivos: encabezado, pestañas y resumen fijos; los objetivos se recorren en un carril horizontal. */
 .rd-goals-layout,
-.rd-goals-panel,
-.rd-goals-scroll {
+.rd-goals-panel {
   min-height: 0;
 }
 
@@ -749,17 +748,65 @@
     gap: 1rem;
   }
 
-  .rd-goals-panel > :not(.rd-goals-scroll) {
+  .rd-goals-panel > :not(.rd-goals-carousel) {
     flex: none;
   }
 
-  .rd-goals-scroll {
+  /* El carril horizontal ocupa el alto restante y cada tarjeta se estira a ese alto. */
+  .rd-goals-carousel {
+    display: flex;
     flex: 1 1 auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 0.35rem;
-    scrollbar-gutter: stable;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-track {
+    flex: 1 1 auto;
+    min-height: 0;
+    overscroll-behavior-x: contain;
+  }
+
+  .rd-goals-track > * {
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* La tarjeta nunca supera el alto del carril: el gráfico cede espacio si hace falta. */
+  .rd-goals-track .rd-goal-card {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goals-track .rd-goal-card-chart,
+  .rd-goals-track .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+}
+
+.rd-goals-carousel {
+  min-height: 0;
+}
+
+/* Se navega con las flechas, swipe o teclado: sin barra de scroll visible. */
+.rd-goals-track {
+  scrollbar-width: none;
+}
+
+.rd-goals-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-goals-carousel > * + * {
+    margin-top: 0.75rem;
+  }
+
+  .rd-goals-track > * {
+    min-height: 26rem;
   }
 }
 
