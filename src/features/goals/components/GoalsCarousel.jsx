@@ -56,7 +56,8 @@ export default function GoalsCarousel({ items, label }) {
 
   return (
     <div className="rd-goals-carousel">
-      <div className="flex items-center justify-between gap-3">
+      {/* La navegación solo aparece cuando hay objetivos fuera de la vista. */}
+      <div className={`items-center justify-between gap-3 ${nav.canPrev || nav.canNext ? 'flex' : 'hidden'}`}>
         <p className="text-xs text-muted-foreground" aria-live="polite">
           {nav.first === nav.last ? `${nav.first}` : `${nav.first}–${nav.last}`} de {items.length}
         </p>

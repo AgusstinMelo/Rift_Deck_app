@@ -35,9 +35,11 @@ function CumulativeProgress({ goal, evaluation, compact }) {
   );
 }
 
-function TodayIndicator({ evaluation }) {
+function TodayIndicator({ evaluation, compact }) {
   if (evaluation.meetsToday === null) return null;
   const notEnough = evaluation.sampleSize < evaluation.minSample;
+  // En las tarjetas, el aviso de evidencia insuficiente ya lo dice.
+  if (notEnough && compact) return null;
   if (notEnough) {
     return (
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -79,7 +81,7 @@ function PerformanceProgress({ goal, evaluation, compact }) {
           Muestra: <span className={`font-semibold ${sampleTone}`}>{evaluation.sampleSize}/{evaluation.minSample}</span>
         </span>
       </div>
-      {evaluation.periodStatus === PERIOD_STATUS.OPEN && <TodayIndicator evaluation={evaluation} />}
+      {evaluation.periodStatus === PERIOD_STATUS.OPEN && <TodayIndicator evaluation={evaluation} compact={compact} />}
     </div>
   );
 }

@@ -3,12 +3,10 @@ import { summarizeCurrent } from '../model/goalLists';
 
 function SummaryStat({ label, value, icon: Icon, tone }) {
   return (
-    <div className="rd-card rd-card-watermark flex items-center justify-between gap-3 p-4">
-      <div>
-        <p className="rd-label">{label}</p>
-        <p className={`font-rajdhani text-3xl font-bold tracking-[-0.08em] ${tone}`}>{value}</p>
-      </div>
-      <Icon size={20} className={tone} />
+    <div className="rd-card flex items-center gap-3 px-4 py-2.5">
+      <Icon size={18} className={`shrink-0 ${tone}`} />
+      <p className="rd-label min-w-0 flex-1 truncate">{label}</p>
+      <p className={`font-rajdhani text-2xl font-bold leading-none tracking-[-0.06em] ${tone}`}>{value}</p>
     </div>
   );
 }

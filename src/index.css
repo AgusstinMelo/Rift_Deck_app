@@ -781,6 +781,10 @@
     overflow: hidden;
   }
 
+  .rd-goals-track .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
   .rd-goals-track .rd-goal-card-chart,
   .rd-goals-track .rd-goal-card-chart > div {
     min-height: 0;
@@ -803,10 +807,6 @@
 @media (max-width: 1023px), (max-height: 699px) {
   .rd-goals-carousel > * + * {
     margin-top: 0.75rem;
-  }
-
-  .rd-goals-track > * {
-    min-height: 26rem;
   }
 }
 
