@@ -693,7 +693,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             Clave
                           </p>
 
-                          <div className="flex flex-wrap justify-between gap-1.5">
+                          <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
                             {claveRunes.map(rune => (
                               <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
     <button
@@ -706,7 +706,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                         rune,
                                       ])
                                 }
-                                className={`relative w-7 h-7 xl:w-8 xl:h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                className={`relative aspect-square w-full max-w-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                   isRuneSelected(rune)
                                     ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
                                     : 'opacity-45 hover:opacity-85'
