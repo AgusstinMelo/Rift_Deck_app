@@ -6,6 +6,7 @@ import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
+import { matchKda } from '@/domain/matchStats';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
@@ -118,6 +119,46 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
       </div>
       </div>
     </div>
+  );
+}
+
+/** Selector segmentado de dos o más opciones (resultado, lado del mapa). */
+function SegmentedChoice({ value, onChange, options }) {
+  return (
+    <div className="flex gap-2">
+      {options.map(option => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${
+            value === option.value ? option.activeClass : `border-border text-muted-foreground ${option.hoverClass}`
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Campo numérico de estadística: vacío significa "sin dato", no cero. */
+function StatInput({ label, value, onChange, placeholder = '—', autoFocus = false }) {
+  return (
+    <label className="block min-w-0">
+      <span className="text-xs text-muted-foreground block mb-1">{label}</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min="0"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-center text-base font-semibold text-foreground placeholder:font-normal placeholder:text-muted-foreground/60 outline-none focus:border-primary/40 transition-all"
+      />
+    </label>
   );
 }
 
@@ -437,7 +478,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
     });
   };
 
-  const fitsViewport = step === 'allies' || step === 'enemies' || step === 'build';
+  const kdaPreview = kills !== '' && deaths !== '' && assists !== ''
+    ? matchKda(Number(kills), Number(deaths), Number(assists)).toFixed(2)
+    : '—';
+  const customTags = tags.filter(tag => !PRESET_MATCH_TAGS.some(preset => preset.toLowerCase() === tag.toLowerCase()));
+
+  const fitsViewport = ['allies', 'enemies', 'build', 'stats'].includes(step);
 
   return (
     <div className={`space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
@@ -906,96 +952,76 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
           {/* Step: Stats */}
       {step === 'stats' && (
-        <div className="space-y-6">
+        <div className="rd-statsstep space-y-6">
           <div>
             <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Detalles de la partida</h2>
             <p className="text-muted-foreground text-sm">Completa los datos de tu rendimiento</p>
           </div>
 
-          {/* Result */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-2">Resultado</label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setResult('win')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${
-                  result === 'win'
-                    ? 'border-green-500 bg-green-500/10 text-green-400'
-                    : 'border-border text-foreground hover:border-green-500/50'
-                }`}
-              >
-                Victoria
-              </button>
-              <button
-                onClick={() => setResult('loss')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${
-                  result === 'loss'
-                    ? 'border-red-500 bg-red-500/10 text-red-400'
-                    : 'border-border text-foreground hover:border-red-500/50'
-                }`}
-              >
-                Derrota
-              </button>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: 'Asesinatos', value: kills, setValue: setKills, placeholder: '—' },
-              { label: 'Muertes', value: deaths, setValue: setDeaths, placeholder: '—' },
-              { label: 'Asistencias', value: assists, setValue: setAssists, placeholder: '—' },
-              { label: 'Oro', value: gold, setValue: setGold, placeholder: '1000' },
-              { label: 'Duración (min)', value: duration, setValue: setDuration, placeholder: '20', colSpan: 'col-span-2' },
-            ].map((field, i) => (
-              <div key={i} className={field.colSpan || ''}>
-                <label className="text-xs text-muted-foreground block mb-1">{field.label}</label>
-                <input
-                  type="number"
-                  value={field.value}
-                  onChange={e => field.setValue(e.target.value)}
-                  placeholder={field.placeholder}
-                  className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
-                />
+          <div className="rd-statsstep-body grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            {/* Resultado y rendimiento: lo que se carga en todas las partidas. */}
+            <section className="rd-card flex flex-col gap-5 p-4 md:p-5" aria-label="Resultado y rendimiento">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-2">Resultado</p>
+                  <SegmentedChoice
+                    value={result}
+                    onChange={setResult}
+                    options={[
+                      { value: 'win', label: 'Victoria', activeClass: 'border-green-500 bg-green-500/10 text-green-400', hoverClass: 'hover:border-green-500/50' },
+                      { value: 'loss', label: 'Derrota', activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
+                    ]}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-2">
+                    Equipo <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                  </p>
+                  <SegmentedChoice
+                    value={side}
+                    onChange={value => setSide(side === value ? '' : value)}
+                    options={[
+                      { value: 'blue', label: 'Azul', activeClass: 'border-blue-500 bg-blue-500/10 text-blue-400', hoverClass: 'hover:border-blue-500/50' },
+                      { value: 'red', label: 'Rojo', activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
+                    ]}
+                  />
+                </div>
               </div>
-            ))}
-          </div>
 
-          {/* Side */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-2">Equipo <span className="text-muted-foreground font-normal text-xs">(opcional)</span></label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setSide(side === 'blue' ? '' : 'blue')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${
-                  side === 'blue'
-                    ? 'border-blue-500 bg-blue-500/10 text-blue-400'
-                    : 'border-border text-muted-foreground hover:border-blue-500/50'
-                }`}
-              >
-                Azul
-              </button>
-              <button
-                onClick={() => setSide(side === 'red' ? '' : 'red')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${
-                  side === 'red'
-                    ? 'border-red-500 bg-red-500/10 text-red-400'
-                    : 'border-border text-muted-foreground hover:border-red-500/50'
-                }`}
-              >
-                Rojo
-              </button>
-            </div>
-            </div>
-
-            {/* Tags and Notes */}
-            <div className="space-y-3">
               <div>
-                <label className="text-sm font-semibold text-foreground block mb-3">Etiquetas</label>
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="mb-2 flex items-baseline justify-between gap-3">
+                  <p className="text-sm font-semibold text-foreground">K / D / A</p>
+                  <p className="text-xs text-muted-foreground">
+                    KDA <span className="font-semibold text-primary">{kdaPreview}</span>
+                  </p>
+                </div>
+                <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-end gap-2">
+                  <StatInput label="Asesinatos" value={kills} onChange={setKills} autoFocus />
+                  <span className="pb-2 text-lg text-muted-foreground">/</span>
+                  <StatInput label="Muertes" value={deaths} onChange={setDeaths} />
+                  <span className="pb-2 text-lg text-muted-foreground">/</span>
+                  <StatInput label="Asistencias" value={assists} onChange={setAssists} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <StatInput label="Oro" value={gold} onChange={setGold} placeholder="ej. 9500" />
+                <StatInput label="Duración (min)" value={duration} onChange={setDuration} placeholder="ej. 18" />
+              </div>
+              <p className="mt-auto text-[11px] text-muted-foreground">
+                Los datos vacíos se guardan como “sin dato”: no cuentan como cero en tus estadísticas ni en tus objetivos.
+              </p>
+            </section>
+
+            {/* Contexto opcional: etiquetas y notas. */}
+            <section className="rd-card rd-statsstep-context flex flex-col gap-4 p-4 md:p-5" aria-label="Contexto">
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">
+                  Etiquetas <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
                   {PRESET_MATCH_TAGS.map(tag => {
                     const isSelected = tags.some(selectedTag => selectedTag.toLowerCase() === tag.toLowerCase());
-
                     return (
                       <button
                         key={tag}
@@ -1012,8 +1038,19 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                       </button>
                     );
                   })}
+                  {customTags.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      title="Quitar etiqueta"
+                      className="px-3 py-1.5 rounded-lg text-sm border bg-primary/20 border-primary/50 text-primary transition-all hover:bg-primary/30"
+                    >
+                      {tag} ×
+                    </button>
+                  ))}
                 </div>
-                <div className="flex gap-2">
+                <div className="mt-2 flex gap-2">
                   <input
                     type="text"
                     value={tagInput}
@@ -1024,51 +1061,42 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                         addTag();
                       }
                     }}
-                    placeholder="Agregar etiqueta..."
+                    placeholder="Etiqueta propia (Enter para agregar)"
                     className="min-w-0 flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
                   />
                   <button
                     type="button"
                     onClick={addTag}
-                    className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                    className="px-3 py-2 rounded-xl border border-primary/30 bg-primary/15 text-primary text-sm font-medium hover:bg-primary/25 transition-colors"
                   >
                     Agregar
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {tags.map(tag => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      title="Quitar etiqueta"
-                      className="px-3 py-1.5 rounded-lg text-sm border bg-primary/20 border-primary/50 text-primary transition-all hover:bg-primary/30"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Notas</label>
+              <div className="rd-statsstep-notes flex min-h-0 flex-1 flex-col">
+                <label htmlFor="match-notes" className="text-sm font-semibold text-foreground mb-2">
+                  Notas <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                </label>
                 <textarea
+                  id="match-notes"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   placeholder="Observaciones sobre la partida..."
-                  className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all resize-none h-24"
+                  className="min-h-24 w-full flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all resize-none"
                 />
               </div>
-            </div>
+            </section>
+          </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-4 border-t border-border">
-              <button
-                onClick={() => setStep('build')}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
-              >
-                <ArrowLeft size={16} /> Atrás
-              </button>
+          {/* Actions */}
+          <div className="flex gap-3 pt-4 border-t border-border">
+            <button
+              onClick={() => setStep('build')}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
+            >
+              <ArrowLeft size={16} /> Atrás
+            </button>
             <button
               onClick={onCancel}
               className="flex-1 px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors"

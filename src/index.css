@@ -909,6 +909,34 @@
   }
 }
 
+/* Registrar partida, paso "Detalles de la partida": dos tarjetas que llenan el alto y botones fijos. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-match-builder-fit > .rd-statsstep {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-statsstep > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-statsstep > .rd-statsstep-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-statsstep-body > * {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
 /* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
    y las acciones del paso quedan siempre visibles abajo. */
 @media (min-width: 1024px) and (min-height: 700px) {
