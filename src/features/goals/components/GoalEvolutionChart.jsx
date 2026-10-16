@@ -30,18 +30,25 @@ export default function GoalEvolutionChart({ goal, evaluation, compact = false, 
   /** @type {import('recharts').YAxisProps['domain']} */
   const yDomain = isPercent ? [0, 100] : [0, 'auto'];
   const allowDecimals = !metric.target.integer;
+  // Ancho del eje según la etiqueta más larga posible (valores, meta y "100%"), para que nunca se corte.
+  const fontSize = compact ? 10 : 11;
+  const longestLabel = isPercent ? '100%' : String(Math.ceil(Math.max(evaluation.target, ...data.map(point => point.value ?? 0))));
+  // Margen extra: el eje puede redondear hacia arriba (95 → 100) y los decimales suman ".5".
+  const extraChars = isPercent ? 0 : allowDecimals ? 2 : 1;
+  const yAxisWidth = Math.ceil((longestLabel.length + extraChars) * fontSize * 0.62) + 10;
 
   return (
     <div className={`w-full ${className}`} aria-label="Evolución del objetivo">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: compact ? -24 : -12 }}>
+        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis dataKey="label" tick={tick} tickLine={false} axisLine={false} minTickGap={16} />
           <YAxis
             tick={tick}
             tickLine={false}
             axisLine={false}
-            width={44}
+            width={yAxisWidth}
+            ticks={isPercent ? [0, 25, 50, 75, 100] : undefined}
             domain={yDomain}
             allowDecimals={allowDecimals}
             allowDataOverflow={isPercent}
