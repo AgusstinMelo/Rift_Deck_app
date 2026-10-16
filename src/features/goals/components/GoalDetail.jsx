@@ -9,6 +9,7 @@ import { getMetric } from '../metrics/index';
 import { LIFECYCLE, METRIC_KIND } from '../model/goalConstants';
 import { useGoalCatalog } from '../hooks/useGoalCatalog';
 import { useGoalMutations } from '../hooks/useGoals';
+import { isCurrent } from '../model/goalLists';
 import { editPermissions } from '../validation/goalSchema';
 import { formatPeriod } from '../texts';
 import ConfirmDialog from './ConfirmDialog';
@@ -89,7 +90,7 @@ export default function GoalDetail({ item, matches, now }) {
     <div className="space-y-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
-          <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
+          <Link to={isCurrent(item) ? "/objetivos" : "/objetivos?tab=historial"} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
             <ArrowLeft size={14} /> Objetivos
           </Link>
           <p className="rd-label">{metric.label}</p>

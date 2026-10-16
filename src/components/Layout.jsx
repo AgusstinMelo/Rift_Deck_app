@@ -20,8 +20,8 @@ const navItems = [
   { path: '/tierlist', label: 'Tierlist', icon: TrendingUp },
   { path: '/build-calculator', label: 'Builds', icon: Wrench },
   { path: '/matches', label: 'Partidas', icon: Swords },
-  { path: '/stats', label: 'Estadísticas', icon: BarChart3 },
   { path: '/objetivos', label: 'Objetivos', icon: Target },
+  { path: '/stats', label: 'Estadísticas', icon: BarChart3 },
   { path: '/suggester', label: 'Sugeridor', icon: Sparkles },
 ];
 

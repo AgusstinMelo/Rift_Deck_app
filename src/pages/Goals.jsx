@@ -1,4 +1,4 @@
-import { Link, Route, Routes, useParams } from 'react-router-dom';
+import { Link, Route, Routes, useMatch, useParams, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Plus, Target } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import MembershipGate from '@/components/membership/MembershipGate';
@@ -27,9 +27,14 @@ function CreateGoalButton() {
   );
 }
 
-function GoalsHeader() {
+const OVERVIEW_TABS = [
+  { id: 'activos', label: 'Objetivos activos' },
+  { id: 'historial', label: 'Historial' },
+];
+
+function GoalsHeader({ activeTab, onTabChange, counts }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <header className="rd-goals-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="w-8 h-px bg-primary/50" />
@@ -38,8 +43,25 @@ function GoalsHeader() {
         <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
         <p className="text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
       </div>
-      <CreateGoalButton />
-    </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="rd-panel-tabs" role="tablist" aria-label="Secciones de Objetivos">
+          {OVERVIEW_TABS.map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
+            >
+              {tab.label} ({counts[tab.id]})
+            </button>
+          ))}
+        </div>
+        <CreateGoalButton />
+      </div>
+    </header>
   );
 }
 
@@ -69,18 +91,11 @@ function ErrorState({ onRetry }) {
   );
 }
 
-function GoalsOverview({ items }) {
-  const { current, finished, archived } = partitionGoals(items);
+function ActiveGoalsPanel({ current }) {
   return (
-    <div className="space-y-6">
-      <GoalsHeader />
+    <section className="rd-goals-panel" aria-label="Objetivos activos">
       <GoalsSummary current={current} />
-
-      <section className="space-y-3" aria-label="Objetivos activos">
-        <div className="flex items-center gap-2">
-          <span className="h-px w-4 bg-primary/50" />
-          <h2 className="rd-card-title">Objetivos activos</h2>
-        </div>
+      <div className="rd-goals-scroll">
         {current.length === 0 ? (
           <div className="rd-card p-6">
             <EmptyState
@@ -95,10 +110,28 @@ function GoalsOverview({ items }) {
             {current.map(item => <GoalCard key={item.goal.id} item={item} />)}
           </div>
         )}
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <GoalsHistory finished={finished} archived={archived} />
-    </div>
+function GoalsOverview({ items }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') === 'historial' ? 'historial' : 'activos';
+  const { current, finished, archived } = partitionGoals(items);
+  const changeTab = tab => setSearchParams(tab === 'activos' ? {} : { tab }, { replace: true });
+
+  return (
+    <>
+      <GoalsHeader
+        activeTab={activeTab}
+        onTabChange={changeTab}
+        counts={{ activos: current.length, historial: finished.length + archived.length }}
+      />
+      {activeTab === 'activos'
+        ? <ActiveGoalsPanel current={current} />
+        : <GoalsHistory finished={finished} archived={archived} />}
+    </>
   );
 }
 
@@ -139,6 +172,7 @@ function NewGoal({ matches }) {
 }
 
 export default function Goals() {
+  const isOverview = Boolean(useMatch('/objetivos'));
   const access = useGoalsAccess();
   const { items, matches, now, isLoading, error, refetch } = useEvaluatedGoals();
 
@@ -160,5 +194,7 @@ export default function Goals() {
     );
   }
 
-  return <div className="rd-page rd-dashboard">{content}</div>;
+  // La vista general se ajusta al viewport; detalle, edición y creación scrollean normal.
+  const layoutClass = isOverview && !isLoading && !error ? 'rd-goals-layout' : '';
+  return <div className={`rd-page rd-dashboard ${layoutClass}`}>{content}</div>;
 }

@@ -717,6 +717,59 @@
   }
 }
 
+/* Objetivos: encabezado, pestañas y resumen fijos; sólo scrollea la lista de objetivos. */
+.rd-goals-layout,
+.rd-goals-panel,
+.rd-goals-scroll {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-goals-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goals-header {
+    flex: none;
+  }
+
+  .rd-goals-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .rd-goals-panel > :not(.rd-goals-scroll) {
+    flex: none;
+  }
+
+  .rd-goals-scroll {
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-gutter: stable;
+  }
+}
+
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-goals-layout > * + *,
+  .rd-goals-panel > * + * {
+    margin-top: 1.25rem;
+  }
+}
+
 /* Tierlist: encabezado y filtros fijos; sólo scrollea la tierlist o la tabla. */
 .rd-tierlist-layout,
 .rd-tierlist-scroll {
