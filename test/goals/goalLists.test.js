@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluateGoal } from '../../src/features/goals/engine/evaluateGoal.js';
-import { isFinished, partitionGoals, summarizeCurrent } from '../../src/features/goals/model/goalLists.js';
+import { isFinished, partitionGoals, successRate, summarizeCurrent } from '../../src/features/goals/model/goalLists.js';
 import { MID_PERIOD, makeGoal, matches } from './helpers.js';
 
 const item = (goalOverrides, data = { matches: [] }) => {
@@ -24,17 +24,20 @@ test('agrupa en activos, finalizados y archivados', () => {
   assert.deepEqual(archived.map(i => i.goal.id), ['archived']);
 });
 
-test('resumen: activos, alcanzados en total, en riesgo y programados', () => {
+test('resumen: activos, programados, por vencer, alcanzados y tasa de logro', () => {
   const reached = item({ id: 'done', target: 2 }, { matches: matches(2) });
   const cancelledReached = item({ id: 'cx', target: 2, lifecycle: 'cancelado' }, { matches: matches(2) });
+  const failed = item({ id: 'f', target: 5, startDate: '2026-09-01', endDate: '2026-09-30' });
+  const inconclusive = item({ id: 'i', metric: 'winrate', target: 50, minSample: 5, startDate: '2026-09-01', endDate: '2026-09-30' });
   const current = [
-    item({ id: 'a', target: 5 }, { matches: matches(2) }),
+    item({ id: 'a', target: 5, endDate: '2026-10-17' }, { matches: matches(2) }),
     item({ id: 'b', metric: 'winrate', target: 60, minSample: 2 }, { matches: matches(2, { result: 'win' }) }),
     item({ id: 'c', metric: 'winrate', target: 60, minSample: 2 }, { matches: matches(2, { result: 'loss' }) }),
     item({ id: 'd', startDate: '2026-11-01', endDate: '2026-11-30' }),
   ];
-  const all = [...current, reached, cancelledReached];
-  assert.deepEqual(summarizeCurrent(current, all), { total: 4, achieved: 1, onTrack: 1, atRisk: 1, scheduled: 1 });
+  const all = [...current, reached, cancelledReached, failed, inconclusive];
+  assert.deepEqual(summarizeCurrent(current, all, MID_PERIOD), { total: 4, scheduled: 1, dueSoon: 1, achieved: 1, successRate: 50 });
+  assert.equal(successRate(current), null, 'sin finalizados todavía no hay tasa');
 });
 
 test('finalizado es derivado: alcanzar antes del cierre lo finaliza y borrar datos lo reactiva', () => {

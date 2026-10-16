@@ -1,5 +1,9 @@
 // Agrupaciones de objetivos evaluados para la página y el Dashboard.
 import { LIFECYCLE, OUTCOME, PERIOD_STATUS } from './goalConstants.js';
+import { inclusiveDayCount, todayIn } from '../engine/period.js';
+
+/** Días (incluido hoy) que se consideran "por vencer". */
+const DUE_SOON_DAYS = 3;
 
 /**
  * @typedef {{ goal: any, evaluation: import('./goalConstants.js').GoalEvaluation, checkins: any[], truncated: boolean }} GoalItem
@@ -50,17 +54,38 @@ export function countAchieved(items) {
   return items.filter(item => item.goal.lifecycle !== LIFECYCLE.CANCELLED && item.evaluation.outcome === OUTCOME.ACHIEVED).length;
 }
 
+/** true si el período está abierto y cierra dentro de los próximos días. */
+export function isDueSoon(item, now = new Date()) {
+  if (item.evaluation.periodStatus !== PERIOD_STATUS.OPEN) return false;
+  const today = todayIn(item.goal.timezone, now);
+  return inclusiveDayCount(today, item.evaluation.period.endDate) <= DUE_SOON_DAYS;
+}
+
+/**
+ * Tasa de logro: alcanzados sobre finalizados con resultado definitivo (alcanzado o no alcanzado).
+ * No cuenta los no concluyentes ni los cancelados. null si todavía no hay ninguno.
+ * @param {GoalItem[]} items
+ */
+export function successRate(items) {
+  const decided = items.filter(item => item.goal.lifecycle !== LIFECYCLE.CANCELLED
+    && isFinished(item.evaluation)
+    && /** @type {string[]} */ ([OUTCOME.ACHIEVED, OUTCOME.NOT_ACHIEVED]).includes(item.evaluation.outcome));
+  if (decided.length === 0) return null;
+  return (decided.filter(item => item.evaluation.outcome === OUTCOME.ACHIEVED).length / decided.length) * 100;
+}
+
 /**
  * Conteos para el resumen de objetivos.
  * @param {GoalItem[]} current  Objetivos activos.
- * @param {GoalItem[]} all      Todos los objetivos, para contar los alcanzados.
+ * @param {GoalItem[]} all      Todos los objetivos (alcanzados y tasa de logro son históricos).
+ * @param {Date} [now]
  */
-export function summarizeCurrent(current, all = current) {
+export function summarizeCurrent(current, all = current, now = new Date()) {
   return {
     total: current.length,
-    achieved: countAchieved(all),
-    onTrack: current.filter(item => item.evaluation.meetsToday === true).length,
-    atRisk: current.filter(item => item.evaluation.meetsToday === false).length,
     scheduled: current.filter(item => item.evaluation.outcome === OUTCOME.SCHEDULED).length,
+    dueSoon: current.filter(item => isDueSoon(item, now)).length,
+    achieved: countAchieved(all),
+    successRate: successRate(all),
   };
 }
