@@ -301,7 +301,7 @@ export default function MatchCard({
             <div className="inline-grid grid-cols-[auto_auto] gap-x-2 gap-y-2 self-start md:grid md:grid-cols-[auto_auto_auto_auto] md:gap-x-3 md:gap-y-2 md:self-auto">
               <InfoStat
                 label="KDA"
-                value={`${match.kills ?? 0}/${match.deaths ?? 0}/${match.assists ?? 0}`}
+                value={`${match.kills ?? '—'}/${match.deaths ?? '—'}/${match.assists ?? '—'}`}
               />
 
               <InfoStat

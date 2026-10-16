@@ -343,9 +343,9 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
       runes_used: selectedRunes.map(r => r.name),
       spells_used: selectedSpells,
       result,
-      kills: kills !== '' ? Number(kills) : 0,
-      deaths: deaths !== '' ? Number(deaths) : 0,
-      assists: assists !== '' ? Number(assists) : 0,
+      kills: kills !== '' ? Number(kills) : null,
+      deaths: deaths !== '' ? Number(deaths) : null,
+      assists: assists !== '' ? Number(assists) : null,
       gold: gold !== '' ? Number(gold) : null,
       duration_minutes: duration !== '' ? Number(duration) : null,
       side: side || null,
@@ -938,7 +938,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
             ].map(f => (
               <div key={f.label}>
                 <label className="text-xs text-muted-foreground block mb-1">{f.label}</label>
-                <input type="number" value={f.value} onChange={e => f.set(e.target.value)} placeholder="0"
+                <input type="number" value={f.value} onChange={e => f.set(e.target.value)} placeholder="—"
                   className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
               </div>
             ))}

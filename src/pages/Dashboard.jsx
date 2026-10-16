@@ -23,6 +23,7 @@ import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
 import { computeInsights } from '@/hooks/useInsights';
 import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
+import { matchKda } from '@/domain/matchStats';
 
 const DASHBOARD_TABS = [
   { id: 'summary', label: 'Resumen' },
@@ -60,12 +61,12 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`;
 };
 
-const getKda = (match) => {
-  const kills = Number(match?.kills) || 0;
-  const deaths = Number(match?.deaths) || 0;
-  const assists = Number(match?.assists) || 0;
-  return deaths === 0 ? kills + assists : (kills + assists) / deaths;
-};
+const getKda = (match) =>
+  matchKda(Number(match?.kills) || 0, Number(match?.deaths) || 0, Number(match?.assists) || 0);
+
+// K/D/A legible: un dato no registrado (null) se muestra como "—".
+const formatKdaLine = (match) =>
+  [match?.kills, match?.deaths, match?.assists].map(value => value ?? '—').join('/');
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -405,7 +406,7 @@ export default function Dashboard() {
                 </div> : <p className="font-rajdhani rd-dashboard-stat-value text-muted-foreground">—</p>}
                 {bestRecentMatch ? <div className="flex items-center gap-2">
                   <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${bestRecentMatch.result === 'win' ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{bestRecentMatch.result === 'win' ? 'Victoria' : 'Derrota'}</span>
-                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{bestRecentMatch.kills}/{bestRecentMatch.deaths}/{bestRecentMatch.assists} · KDA {getKda(bestRecentMatch).toFixed(2)}</span>
+                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{formatKdaLine(bestRecentMatch)} · KDA {getKda(bestRecentMatch).toFixed(2)}</span>
                 </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
               </article>
             </div>
@@ -431,7 +432,7 @@ export default function Dashboard() {
               <div className="rd-dashboard-list rd-dashboard-match-list">
                 {latestMatches.length ? latestMatches.map(match => <div key={match.id} className="font-rajdhani rd-dashboard-row">
                   {renderChampionAvatar(match.own_champion_name, 'w-9 h-9')}
-                  <div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{match.own_champion_name}</p><p className="text-[11px] text-muted-foreground">{match.lane} · {match.kills}/{match.deaths}/{match.assists}</p></div>
+                  <div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{match.own_champion_name}</p><p className="text-[11px] text-muted-foreground">{match.lane} · {formatKdaLine(match)}</p></div>
                   <div className="text-right"><p className={`text-xs font-bold ${match.result === 'win' ? 'text-green-400' : 'text-red-400'}`}>{match.result === 'win' ? 'Victoria' : 'Derrota'}</p><p className="text-[10px] text-muted-foreground">{formatDate(match.date)}</p></div>
                 </div>) : <p className="text-sm text-muted-foreground text-center my-auto">No hay partidas registradas.</p>}
               </div>

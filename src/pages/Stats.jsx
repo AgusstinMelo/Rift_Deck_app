@@ -14,20 +14,17 @@ import { getMyMembership } from '@/api/membershipSupabase';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
+import { matchKda, winratePct } from '@/domain/matchStats';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
 function calcWR(matches) {
   const wins = matches.filter(m => m.result === 'win').length;
-  return matches.length > 0 ? (wins / matches.length) * 100 : 0;
+  return winratePct(wins, matches.length);
 }
 
 function calcMatchKDA(match) {
-  const kills = Number(match.kills || 0);
-  const deaths = Number(match.deaths || 0);
-  const assists = Number(match.assists || 0);
-
-  return deaths === 0 ? kills + assists : (kills + assists) / deaths;
+  return matchKda(Number(match.kills || 0), Number(match.deaths || 0), Number(match.assists || 0));
 }
 
 function getKdaTone(avgKDA) {

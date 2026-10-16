@@ -422,9 +422,9 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       runes_used: selectedRunes.map(r => r.name),
       spells_used: selectedSpells,
       result,
-      kills: kills ? Number(kills) : 0,
-      deaths: deaths ? Number(deaths) : 0,
-      assists: assists ? Number(assists) : 0,
+      kills: kills !== '' ? Number(kills) : null,
+      deaths: deaths !== '' ? Number(deaths) : null,
+      assists: assists !== '' ? Number(assists) : null,
       gold: gold ? Number(gold) : null,
       duration_minutes: duration ? Number(duration) : null,
       side,
@@ -927,9 +927,9 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
           {/* Stats Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Asesinatos', value: kills, setValue: setKills, placeholder: '0' },
-              { label: 'Muertes', value: deaths, setValue: setDeaths, placeholder: '0' },
-              { label: 'Asistencias', value: assists, setValue: setAssists, placeholder: '0' },
+              { label: 'Asesinatos', value: kills, setValue: setKills, placeholder: '—' },
+              { label: 'Muertes', value: deaths, setValue: setDeaths, placeholder: '—' },
+              { label: 'Asistencias', value: assists, setValue: setAssists, placeholder: '—' },
               { label: 'Oro', value: gold, setValue: setGold, placeholder: '1000' },
               { label: 'Duración (min)', value: duration, setValue: setDuration, placeholder: '20', colSpan: 'col-span-2' },
             ].map((field, i) => (
