@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Search } from 'lucide-react';
@@ -798,12 +798,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                           </select>
 
                           <div className="flex flex-1 flex-col justify-evenly gap-2">
-                            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-                              <div key={group} className="flex items-center gap-3">
-                                <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>
-                                  G{group}
-                                </p>
-
+                            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
+                              <Fragment key={group}>
+                              {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                              <div className="flex items-center">
                                 <div className="flex flex-1 flex-wrap justify-around gap-2">
                                   {runesInGroup.map(rune => (
                                     <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
@@ -832,6 +830,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                   ))}
                                 </div>
                               </div>
+                              </Fragment>
                             ))}
                           </div>
                         </div>
@@ -855,12 +854,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                           </select>
 
                           <div className="flex flex-1 flex-col justify-evenly gap-2">
-                            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-                              <div key={group} className="flex items-center gap-3">
-                                <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>
-                                  G{group}
-                                </p>
-
+                            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
+                              <Fragment key={group}>
+                              {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                              <div className="flex items-center">
                                 <div className="flex flex-1 flex-wrap justify-around gap-2">
                                   {runesInGroup.map(rune => (
                                     <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
@@ -889,6 +886,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                   ))}
                                 </div>
                               </div>
+                              </Fragment>
                             ))}
                           </div>
                         </div>

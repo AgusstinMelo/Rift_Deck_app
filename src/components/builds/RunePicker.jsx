@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
@@ -208,15 +208,15 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
             ))}
           </select>
           <div className="flex flex-1 flex-col justify-evenly gap-2">
-            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-              <div key={group} className="flex items-center gap-2">
-                <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>G{group}</p>
-                <div className="flex flex-1 flex-wrap justify-around gap-1.5">
+            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
+              <Fragment key={group}>
+                {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                <div className="flex flex-wrap justify-around gap-1.5">
                   {runesInGroup.map(rune => (
                     <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} />
                   ))}
                 </div>
-              </div>
+              </Fragment>
             ))}
           </div>
         </div>
@@ -262,15 +262,15 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
             ))}
           </select>
           <div className="flex flex-1 flex-col justify-evenly gap-2">
-            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-              <div key={group} className="flex items-center gap-2">
-                <p className="w-6 shrink-0 text-xs font-semibold text-muted-foreground" title={`Grupo ${group}`}>G{group}</p>
-                <div className="flex flex-1 flex-wrap justify-around gap-1.5">
+            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
+              <Fragment key={group}>
+                {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                <div className="flex flex-wrap justify-around gap-1.5">
                   {runesInGroup.map(rune => (
                     <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, true)} />
                   ))}
                 </div>
-              </div>
+              </Fragment>
             ))}
           </div>
           </div>

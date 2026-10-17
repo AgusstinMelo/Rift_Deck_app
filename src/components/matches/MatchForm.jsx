@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { updateMatch } from '@/api/matchesSupabase';
@@ -745,12 +745,10 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   </select>
 
                   <div className="space-y-3">
-                    {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-                      <div key={group}>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Grupo {group}
-                        </p>
-
+                    {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
+                      <Fragment key={group}>
+                      {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                      <div>
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
                             <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
@@ -779,6 +777,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                           ))}
                         </div>
                       </div>
+                      </Fragment>
                     ))}
                   </div>
                 </div>
@@ -802,12 +801,10 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   </select>
 
                   <div className="space-y-3">
-                    {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-                      <div key={group}>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Grupo {group}
-                        </p>
-
+                    {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
+                      <Fragment key={group}>
+                      {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                      <div>
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
                             <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
@@ -836,6 +833,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                           ))}
                         </div>
                       </div>
+                      </Fragment>
                     ))}
                   </div>
                 </div>
