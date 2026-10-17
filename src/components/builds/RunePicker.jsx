@@ -151,15 +151,12 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
 
       {/* Runas Clave */}
       {claveRunes.length > 0 && (
-        <div className="mb-3 flex flex-1 flex-col">
+        <div className="mb-3">
           <p className="text-xs font-semibold text-muted-foreground mb-2">Clave</p>
-          {/* Dos filas parejas (por ejemplo 7 + 6): íconos más grandes que en una sola línea. */}
-          <div
-            className="my-auto grid justify-items-center gap-x-1 gap-y-2"
-            style={{ gridTemplateColumns: `repeat(${Math.ceil(claveRunes.length / 2)}, minmax(0, 1fr))` }}
-          >
+          {/* Una columna por runa clave: siempre una sola línea que ocupa todo el ancho. */}
+          <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
             {claveRunes.map(rune => (
-              <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} size="aspect-square w-full max-w-14" imageClassName="scale-[1.35]" />
+              <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} size="aspect-square w-full max-w-11" imageClassName="scale-[1.35]" />
             ))}
           </div>
         </div>
@@ -169,7 +166,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
       {claveRunes.length > 0 && <div className="h-px bg-border/50 mb-3" />}
 
       {/* Rama Principal y Secundaria */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid flex-1 grid-cols-2 gap-4">
         {/* Rama Principal */}
         <div className="flex min-w-0 flex-col">
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">Rama Principal</label>
@@ -210,7 +207,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
               <option key={b} value={b}>{b}</option>
             ))}
           </select>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-1 flex-col justify-evenly gap-2">
             {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
               <Fragment key={group}>
                 {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
@@ -264,7 +261,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
               <option key={b} value={b}>{b}</option>
             ))}
           </select>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-1 flex-col justify-evenly gap-2">
             {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
               <Fragment key={group}>
                 {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
