@@ -1048,7 +1048,7 @@ export default function Suggester() {
   );
 
   return (
-    <div className="rd-v2-build-page max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+    <div className="rd-page rd-v2-build-page">
       {activeTab === 'legacy' ? <LegacySuggester tabSelector={tabSelector} /> : <V2BuildTab tabSelector={tabSelector} />}
     </div>
   );

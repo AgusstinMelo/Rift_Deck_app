@@ -3,12 +3,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, BookOpen, TrendingUp, Wrench, Swords,
-  BarChart3, Sparkles, Settings, Menu, LogOut, User, Bug, Info, Scale, ShieldCheck, Search, Target
+  BarChart3, Sparkles, Settings, Menu, LogOut, Bug, Info, Scale, ShieldCheck, Search, Target
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import BugReportModal from '@/components/BugReportModal';
 import LegalInfoModal from '@/components/LegalInfoModal';
+import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import wordmarkUrl from '@/assets/riftdeck-final.png';
 
 const LOGO_URL = 'https://media.base44.com/images/public/69f960ee6e584cfa5a577a24/aedbcc40d_FullColor.png';
@@ -360,11 +361,7 @@ export default function Layout() {
           {user && (
             <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  <User size={13} className="text-primary" />
-                )}
+                <ProfileAvatar src={user.avatar_url} iconSize={13} />
               </div>
               {!collapsed && (
                 <Link to="/profile" className="flex-1 min-w-0 hover:opacity-80 transition-opacity">

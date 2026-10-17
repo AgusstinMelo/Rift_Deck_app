@@ -22,36 +22,41 @@ function GoalSlide({ item }) {
   const isSingleMatch = evaluation.aggregation === AGGREGATION.BEST;
 
   return (
-    <Link to={`/objetivos/${goal.id}`} className="block min-h-0 flex-1 space-y-2 rounded-lg px-2 py-1.5 hover:bg-primary/5">
-      <div className="flex items-baseline justify-between gap-2">
+    // Cada fila tiene un alto exacto: la barra/meta y la fila de estado y fechas
+    // quedan siempre en la misma posición, sea cual sea el objetivo.
+    <Link to={`/objetivos/${goal.id}`} className="flex shrink-0 flex-col gap-2 overflow-hidden rounded-lg px-2 py-1.5 hover:bg-primary/5">
+      <div className="flex h-9 shrink-0 items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{getMetric(goal.metric).label}</p>
-          <p className="truncate text-sm font-semibold text-foreground">{goal.name}</p>
+          <p className="truncate text-[10px] leading-4 uppercase tracking-[0.14em] text-muted-foreground">{getMetric(goal.metric).label}</p>
+          <p className="truncate text-sm leading-5 font-semibold text-foreground">{goal.name}</p>
         </div>
-        <span className="shrink-0 text-xs text-muted-foreground">
+        <span className="shrink-0 text-xs leading-4 text-muted-foreground">
           {formatMetricValue(goal, evaluation.value)} / {formatMetricValue(goal, evaluation.target)}
         </span>
       </div>
 
-      {pct !== null ? (
-        <div className="h-1.5 overflow-hidden rounded-full bg-primary/15">
-          <div className={`h-full rounded-full ${OUTCOME_BAR[evaluation.outcome]}`} style={{ width: `${pct}%` }} />
-        </div>
-      ) : isSingleMatch ? (
-        <p className="text-xs text-muted-foreground">
-          Objetivo único · Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)} en una partida
-        </p>
-      ) : (
-        <p className="text-xs text-muted-foreground">
-          Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)}
-          {' · '}Diferencia {formatDifference(goal, evaluation.difference)}
-          {' · '}Muestra {evaluation.sampleSize}/{evaluation.minSample}
-        </p>
-      )}
+      {/* Altura fija: barra o texto ocupan el mismo espacio, así nada se mueve al cambiar de objetivo. */}
+      <div className="flex h-5 shrink-0 items-center">
+        {pct !== null ? (
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/15">
+            <div className={`h-full rounded-full ${OUTCOME_BAR[evaluation.outcome]}`} style={{ width: `${pct}%` }} />
+          </div>
+        ) : isSingleMatch ? (
+          <p className="truncate text-xs text-muted-foreground">
+            Objetivo único · Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)} en una partida
+          </p>
+        ) : (
+          <p className="truncate text-xs text-muted-foreground">
+            Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)}
+            {' · '}Diferencia {formatDifference(goal, evaluation.difference)}
+            {' · '}Muestra {evaluation.sampleSize}/{evaluation.minSample}
+          </p>
+        )}
+      </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex h-6 shrink-0 items-center justify-between gap-2 overflow-hidden">
         <GoalOutcomeBadge lifecycle={goal.lifecycle} evaluation={evaluation} size="sm" />
-        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] text-muted-foreground">
           <CalendarDays size={12} /> {formatPeriod(evaluation.period)}
         </span>
       </div>
