@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
-import { BarChart3, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { BarChart3, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { computeInsights } from '@/hooks/useInsights';
@@ -15,6 +15,7 @@ import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda, winratePct } from '@/domain/matchStats';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
@@ -147,7 +148,7 @@ function HeroStat({ label, value, sub, tone }) {
 
 function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, blueWins, blueLosses, redWins, redLosses, champImageUrl, poolScore }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border min-h-[150px]"
+    <div className="rd-stats-hero relative overflow-hidden rounded-2xl border border-border min-h-[150px]"
     style={{
       background: `
         radial-gradient(circle at 18% 0%, rgba(74, 222, 128, 0.08), transparent 32%),
@@ -157,7 +158,7 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
     }}>
       {champImageUrl && (
         <>
-          <div className="pointer-events-none absolute -bottom-[10%] -top-[10%] left-0 overflow-visible">
+          <div className="rd-stats-hero-art pointer-events-none absolute -bottom-[10%] -top-[10%] left-0 overflow-visible">
             <div
               className="relative h-full w-fit overflow-hidden"
               style={{
@@ -197,7 +198,7 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
         </>
       )}
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[minmax(220px,290px)_1fr_1fr_1fr_1fr] min-h-[150px]">
+      <div className="rd-stats-hero-grid relative z-10 grid grid-cols-1 lg:grid-cols-[minmax(220px,290px)_1fr_1fr_1fr_1fr] min-h-[150px]">
         <div className="flex flex-col items-center justify-center px-5 py-2 md:translate-x-6">
           <p className="rd-label mb-1 text-center">WINRATE GENERAL</p>
           <div className="relative flex h-20 w-20 items-center justify-center">
@@ -441,23 +442,20 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
       )}
     >
       <div className="min-h-0 h-full flex flex-col">
-        <div className="flex-1 flex items-center justify-center overflow-hidden rounded-xl">
+        <div className="rd-pool-frame flex-1 flex items-center justify-center overflow-hidden rounded-xl">
           <div
-            className="relative shrink-0"
-            style={{
-              width: `${CONTAINER_W}px`,
-              height: `${CONTAINER_H}px`,
-            }}
+            className="rd-pool-bubbles relative shrink-0"
+            style={{ aspectRatio: `${CONTAINER_W} / ${CONTAINER_H}` }}
           >
           {bubbles.map(({ champ, r, cx, cy }) => (
             <div
               key={champ.name}
               className={`absolute rounded-full overflow-hidden bg-secondary ring-2 ${getRingColor(champ)} shadow-lg shadow-black/40`}
               style={{
-                width: `${r * 2}px`,
-                height: `${r * 2}px`,
-                left: `${cx - r}px`,
-                top: `${cy - r}px`,
+                width: `${(r * 2 / CONTAINER_W) * 100}%`,
+                aspectRatio: '1',
+                left: `${((cx - r) / CONTAINER_W) * 100}%`,
+                top: `${((cy - r) / CONTAINER_H) * 100}%`,
                 zIndex: Math.round(MAX_R - r + 1),
               }}
               title={`${champ.name} · ${champ.games}p · ${champ.wr.toFixed(0)}% WR`}
@@ -479,6 +477,69 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
       </div>
       </div>
     </SectionCard>
+  );
+}
+
+// Carril de Rendimiento. En desktop es una columna normal; en smartphone
+// horizontal el CSS lo vuelve un carril de dos tarjetas por vista y muestra
+// las flechas, que se ocultan al llegar a cada extremo.
+function OverviewTrack({ children }) {
+  const trackRef = useRef(null);
+  const [edges, setEdges] = useState({ prev: false, next: false });
+
+  const updateEdges = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    setEdges({
+      prev: track.scrollLeft > 4,
+      next: track.scrollLeft + track.clientWidth < track.scrollWidth - 4,
+    });
+  }, []);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return undefined;
+
+    updateEdges();
+    const observer = new ResizeObserver(updateEdges);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [updateEdges]);
+
+  // Avanza una tarjeta: media vista más medio gap (el snap corrige el resto).
+  const scrollByCard = (direction) => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    track.scrollBy({ left: direction * ((track.clientWidth + gap) / 2), behavior: 'smooth' });
+  };
+
+  return (
+    <>
+      <div ref={trackRef} onScroll={updateEdges} className="rd-stats-track flex min-h-0 flex-1 flex-col gap-3">
+        {children}
+      </div>
+      <button
+        type="button"
+        onClick={() => scrollByCard(-1)}
+        disabled={!edges.prev}
+        className="rd-stats-track-arrow rd-stats-track-arrow-prev"
+        aria-label="Tarjetas anteriores"
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <button
+        type="button"
+        onClick={() => scrollByCard(1)}
+        disabled={!edges.next}
+        className="rd-stats-track-arrow rd-stats-track-arrow-next"
+        aria-label="Tarjetas siguientes"
+      >
+        <ChevronRight size={16} />
+      </button>
+    </>
   );
 }
 
@@ -515,7 +576,7 @@ function LaneBarChart({ laneArr }) {
 
   return (
     <div className="flex h-full min-h-0 items-center justify-center">
-      <svg viewBox="0 0 300 210" className="h-full max-h-[276px] w-full" role="img" aria-label="Winrate por línea">
+      <svg viewBox="0 0 300 210" className="rd-stats-lane-chart h-full max-h-[276px] w-full" role="img" aria-label="Winrate por línea">
         {[0.33, 0.66, 1].map(level => (
           <polygon key={level} points={polygon(radius * level)} fill="none" stroke="rgba(148,163,184,.16)" strokeWidth="1" />
         ))}
@@ -558,7 +619,7 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
   }
 
   return (
-    <div className="space-y-1.5 overflow-hidden">
+    <div className="rd-matchup-list space-y-1.5 overflow-hidden">
       {items.map(m => (
         <div key={m.champ} className={`rd-list-row rd-matchup-row ${positive ? 'rd-matchup-row-positive' : 'rd-matchup-row-negative'}`}>
           <ChampionAvatar name={m.champ} src={getChampImg(m.champ)} rounded="rounded" />
@@ -590,6 +651,7 @@ export default function Stats() {
   const [patchFilter, setPatchFilter] = useState('');
   const [analyticsView, setAnalyticsView] = useState('overview');
   const [coachPage, setCoachPage] = useState(0);
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
   const patchDefaultApplied = useRef(false);
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
@@ -935,16 +997,18 @@ export default function Stats() {
     .slice(0, 10);
 
   const insights = computeInsights({ matches, tierlist, wrItems, builds: insightBuilds, champions, runes, spells });
-  const coachPageCount = Math.max(1, Math.ceil(insights.length / 2));
+  // En smartphone horizontal no entran dos consejos legibles: va uno por página.
+  const insightsPerPage = isPhoneLandscape ? 1 : 2;
+  const coachPageCount = Math.max(1, Math.ceil(insights.length / insightsPerPage));
   const effectiveCoachPage = Math.min(coachPage, coachPageCount - 1);
-  const visibleInsights = insights.slice(effectiveCoachPage * 2, effectiveCoachPage * 2 + 2);
+  const visibleInsights = insights.slice(effectiveCoachPage * insightsPerPage, (effectiveCoachPage + 1) * insightsPerPage);
 
   return (
     <div className="rd-page rd-dashboard rd-compact-page rd-stats-layout">
 
       <section className="rd-viewport-section rd-stats-overview space-y-6" aria-label="Resumen de rendimiento">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+      <div className="rd-stats-header flex flex-wrap items-start justify-between gap-4">
+        <div className="rd-stats-title">
           <div className="flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
@@ -961,8 +1025,8 @@ export default function Stats() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-end justify-end gap-3">
-          <label className="min-w-52 text-xs text-muted-foreground">
+        <div className="rd-stats-filters flex flex-wrap items-end justify-end gap-3">
+          <label className="rd-stats-filter min-w-52 text-xs text-muted-foreground">
             Tipo de partida
             <select
               value={matchTypeFilter}
@@ -979,7 +1043,7 @@ export default function Stats() {
             value={patchFilter}
             onChange={handlePatchFilterChange}
             patches={patchOptions}
-            className="min-w-52"
+            className="rd-stats-filter rd-stats-filter-patch min-w-52"
           />
           <div className="hidden items-center gap-3 rd-status-pill 2xl:flex">
             <BarChart3 size={16} className="text-primary" />
@@ -1011,7 +1075,8 @@ export default function Stats() {
         ))}
       </div>
 
-      {analyticsView === 'overview' && <section className="rd-analytics-panel flex min-h-0 flex-col gap-3" aria-label="Rendimiento por campeón y línea">
+      {analyticsView === 'overview' && <section className="rd-analytics-panel rd-stats-overview-panel flex min-h-0 flex-col gap-3" aria-label="Rendimiento por campeón y línea">
+        <OverviewTrack>
         <StatsHeroCard
           winrate={winrate}
           wins={wins}
@@ -1027,10 +1092,10 @@ export default function Stats() {
           champImageUrl={mostPlayedChampCardImageUrl}
           poolScore={poolScore}
         />
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-6">
+        <div className="rd-stats-cards grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-6">
         <div className="lg:col-span-2 flex flex-col">
           <SectionCard title="Winrate por campeón" watermark fullHeight>
-            <div className="grid h-full auto-rows-fr grid-cols-1 gap-1.5 xl:grid-cols-2">
+            <div className="rd-stats-champ-list grid h-full auto-rows-fr grid-cols-1 gap-1.5 xl:grid-cols-2">
               {champArr.slice(0, 10).map(c => {
                 const tone =
                   c.wr >= 55 ? 'text-green-400' :
@@ -1079,9 +1144,10 @@ export default function Stats() {
           />
         </div>
         </div>
+        </OverviewTrack>
       </section>}
 
-      {analyticsView === 'direct' && <section className="rd-analytics-panel grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups directos">
+      {analyticsView === 'direct' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups directos">
         <div>
           <SectionCard title="Mejores Matchups Directos" fixedHeight>
             <MatchupList
@@ -1104,7 +1170,7 @@ export default function Stats() {
         </div>
       </section>}
 
-      {analyticsView === 'general' && <section className="rd-analytics-panel grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups generales">
+      {analyticsView === 'general' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups generales">
         <div>
           <SectionCard title="Mejores Matchups Generales" fixedHeight>
             <MatchupList
@@ -1129,7 +1195,7 @@ export default function Stats() {
 
       </section>}
 
-      {analyticsView === 'synergy' && <section className="rd-analytics-panel grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Sinergias aliadas">
+      {analyticsView === 'synergy' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Sinergias aliadas">
 
         <div>
           <SectionCard title="Buena Sinergia Aliada" fixedHeight>
@@ -1155,8 +1221,8 @@ export default function Stats() {
       </section>}
 
       {analyticsView === 'coach' && insights.length > 0 && (
-        <section className="rd-analytics-panel rd-card rd-card-watermark p-5 md:p-7 overflow-hidden" aria-label="Lectura estratégica">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
+        <section className="rd-analytics-panel rd-stats-coach rd-card rd-card-watermark p-5 md:p-7 overflow-hidden" aria-label="Lectura estratégica">
+          <div className="rd-stats-coach-header flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
             <div className="flex items-center gap-4">
               <img
                 src={COACH_BOOK_URL}
@@ -1204,14 +1270,14 @@ export default function Stats() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div className="rd-stats-coach-grid grid grid-cols-1 xl:grid-cols-2 gap-4">
             {visibleInsights.map((insight, i) => (
-              <article key={insight.id} className={`relative flex flex-col rounded-2xl border p-5 overflow-hidden ${insightTone[insight.tone] || insightTone.neutral}`}>
+              <article key={insight.id} className={`rd-stats-insight relative flex flex-col rounded-2xl border p-5 overflow-hidden ${insightTone[insight.tone] || insightTone.neutral}`}>
                 <div className={`absolute inset-y-0 left-0 w-1 ${insightAccent[insight.tone] || insightAccent.neutral}`} />
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                      {String(effectiveCoachPage * 2 + i + 1).padStart(2, '0')} · {insight.domain}
+                      {String(effectiveCoachPage * insightsPerPage + i + 1).padStart(2, '0')} · {insight.domain}
                     </p>
                     <h3 className="font-rajdhani text-xl font-bold leading-tight text-foreground">{insight.title}</h3>
                   </div>
@@ -1220,22 +1286,22 @@ export default function Stats() {
                   </span>
                 </div>
 
-                <div className="mt-1">
+                <div className="rd-stats-insight-body mt-1">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Qué muestran los datos</p>
                   <p className="text-sm text-foreground/85 leading-relaxed">{insight.thesis}</p>
                 </div>
 
                 {insight.evidence.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="rd-stats-insight-evidence flex flex-wrap gap-2 mt-4">
                     {insight.evidence.map(item => (
                       <span key={item} className="rounded-md bg-background/45 border border-border/50 px-2 py-1 text-[11px] text-muted-foreground">{item}</span>
                     ))}
                   </div>
                 )}
 
-                <div className="min-h-4 flex-1" aria-hidden="true" />
+                <div className="rd-stats-insight-spacer min-h-4 flex-1" aria-hidden="true" />
 
-                <div className="flex items-start gap-2 pt-4 border-t border-border/50 xl:h-[88px] xl:shrink-0">
+                <div className="rd-stats-insight-action flex items-start gap-2 pt-4 border-t border-border/50 xl:h-[88px] xl:shrink-0">
                   <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" />
                   <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">Consejo:</span> {insight.action}</p>
                 </div>

@@ -18,7 +18,7 @@ function SummaryStat({ label, value, icon: Icon, tone }) {
 export default function GoalsSummary({ current, all }) {
   const summary = summarizeCurrent(current, all);
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <div className="rd-goals-summary grid grid-cols-2 gap-3 lg:grid-cols-5">
       <SummaryStat label="Activos" value={summary.total} icon={Target} tone="text-primary" />
       <SummaryStat label="Programados" value={summary.scheduled} icon={CalendarClock} tone="text-sky-300" />
       <SummaryStat label="Por vencer" value={summary.dueSoon} icon={Hourglass} tone="text-amber-300" />

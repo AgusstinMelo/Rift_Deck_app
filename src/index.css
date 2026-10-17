@@ -2417,6 +2417,276 @@
   }
 }
 
+/* Objetivos (vista general) en smartphone horizontal: todo entra en el viewport.
+   Fila 1: título compacto, pestañas y "Nuevo objetivo". Debajo, los 5 contadores en
+   una columna y el carril de objetivos (2 por vista) con el alto restante.
+   Los selectores llevan .rd-goals-layout porque las variantes lg:/sm: de Tailwind se
+   emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-goals-layout {
+    display: grid;
+    height: 100%;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout > *,
+  .rd-goals-panel > * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout > header.rd-goals-header {
+    display: contents;
+  }
+
+  .rd-goals-layout > header > div:first-child {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .rd-goals-layout > header > div:first-child > div:first-child,
+  .rd-goals-layout > header > div:first-child > p {
+    display: none;
+  }
+
+  .rd-goals-layout > header h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout > header > a {
+    grid-row: 1;
+    grid-column: 3;
+    gap: 0.5rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.35rem;
+    border-radius: 0.7rem;
+  }
+
+  .rd-goals-layout > header > a > div:first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-goals-layout > header > a svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-goals-layout > header > a p:first-child {
+    font-size: 12px;
+  }
+
+  .rd-goals-layout > header > a p + p {
+    display: none;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: center;
+    padding: 0.2rem;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.7rem;
+  }
+
+  /* Panel: contadores en una columna a la izquierda y carril a la derecha. */
+  .rd-goals-layout > .rd-goals-panel {
+    display: grid;
+    height: 100%;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.5rem;
+    align-self: stretch;
+  }
+
+  /* Historial: los filtros Finalizados / Archivados ocupan la columna izquierda. */
+  .rd-goals-layout > .rd-goals-panel > [role="tablist"] {
+    flex-direction: column;
+    align-self: start;
+  }
+
+  .rd-goals-layout .rd-goals-summary {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary > div:last-child {
+    grid-column: auto;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-card {
+    height: 100%;
+    gap: 0.45rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label + p {
+    font-size: 1.2rem;
+  }
+
+  /* Carril: navegación compacta y tarjetas que ocupan todo el alto restante. */
+  .rd-goals-layout .rd-goals-carousel {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > * + * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child button {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child p {
+    font-size: 11px;
+  }
+
+  .rd-goals-layout .rd-goals-track {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.5rem;
+  }
+
+  /* Ancho fijo: sin min-width 0, una tarjeta con pie largo (Historial: fechas +
+     Finalizado + Alcanzado) se ensanchaba y la segunda quedaba cortada. */
+  .rd-goals-layout .rd-goals-track > * {
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex-basis: calc((100% - 0.5rem) / 2);
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Tarjeta compacta: sin la descripción larga; el gráfico usa el espacio que sobra. */
+  .rd-goals-layout .rd-goal-card {
+    min-height: 0;
+    gap: 0.3rem;
+    padding: 0.5rem 0.65rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 {
+    font-size: 0.8rem;
+    line-height: 1.1;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 + p {
+    display: none;
+  }
+
+  /* Aviso de evidencia insuficiente: la "Muestra x/y" ya lo indica. */
+  .rd-goals-layout .rd-goal-card > p[class*="border-amber"] {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card > .border-t {
+    padding-top: 0.3rem;
+  }
+
+  .rd-goals-layout .rd-goal-card .space-y-2 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card .text-2xl {
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout .rd-goal-card .text-xs,
+  .rd-goals-layout .rd-goal-card .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  .rd-goals-layout .rd-goal-card [role="progressbar"] {
+    height: 0.35rem;
+  }
+
+  /* El gráfico conserva un alto mínimo; su etiqueta sobra (la línea de meta lo explica). */
+  .rd-goals-layout .rd-goal-card-chart {
+    min-height: 4.5rem;
+    gap: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > .rd-label {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+
+  /* Pie en una sola línea: período (sin ícono) y estados, más chicos. */
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child {
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child svg {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+}
+
 /* Tierlist: encabezado y filtros fijos; sólo scrollea la tierlist o la tabla. */
 .rd-tierlist-layout,
 .rd-tierlist-scroll {
@@ -2946,6 +3216,642 @@
   }
 }
 
+/* Sugeridor (Builds y Campeones) en smartphone horizontal: asistente a viewport
+   completo, un paso por vez y el resultado como último paso (lo agrega el JSX).
+   - Fila 1: título compacto, selector Builds / Campeones y píldora "Intelligence".
+   - Centro: el paso activo (o el resultado) a todo el ancho y alto restante.
+   - Pie: barra de navegación con Atrás a la izquierda, los pasos al centro y
+     Siguiente / Generar a la derecha (al alcance de los pulgares).
+   El aside se "disuelve" (display: contents) para ubicar sus partes en la grilla.
+   Los selectores llevan .rd-v2-build-page porque las variantes md:/xl: de
+   Tailwind se emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-v2-build-page) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-v2-build-page {
+    height: 100%;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-v2-build-page .rd-v2-build {
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+
+  /* Encabezado: kicker y descripción sobran; el selector de pestañas va en línea. */
+  .rd-v2-build-page .rd-v2-build-header {
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:first-child,
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > p {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header h1 {
+    overflow: hidden;
+    font-size: 1.5rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:last-child {
+    flex: none;
+    margin-top: 0;
+    padding: 0.15rem;
+    border-radius: 0.65rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:last-child > button {
+    padding: 0.25rem 0.7rem;
+    border-radius: 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill {
+    flex: none;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 0.65rem;
+    box-shadow: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill span {
+    font-size: 11px;
+  }
+
+  /* Grilla del asistente: contenido arriba, error (si hay) y barra al pie. */
+  .rd-v2-build-page .rd-v2-build-body {
+    height: 100%;
+    grid-template-columns: 7rem minmax(0, 1fr) 11rem;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    align-items: stretch;
+    gap: 0.45rem 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside,
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child {
+    display: contents;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside-scroll,
+  .rd-v2-build-page .rd-v2-build-result {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-v2-build-aside-scroll::-webkit-scrollbar,
+  .rd-v2-build-result::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Un paso por vez: el formulario o el resultado. */
+  .rd-v2-build-page .rd-v2-build-body:not(.rd-v2-result-step) > .rd-v2-build-result,
+  .rd-v2-build-page .rd-v2-result-step .rd-v2-build-aside-scroll {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > p {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    padding: 0.3rem 0.6rem;
+    font-size: 11px;
+  }
+
+  /* Barra de navegación */
+  .rd-v2-build-page .rd-v2-build-aside > nav {
+    grid-row: 3;
+    grid-column: 2;
+    align-self: center;
+    padding: 0.2rem;
+    border-radius: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav ol {
+    gap: 0.2rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav button {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.25rem;
+    font-size: 10.5px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav button > span {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 9px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button {
+    grid-row: 3;
+    align-self: center;
+    min-height: 2.25rem;
+    padding-block: 0.35rem;
+    border-radius: 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button:not(:last-child) {
+    grid-column: 1;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button:last-child {
+    grid-column: 3;
+  }
+
+  /* Paso activo: tarjeta a todo el ancho y alto. */
+  .rd-v2-build-page .rd-v2-step-card {
+    height: 100%;
+    min-height: 0;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > div:first-child {
+    margin-bottom: 0.55rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .rd-status-pill {
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    font-size: 10.5px;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .rd-label {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card label.rd-label {
+    margin-bottom: 0.3rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card textarea {
+    min-height: 0;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  /* Builds · Campeón: selectores a la izquierda, temática a la derecha. */
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) > .space-y-2\.5 {
+    grid-row: 2;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .space-y-2\.5 > * + * {
+    margin-top: 0.6rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid:has(> button[aria-haspopup]) {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t {
+    grid-row: 2;
+    grid-column: 2;
+    min-height: 0;
+    margin-top: 0;
+    padding: 0 0 0 1rem;
+    border-top: 0;
+    border-left: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t > div:first-child {
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t > div:last-child {
+    margin-top: 0.3rem;
+    font-size: 10px;
+  }
+
+  /* Builds · Aliados / Enemigos: una ficha vertical por línea, con retrato grande. */
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly {
+    display: grid;
+    min-height: 0;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > .rd-label {
+    text-align: center;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] {
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 0.9rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup]:has(> img) {
+    border-color: hsl(var(--primary) / 0.35);
+    background: hsl(var(--primary) / 0.06);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > :first-child {
+    width: min(3.75rem, 100%);
+    height: auto;
+    aspect-ratio: 1;
+    font-size: 1.1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > span:nth-child(2) {
+    width: 100%;
+    flex: none;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > svg {
+    display: none;
+  }
+
+  /* Campeones · Pool: selector arriba y chips en tres columnas. */
+  .rd-v2-build-page .rd-v2-step-card > .relative.mb-3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .relative > button[aria-haspopup] {
+    min-height: 2.4rem;
+    padding-block: 0.3rem;
+    font-size: 0.82rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: 0.4rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 > * + * {
+    margin-top: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 > * {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .flex-1.items-center.justify-center p {
+    font-size: 12px;
+  }
+
+  /* Campeones · Parámetros: línea, objetivo y contexto en tres columnas. */
+  .rd-v2-build-page .rd-v2-step-card.gap-3 {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem 1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card.gap-3 > div:first-child {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card.gap-3 > div:not(:first-child) {
+    min-height: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card select {
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid-cols-2 {
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid-cols-2 > button {
+    gap: 0.4rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 0.65rem;
+    font-size: 11px;
+  }
+
+  /* Resultado: cargando / error a todo el alto. */
+  .rd-v2-build-page .rd-v2-build-placeholder {
+    height: 100%;
+    min-height: 0;
+    padding: 1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder > div {
+    height: 100%;
+    min-height: 0;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder > div > div:first-child {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder > div > div:first-child svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder .rd-label {
+    margin-bottom: 0.25rem;
+    font-size: 9.5px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder h2 {
+    font-size: 1.45rem;
+    line-height: 1.05;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder h2 ~ p {
+    margin-top: 0.35rem;
+    font-size: 12px;
+  }
+
+  /* Éxito: franja de íconos fija y el análisis con el alto restante. */
+  .rd-v2-build-page .rd-v2-build-success {
+    height: 100%;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > * {
+    flex-shrink: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > .rd-v2-build-analysis {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 0.6rem 0.75rem;
+  }
+
+  /* Build (Builds): íconos a la izquierda (35%) y el análisis a la derecha (65%)
+     con todo el alto, para leer más texto sin scroll. */
+  .rd-v2-build-page .rd-v2-build-success:has(> section:first-child) {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 13fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  /* Objetos, runas y hechizos apilados, cada grupo en su fila. Sin wrap: con
+     flex-wrap (de Tailwind) los grupos que no entraban saltaban a otra columna. */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    gap: 0.45rem;
+    padding: 0.55rem 0.65rem;
+    overflow: hidden;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div {
+    flex: none;
+  }
+
+  /* Separadores horizontales entre grupos (en vez de los verticales de md:). */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div + div {
+    padding-top: 0.45rem;
+    padding-left: 0;
+    border-top: 1px solid hsl(var(--border) / 0.5);
+    border-left: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .rd-label {
+    font-size: 9px;
+  }
+
+  /* Íconos fluidos: los tres grupos comparten una grilla de 6 columnas (objetos
+     llenan la fila, runas 5 y hechizos 2), así entran siempre en una línea y
+     quedan alineados entre sí. */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    justify-items: start;
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .group {
+    width: 100%;
+    max-width: 2.6rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .group > :first-child {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  /* Métricas del pool (Campeones): cuatro en una fila baja. */
+  .rd-v2-build-page .rd-v2-build-success > div:first-child {
+    gap: 0.4rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child > .rd-mini-action {
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child > .rd-mini-action > div {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child .rd-mini-action > p {
+    font-size: 12.5px;
+  }
+
+  /* Pestañas del análisis: se reparten el ancho de la tarjeta; si no entran en
+     una línea, el texto de cada una pasa a dos líneas en vez de cortarse. */
+  .rd-v2-build-page .rd-v2-build-analysis > [role="tablist"] {
+    width: 100%;
+    flex-wrap: nowrap;
+    align-self: stretch;
+    margin-bottom: 0.45rem;
+    padding: 0.2rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis > [role="tablist"] > button {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding: 0.3rem 0.4rem;
+    font-size: 10.5px;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  /* Explicación de objetos, runas y hechizos completa (sin "…"): el panel ya
+     tiene scroll propio si hace falta. */
+  .rd-v2-build-page .rd-v2-reason {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  /* Con el texto completo, cada fila toma su alto (auto-rows-fr las igualaba a la
+     más alta y dejaba huecos). */
+  .rd-v2-build-page .rd-v2-build-analysis-body .auto-rows-fr {
+    grid-auto-rows: auto;
+    align-content: start;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  /* Texto del análisis más compacto para que entre sin scroll en la mayoría
+     de las builds (la IA puede devolver textos largos: ahí sí scrollea). */
+  .rd-v2-build-page .rd-v2-build-analysis-body {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .text-\[13px\] {
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .space-y-2 > * + * {
+    margin-top: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .gap-3 {
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .gap-2\.5 {
+    gap: 0.45rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .rounded-xl {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .rounded-xl .mb-1\.5 {
+    margin-bottom: 0.25rem;
+  }
+
+  /* Recomendaciones (Campeones): lista angosta y detalle con más aire. */
+  .rd-v2-build-page .rd-rec-layout {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol > li + li {
+    margin-top: 0.3rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol button {
+    gap: 0.45rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol button > :first-child {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > div {
+    padding: 0.65rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout h3 {
+    font-size: 1.1rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout img.h-12 {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+}
+
+/* Teléfonos chicos en horizontal: la píldora de "Intelligence" no entra y la
+   barra de navegación cede ancho a los pasos. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 759px) {
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-body {
+    grid-template-columns: 5.5rem minmax(0, 1fr) 9rem;
+  }
+}
+
 @media (min-width: 1024px) and (min-height: 700px) {
   .rd-main-content:has(.rd-stats-layout) {
     overflow: hidden;
@@ -2984,6 +3890,561 @@
 
   .rd-stats-layout .rd-analytics-panel .rd-card {
     height: 100%;
+  }
+}
+
+/* Pool de campeones: el lienzo de burbujas escala con la tarjeta (posiciones en %). */
+.rd-pool-bubbles {
+  width: min(100%, 380px);
+}
+
+/* Flechas del carril de Rendimiento: solo existen en smartphone horizontal. */
+.rd-stats-track-arrow {
+  display: none;
+}
+
+/* Estadísticas en smartphone horizontal: todo entra en el viewport.
+   Fila 1: título + "Basado en…" en línea y filtros compactos a la derecha.
+   Fila 2: pestañas. Debajo, el panel activo con el alto restante:
+   - Rendimiento: hero en una columna (splash de fondo, winrate arriba y 2x2 de
+     KDA / lados / pool) y un carril horizontal con las tres tarjetas.
+   - Matchups y sinergias: las dos listas lado a lado, cada una con scroll propio.
+   - Coach: encabezado en una franja fina y un consejo por página, a lo ancho.
+   Los selectores llevan .rd-stats-layout porque las variantes md:/lg:/xl: de
+   Tailwind se emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-stats-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-stats-layout {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  /* Encabezado */
+  .rd-stats-layout .rd-stats-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-title {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-title > div:first-child {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-title h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-title p {
+    margin-top: 0;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-stats-filters {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    gap: 0.4rem;
+  }
+
+  /* El texto del label queda para lectores de pantalla; visualmente sobra. */
+  .rd-stats-layout .rd-stats-filter {
+    width: 8.25rem;
+    min-width: 0;
+    font-size: 0;
+  }
+
+  .rd-stats-layout .rd-stats-filter-patch {
+    width: 7.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-filter select {
+    height: 1.85rem;
+    margin-top: 0;
+    padding: 0 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  /* Pestañas */
+  .rd-stats-layout > .rd-panel-tabs {
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-stats-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-analytics-panel {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-stats-layout .rd-card-title {
+    font-size: 12px;
+  }
+
+  /* Rendimiento: carril 1x4 (hero, campeón, línea y pool) con dos tarjetas por
+     vista; se navega con swipe o con las flechas superpuestas en los bordes. */
+  .rd-stats-layout .rd-stats-overview-panel {
+    position: relative;
+  }
+
+  .rd-stats-layout .rd-stats-track {
+    height: 100%;
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-cards {
+    display: contents;
+  }
+
+  .rd-stats-layout .rd-stats-track > .rd-stats-hero,
+  .rd-stats-layout .rd-stats-cards > * {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex: 0 0 calc((100% - 0.5rem) / 2);
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 20;
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 999px;
+    background: rgba(11, 15, 26, 0.82);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    color: hsl(var(--primary));
+    backdrop-filter: blur(6px);
+    transform: translateY(-50%);
+    transition: opacity 160ms ease;
+  }
+
+  .rd-stats-track-arrow-prev {
+    left: 0.35rem;
+  }
+
+  .rd-stats-track-arrow-next {
+    right: 0.35rem;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero {
+    min-height: 0;
+  }
+
+  /* Splash a tamaño completo, con una sombra que se cierra hacia los datos. */
+  .rd-stats-layout .rd-stats-hero-art {
+    inset: 0;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art > div {
+    width: 100%;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 18%;
+    filter: brightness(0.62) saturate(1.12) !important;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art img + div {
+    inset: 0;
+    width: auto;
+    background: linear-gradient(
+      180deg,
+      hsl(222 36% 9% / 0.15) 0%,
+      hsl(222 36% 9% / 0.55) 38%,
+      hsl(222 36% 9% / 0.92) 62%,
+      hsl(222 36% 9% / 0.96) 100%
+    );
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid {
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child {
+    grid-column: 1 / -1;
+    padding: 0.35rem 0.5rem;
+    transform: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > div {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child span {
+    font-size: 0.95rem;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > p:last-child {
+    margin-top: 0.2rem;
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents > * {
+    min-width: 0;
+    padding: 0.3rem 0.35rem;
+    border-bottom: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    transform: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents > :nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid .rd-label {
+    margin-bottom: 0.15rem;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-4xl {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-xs {
+    margin-top: 0.1rem;
+    font-size: 9.5px;
+    line-height: 1.2;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card {
+    height: 100%;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child {
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:last-child {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child p {
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child p + p {
+    font-size: 9px;
+  }
+
+  /* Winrate por campeón: lista con scroll propio. */
+  .rd-stats-layout .rd-stats-champ-list {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+    align-content: start;
+    gap: 0.3rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-champ-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list > * {
+    padding: 0.3rem 0.45rem;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list > * > div:first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-lane-chart {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Pool: el lienzo se ajusta al alto y al ancho disponibles. */
+  .rd-stats-layout .rd-pool-frame {
+    min-height: 0;
+    container-type: size;
+  }
+
+  .rd-stats-layout .rd-pool-bubbles {
+    width: min(100cqw, 172.7cqh);
+  }
+
+  /* Matchups y sinergias: dos columnas con scroll propio. */
+  .rd-stats-layout .rd-stats-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-pair > * {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-stats-pair .rd-card {
+    height: 100%;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-pair .rd-card > div:last-child {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-matchup-list {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-matchup-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-matchup-list > * + * {
+    margin-top: 0.3rem;
+  }
+
+  .rd-stats-layout .rd-matchup-list .text-\[13px\] {
+    font-size: 12px;
+  }
+
+  .rd-stats-layout .rd-matchup-list .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  /* Coach: encabezado en una franja fina y un consejo por página, a lo ancho.
+     Izquierda: dominio, título, tesis (con scroll propio) y evidencia.
+     Derecha: el consejo como panel destacado, siempre visible entero. */
+  .rd-stats-layout .rd-stats-coach {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.75rem 0.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header img {
+    width: 1.9rem;
+  }
+
+  /* Kicker, descripción y nota de confianza sobran: el chip de cada consejo ya
+     indica su respaldo. */
+  .rd-stats-layout .rd-stats-coach-header > div:first-child > div > div,
+  .rd-stats-layout .rd-stats-coach-header h2 + p,
+  .rd-stats-layout .rd-stats-coach-header > div:last-child > p {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header h2 {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-coach-grid {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .rd-stats-layout .rd-stats-insight {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 0.85rem;
+    padding: 0.65rem 0.75rem 0.65rem 1rem;
+    border-radius: 0.9rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) p {
+    margin-bottom: 0.2rem;
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-insight h3 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) > span {
+    padding: 0.15rem 0.4rem;
+    font-size: 9px;
+  }
+
+  /* Tesis: ocupa el alto que sobra y scrollea si es larga. */
+  .rd-stats-layout .rd-stats-insight-body {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+    margin-top: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p:first-child {
+    margin-bottom: 0.25rem;
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p + p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .rd-stats-layout .rd-stats-insight-evidence {
+    grid-column: 1;
+    grid-row: 3;
+    flex-wrap: nowrap;
+    gap: 0.3rem;
+    margin-top: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-evidence::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-evidence > span {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-stats-insight-spacer {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 0.8rem;
+    overflow-y: auto;
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 0.75rem;
+    background: rgba(212, 175, 55, 0.06);
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-action::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action svg {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* "Consejo:" pasa a ser el título del panel. */
+  .rd-stats-layout .rd-stats-insight-action p > span:first-child {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: hsl(var(--primary));
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 }
 

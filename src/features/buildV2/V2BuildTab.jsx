@@ -12,6 +12,7 @@ import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
 import StepNav from '@/components/suggester/StepNav';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const LABELS = { top: 'Top', jungler: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
@@ -118,6 +119,8 @@ function DraftCard({ title, icon: Icon, team, setter, champions, onMemberChange,
 }
 
 const STEPS = ['Campeón', 'Aliados', 'Enemigos'];
+// En smartphone horizontal el asistente ocupa el viewport y la build es un paso más.
+const RESULT_STEP = STEPS.length;
 
 export default function V2BuildTab({ tabSelector }) {
   const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
@@ -130,12 +133,17 @@ export default function V2BuildTab({ tabSelector }) {
   const [error, setError] = useState('');
   const [buildPreference, setBuildPreference] = useState('');
   const [step, setStep] = useState(0);
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const steps = isPhoneLandscape ? [...STEPS, 'Build'] : STEPS;
+  const viewStep = Math.min(step, steps.length - 1);
+  const onResultStep = viewStep === RESULT_STEP;
   const champions =useMemo(() => [...(snapshot?.champions || [])].sort((a, b) => a.name.localeCompare(b.name)), [snapshot]);
   const pickReady = Boolean(championId && role);
   const stepCompleted = [
     pickReady,
     LANES.some(lane => lane !== role && allies[lane]),
     LANES.some(lane => enemies[lane]),
+    state === 'success',
   ];
   const setMember = (setter, lane, value) => setter(team => ({ ...team, [lane]: value }));
   const selectMain = id => {
@@ -153,6 +161,7 @@ export default function V2BuildTab({ tabSelector }) {
   };
 
   async function generate() {
+    if (isPhoneLandscape) setStep(RESULT_STEP);
     if (!snapshot || !championId || !role) { setState('validation_error'); setError('Seleccioná un campeón y su rol.'); return; }
     if (allies[role] !== championId) { setState('validation_error'); setError('El campeón elegido debe ocupar el rol seleccionado en aliados.'); return; }
     const selectedAllies = Object.values(allies).filter(Boolean);
@@ -235,11 +244,11 @@ export default function V2BuildTab({ tabSelector }) {
           <span className="text-xs text-muted-foreground">Build Intelligence</span>
         </div>
     </header>
-    <div className="rd-v2-build-body grid items-start gap-5 xl:grid-cols-[310px_minmax(0,1fr)]">
+    <div className={`rd-v2-build-body grid items-start gap-5 xl:grid-cols-[310px_minmax(0,1fr)] ${onResultStep ? 'rd-v2-result-step' : ''}`}>
       <aside className="rd-v2-build-aside xl:sticky xl:top-6">
-        <StepNav steps={STEPS} label="Pasos del draft" step={step} completed={stepCompleted} locked={!pickReady} onStep={setStep} />
+        <StepNav steps={steps} label="Pasos del draft" step={viewStep} completed={stepCompleted} locked={!pickReady} available={steps.map((_, index) => index !== RESULT_STEP || state !== 'idle')} onStep={setStep} />
         <div className="rd-v2-build-aside-scroll">
-        {step === 0 && <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4 focus-within:z-30">
+        {viewStep === 0 && <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4 focus-within:z-30">
           <div className="mb-3 flex items-center justify-between gap-3"><div className="flex items-center gap-2"><Sparkles size={15} className="text-primary" /><h2 className="rd-card-title">Tu selección</h2></div><span className="rd-status-pill">Parche {snapshot.patchVersion}</span></div>
           <div className="space-y-2.5"><ChampionSelect inline label="Campeón" value={championId} champions={champions} onChange={selectMain} /><RoleSelect value={role} onChange={changeRole} /></div>
           <div className="mt-3 flex flex-1 flex-col border-t border-border/50 pt-3">
@@ -248,14 +257,14 @@ export default function V2BuildTab({ tabSelector }) {
             <div className="mt-1.5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground"><span title="La IA la priorizará si es viable para el campeón y el draft.">Se prioriza si es viable.</span><span className="shrink-0 tabular-nums">{buildPreference.length}/240</span></div>
           </div>
         </section>}
-        {step === 1 && <DraftCard title="Composición aliada" icon={Users} team={allies} setter={setAllies} champions={champions} onMemberChange={setMember} hiddenLane={role} />}
-        {step === 2 && <DraftCard title="Composición enemiga" icon={Swords} team={enemies} setter={setEnemies} champions={champions} onMemberChange={setMember} />}
+        {viewStep === 1 && <DraftCard title="Composición aliada" icon={Users} team={allies} setter={setAllies} champions={champions} onMemberChange={setMember} hiddenLane={role} />}
+        {viewStep === 2 && <DraftCard title="Composición enemiga" icon={Swords} team={enemies} setter={setEnemies} champions={champions} onMemberChange={setMember} />}
         </div>
         <div className="flex gap-2">
-          {step > 0 && <button type="button" onClick={() => setStep(current => current - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
-          {step < STEPS.length - 1
-            ? <button type="button" onClick={() => setStep(current => current + 1)} disabled={!pickReady} title={pickReady ? undefined : 'Elegí campeón y rol para continuar'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
-            : <button type="button" onClick={generate} disabled={state === 'loading'} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? 'Analizando draft…' : 'Generar build'}</button>}
+          {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
+          {viewStep < STEPS.length - 1
+            ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!pickReady} title={pickReady ? undefined : 'Elegí campeón y rol para continuar'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
+            : <button type="button" onClick={generate} disabled={state === 'loading'} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? 'Analizando draft…' : onResultStep ? 'Volver a generar' : 'Generar build'}</button>}
         </div>
       </aside>
       <div className="rd-v2-build-result">

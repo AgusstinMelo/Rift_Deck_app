@@ -36,6 +36,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import V2BuildTab from '@/features/buildV2/V2BuildTab';
 import StepNav from '@/components/suggester/StepNav';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
@@ -599,6 +600,8 @@ function normalizeRecommendations(recommendations, candidates) {
     );
   }
 const LEGACY_STEPS = ['Pool', 'Parámetros'];
+// En smartphone horizontal el asistente ocupa el viewport y las sugerencias son un paso más.
+const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
 
   function LegacySuggester({ tabSelector }) {
   const [pool, setPool] = useState([]);
@@ -613,6 +616,10 @@ const LEGACY_STEPS = ['Pool', 'Parámetros'];
   const [view, setView] = useState('recs');
   const [selectedRec, setSelectedRec] = useState(0);
   const { user } = useAuth();
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const steps = isPhoneLandscape ? [...LEGACY_STEPS, 'Sugerencias'] : LEGACY_STEPS;
+  const viewStep = Math.min(step, steps.length - 1);
+  const onResultStep = viewStep === LEGACY_RESULT_STEP;
 
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
@@ -693,6 +700,7 @@ const LEGACY_STEPS = ['Pool', 'Parámetros'];
       return;
     }
 
+    if (isPhoneLandscape) setStep(LEGACY_RESULT_STEP);
     setError('');
     setGenerating(true);
     setRecommendations([]);
@@ -856,12 +864,12 @@ Devuelve exactamente 5 recomendaciones.`;
         </div>
       </header>
 
-      <div className="rd-v2-build-body grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
+      <div className={`rd-v2-build-body grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)] ${onResultStep ? 'rd-v2-result-step' : ''}`}>
         <aside className="rd-v2-build-aside xl:sticky xl:top-6">
-          <StepNav steps={LEGACY_STEPS} label="Pasos del análisis" step={step} completed={[hasPool, hasRecommendations]} locked={!hasPool} onStep={setStep} />
+          <StepNav steps={steps} label="Pasos del análisis" step={viewStep} completed={[hasPool, hasRecommendations, hasRecommendations]} locked={!hasPool} onStep={setStep} />
 
           <div className="rd-v2-build-aside-scroll">
-            {step === 0 && (
+            {viewStep === 0 && (
               <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Target size={15} className="text-primary" />
@@ -885,7 +893,7 @@ Devuelve exactamente 5 recomendaciones.`;
               </section>
             )}
 
-            {step === 1 && (
+            {viewStep === 1 && (
               <section className="rd-card rd-v2-step-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
                   <Compass size={15} className="text-primary" />
@@ -927,10 +935,10 @@ Devuelve exactamente 5 recomendaciones.`;
           {error && <p className="rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-400">{error}</p>}
 
           <div className="flex gap-2">
-            {step > 0 && <button type="button" onClick={() => setStep(current => current - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
-            {step < LEGACY_STEPS.length - 1
-              ? <button type="button" onClick={() => setStep(current => current + 1)} disabled={!hasPool} title={hasPool ? undefined : 'Agregá al menos un campeón a tu pool'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
-              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? 'Analizando pool…' : 'Generar recomendaciones'}</button>}
+            {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
+            {viewStep < LEGACY_STEPS.length - 1
+              ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!hasPool} title={hasPool ? undefined : 'Agregá al menos un campeón a tu pool'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
+              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? 'Analizando pool…' : onResultStep ? 'Volver a generar' : 'Generar recomendaciones'}</button>}
           </div>
         </aside>
 
@@ -964,7 +972,7 @@ Devuelve exactamente 5 recomendaciones.`;
 
                   <div role="tabpanel" className="rd-v2-build-analysis-body text-sm text-muted-foreground">
                     {currentView === 'recs' && selected && (
-                      <div className="grid min-h-full gap-3 md:grid-cols-[12.5rem_minmax(0,1fr)]">
+                      <div className="rd-rec-layout grid min-h-full gap-3 md:grid-cols-[12.5rem_minmax(0,1fr)]">
                         <ol className="space-y-1.5">
                           {recommendations.map((rec, index) => {
                             const imageUrl = getChampionImage(champions, rec.champion_name);
