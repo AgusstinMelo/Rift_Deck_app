@@ -659,16 +659,122 @@
   }
 }
 
-/* Smartphone horizontal: el Resumen entra completo en el viewport, sin scroll.
-   Estadísticas en 4x2 a la izquierda; Insight del día y Objetivos apilados a la derecha. */
+/* Sidebar (drawer) en smartphone horizontal: scrollea completa (marca, buscador
+   y pestañas) con la franja del usuario fija abajo. No aplica a desktop. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+  .rd-sidebar {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Primera pantalla: marca, íconos y buscador llenan el alto visible (sobre la
+     franja del usuario); las pestañas aparecen recién al scrollear.
+     Alturas: buscador = 0.75rem + 2.5rem (h-10) + 0.75rem (mb-3);
+     franja = 1.75rem (avatar) + paddings + borde (+2rem con "Config Tierlist"). */
+  .rd-sidebar {
+    --rd-sidebar-search-h: 4rem;
+    --rd-sidebar-footer-h: calc(2.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
+  }
+
+  .rd-sidebar:has(.rd-sidebar-footer a[href="/admin/tierlist-config"]) {
+    --rd-sidebar-footer-h: calc(4.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
+  }
+
+  .rd-sidebar > .rd-sidebar-brand {
+    display: flex;
+    min-height: calc(100dvh - var(--rd-sidebar-search-h) - var(--rd-sidebar-footer-h));
+    flex: none;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .rd-sidebar > .rd-sidebar-nav {
+    flex: none;
+    overflow: visible;
+    padding-top: 0.75rem;
+  }
+
+  .rd-sidebar-tools {
+    align-self: center;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .rd-sidebar > .rd-sidebar-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding: 0.5rem 0.9rem max(0.5rem, env(safe-area-inset-bottom));
+    background: rgb(15, 21, 36);
+  }
+}
+
+/* Elementos que solo existen en smartphone horizontal: libro del Insight,
+   "Ver consejo", selector de línea de Meta y "Equipo enemigo" en Partidas. */
+.rd-dashboard-insight-icon,
+.rd-dashboard-insight-more,
+.rd-meta-lane-picker,
+.rd-match-card-label-compact {
+  display: none;
+}
+
+/* Insight completo; se abre desde "Ver consejo" en smartphone horizontal. */
+.rd-insight-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.rd-insight-sheet-panel {
+  width: min(100%, 32rem);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+}
+
+/* Smartphone horizontal: falta alto y sobra ancho.
+   - La barra superior pasa a ser un riel vertical a la izquierda (todas las páginas).
+   - Resumen del Dashboard sin scroll: estadísticas 4x2 a la izquierda;
+     Insight del día y Objetivos apilados a la derecha. */
 @media (orientation: landscape) and (max-height: 500px) {
+  .rd-shell-column {
+    flex-direction: row;
+  }
+
   .rd-mobile-topbar {
-    height: 2.75rem;
+    width: calc(3.25rem + env(safe-area-inset-left));
+    height: auto;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0.5rem 0 0.5rem env(safe-area-inset-left);
+    border-right: 1px solid hsl(var(--primary) / 0.1);
+    border-bottom: 0;
   }
 
   .rd-mobile-topbar button {
+    position: static;
     width: 2.5rem;
     height: 2.5rem;
+    transform: none;
+  }
+
+  .rd-mobile-topbar > div {
+    padding: 0;
+  }
+
+  .rd-mobile-topbar img + img {
+    display: none;
   }
 
   .rd-main-content:has(.rd-dashboard-tabs) {
@@ -684,7 +790,7 @@
       0.5rem
       max(0.75rem, env(safe-area-inset-right))
       max(0.5rem, env(safe-area-inset-bottom))
-      max(0.75rem, env(safe-area-inset-left));
+      0.75rem;
     overflow: hidden;
   }
 
@@ -737,43 +843,51 @@
   }
 
   .rd-dashboard-summary {
-    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     gap: 0.5rem;
   }
 
   .rd-dashboard-stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .rd-dashboard-side {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 0.5rem;
   }
 
   .rd-dashboard-stat {
-    gap: 0.15rem;
-    padding: 0.45rem 0.6rem;
+    gap: 0.2rem;
+    padding: 0.5rem 0.55rem;
   }
 
+  .rd-dashboard-stat > div:first-child {
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  /* Sin puntos suspensivos en las tarjetas: los textos pasan de línea en vez de cortarse. */
   .rd-dashboard-stat .rd-label {
-    overflow: hidden;
     font-size: 9px;
-    letter-spacing: 0.08em;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+  }
+
+  .rd-dashboard-label-extra {
+    display: none;
   }
 
   .rd-dashboard-stat svg {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
   }
 
   .rd-dashboard-stat-value {
-    font-size: 1.5rem;
+    font-size: 1.65rem;
   }
 
   .rd-dashboard-stat .text-xs {
@@ -782,13 +896,44 @@
   }
 
   .rd-dashboard-stat .text-lg {
+    overflow: visible;
     font-size: 0.95rem;
     line-height: 1.1;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-dashboard-stat > div:nth-child(2) {
+    gap: 0.4rem;
+  }
+
+  /* El avatar ocupa el lugar del ícono (arriba a la derecha) y el nombre del
+     campeón usa todo el ancho de la tarjeta, sin cortarse. */
+  .rd-dashboard-stat {
+    position: relative;
+  }
+
+  /* .rd-card > * es relative: la fila del nombre se vuelve estática para que
+     el avatar se ubique respecto de la tarjeta y no de esa fila. */
+  .rd-dashboard-stat > div:has(> .rd-dashboard-stat-avatar) {
+    position: static;
   }
 
   .rd-dashboard-stat-avatar {
-    width: 1.75rem;
-    height: 1.75rem;
+    position: absolute;
+    z-index: 1;
+    top: 0.45rem;
+    right: 0.5rem;
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-dashboard-stat:has(.rd-dashboard-stat-avatar) > div:first-child {
+    padding-right: 1.9rem;
+  }
+
+  .rd-dashboard-stat:has(.rd-dashboard-stat-avatar) > div:first-child svg {
+    display: none;
   }
 
   .rd-dashboard-stat-hint {
@@ -796,15 +941,14 @@
   }
 
   .rd-dashboard-stat-tags {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0.25rem;
-    overflow: hidden;
   }
 
   .rd-dashboard-stat-tags span {
     padding: 0.05rem 0.3rem;
     font-size: 9px;
-    white-space: nowrap;
+    line-height: 1.3;
   }
 
   .rd-dashboard-insight {
@@ -812,44 +956,100 @@
   }
 
   .rd-dashboard-insight > div {
-    gap: 0.6rem;
+    align-items: center;
   }
 
   .rd-dashboard-insight-art {
-    width: 2.75rem;
+    display: none;
   }
 
+  /* Mismo tamaño que el ícono de Objetivos (15px). */
+  .rd-dashboard-insight-icon {
+    display: block;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  /* Mismo estilo que los títulos de las demás tarjetas (.rd-label). */
   .rd-dashboard-insight .rd-section-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 0;
-    font-size: 9px;
+    color: hsl(var(--muted-foreground));
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
   }
 
+  /* Título completo; la explicación y el consejo se leen en el panel de "Ver consejo". */
   .rd-dashboard-insight h2 {
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    line-height: 1.15;
+  }
+
+  .rd-dashboard-insight-thesis,
+  .rd-dashboard-insight-tip {
+    display: none;
+  }
+
+  .rd-dashboard-insight-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-top: 0.35rem;
+    color: hsl(var(--primary));
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Título, flechas y "Ver todos" en una sola fila; el objetivo ocupa el resto. */
+  .rd-goals-widget {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: start;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .rd-goals-widget > * {
+    grid-column: 1 / -1;
+  }
+
+  .rd-goals-widget-head,
+  .rd-goals-widget-summary {
+    display: contents;
+  }
+
+  .rd-goals-widget-head > :first-child {
     overflow: hidden;
-    margin-top: 0.1rem;
-    font-size: 0.9rem;
-    text-overflow: ellipsis;
+    grid-row: 1;
+    grid-column: 1;
     white-space: nowrap;
   }
 
-  .rd-dashboard-insight h2 + p {
-    margin-top: 0.2rem;
-    font-size: 11px;
-    line-height: 1.3;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+  .rd-goals-widget-nav {
+    grid-row: 1;
+    grid-column: 2;
   }
 
-  .rd-dashboard-insight-tip {
-    margin-top: 0.2rem;
-    font-size: 10px;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
+  .rd-goals-widget-all {
+    grid-row: 1;
+    grid-column: 3;
+    font-size: 0;
   }
 
-  .rd-goals-widget {
-    gap: 0.3rem;
-    padding: 0.55rem 0.7rem;
+  .rd-goals-widget-count {
+    display: none;
+  }
+
+  .rd-goals-widget-title-extra {
+    display: none;
   }
 
   .rd-goals-widget .rd-label {
@@ -862,25 +1062,443 @@
   }
 
   .rd-goal-slide {
-    gap: 0.25rem;
-    padding-block: 0.15rem;
+    gap: 0.3rem;
+    padding-block: 0.2rem;
   }
 
   .rd-goal-slide-kicker {
     display: none;
   }
 
+  /* Nombre arriba y valor debajo: el nombre deja de cortarse contra "3 partidas / 10 partidas". */
   .rd-goal-slide-top {
-    height: 1.25rem;
-    align-items: center;
+    height: 2.75rem;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .rd-goal-slide-top > span {
+    font-size: 10px;
+  }
+
+  /* Nombre y meta en hasta dos líneas; el alto fijo evita que la tarjeta se mueva. */
+  .rd-goal-slide-top p {
+    max-height: 2.2em;
+    overflow: hidden;
+    line-height: 1.1;
+    text-overflow: clip;
+    white-space: normal;
   }
 
   .rd-goal-slide-meter {
-    height: 1rem;
+    height: 1.6rem;
+  }
+
+  .rd-goal-slide-meter p {
+    max-height: 2.5em;
+    overflow: hidden;
+    font-size: 10px;
+    line-height: 1.25;
+    text-overflow: clip;
+    white-space: normal;
   }
 
   .rd-goal-slide-status {
     height: 1.4rem;
+  }
+
+  .rd-goal-slide-status > span:first-child {
+    flex-wrap: nowrap;
+  }
+
+  /* El período queda en el detalle del objetivo; acá no entra junto a los estados. */
+  .rd-goal-slide-status > span:last-child {
+    display: none;
+  }
+
+  /* Actividad: las tres tarjetas lado a lado, compactas y sin scroll. */
+  .rd-dashboard-activity {
+    height: 100%;
+    overflow: hidden;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-dashboard-activity > .rd-card {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .rd-dashboard-activity > .rd-card > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-dashboard-activity .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-dashboard-activity .rd-link {
+    font-size: 11px;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-list {
+    min-height: 0;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-row .text-sm {
+    font-size: 12px;
+  }
+
+  /* Últimas partidas: las 6 más recientes; el resto en "Ver todas". */
+  .rd-dashboard-activity .rd-dashboard-match-list {
+    min-height: 0;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+  }
+
+  .rd-dashboard-match-list > .rd-dashboard-row:nth-child(n + 7) {
+    display: none;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-match-list .rd-dashboard-row > :first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  /* Últimas builds: íconos más chicos; el nombre usa hasta dos líneas y el
+     campeón se identifica por el avatar. */
+  .rd-dashboard-build-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.45rem;
+  }
+
+  .rd-dashboard-build-name {
+    gap: 0.4rem;
+  }
+
+  .rd-dashboard-build-name > :first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-dashboard-build-name .text-sm {
+    max-height: 2.3em;
+    overflow: hidden;
+    line-height: 1.15;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-dashboard-build-name .text-\[10px\] {
+    display: none;
+  }
+
+  .rd-build-loadout {
+    grid-template-columns: 1.5rem 1.05rem auto;
+    grid-template-rows: repeat(2, 1.05rem);
+    gap: 0.15rem 0.25rem;
+  }
+
+  .rd-build-keystone {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .rd-build-spells {
+    grid-template-rows: repeat(2, 1.05rem);
+    gap: 0.15rem;
+  }
+
+  .rd-build-spells img,
+  .rd-build-spells span {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .rd-build-items {
+    grid-template-columns: repeat(3, 1.05rem);
+    grid-template-rows: repeat(2, 1.05rem);
+    gap: 0.15rem;
+  }
+
+  .rd-build-items img,
+  .rd-build-items span {
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 0.25rem;
+  }
+
+  .rd-build-winrate {
+    min-width: 1.75rem;
+    font-size: 11px;
+  }
+
+  /* Matchups: los dos grupos apilados con filas más bajas. */
+  .rd-dashboard-activity div:has(> .rd-dashboard-matchup-group) {
+    gap: 0.4rem;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-matchup-group {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .rd-dashboard-matchup-group .rd-mini-label {
+    margin-bottom: 0.15rem;
+    font-size: 9px;
+  }
+
+  .rd-dashboard-matchup-row > div:first-child {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .rd-dashboard-matchup-row .text-sm {
+    font-size: 11px;
+  }
+
+  /* Meta: "Meta por línea" a la izquierda con una sola línea visible (se elige
+     con los íconos) y "Mis mains" a la derecha. */
+  .rd-dashboard-meta {
+    height: 100%;
+    overflow: hidden;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-dashboard-meta > .rd-card {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .rd-dashboard-meta .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-dashboard-meta .rd-link {
+    font-size: 11px;
+  }
+
+  .rd-dashboard-meta > article:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .rd-dashboard-meta > article:first-child > div:first-child {
+    margin-bottom: 0;
+  }
+
+  .rd-meta-lane-picker {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-meta-lane-pick {
+    display: grid;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid hsl(var(--border) / 0.8);
+    border-radius: 0.6rem;
+    background: hsl(var(--secondary) / 0.25);
+    opacity: 0.55;
+    transition: opacity 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  }
+
+  .rd-meta-lane-pick img {
+    width: 1.15rem;
+    height: 1.15rem;
+    object-fit: contain;
+  }
+
+  .rd-meta-lane-pick-active {
+    border-color: hsl(var(--primary) / 0.45);
+    background: hsl(var(--primary) / 0.12);
+    opacity: 1;
+  }
+
+  .rd-dashboard-meta > article:first-child > div:last-child {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rd-meta-lane-card:not(.rd-meta-lane-card-active) {
+    display: none;
+  }
+
+  .rd-meta-lane-card {
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-meta-lane-card > div:first-child {
+    margin-bottom: 0.2rem;
+  }
+
+  /* El ícono ya está en el selector; queda solo el nombre de la línea. */
+  .rd-meta-lane-card > div:first-child img {
+    display: none;
+  }
+
+  .rd-meta-lane-row {
+    gap: 0.6rem;
+  }
+
+  .rd-meta-lane-row > div:first-of-type {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .rd-meta-lane-row p:first-child {
+    font-size: 0.85rem;
+  }
+
+  .rd-meta-lane-row [class*="text-[9px]"] {
+    font-size: 10px;
+  }
+
+  /* Mis mains: identidad arriba, las dos estadísticas lado a lado e insight debajo. */
+  .rd-main-card {
+    gap: 0.4rem;
+  }
+
+  .rd-main-card-header {
+    min-height: 1.5rem;
+    align-items: center;
+  }
+
+  .rd-main-arrow {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  /* Sin "Pool personal": título, contador y flechas entran en una línea. */
+  .rd-main-card-header .rd-inline-section-heading > span,
+  .rd-main-card-header .rd-section-kicker {
+    display: none;
+  }
+
+  .rd-main-navigation span {
+    white-space: nowrap;
+  }
+
+  /* Campeón a la izquierda; a su derecha "Estadísticas del meta" y "Tu rendimiento"
+     apiladas. El insight ocupa todo el ancho con el resto del alto. */
+  .rd-main-meta-layout {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.35rem 0.75rem;
+  }
+
+  .rd-main-identity {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    gap: 0.65rem;
+    padding: 0;
+  }
+
+  .rd-main-identity > div:first-child {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.55rem;
+  }
+
+  .rd-main-identity p {
+    font-size: 9px;
+  }
+
+  .rd-main-identity h3 {
+    font-size: 1.2rem;
+    line-height: 1.05;
+  }
+
+  .rd-main-identity h3 + div {
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+  }
+
+  .rd-main-identity h3 + div > span:first-child {
+    width: 1.2rem;
+    height: 1.2rem;
+    font-size: 10px;
+  }
+
+  .rd-main-identity h3 + div > span:last-child {
+    font-size: 10px;
+  }
+
+  .rd-main-stat-group {
+    display: flex;
+    grid-column: 2;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0 0 0 0.75rem;
+    border-top: 0;
+    border-left: 1px solid hsl(var(--border) / 0.8);
+  }
+
+  .rd-main-stat-group + .rd-main-stat-group {
+    padding-top: 0.35rem;
+    border-top: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .rd-main-stat-group .rd-mini-label {
+    margin-bottom: 0;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+  }
+
+  .rd-main-stat-group strong {
+    font-size: 0.95rem;
+  }
+
+  .rd-main-stat-group span {
+    font-size: 9px;
+  }
+
+  /* Si el insight no entra, scrollea dentro de la tarjeta con una barra dorada fina. */
+  .rd-main-insight {
+    display: block;
+    min-height: 0;
+    padding: 0.3rem 0.4rem 0 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    line-height: 1.35;
+    scrollbar-color: hsl(var(--primary) / 0.7) transparent;
+    scrollbar-width: thin;
+  }
+
+  .rd-main-insight::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .rd-main-insight::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .rd-main-insight::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  /* El título del insight va en la misma línea donde arranca el texto: ahorra una línea. */
+  .rd-main-insight .rd-mini-label {
+    display: inline;
+    margin: 0 0.4rem 0 0;
+    font-size: 9px;
+  }
+
+  /* Sin "…": el insight se muestra completo. */
+  .rd-main-insight p:last-child {
+    display: inline;
+    font-size: 10.5px;
+    line-height: 1.35;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
   }
 }
 
@@ -947,6 +1565,351 @@
 @media (max-width: 1023px), (max-height: 699px) {
   .rd-matches-layout > * + * {
     margin-top: 1.25rem;
+  }
+}
+
+/* Partidas en smartphone horizontal: título a la izquierda y un 2x2 a la derecha
+   (Eliminar todas | Nueva partida / Partidas | Record; sin Winrate). Encabezado,
+   acciones y métricas se "disuelven" (display: contents) en la grilla de la página. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-matches-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 12.5rem));
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .rd-matches-layout > * {
+    margin-top: 0;
+  }
+
+  .rd-matches-header,
+  .rd-matches-header > div:nth-child(2),
+  .rd-matches-metrics {
+    display: contents;
+  }
+
+  .rd-matches-header > div:first-child {
+    grid-row: 1 / 3;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:first-child:not(:last-child) {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:last-child {
+    grid-row: 1;
+    grid-column: 3;
+  }
+
+  /* Más específico que ".rd-matches-metrics > .rd-card" (display: flex) de abajo. */
+  .rd-matches-metrics > .rd-card:nth-child(2) {
+    display: none;
+  }
+
+  .rd-matches-metrics > :first-child {
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  .rd-matches-metrics > :last-child {
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  .rd-matches-layout > .rd-matches-filters,
+  .rd-matches-layout > .rd-matches-scroll {
+    grid-column: 1 / -1;
+  }
+
+  /* Filtros en una sola línea compacta: el buscador toma el ancho que sobra. */
+  .rd-matches-layout > .rd-matches-filters {
+    margin-top: 0.25rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .rd-matches-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .rd-matches-filters > div > div:first-child {
+    min-width: 0;
+  }
+
+  .rd-matches-filters input {
+    padding-block: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-matches-filters select {
+    flex-shrink: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* Tarjeta de cada partida, resumida para entrar en el ancho: sólo "V/D", info en una
+     línea, build en 2 filas de 3 y equipos sin etiquetas (aliados en azul, enemigos en rojo).
+     Los selectores llevan .rd-matches-scroll porque las variantes md: de Tailwind se
+     emiten al final de la hoja y, con la misma especificidad, ganarían. */
+  /* Alto fijo: todas las tarjetas miden lo mismo, tengan o no tags. */
+  .rd-matches-scroll .rd-match-card-grid {
+    display: grid;
+    height: 5.25rem;
+    grid-template-columns: minmax(0, 1fr) 1px auto 1px auto auto;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem 0.45rem 0.75rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-grid > div:nth-child(2) {
+    display: block;
+  }
+
+  .rd-matches-scroll .rd-match-card-main {
+    gap: 0.5rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result {
+    width: 1.1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > p:first-child {
+    font-size: 1.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > :not(:first-child) {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-champ {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info {
+    gap: 0.25rem;
+  }
+
+  /* Línea 1: campeón, rol, lado y tipo (el tipo se abrevia si no entra).
+     Línea 2: tags en una línea, abreviadas si no entran; existe aunque no haya tags. */
+  .rd-matches-scroll .rd-match-card-info > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line,
+  .rd-matches-scroll .rd-match-card-tags {
+    display: flex;
+    min-width: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    overflow: hidden;
+  }
+
+  .rd-matches-scroll .rd-match-card-tags {
+    height: 1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > * {
+    flex-shrink: 0;
+  }
+
+  .rd-matches-scroll .rd-match-card-info h2 {
+    flex-shrink: 1;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 8.5px;
+    white-space: nowrap;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span:last-child,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* KDA, oro, parche y fecha en una línea, con su referencia chica arriba. */
+  .rd-matches-scroll .rd-match-card-info > div:last-child {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.7rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:first-child {
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:last-child {
+    font-size: 11px;
+  }
+
+  .rd-matches-scroll .rd-match-card-build,
+  .rd-matches-scroll .rd-match-card-teams {
+    width: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* "Build" arriba de la primera fila de ítems; la segunda etiqueta (invisible, sólo
+     para alinear en desktop) no hace falta. Entra sin sumar alto a la tarjeta. */
+  .rd-matches-scroll .rd-match-card-build p {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-build > div:first-child p {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  /* "Tu equipo" / "Enemigos" a la izquierda de cada fila, para no sumar alto. */
+  .rd-matches-scroll .rd-match-card-teams > div {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-label-wide {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-label-compact {
+    display: inline;
+  }
+
+  /* Ancho fijo que entra "ENEMIGO": si no, esa fila se ensanchaba y los íconos
+     quedaban desalineados con los de "Tu equipo". */
+  .rd-matches-scroll .rd-match-card-teams p {
+    flex: 0 0 3.3rem;
+    width: 3.3rem;
+    margin: 0;
+    font-size: 7.5px;
+    letter-spacing: 0.1em;
+    line-height: 1.15;
+  }
+
+  .rd-matches-scroll .rd-match-card-build {
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams {
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid {
+    grid-template-columns: repeat(3, 1.4rem);
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams .grid {
+    grid-template-columns: repeat(5, 1.4rem);
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid > *,
+  .rd-matches-scroll .rd-match-card-teams .grid > * {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:first-child .grid > :not([class*="border-primary"]) {
+    border-color: rgb(96 165 250 / 0.4);
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:last-child .grid > * {
+    border-color: rgb(248 113 113 / 0.4);
+  }
+
+  .rd-matches-scroll .rd-match-card-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions button {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* El selector de tipo tomaba el ancho de "Clasificatoria Legendaria": queda justo
+     para "Todos los tipos" y el resto pasa al buscador. */
+  .rd-matches-filters select:last-child {
+    width: 8.25rem;
+  }
+
+  /* Tarjetas compactas: acciones y métricas con el mismo alto. */
+  .rd-matches-header .rd-action-card {
+    gap: 0.55rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-matches-header .rd-action-card > div:first-child {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-matches-header .rd-action-card svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .rd-matches-header .rd-action-card p:first-child {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-matches-header .rd-action-card p + p {
+    font-size: 10px;
+  }
+
+  .rd-matches-metrics > .rd-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-matches-metrics > .rd-card > div:first-child {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-matches-metrics > .rd-card .text-3xl {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .rd-matches-metrics > .rd-card p + p {
+    margin-top: 0.15rem;
+    font-size: 10px;
   }
 }
 
@@ -1618,6 +2581,179 @@
   .rd-library-header,
   .rd-library-tabs {
     margin-bottom: 1.25rem;
+  }
+}
+
+/* Builds en mobile: en desktop la separación la da el gap de la grilla; acá la
+   página es un bloque y subtítulo, buscador y lista quedaban pegados. */
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-build-picker-header,
+  .rd-build-picker .rd-build-picker-filters {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Builds en smartphone horizontal: filtros en una sola línea compacta. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-build-picker .rd-build-picker-filters {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .rd-build-picker-filters > div {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .rd-build-picker-filters input {
+    padding-block: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-build-picker-filters > div > div:last-child {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .rd-build-picker-filters > div > div:last-child > div {
+    display: flex;
+    padding: 0.2rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-build-picker-filters button {
+    width: auto;
+    padding: 0.3rem 0.55rem;
+    font-size: 11px;
+  }
+}
+
+/* Biblioteca en smartphone horizontal: las pestañas van en la misma línea que la
+   descripción ("Archivo táctico…") y buscador + selectores en una línea compacta.
+   Encabezado y bloque del título se "disuelven" (display: contents) para ubicar
+   sus partes en la grilla de la página. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-library-layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    /* Sin el gap base de .rd-library-layout (1.25rem), que separaba cada fila. */
+    gap: 0 1rem;
+  }
+
+  .rd-library-header,
+  .rd-library-header > div:first-child {
+    display: contents;
+  }
+
+  .rd-library-header > div:first-child > :first-child {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .rd-library-header h1 {
+    grid-row: 2;
+    grid-column: 1;
+    line-height: 0.78;
+  }
+
+  .rd-library-header > div:first-child > p {
+    grid-row: 3;
+    grid-column: 1;
+    margin-top: 0.2rem;
+  }
+
+  /* "Base de conocimiento" flota arriba a la derecha, a la altura del kicker,
+     sin agrandar ninguna fila de la grilla. */
+  .rd-library-header > div:last-child {
+    position: absolute;
+    top: clamp(1rem, 2.2vw, 1.5rem);
+    right: clamp(1rem, 2.2vw, 1.5rem);
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .rd-library-header > div:last-child svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .rd-library-header > div:last-child span {
+    font-size: 11px;
+  }
+
+  .rd-library-layout > .rd-library-content {
+    grid-row: 4;
+    grid-column: 1 / -1;
+    margin-top: 0.6rem;
+  }
+
+  /* space-y-6 deja 1.5rem entre filtros y lista: se reduce para ganar alto. */
+  .rd-library-content > .space-y-6 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  /* Abarca título y descripción alineada abajo: no estira la fila de la descripción. */
+  .rd-library-tabs {
+    grid-row: 2 / 4;
+    grid-column: 2;
+    align-self: end;
+    justify-self: end;
+    margin-bottom: 0;
+    padding: 0.2rem;
+  }
+
+  .rd-library-tabs > div {
+    flex-wrap: nowrap;
+  }
+
+  .rd-library-tabs button {
+    gap: 0.45rem;
+    padding: 0.2rem 0.65rem 0.2rem 0.25rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-library-tabs button > div:first-child {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.45rem;
+  }
+
+  .rd-library-tabs button svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-library-tabs button p + p {
+    display: none;
+  }
+
+  .rd-library-filters {
+    margin-bottom: 0;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .rd-library-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .rd-library-filters > div > div:first-child {
+    min-width: 0;
+  }
+
+  .rd-library-filters input {
+    padding-block: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-library-filters select {
+    flex-shrink: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
   }
 }
 

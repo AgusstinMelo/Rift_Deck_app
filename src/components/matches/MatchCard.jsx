@@ -327,6 +327,7 @@ export default function MatchCard({
 
       <div
         className="
+          rd-match-card-grid
           relative flex flex-col px-4 py-4 w-full gap-4
           md:grid md:items-center md:px-5 md:py-4
           md:grid-cols-[minmax(360px,1fr)_1px_175px_1px_270px_42px]
@@ -334,10 +335,10 @@ export default function MatchCard({
         "
       >
         {/* ================= LEFT ================= */}
-        <div className="flex items-center gap-4 min-w-0 w-full md:gap-5">
+        <div className="rd-match-card-main flex items-center gap-4 min-w-0 w-full md:gap-5">
 
           {/* RESULT */}
-          <div className={`w-14 shrink-0 text-center ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+          <div className={`rd-match-card-result w-14 shrink-0 text-center ${isWin ? 'text-green-400' : 'text-red-400'}`}>
             <p className="font-rajdhani font-bold text-4xl leading-none tracking-[-0.08em]">
               {isWin ? 'V' : 'D'}
             </p>
@@ -357,6 +358,7 @@ export default function MatchCard({
           {/* CHAMP */}
           <div
             className="
+              rd-match-card-champ
               relative w-14 h-14 rounded-2xl overflow-hidden
               border border-primary/20 shadow-[0_0_18px_rgba(212,175,55,.12)]
               shrink-0
@@ -376,9 +378,11 @@ export default function MatchCard({
           </div>
 
           {/* INFO */}
-          <div className="flex flex-col justify-center gap-2 min-w-0 flex-1">
+          <div className="rd-match-card-info flex flex-col justify-center gap-2 min-w-0 flex-1">
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* display: contents en desktop (una sola fila); en mobile horizontal son dos líneas fijas. */}
+              <span className="rd-match-card-line contents">
               <h2 className="font-rajdhani font-bold text-xl tracking-[-0.05em] text-foreground truncate max-w-[130px]">
                 {ownName}
               </h2>
@@ -404,7 +408,9 @@ export default function MatchCard({
               <span className="text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded-md border font-semibold bg-secondary/70 text-muted-foreground border-border/60">
                 {getMatchTypeLabel(match.type)}
               </span>
+              </span>
 
+              <span className="rd-match-card-tags contents">
               {tags.map(tag => (
                 <span
                   key={tag}
@@ -413,6 +419,7 @@ export default function MatchCard({
                   {tag}
                 </span>
               ))}
+              </span>
             </div>
 
             <div className="inline-grid grid-cols-[auto_auto] gap-x-2 gap-y-2 self-start md:grid md:grid-cols-[auto_auto_auto_auto] md:gap-x-3 md:gap-y-2 md:self-auto">
@@ -443,7 +450,7 @@ export default function MatchCard({
         <div className="hidden md:block w-px h-full bg-border/50" />
 
         {/* ================= BUILD ================= */}
-        <div className="flex flex-col justify-center gap-[14px] w-full rounded-2xl bg-secondary/20 border border-border/30 p-3 md:w-auto md:rounded-none md:bg-transparent md:border-0 md:p-0">
+        <div className="rd-match-card-build flex flex-col justify-center gap-[14px] w-full rounded-2xl bg-secondary/20 border border-border/30 p-3 md:w-auto md:rounded-none md:bg-transparent md:border-0 md:p-0">
           <div>
             <p className="text-[9px] uppercase tracking-[0.18em] text-primary/80 font-bold mb-2">
               BUILD
@@ -484,7 +491,7 @@ export default function MatchCard({
         <div className="w-px h-full bg-border/50" />
 
         {/* ================= TEAMS ================= */}
-        <div className="flex flex-col justify-center gap-[14px] w-full rounded-2xl bg-secondary/20 border border-border/30 p-3 md:w-auto md:rounded-none md:bg-transparent md:border-0 md:p-0">
+        <div className="rd-match-card-teams flex flex-col justify-center gap-[14px] w-full rounded-2xl bg-secondary/20 border border-border/30 p-3 md:w-auto md:rounded-none md:bg-transparent md:border-0 md:p-0">
 
           {/* allies */}
           <div>
@@ -513,7 +520,8 @@ export default function MatchCard({
           {/* enemies */}
           <div>
             <p className="text-[9px] uppercase tracking-[0.18em] text-red-400 font-bold mb-2">
-              ENEMIGOS
+              <span className="rd-match-card-label-wide">ENEMIGOS</span>
+              <span className="rd-match-card-label-compact">Equipo enemigo</span>
             </p>
 
             <div className="grid grid-cols-5 gap-2 w-full">
@@ -535,7 +543,7 @@ export default function MatchCard({
         </div>
 
         {/* ================= ACTIONS ================= */}
-        <div className="flex flex-row md:flex-col gap-2 justify-end md:justify-self-end">
+        <div className="rd-match-card-actions flex flex-row md:flex-col gap-2 justify-end md:justify-self-end">
           <button
             onClick={() => onEdit(match)}
             className="

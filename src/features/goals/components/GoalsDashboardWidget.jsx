@@ -79,9 +79,9 @@ export default function GoalsDashboardWidget() {
 
   return (
     <article className="rd-card rd-goals-widget p-4 min-h-0 overflow-hidden flex flex-col gap-2" aria-label="Objetivos activos">
-      <div className="flex items-center justify-between gap-2">
-        <span className="rd-label flex items-center gap-2"><Target size={15} className="text-primary" /> Objetivos activos</span>
-        <Link to="/objetivos" className="flex items-center gap-1 text-xs text-primary hover:underline">
+      <div className="rd-goals-widget-head flex items-center justify-between gap-2">
+        <span className="rd-label flex items-center gap-2"><Target size={15} className="text-primary" /> Objetivos<span className="rd-goals-widget-title-extra"> activos</span></span>
+        <Link to="/objetivos" className="rd-goals-widget-all flex items-center gap-1 text-xs text-primary hover:underline">
           Ver todos <ArrowRight size={13} />
         </Link>
       </div>
@@ -95,14 +95,14 @@ export default function GoalsDashboardWidget() {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between gap-2">
-            <p className="min-w-0 truncate text-xs text-muted-foreground">
+          <div className="rd-goals-widget-summary flex items-center justify-between gap-2">
+            <p className="rd-goals-widget-count min-w-0 truncate text-xs text-muted-foreground">
               {summary.total} activos
               {summary.dueSoon > 0 && <> · <span className="text-amber-300">{summary.dueSoon} por vencer</span></>}
               {' · '}<span className="text-green-400">{summary.achieved} alcanzados</span>
             </p>
             {current.length > 1 && (
-              <div className="flex shrink-0 items-center gap-1.5">
+              <div className="rd-goals-widget-nav flex shrink-0 items-center gap-1.5">
                 <button type="button" onClick={() => go(-1)} disabled={safeIndex === 0} className={ARROW_CLASS} aria-label="Objetivo anterior">
                   <ChevronLeft size={15} />
                 </button>

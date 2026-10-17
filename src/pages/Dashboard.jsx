@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  X,
 } from 'lucide-react';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
@@ -25,6 +26,8 @@ import { computeInsights } from '@/hooks/useInsights';
 import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda } from '@/domain/matchStats';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
+
+const COACH_IMAGE_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png';
 
 const DASHBOARD_TABS = [
   { id: 'summary', label: 'Resumen' },
@@ -74,6 +77,9 @@ export default function Dashboard() {
   const [patchFilter, setPatchFilter] = useState('');
   const [activeTab, setActiveTab] = useState('summary');
   const [mainIndex, setMainIndex] = useState(0);
+  const [insightOpen, setInsightOpen] = useState(false);
+  // Línea visible en Meta en mobile horizontal; en desktop se ven todas.
+  const [metaLane, setMetaLane] = useState('top');
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
 
   const { data: allMatches = [] } = useQuery({
@@ -398,12 +404,12 @@ export default function Dashboard() {
               </article>
 
               <article className="rd-card rd-dashboard-stat rd-card-watermark">
-                <div className="flex items-center justify-between"><span className="rd-label">Mejor partida reciente</span><Trophy size={17} className="text-green-400" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">Mejor partida<span className="rd-dashboard-label-extra"> reciente</span></span><Trophy size={17} className="text-green-400" /></div>
                 {bestRecentMatch ? <div className="flex items-center gap-3 min-h-0">
                   {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10 rd-dashboard-stat-avatar')}
                   <div className="min-w-0 flex-1">
                     <p className="font-rajdhani text-lg font-bold text-foreground truncate">{bestRecentMatch.own_champion_name}</p>
-                    <p className="text-xs text-muted-foreground">{bestRecentMatch.lane} · {formatDate(bestRecentMatch.date)}</p>
+                    <p className="rd-dashboard-stat-hint text-xs text-muted-foreground">{bestRecentMatch.lane} · {formatDate(bestRecentMatch.date)}</p>
                   </div>
                 </div> : <p className="font-rajdhani rd-dashboard-stat-value text-muted-foreground">—</p>}
                 {bestRecentMatch ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
@@ -416,15 +422,29 @@ export default function Dashboard() {
             <div className="rd-dashboard-side grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
               <article className="rd-card rd-card-watermark rd-dashboard-insight p-5 min-h-0 overflow-hidden">
                 <div className="flex items-start gap-4 h-full">
-                  <img src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png" alt="Rift Deck Coach" className="rd-dashboard-insight-art w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
+                  <img src={COACH_IMAGE_URL} alt="Rift Deck Coach" className="rd-dashboard-insight-art w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
                   <div className="min-w-0 self-center">
-                    <p className="rd-section-kicker">Insight del día</p>
-                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="rd-dashboard-insight-tip text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
+                    <p className="rd-section-kicker"><img src={COACH_IMAGE_URL} alt="" className="rd-dashboard-insight-icon" />Insight del día</p>
+                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="rd-dashboard-insight-thesis text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="rd-dashboard-insight-tip text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p><button type="button" className="rd-dashboard-insight-more" onClick={() => setInsightOpen(true)}>Ver consejo <ChevronRight size={12} /></button></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
                   </div>
                 </div>
               </article>
               <GoalsDashboardWidget />
             </div>
+            {/* Solo se abre desde mobile horizontal, donde la tarjeta muestra únicamente el título. */}
+            {insightOpen && topInsight && (
+              <div className="rd-insight-sheet" role="dialog" aria-modal="true" aria-label="Insight del día" onClick={() => setInsightOpen(false)}>
+                <div className="rd-card rd-insight-sheet-panel" onClick={event => event.stopPropagation()}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="rd-label flex items-center gap-2"><img src={COACH_IMAGE_URL} alt="" className="h-[15px] w-[15px] object-contain" />Insight del día</p>
+                    <button type="button" onClick={() => setInsightOpen(false)} className="text-muted-foreground transition-colors hover:text-primary" aria-label="Cerrar"><X size={16} /></button>
+                  </div>
+                  <h2 className="font-rajdhani text-lg font-bold leading-tight text-foreground mt-2">{topInsight.title}</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2">{topInsight.thesis}</p>
+                  <p className="text-xs text-primary mt-3">Consejo: {topInsight.action}</p>
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -498,9 +518,12 @@ export default function Dashboard() {
         {activeTab === 'meta' && (
           <section className="rd-dashboard-meta" aria-label="Meta">
             <article className="rd-card p-4 min-h-0 overflow-hidden">
-              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">Meta por línea</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Parche {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">Tierlist completa <ChevronRight size={12} /></Link></div>
+              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">Meta por línea</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Parche {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">Tierlist<span className="rd-dashboard-label-extra"> completa</span> <ChevronRight size={12} /></Link></div>
+              <div className="rd-meta-lane-picker" role="tablist" aria-label="Línea">
+                {laneHighlights.map(({ lane }) => <button key={lane} type="button" role="tab" aria-selected={metaLane === lane} aria-label={LANE_LABELS[lane]} title={LANE_LABELS[lane]} onClick={() => setMetaLane(lane)} className={`rd-meta-lane-pick ${metaLane === lane ? 'rd-meta-lane-pick-active' : ''}`}><img src={LANE_ICONS[lane]} alt="" /></button>)}
+              </div>
               <div className="grid grid-cols-5 gap-2 h-[calc(100%-2.75rem)]">
-                {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className="rd-meta-lane-card rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden">
+                {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className={`rd-meta-lane-card ${metaLane === lane ? 'rd-meta-lane-card-active' : ''} rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden`}>
                   <div className="flex items-center gap-2 mb-1.5"><img src={LANE_ICONS[lane]} alt="" className="w-5 h-5 object-contain" /><span className="text-[11px] font-bold text-muted-foreground">{LANE_LABELS[lane]}</span></div>
                   {laneChampions.length ? laneChampions.map((champion, index) => <div key={champion.id || `${champion.champion_name}-${index}`} className="rd-meta-lane-row font-rajdhani flex items-center gap-2 border-t border-border/50 first:border-0">
                     <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(1)}% WR</p></div><TierBadge tier={champion.tier} size="sm" />
