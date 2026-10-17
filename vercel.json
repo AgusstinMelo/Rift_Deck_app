@@ -31,6 +31,14 @@
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {
+      "source": "/objetivos",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/objetivos/:path*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
       "source": "/suggester",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
@@ -74,6 +82,14 @@
     },
     {
       "source": "/stats",
+      "destination": "/"
+    },
+    {
+      "source": "/objetivos",
+      "destination": "/"
+    },
+    {
+      "source": "/objetivos/:path*",
       "destination": "/"
     },
     {
