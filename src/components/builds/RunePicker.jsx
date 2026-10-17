@@ -11,7 +11,7 @@ const BRANCH_COLORS = {
   'Brujería': 'border-purple-400/70 shadow-purple-400/40',
 };
 
-function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9' }) {
+function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9', imageClassName = '' }) {
   const branchGlow = BRANCH_COLORS[rune.branch] || 'border-primary/70 shadow-primary/40';
 
   return (
@@ -25,7 +25,7 @@ function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9' }) {
         }`}
     >
       {rune.image_url
-        ? <img src={rune.image_url} alt={rune.name} className="w-full h-full object-cover rounded-full" />
+        ? <img src={rune.image_url} alt={rune.name} className={`w-full h-full object-cover rounded-full ${imageClassName}`} />
         : (
           <div className={`w-full h-full flex items-center justify-center text-xs font-bold rounded-full
             ${selected ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'}`}>
@@ -156,7 +156,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
           {/* Una columna por runa clave: siempre una sola línea que ocupa todo el ancho. */}
           <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
             {claveRunes.map(rune => (
-              <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} size="aspect-square w-full max-w-9" />
+              <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} size="aspect-square w-full max-w-11" imageClassName="scale-[1.35]" />
             ))}
           </div>
         </div>
