@@ -113,6 +113,14 @@
   background: hsla(43, 65%, 58%, 0.42);
 }
 
+/* Firefox: misma barra dorada con las propiedades estándar (Chrome/Edge usan las reglas webkit de arriba). */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsla(43, 65%, 58%, 0.35) transparent;
+  }
+}
+
 /* Rift Deck Brand System */
 
 .rd-app-shell {
@@ -905,7 +913,6 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-width: thin;
   }
 }
 
@@ -933,7 +940,6 @@
   .rd-statsstep-body > * {
     min-height: 0;
     overflow-y: auto;
-    scrollbar-width: thin;
   }
 }
 
@@ -1006,7 +1012,6 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    scrollbar-width: thin;
   }
 
   /* Stats: la lista scrollea por dentro si no entra. */
@@ -1024,7 +1029,6 @@
     min-height: 0;
     overflow-y: auto;
     padding-right: 0.25rem;
-    scrollbar-width: thin;
   }
 }
 
@@ -1092,7 +1096,6 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 0.25rem;
-    scrollbar-width: thin;
   }
 
   /* Pasos 2 y 3 y edición: contenido en dos paneles con scroll propio y acciones fijas. */
@@ -1119,7 +1122,6 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 0.5rem;
-    scrollbar-width: thin;
   }
 
   .rd-goal-form-filters {

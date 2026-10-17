@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSpells } from '@/hooks/useSpells';
 import { useAuth } from '@/lib/AuthContext';
 import { createBuild, updateBuild } from '@/api/buildsSupabase';
-import { ArrowLeft, Info, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Info, Save, Trash2 } from 'lucide-react';
 import ItemPool from './ItemPool';
 import ItemBrowser from './ItemBrowser';
 import StatsPanel from './StatsPanel';
@@ -284,7 +284,11 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
               <summary className="flex cursor-pointer list-none items-center gap-2">
                 <span className="w-5 h-px bg-primary/50" />
                 <h3 className="rd-card-title">Notas Estratégicas</h3>
-                <span className="ml-auto text-xs text-muted-foreground group-open:hidden">Ver</span>
+                <span className="ml-auto flex items-center gap-1 rounded-lg border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+                  <span className="group-open:hidden">Ver</span>
+                  <span className="hidden group-open:inline">Ocultar</span>
+                  <ChevronDown size={13} className="transition-transform group-open:rotate-180" />
+                </span>
               </summary>
               <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{champion.strategic_notes}</p>
             </details>
