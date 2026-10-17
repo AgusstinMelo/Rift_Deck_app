@@ -383,7 +383,7 @@ export default function Layout() {
       </aside>
 
       <div className="flex-1 flex min-h-0 flex-col min-w-0 overflow-hidden">
-        <header className="relative lg:hidden flex items-center justify-center h-14 px-4 border-b border-primary/10 bg-card shrink-0">
+        <header className="rd-mobile-topbar relative lg:hidden flex items-center justify-center h-14 px-4 border-b border-primary/10 bg-card shrink-0">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}

@@ -300,12 +300,12 @@ export default function Dashboard() {
     <div className="rd-page rd-dashboard-tabs">
       <header className="rd-dashboard-header">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="rd-dashboard-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Centro Táctico</span>
           </div>
           <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{activeHeading.title}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
+          <p className="rd-dashboard-description mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
         </div>
 
         <div className="rd-panel-tabs rd-dashboard-tablist" role="tablist" aria-label="Secciones del Dashboard">
@@ -336,6 +336,7 @@ export default function Dashboard() {
             <Sparkles size={14} className="text-primary" />
           </div>
           <PatchFilter
+            className="rd-dashboard-patch"
             value={patchFilter}
             onChange={(value) => { setPatchFilter(value); setMainIndex(0); }}
             patches={[
@@ -350,7 +351,7 @@ export default function Dashboard() {
       <main className="rd-dashboard-panel rd-analytics-panel">
         {activeTab === 'summary' && (
           <section className="rd-dashboard-summary" aria-label="Resumen">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-h-0">
+            <div className="rd-dashboard-stats grid grid-cols-2 lg:grid-cols-4 gap-3 min-h-0">
               <article className="rd-card rd-dashboard-stat">
                 <div className="flex items-center justify-between"><span className="rd-label">Partidas</span><Swords size={17} className="text-primary" /></div>
                 <p className="font-rajdhani rd-dashboard-stat-value text-primary">{totalMatches || '—'}</p>
@@ -364,10 +365,10 @@ export default function Dashboard() {
               <article className="rd-card rd-dashboard-stat">
                 <div className="flex items-center justify-between"><span className="rd-label">Campeón más usado</span><Target size={17} className="text-accent" /></div>
                 <div className="flex items-center gap-3 min-h-0">
-                  {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10')}
-                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="text-xs text-muted-foreground">Pick principal del historial</p></div>
+                  {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10 rd-dashboard-stat-avatar')}
+                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="rd-dashboard-stat-hint text-xs text-muted-foreground">Pick principal del historial</p></div>
                 </div>
-                {mostUsed ? <div className="flex items-center gap-2">
+                {mostUsed ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
                   <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{mostUsed[1].length} partidas</span>
                   <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${mostUsedWR >= 50 ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{mostUsedWR.toFixed(0)}% WR</span>
                 </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
@@ -399,26 +400,26 @@ export default function Dashboard() {
               <article className="rd-card rd-dashboard-stat rd-card-watermark">
                 <div className="flex items-center justify-between"><span className="rd-label">Mejor partida reciente</span><Trophy size={17} className="text-green-400" /></div>
                 {bestRecentMatch ? <div className="flex items-center gap-3 min-h-0">
-                  {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10')}
+                  {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10 rd-dashboard-stat-avatar')}
                   <div className="min-w-0 flex-1">
                     <p className="font-rajdhani text-lg font-bold text-foreground truncate">{bestRecentMatch.own_champion_name}</p>
                     <p className="text-xs text-muted-foreground">{bestRecentMatch.lane} · {formatDate(bestRecentMatch.date)}</p>
                   </div>
                 </div> : <p className="font-rajdhani rd-dashboard-stat-value text-muted-foreground">—</p>}
-                {bestRecentMatch ? <div className="flex items-center gap-2">
+                {bestRecentMatch ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
                   <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${bestRecentMatch.result === 'win' ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{bestRecentMatch.result === 'win' ? 'Victoria' : 'Derrota'}</span>
                   <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{formatKdaLine(bestRecentMatch)} · KDA {getKda(bestRecentMatch).toFixed(2)}</span>
                 </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
               </article>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
-              <article className="rd-card rd-card-watermark p-5 min-h-0 overflow-hidden">
+            <div className="rd-dashboard-side grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
+              <article className="rd-card rd-card-watermark rd-dashboard-insight p-5 min-h-0 overflow-hidden">
                 <div className="flex items-start gap-4 h-full">
-                  <img src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png" alt="Rift Deck Coach" className="w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
+                  <img src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png" alt="Rift Deck Coach" className="rd-dashboard-insight-art w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
                   <div className="min-w-0 self-center">
                     <p className="rd-section-kicker">Insight del día</p>
-                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
+                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="rd-dashboard-insight-tip text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
                   </div>
                 </div>
               </article>
