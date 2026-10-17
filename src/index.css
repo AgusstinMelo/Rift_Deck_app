@@ -2740,6 +2740,244 @@
   }
 }
 
+/* Tierlist en smartphone horizontal: todos los filtros en una sola línea compacta.
+   El selector Por Tier / Tabla no entra en esa fila: el JSX lo mueve al
+   encabezado, en la línea de "Parche X vs Parche Y". Si en un teléfono chico los
+   filtros no entran, la fila se desliza en horizontal en vez de saltar de línea. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-tierlist-layout .rd-tierlist-filters {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-tierlist-filters > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > * {
+    flex: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > div:first-child {
+    width: auto;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > div:first-child > div {
+    display: flex;
+    gap: 0.15rem;
+    padding: 0.2rem;
+    border-radius: 0.65rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > div:first-child button {
+    width: auto;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 11px;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters select {
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 11px;
+  }
+
+  /* Encabezado en grilla: la línea del parche ocupa todo el ancho (también bajo
+     la píldora "Actualizado…"), con el texto a la izquierda y el selector de
+     vista alineado a la derecha, siempre en una sola línea. */
+  .rd-tierlist-layout .rd-tierlist-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header > div:first-child {
+    display: contents;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header > div:first-child > :not(.rd-tierlist-subline) {
+    grid-column: 1;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header > .rd-status-pill {
+    grid-row: 1 / 3;
+    grid-column: 2;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline {
+    grid-column: 1 / -1;
+    min-width: 0;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline > p {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Por Tier: cada tier es una fila de tierlist clásica. A la izquierda un riel
+     angosto con el badge y la cantidad; a la derecha una grilla fluida de fichas
+     compactas (retrato, nombre + variación, línea + WR). */
+  /* Mismo selector que space-y-6 de Tailwind, para ganarle. */
+  .rd-tierlist-layout .rd-tier-groups > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    border-radius: 0.9rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.25rem;
+    border-right: 1px solid hsl(var(--border) / 0.7);
+    border-bottom: 0;
+    text-align: center;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head > :first-child {
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1rem;
+  }
+
+  /* "Tier S+" repite el badge: queda solo la cantidad. */
+  .rd-tierlist-layout .rd-tier-group-head .rd-card-title {
+    display: none;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head .text-xs {
+    font-size: 9.5px;
+    line-height: 1.2;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-grid {
+    grid-template-columns: repeat(auto-fill, minmax(9.25rem, 1fr));
+    align-content: start;
+    gap: 0.35rem;
+    padding: 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile {
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile > .relative {
+    gap: 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile > .relative > :first-child {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .text-sm {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .mt-1 {
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .mt-1 > :first-child {
+    padding: 0 0.3rem;
+    border-radius: 0.3rem;
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .mt-1 > span:last-child {
+    font-size: 10px;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .text-xs {
+    font-size: 10px;
+  }
+
+  /* Tabla: anchos fijos para que las 9 columnas entren en el ancho de la tarjeta.
+     Las columnas cortas (#, chips y números) tienen ancho propio y "Campeón" se
+     lleva el resto, recortando el nombre si no entra. */
+  .rd-tierlist-layout .rd-tierlist-table table {
+    table-layout: fixed;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table th,
+  .rd-tierlist-layout .rd-tierlist-table td {
+    padding: 0.4rem 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table th {
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table td,
+  .rd-tierlist-layout .rd-tierlist-table td .text-sm {
+    font-size: 12px;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(1) { width: 2rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(3) { width: 4.5rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(4) { width: 3rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(5),
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(6),
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(7) { width: 4.25rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(8) { width: 3.75rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(9) { width: 2.75rem; }
+
+  .rd-tierlist-layout .rd-tierlist-table td:nth-child(2) > div {
+    min-width: 0;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table td:nth-child(2) > div > div {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table td:nth-child(2) span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Selector de vista en la línea del parche: compacto y pegado a la derecha. */
+  .rd-tierlist-layout .rd-tierlist-subline .rd-tierlist-view-toggle {
+    flex: none;
+    margin-left: auto;
+    gap: 0.15rem;
+    padding: 0.15rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline .rd-tierlist-view-toggle > button {
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.45rem;
+    font-size: 11px;
+  }
+}
+
 .rd-build-picker,
 .rd-saved-builds-layout {
   min-height: 0;
