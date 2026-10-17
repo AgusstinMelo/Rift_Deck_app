@@ -5,7 +5,7 @@ import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
-import { BarChart3, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { BarChart3, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { computeInsights } from '@/hooks/useInsights';
@@ -14,20 +14,17 @@ import { getMyMembership } from '@/api/membershipSupabase';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
+import { matchKda, winratePct } from '@/domain/matchStats';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
 function calcWR(matches) {
   const wins = matches.filter(m => m.result === 'win').length;
-  return matches.length > 0 ? (wins / matches.length) * 100 : 0;
+  return winratePct(wins, matches.length);
 }
 
 function calcMatchKDA(match) {
-  const kills = Number(match.kills || 0);
-  const deaths = Number(match.deaths || 0);
-  const assists = Number(match.assists || 0);
-
-  return deaths === 0 ? kills + assists : (kills + assists) / deaths;
+  return matchKda(Number(match.kills || 0), Number(match.deaths || 0), Number(match.assists || 0));
 }
 
 function getKdaTone(avgKDA) {
@@ -990,20 +987,6 @@ export default function Stats() {
           </div>
         </div>
       </div>
-
-      {totalMatches < 10 && (
-        <div className="rd-card p-4 flex items-start gap-3 border-yellow-500/20">
-          <AlertCircle size={18} className="text-yellow-400 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {totalMatches === 1 ? 'Tu primera lectura ya está lista.' : `Lectura inicial sobre ${totalMatches} partidas.`}
-            </p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Estos resultados describen lo que ocurrió hasta ahora. La precisión y la detección de tendencias mejorarán con cada partida que cargues.
-            </p>
-          </div>
-        </div>
-      )}
 
       </section>
 

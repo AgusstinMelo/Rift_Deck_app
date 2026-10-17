@@ -11,7 +11,9 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
-    "test:v2": "node --experimental-specifier-resolution=node --test test/buildV2/*.test.js"
+    "test:v2": "node --experimental-specifier-resolution=node --test test/buildV2/*.test.js",
+    "test:goals": "node --test test/goals/*.test.js",
+    "test": "npm run test:v2 && npm run test:goals"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

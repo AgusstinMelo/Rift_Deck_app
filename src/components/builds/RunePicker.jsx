@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
@@ -11,21 +11,21 @@ const BRANCH_COLORS = {
   'Brujería': 'border-purple-400/70 shadow-purple-400/40',
 };
 
-function RuneIcon({ rune, selected, onClick }) {
+function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9', imageClassName = '' }) {
   const branchGlow = BRANCH_COLORS[rune.branch] || 'border-primary/70 shadow-primary/40';
 
   return (
     <EntityHoverCard entity={rune} kind={rune.branch}>
     <button
       onClick={() => onClick(rune)}
-      className={`relative rounded-full border-2 transition-all flex-shrink-0 overflow-hidden w-9 h-9 cursor-pointer
+      className={`relative rounded-full border-2 transition-all flex-shrink-0 overflow-hidden ${size} cursor-pointer
         ${selected
           ? `${branchGlow} shadow-[0_0_8px_1px] scale-110`
           : 'border-border/40 opacity-50 hover:opacity-80 hover:border-border'
         }`}
     >
       {rune.image_url
-        ? <img src={rune.image_url} alt={rune.name} className="w-full h-full object-cover rounded-full" />
+        ? <img src={rune.image_url} alt={rune.name} className={`w-full h-full object-cover rounded-full ${imageClassName}`} />
         : (
           <div className={`w-full h-full flex items-center justify-center text-xs font-bold rounded-full
             ${selected ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'}`}>
@@ -146,28 +146,29 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
   };
 
   return (
-    <div className="rd-card p-4">
-      <div className="flex items-center gap-2 mb-4"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Runas</h3></div>
+    <div className="rd-card rd-rune-picker flex flex-col p-4">
+      <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Runas</h3></div>
 
       {/* Runas Clave */}
       {claveRunes.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-3">
           <p className="text-xs font-semibold text-muted-foreground mb-2">Clave</p>
-          <div className="flex flex-wrap gap-2">
+          {/* Una columna por runa clave: siempre una sola línea que ocupa todo el ancho. */}
+          <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
             {claveRunes.map(rune => (
-              <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} />
+              <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} size="aspect-square w-full max-w-11" imageClassName="scale-[1.35]" />
             ))}
           </div>
         </div>
       )}
 
       {/* Divisor */}
-      {claveRunes.length > 0 && <div className="h-px bg-border/50 mb-6" />}
+      {claveRunes.length > 0 && <div className="h-px bg-border/50 mb-3" />}
 
       {/* Rama Principal y Secundaria */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid flex-1 grid-cols-2 gap-4">
         {/* Rama Principal */}
-        <div>
+        <div className="flex min-w-0 flex-col">
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">Rama Principal</label>
           <select
             value={primaryBranch}
@@ -200,28 +201,28 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
               }
               setPrimaryBranch(newPrimary);
             }}
-            className="w-full bg-secondary/70 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
+            className="w-full bg-secondary/70 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
           >
             {PRIMARY_BRANCHES.map(b => (
               <option key={b} value={b}>{b}</option>
             ))}
           </select>
-          <div className="space-y-2">
-            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-              <div key={group}>
-                <p className="text-xs text-muted-foreground mb-1">Grupo {group}</p>
-                <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-1 flex-col justify-evenly gap-2">
+            {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
+              <Fragment key={group}>
+                {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
+                <div className="flex flex-wrap justify-around gap-1.5">
                   {runesInGroup.map(rune => (
                     <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} />
                   ))}
                 </div>
-              </div>
+              </Fragment>
             ))}
           </div>
         </div>
 
         {/* Rama Secundaria */}
-        <div>
+        <div className="flex min-w-0 flex-col">
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">Rama Secundaria</label>
           <select
             value={secondaryBranch}
@@ -254,39 +255,27 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
               }
               setSecondaryBranch(newSecondary);
             }}
-            className="w-full bg-secondary/70 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
+            className="w-full bg-secondary/70 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
           >
             {PRIMARY_BRANCHES.map(b => (
               <option key={b} value={b}>{b}</option>
             ))}
           </select>
-          <div className="space-y-2">
-            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-              <div key={group}>
-                <p className="text-xs text-muted-foreground mb-1">Grupo {group}</p>
-                <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-1 flex-col justify-evenly gap-2">
+            {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
+              <Fragment key={group}>
+                {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
+                <div className="flex flex-wrap justify-around gap-1.5">
                   {runesInGroup.map(rune => (
                     <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, true)} />
                   ))}
                 </div>
-              </div>
+              </Fragment>
             ))}
           </div>
           </div>
           </div>
 
-      {/* Runas seleccionadas */}
-      {selectedRunes.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-1.5">
-          {selectedRunes.map(r => (
-            <span key={r.id} className="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded text-xs">
-              {r.image_url && <img src={r.image_url} alt={r.name} className="w-3.5 h-3.5 rounded-full" />}
-              {r.name}
-              <button onClick={() => onToggleRune(r)} className="ml-0.5 hover:text-red-400">×</button>
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

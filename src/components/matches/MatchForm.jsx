@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { updateMatch } from '@/api/matchesSupabase';
@@ -343,9 +343,9 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
       runes_used: selectedRunes.map(r => r.name),
       spells_used: selectedSpells,
       result,
-      kills: kills !== '' ? Number(kills) : 0,
-      deaths: deaths !== '' ? Number(deaths) : 0,
-      assists: assists !== '' ? Number(assists) : 0,
+      kills: kills !== '' ? Number(kills) : null,
+      deaths: deaths !== '' ? Number(deaths) : null,
+      assists: assists !== '' ? Number(assists) : null,
       gold: gold !== '' ? Number(gold) : null,
       duration_minutes: duration !== '' ? Number(duration) : null,
       side: side || null,
@@ -745,12 +745,10 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   </select>
 
                   <div className="space-y-3">
-                    {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup]) => (
-                      <div key={group}>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Grupo {group}
-                        </p>
-
+                    {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
+                      <Fragment key={group}>
+                      {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
+                      <div>
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
                             <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
@@ -779,6 +777,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                           ))}
                         </div>
                       </div>
+                      </Fragment>
                     ))}
                   </div>
                 </div>
@@ -802,12 +801,10 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   </select>
 
                   <div className="space-y-3">
-                    {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup]) => (
-                      <div key={group}>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Grupo {group}
-                        </p>
-
+                    {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
+                      <Fragment key={group}>
+                      {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
+                      <div>
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
                             <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
@@ -836,6 +833,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                           ))}
                         </div>
                       </div>
+                      </Fragment>
                     ))}
                   </div>
                 </div>
@@ -870,7 +868,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
           {/* Hechizos */}
           <div>
             <label className="text-sm font-semibold text-foreground block mb-3">Hechizos ({selectedSpells.length}/2)</label>
-            <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-nowrap">
+            <div className="grid w-full grid-cols-5 justify-items-center gap-2 sm:[grid-template-columns:repeat(var(--spell-count),minmax(0,1fr))]" style={/** @type {any} */ ({ '--spell-count': spells.length })}>
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
@@ -878,12 +876,12 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
 <button type="button" onClick={() => toggleSpell(spell.name)}
                     aria-disabled={disabled}
-                    className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
-                      selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                    } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
+                    className={`aspect-square w-full max-w-12 min-w-0 flex items-center justify-center rounded-full transition-all overflow-hidden ${
+                      selected ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]' : 'opacity-50 hover:opacity-90'
+                    } ${disabled ? '!opacity-25 cursor-not-allowed' : ''}`}>
                     {spell.image_url
-                      ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
-                      : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                      ? <img src={spell.image_url} alt={spell.name} className="w-full h-full rounded-full object-cover" />
+                      : <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
                     }
                   </button>
                       </EntityHoverCard>
@@ -938,7 +936,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
             ].map(f => (
               <div key={f.label}>
                 <label className="text-xs text-muted-foreground block mb-1">{f.label}</label>
-                <input type="number" value={f.value} onChange={e => f.set(e.target.value)} placeholder="0"
+                <input type="number" value={f.value} onChange={e => f.set(e.target.value)} placeholder="—"
                   className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
               </div>
             ))}

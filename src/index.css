@@ -113,6 +113,14 @@
   background: hsla(43, 65%, 58%, 0.42);
 }
 
+/* Firefox: misma barra dorada con las propiedades estándar (Chrome/Edge usan las reglas webkit de arriba). */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsla(43, 65%, 58%, 0.35) transparent;
+  }
+}
+
 /* Rift Deck Brand System */
 
 .rd-app-shell {
@@ -713,6 +721,510 @@
 
 @media (max-width: 1023px), (max-height: 699px) {
   .rd-matches-layout > * + * {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Detalle de un objetivo: encabezado y franja de tarjetas fijos; sólo scrollea la lista de partidas o check-ins.
+   Se activa únicamente cuando la página contiene el detalle (no al editar una partida desde él). */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-goal-detail) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-goal-detail) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goal-detail {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-goal-detail > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-goal-detail-strip {
+    height: clamp(15rem, 36vh, 20.5rem);
+  }
+
+  .rd-goal-detail-strip > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* La marca de agua de fondo no debe generar scroll en Progreso. */
+  .rd-goal-detail-strip > :first-child {
+    overflow: hidden;
+  }
+
+  .rd-goal-detail > .rd-goal-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-goal-panel > * {
+    flex: none;
+  }
+
+  .rd-goal-panel > .rd-goal-panel-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Registrar partida, pasos de equipo aliado/enemigo: encabezado y botones fijos; la grilla de
+   campeones toma todo el alto restante y scrollea por dentro si hace falta. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-match-builder-fit) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-match-builder-fit) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-match-builder-fit,
+  .rd-match-builder-fit > .rd-team-step,
+  .rd-team-step > .rd-team-pool,
+  .rd-team-pool-champions {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-match-builder-fit {
+    flex: 1 1 auto;
+    gap: 1rem;
+  }
+
+  .rd-match-builder-fit > *,
+  .rd-team-step > *,
+  .rd-team-pool > *,
+  .rd-team-pool-champions > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-match-builder-fit > .rd-team-step {
+    flex: 1 1 auto;
+    gap: 1rem;
+  }
+
+  .rd-team-step > .rd-team-pool,
+  .rd-team-pool > .rd-team-pool-body,
+  .rd-team-pool-champions > .rd-team-pool-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* Una sola fila que ocupa todo el alto: slots a la izquierda, campeones a la derecha. */
+  .rd-team-pool > .rd-team-pool-body {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-team-pool-champions > .rd-team-pool-grid {
+    max-height: none;
+    align-content: start;
+  }
+}
+
+/* Registrar partida, paso "Tu build": espacio de trabajo en dos columnas que entra en el viewport.
+   Objetos a la izquierda (la grilla toma el alto restante); runas (con scroll propio) y hechizos a la derecha. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-match-builder-fit > .rd-buildstep {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-buildstep > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-buildstep > .rd-buildstep-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-buildstep-items,
+  .rd-buildstep-side {
+    min-height: 0;
+  }
+
+  .rd-buildstep-items > *,
+  .rd-buildstep-side > * {
+    flex: none;
+  }
+
+  /* Buscador de objetos: filtros fijos y grilla que llena el alto. */
+  .rd-buildstep-items > .rd-item-browser {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-buildstep-items > .rd-item-browser > * {
+    flex: none;
+  }
+
+  .rd-buildstep-items > .rd-item-browser > .rd-item-browser-results {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-buildstep-items .rd-item-browser-results > .rd-item-browser-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    align-content: start;
+  }
+
+  /* Runas: ocupan lo que dejan los hechizos y scrollean por dentro si no entran. */
+  .rd-buildstep-side > .rd-buildstep-runes {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Registrar partida, paso "Detalles de la partida": dos tarjetas que llenan el alto y botones fijos. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-match-builder-fit > .rd-statsstep {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-statsstep > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-statsstep > .rd-statsstep-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-statsstep-body > * {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+/* Creador de builds: franja del campeón arriba y tres columnas (objetos · runas y hechizos · stats)
+   que llenan el alto. Desde 1280px, porque tres columnas no entran bien en menos ancho. */
+@media (min-width: 1280px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-buildws) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-buildws {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-buildws > * {
+    flex: none;
+  }
+
+  .rd-buildws > .rd-buildws-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-buildws-items,
+  .rd-buildws-side,
+  .rd-buildws-stats {
+    min-height: 0;
+  }
+
+  .rd-buildws-items > *,
+  .rd-buildws-side > *,
+  .rd-buildws-stats > * {
+    flex: none;
+  }
+
+  /* Objetos: la grilla del buscador toma el alto restante. */
+  .rd-buildws-items > .rd-item-browser {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-buildws-items > .rd-item-browser > * {
+    flex: none;
+  }
+
+  .rd-buildws-items > .rd-item-browser > .rd-item-browser-results {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rd-buildws-items .rd-item-browser-results > .rd-item-browser-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    align-content: start;
+  }
+
+  /* Runas: llenan lo que dejan los hechizos. */
+  .rd-buildws-side > .rd-rune-picker {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  /* Stats: la lista scrollea por dentro si no entra. */
+  .rd-buildws-stats > .rd-stats-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-stats-panel > * {
+    flex: none;
+  }
+
+  .rd-stats-panel > .rd-stats-panel-rows {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+/* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
+   y las acciones del paso quedan siempre visibles abajo. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-goal-flow) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-goal-flow) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goal-flow {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-goal-flow > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-goal-flow > .rd-goal-flow-body,
+  .rd-goal-flow-body > .rd-goal-step,
+  .rd-goal-flow-body > .rd-goal-step-fill {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-goal-flow-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-goal-flow-body > * {
+    flex: none;
+  }
+
+  /* Paso 1: el carril de categorías ocupa todo el alto restante. */
+  .rd-goal-step-fill {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-goal-choice {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goal-choice > :not(.rd-goal-choice-body) {
+    flex: none;
+  }
+
+  .rd-goal-choice-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
+  }
+
+  /* Pasos 2 y 3 y edición: contenido en dos paneles con scroll propio y acciones fijas. */
+  .rd-goal-step {
+    overflow: hidden;
+  }
+
+  .rd-goal-step > * {
+    flex: none;
+  }
+
+  .rd-goal-step > .rd-goal-step-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-goal-step-content > .rd-goal-form,
+  .rd-goal-step-content.rd-goal-form {
+    height: 100%;
+  }
+
+  .rd-goal-form-pane {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.5rem;
+  }
+
+  .rd-goal-form-filters {
+    border-left: 1px solid hsl(var(--border) / 0.6);
+    padding-left: 1.25rem;
+  }
+}
+
+/* Objetivos: encabezado, pestañas y resumen fijos; los objetivos se recorren en un carril horizontal. */
+.rd-goals-layout,
+.rd-goals-panel {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-goals-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goals-header {
+    flex: none;
+  }
+
+  .rd-goals-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .rd-goals-panel > :not(.rd-goals-carousel) {
+    flex: none;
+  }
+
+  /* El carril horizontal ocupa el alto restante y cada tarjeta se estira a ese alto. */
+  .rd-goals-carousel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-track {
+    flex: 1 1 auto;
+    min-height: 0;
+    overscroll-behavior-x: contain;
+  }
+
+  .rd-goals-track > * {
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* La tarjeta nunca supera el alto del carril: el gráfico cede espacio si hace falta. */
+  .rd-goals-track .rd-goal-card {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goals-track .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
+  .rd-goals-track .rd-goal-card-chart,
+  .rd-goals-track .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+}
+
+.rd-goals-carousel {
+  min-height: 0;
+}
+
+/* Se navega con las flechas, swipe o teclado: sin barra de scroll visible. */
+.rd-goals-track {
+  scrollbar-width: none;
+}
+
+.rd-goals-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-goals-carousel > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-goals-layout > * + *,
+  .rd-goals-panel > * + * {
     margin-top: 1.25rem;
   }
 }
