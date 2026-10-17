@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
@@ -156,24 +156,41 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
   const [category, setCategory] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [tooltip, setTooltip] = useState(null);
+  const [tooltipTop, setTooltipTop] = useState(null);
+  const tooltipRef = useRef(null);
 
   const showTooltip = (event, item, lockReason) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    const tooltipWidth = Math.min(320, window.innerWidth - 24);
+    // Las descripciones largas usan un tooltip más ancho: queda más bajo y entra en pantalla.
+    const isLong = String(item.description || '').length > 280;
+    const tooltipWidth = Math.min(isLong ? 380 : 320, window.innerWidth - 24);
     const wouldOverflowRight = rect.left + tooltipWidth > window.innerWidth - 12;
     const left = wouldOverflowRight
       ? Math.max(12, rect.right - tooltipWidth)
       : Math.max(12, rect.left);
-    const placeBelow = rect.top < Math.min(300, window.innerHeight / 2);
 
-    setTooltip({
-      item,
-      lockReason,
-      position: placeBelow
-        ? { top: rect.bottom + 8, left, width: tooltipWidth }
-        : { bottom: window.innerHeight - rect.top + 8, left, width: tooltipWidth },
-    });
+    setTooltipTop(null);
+    setTooltip({ item, lockReason, left, width: tooltipWidth, anchor: { top: rect.top, bottom: rect.bottom } });
   };
+
+  // Posición vertical según la altura real del tooltip: abajo o arriba del item, donde entre;
+  // si no entra en ninguno de los dos lados, se desplaza para quedar completo dentro de la pantalla.
+  useLayoutEffect(() => {
+    if (!tooltip || !tooltipRef.current) return;
+    const margin = 12;
+    const gap = 8;
+    const viewportHeight = window.innerHeight;
+    const height = tooltipRef.current.offsetHeight;
+    const spaceBelow = viewportHeight - tooltip.anchor.bottom - gap - margin;
+    const spaceAbove = tooltip.anchor.top - gap - margin;
+
+    let top;
+    if (height <= spaceBelow) top = tooltip.anchor.bottom + gap;
+    else if (height <= spaceAbove) top = tooltip.anchor.top - gap - height;
+    else top = spaceBelow >= spaceAbove ? tooltip.anchor.bottom + gap : tooltip.anchor.top - gap - height;
+
+    setTooltipTop(Math.max(margin, Math.min(top, viewportHeight - height - margin)));
+  }, [tooltip]);
 
   const canAddEnchantment = selectedItems.some(isMobilityBoots) && !selectedItems.some(isEnchant);
   const itemTypes = [...new Set(items.flatMap(getItemTypes))].sort(sortItemTypes);
@@ -257,8 +274,16 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
         {/* Item tooltip */}
         {tooltip && typeof document !== 'undefined' && createPortal(
           <div
-            className="fixed z-[100] pointer-events-none"
-            style={tooltip.position}
+            ref={tooltipRef}
+            className="fixed z-[100] pointer-events-none overflow-hidden"
+            style={{
+              left: tooltip.left,
+              width: tooltip.width,
+              top: tooltipTop ?? 0,
+              maxHeight: 'calc(100dvh - 24px)',
+              // Hasta medir la altura se dibuja invisible, para que no "salte" en pantalla.
+              visibility: tooltipTop === null ? 'hidden' : 'visible',
+            }}
           >
             <div className="bg-popover border border-primary/25 rounded-xl p-3 shadow-2xl w-full">
               <div className="flex items-start gap-3">
