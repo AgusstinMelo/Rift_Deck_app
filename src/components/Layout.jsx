@@ -232,7 +232,7 @@ export default function Layout() {
       <aside
         className={`
           fixed lg:relative z-[300] h-full flex flex-col
-          rd-sidebar
+          rd-sidebar ${user?.role === 'admin' ? 'rd-sidebar-admin' : ''}
           transition-all duration-300 ease-in-out
           ${collapsed ? 'w-16' : 'w-60'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}

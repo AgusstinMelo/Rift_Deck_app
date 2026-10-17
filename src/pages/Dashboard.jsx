@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -111,9 +111,10 @@ export default function Dashboard() {
     queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: recentSnapshotKeys }),
     enabled: recentSnapshotKeys.length > 0,
   });
-  const tierlist = latestSuccessExec?.snapshot_key
-    ? tierlistHistory.filter(entry => entry.snapshot_key === latestSuccessExec.snapshot_key)
-    : [];
+  const latestSnapshotKey = latestSuccessExec?.snapshot_key;
+  const tierlist = useMemo(() => (latestSnapshotKey
+    ? tierlistHistory.filter(entry => entry.snapshot_key === latestSnapshotKey)
+    : []), [tierlistHistory, latestSnapshotKey]);
 
   const { data: champions = [] } = useQuery({ queryKey: ['champions'], queryFn: () => Champion.list('name') });
   const { data: wrItems = [] } = useQuery({ queryKey: ['wr-items'], queryFn: () => WRItem.list('name') });
@@ -124,8 +125,7 @@ export default function Dashboard() {
     champion => champion.name?.toLowerCase() === name?.toLowerCase()
   )?.image_url;
   const getSpellImg = (name) => spellsData.find(spell => spell.name === name)?.image_url;
-  const matches = filterByPatch(allMatches, patchFilter);
-  const builds = filterByPatch(allBuilds, patchFilter);
+  const builds = useMemo(() => filterByPatch(allBuilds, patchFilter), [allBuilds, patchFilter]);
 
   const getMatchTimestamp = (match) => {
     if (!match?.date) return 0;
@@ -135,7 +135,12 @@ export default function Dashboard() {
     return new Date(year, month - 1, day, hours || 0, minutes || 0).getTime();
   };
 
-  const sortedMatches = [...matches].sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a));
+  // Los cálculos pesados se memorizan: cambiar de pestaña re-renderiza el Dashboard y,
+  // sin esto, se recalculaba todo (incluido computeInsights) en cada clic.
+  const sortedMatches = useMemo(
+    () => [...filterByPatch(allMatches, patchFilter)].sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a)),
+    [allMatches, patchFilter],
+  );
   const latestMatches = sortedMatches.slice(0, 10);
   const totalMatches = sortedMatches.length;
   const wins = sortedMatches.filter(match => match.result === 'win').length;
@@ -160,20 +165,22 @@ export default function Dashboard() {
     ? (currentStreak === -1 ? sortedMatches.length : currentStreak)
     : 0;
 
-  const championGroups = sortedMatches.reduce((groups, match) => {
-    const name = match.own_champion_name;
-    if (!name) return groups;
-    if (!groups[name]) groups[name] = [];
-    groups[name].push(match);
-    return groups;
-  }, {});
-  const topChamps = Object.entries(championGroups).sort((a, b) => b[1].length - a[1].length);
+  const topChamps = useMemo(() => {
+    const championGroups = sortedMatches.reduce((groups, match) => {
+      const name = match.own_champion_name;
+      if (!name) return groups;
+      if (!groups[name]) groups[name] = [];
+      groups[name].push(match);
+      return groups;
+    }, {});
+    return Object.entries(championGroups).sort((a, b) => b[1].length - a[1].length);
+  }, [sortedMatches]);
   const mostUsed = topChamps[0];
   const mostUsedWR = mostUsed
     ? (mostUsed[1].filter(match => match.result === 'win').length / mostUsed[1].length) * 100
     : null;
 
-  const topInsight = computeInsights({
+  const topInsight = useMemo(() => computeInsights({
     matches: sortedMatches,
     tierlist: tierlistHistory,
     wrItems,
@@ -183,7 +190,7 @@ export default function Dashboard() {
     spells: spellsData,
     limit: 1,
     minimum: 1,
-  })[0] || null;
+  })[0] || null, [sortedMatches, tierlistHistory, wrItems, builds, champions, runes, spellsData]);
 
   const bestRecentMatch = [...recentSevenDayMatches]
     .filter(match => match.result === 'win')
@@ -228,7 +235,7 @@ export default function Dashboard() {
       .slice(0, 3),
   }));
 
-  const mainChampions = topChamps.slice(0, 3).map(([name, championMatches]) => {
+  const mainChampions = useMemo(() => topChamps.slice(0, 3).map(([name, championMatches]) => {
     const meta = tierlist
       .filter(entry => entry.champion_name?.toLowerCase() === name.toLowerCase())
       .sort((a, b) => Number(b.ranking_final || 0) - Number(a.ranking_final || 0))[0] || null;
@@ -279,7 +286,7 @@ export default function Dashboard() {
       position: rankIndex >= 0 ? rankIndex + 1 : null,
       insight,
     };
-  });
+  }), [topChamps, tierlist]);
   const selectedMain = mainChampions[Math.min(mainIndex, Math.max(mainChampions.length - 1, 0))];
 
   const changeMain = (direction) => {
@@ -368,9 +375,9 @@ export default function Dashboard() {
                 <p className={`font-rajdhani rd-dashboard-stat-value ${wrColor}`}>{winrate === null ? '—' : `${winrate.toFixed(1)}%`}</p>
                 <p className="text-xs text-muted-foreground">Rendimiento global filtrado</p>
               </article>
-              <article className="rd-card rd-dashboard-stat">
+              <article className="rd-card rd-dashboard-stat rd-dashboard-stat-with-avatar">
                 <div className="flex items-center justify-between"><span className="rd-label">Campeón más usado</span><Target size={17} className="text-accent" /></div>
-                <div className="flex items-center gap-3 min-h-0">
+                <div className="rd-dashboard-stat-champ flex items-center gap-3 min-h-0">
                   {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10 rd-dashboard-stat-avatar')}
                   <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="rd-dashboard-stat-hint text-xs text-muted-foreground">Pick principal del historial</p></div>
                 </div>
@@ -403,9 +410,9 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground">Picks diferentes registrados</p>
               </article>
 
-              <article className="rd-card rd-dashboard-stat rd-card-watermark">
+              <article className={`rd-card rd-dashboard-stat rd-card-watermark ${bestRecentMatch ? 'rd-dashboard-stat-with-avatar' : ''}`}>
                 <div className="flex items-center justify-between"><span className="rd-label">Mejor partida<span className="rd-dashboard-label-extra"> reciente</span></span><Trophy size={17} className="text-green-400" /></div>
-                {bestRecentMatch ? <div className="flex items-center gap-3 min-h-0">
+                {bestRecentMatch ? <div className="rd-dashboard-stat-champ flex items-center gap-3 min-h-0">
                   {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10 rd-dashboard-stat-avatar')}
                   <div className="min-w-0 flex-1">
                     <p className="font-rajdhani text-lg font-bold text-foreground truncate">{bestRecentMatch.own_champion_name}</p>
@@ -508,7 +515,7 @@ export default function Dashboard() {
 
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Análisis de matchups</h2><Link to="/stats" className="rd-link">Ampliar</Link></div>
-              {matchupStats.length ? <div className="grid grid-rows-2 gap-3 min-h-0 flex-1">
+              {matchupStats.length ? <div className="rd-dashboard-matchups grid grid-rows-2 gap-3 min-h-0 flex-1">
                 {[{ title: 'Favorables', rows: bestMatchups, positive: true }, { title: 'Problemáticos', rows: worstMatchups, positive: false }].map(group => <div key={group.title} className={`rd-dashboard-matchup-group rounded-xl border p-2 min-h-0 overflow-hidden ${group.positive ? 'bg-green-500/[0.05] border-green-400/15' : 'bg-red-500/[0.05] border-red-400/15'}`}><p className={`rd-mini-label ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{group.title}</p>{group.rows.map(item => <div key={item.champ} className="rd-dashboard-matchup-row flex items-center gap-2 min-h-0">{renderChampionAvatar(item.champ, 'w-6 h-6')}<span className="text-sm flex-1 truncate">{item.champ}</span><span className="text-[10px] text-muted-foreground">{item.total}p</span><span className={`text-xs font-bold ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{item.wr.toFixed(0)}%</span></div>)}</div>)}
               </div> : <p className="text-sm text-muted-foreground text-center my-auto">Necesitás más partidas para detectar matchups.</p>}
             </article>

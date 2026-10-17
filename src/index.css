@@ -681,7 +681,7 @@
     --rd-sidebar-footer-h: calc(2.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
   }
 
-  .rd-sidebar:has(.rd-sidebar-footer a[href="/admin/tierlist-config"]) {
+  .rd-sidebar-admin {
     --rd-sidebar-footer-h: calc(4.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
   }
 
@@ -915,7 +915,7 @@
 
   /* .rd-card > * es relative: la fila del nombre se vuelve estática para que
      el avatar se ubique respecto de la tarjeta y no de esa fila. */
-  .rd-dashboard-stat > div:has(> .rd-dashboard-stat-avatar) {
+  .rd-dashboard-stat > .rd-dashboard-stat-champ {
     position: static;
   }
 
@@ -928,11 +928,11 @@
     height: 1.6rem;
   }
 
-  .rd-dashboard-stat:has(.rd-dashboard-stat-avatar) > div:first-child {
+  .rd-dashboard-stat-with-avatar > div:first-child {
     padding-right: 1.9rem;
   }
 
-  .rd-dashboard-stat:has(.rd-dashboard-stat-avatar) > div:first-child svg {
+  .rd-dashboard-stat-with-avatar > div:first-child svg {
     display: none;
   }
 
@@ -1234,7 +1234,7 @@
   }
 
   /* Matchups: los dos grupos apilados con filas más bajas. */
-  .rd-dashboard-activity div:has(> .rd-dashboard-matchup-group) {
+  .rd-dashboard-activity .rd-dashboard-matchups {
     gap: 0.4rem;
   }
 
