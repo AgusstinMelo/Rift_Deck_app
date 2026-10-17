@@ -247,7 +247,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             <p className="text-sm font-semibold text-foreground mb-3">
               Hechizos ({selectedSpells.length}/2)
             </p>
-            <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-nowrap">
+            <div className="grid w-full grid-cols-5 justify-items-center gap-2 sm:[grid-template-columns:repeat(var(--spell-count),minmax(0,1fr))]" style={/** @type {any} */ ({ '--spell-count': spells.length })}>
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
@@ -260,13 +260,13 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
                         else if (selectedSpells.length < 2) setSelectedSpells(prev => [...prev, spell.name]);
                       }}
                       aria-disabled={disabled}
-                      className={`aspect-square w-14 max-w-full justify-self-center min-w-0 sm:aspect-auto sm:w-auto sm:h-auto sm:max-w-none sm:flex-1 flex items-center justify-center p-1 rounded-full sm:rounded-xl border-2 transition-all overflow-hidden ${
+                      className={`aspect-square w-full max-w-12 min-w-0 flex items-center justify-center p-0.5 rounded-full border-2 transition-all overflow-hidden ${
                         selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                       } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
                     >
                       {spell.image_url
-                        ? <img src={spell.image_url} alt={spell.name} className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full object-cover" />
-                        : <div className="w-[76%] h-[76%] sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                        ? <img src={spell.image_url} alt={spell.name} className="w-full h-full rounded-full object-cover" />
+                        : <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
                       }
                     </button>
                   </EntityHoverCard>

@@ -219,12 +219,12 @@ export default function StatsPanel({ champion, items, runes = [] }) {
   ];
 
   return (
-    <div className="rd-card rd-stats-panel flex flex-col p-4">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="rd-card rd-stats-panel flex flex-col py-4 pl-4">
+      <div className="flex items-center gap-2 mb-2 pr-4">
         <span className="w-5 h-px bg-primary/50" />
         <h3 className="rd-card-title">Stats de la Build</h3>
       </div>
-      <div className="rd-stats-panel-rows">
+      <div className="rd-stats-panel-rows pr-4">
         {rows.map((row, i) => (
           <div key={i} className="flex items-center justify-between py-1 border-b border-border/60 last:border-0">
             <span className="text-xs text-muted-foreground">{row.label}</span>
@@ -235,7 +235,7 @@ export default function StatsPanel({ champion, items, runes = [] }) {
         ))}
       </div>
       {(hasItems || runes.length > 0) && (
-        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/60">
+        <p className="text-xs text-muted-foreground mt-2 mr-4 pt-2 border-t border-border/60">
           Stats con {items.length} obj.{runes.length > 0 && ` y ${runes.length} runa${runes.length > 1 ? 's' : ''}`}
         </p>
       )}
