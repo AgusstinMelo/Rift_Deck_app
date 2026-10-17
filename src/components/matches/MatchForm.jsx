@@ -747,7 +747,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   <div className="space-y-3">
                     {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
                       <Fragment key={group}>
-                      {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                      {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
                       <div>
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (
@@ -803,7 +803,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   <div className="space-y-3">
                     {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
                       <Fragment key={group}>
-                      {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                      {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
                       <div>
                         <div className="flex flex-wrap gap-2">
                           {runesInGroup.map(rune => (

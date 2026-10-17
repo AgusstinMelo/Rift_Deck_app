@@ -210,7 +210,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
           <div className="flex flex-1 flex-col justify-evenly gap-2">
             {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
               <Fragment key={group}>
-                {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
                 <div className="flex flex-wrap justify-around gap-1.5">
                   {runesInGroup.map(rune => (
                     <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, false)} />
@@ -264,7 +264,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
           <div className="flex flex-1 flex-col justify-evenly gap-2">
             {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
               <Fragment key={group}>
-                {index > 0 && <div className="h-px bg-primary/25" aria-hidden="true" />}
+                {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
                 <div className="flex flex-wrap justify-around gap-1.5">
                   {runesInGroup.map(rune => (
                     <RuneIcon key={rune.id} rune={rune} selected={isSelected(rune)} onClick={() => handleToggleRune(rune, true)} />
