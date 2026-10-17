@@ -878,9 +878,9 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                   <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
 <button type="button" onClick={() => toggleSpell(spell.name)}
                     aria-disabled={disabled}
-                    className={`aspect-square w-full max-w-12 min-w-0 flex items-center justify-center p-0.5 rounded-full border-2 transition-all overflow-hidden ${
-                      selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                    } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
+                    className={`aspect-square w-full max-w-12 min-w-0 flex items-center justify-center rounded-full transition-all overflow-hidden ${
+                      selected ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]' : 'opacity-50 hover:opacity-90'
+                    } ${disabled ? '!opacity-25 cursor-not-allowed' : ''}`}>
                     {spell.image_url
                       ? <img src={spell.image_url} alt={spell.name} className="w-full h-full rounded-full object-cover" />
                       : <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
