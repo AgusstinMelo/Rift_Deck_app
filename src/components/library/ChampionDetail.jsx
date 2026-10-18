@@ -1,19 +1,25 @@
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Sword,
   Shield,
   Zap,
 } from 'lucide-react';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Champion } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
+import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
 
 import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { championSlug } from '@/utils/championSlug';
+import { getTierEntriesForChampion } from '@/utils/tierlist';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 const SCALING_LABEL = {
   earlygame: 'Early Game',
@@ -340,6 +346,82 @@ function PersonalMetric({ label, value, hint }) {
   );
 }
 
+// Evolución de una línea en los últimos parches: curva del score y el tier de
+// cada snapshot. `points` va del parche más viejo al actual.
+function MetaEvolution({ points }) {
+  if (points.length < 2) {
+    return (
+      <div className="rd-champ-meta-evolution rd-champ-meta-evolution-empty">
+        <p className="rd-label">Evolución</p>
+        <p className="text-xs text-muted-foreground">
+          Hace falta al menos un parche anterior registrado para ver la evolución.
+        </p>
+      </div>
+    );
+  }
+
+  const scores = points.map(point => point.score);
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const range = max - min || 1;
+  // x centrado en la columna de cada parche, para alinear con los chips de abajo.
+  const coords = points.map((point, index) => [
+    ((index + 0.5) / points.length) * 100,
+    36 - ((point.score - min) / range) * 30,
+  ]);
+  const line = coords.map(([x, y]) => `${x},${y}`).join(' ');
+  const area = `${coords[0][0]},40 ${line} ${coords[coords.length - 1][0]},40`;
+  const first = points[0];
+  const last = points[points.length - 1];
+  const delta = last.score - first.score;
+
+  return (
+    <div className="rd-champ-meta-evolution">
+      <div className="rd-champ-meta-evolution-head">
+        <p className="rd-label">Evolución · {points.length} parches</p>
+        <p className="text-xs text-muted-foreground">
+          {first.tier !== last.tier && <span>{first.tier} → {last.tier} · </span>}
+          <span className={delta > 0 ? 'text-green-400' : delta < 0 ? 'text-red-400' : ''}>
+            {delta > 0 ? '+' : ''}{delta.toFixed(1)} score
+          </span>
+        </p>
+      </div>
+
+      <div className="rd-champ-meta-evolution-chart">
+        <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="rd-meta-evolution-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgb(212,175,55)" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="rgb(212,175,55)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <polygon points={area} fill="url(#rd-meta-evolution-fill)" />
+          <polyline points={line} fill="none" stroke="rgb(212,175,55)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        </svg>
+        {coords.map(([x, y], index) => (
+          <span
+            key={points[index].key}
+            className="rd-champ-meta-evolution-dot"
+            style={{ left: `${x}%`, top: `${(y / 40) * 100}%` }}
+          />
+        ))}
+      </div>
+
+      <ol className="rd-champ-meta-evolution-patches" style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}>
+        {points.map(point => (
+          <li key={point.key} title={`Score ${point.score.toFixed(1)}${point.date ? ` · snapshot del ${point.date}` : ''}`}>
+            <TierBadge tier={point.tier} size="sm" />
+            <span className="font-semibold text-foreground">{point.patch}</span>
+            {point.date && (
+              <span className="text-muted-foreground">{point.date.slice(8, 10)}/{point.date.slice(5, 7)}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ChampionDetail({
@@ -351,6 +433,9 @@ export default function ChampionDetail({
   relatedChampions = [],
 }) {
   const { user } = useAuth();
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const [section, setSection] = useState('profile');
+  const [metaIndex, setMetaIndex] = useState(0);
 
   const { data: allChampions = [] } = useQuery({
     queryKey: ['champions'],
@@ -502,8 +587,58 @@ export default function ChampionDetail({
     tierEntry: selectedTierEntry,
   });
 
+  // En smartphone horizontal la ficha es un "dossier": identidad fija a la
+  // izquierda y una sección a la vez a la derecha (no aplica a la ficha pública).
+  const useSections = isPhoneLandscape && !publicMode;
+  const sectionTabs = [
+    ['profile', 'Perfil'],
+    ['stats', 'Estadísticas'],
+    ['matchups', 'Matchups'],
+    ['personal', 'Rendimiento'],
+    ...(tierData.length > 0 ? [['meta', 'Meta']] : []),
+  ];
+  const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'profile';
+  const show = id => !useSections || activeSection === id;
+  // En el dossier horizontal se ve una posición meta por vez (flechas para cambiar).
+  const activeMetaIndex = Math.min(metaIndex, Math.max(0, tierData.length - 1));
+  const visibleTierData = useSections ? tierData.slice(activeMetaIndex, activeMetaIndex + 1) : tierData;
+
+  // Evolución en el meta (solo en el dossier horizontal): últimos 6 snapshots,
+  // consultando únicamente las filas de este campeón.
+  const { data: executions = [] } = useQuery({
+    queryKey: ['executions'],
+    queryFn: () => getTierlistExecutions(10),
+    enabled: useSections,
+  });
+  const historyExecutions = executions
+    .filter(execution => execution.status === 'success' || execution.status === 'partial')
+    .slice(0, 6)
+    .reverse();
+  const historyKeys = historyExecutions.map(execution => execution.snapshot_key).filter(Boolean);
+  const championNames = [champion.name, champion.original_name].filter(Boolean);
+  const { data: historyEntries = [] } = useQuery({
+    queryKey: ['tierlist-champion-history', champion.id, historyKeys],
+    queryFn: () => getTierlistEntries('-ranking_final', 500, { snapshotKeys: historyKeys, championNames }),
+    enabled: useSections && historyKeys.length > 1,
+    staleTime: 5 * 60 * 1000,
+  });
+  const getLaneHistory = lane => historyExecutions.flatMap(execution => {
+    const [entry] = getTierEntriesForChampion(
+      champion,
+      historyEntries.filter(item => item.snapshot_key === execution.snapshot_key && item.lane === lane)
+    );
+    if (!entry || entry.ranking_final == null) return [];
+    return [{
+      key: execution.snapshot_key,
+      patch: execution.patch,
+      date: execution.snapshot_date,
+      tier: entry.tier,
+      score: Number(entry.ranking_final),
+    }];
+  });
+
   return (
-    <div className="space-y-6">
+    <div className="rd-champ-detail space-y-6">
       {/* back */}
       <button
         onClick={onBack}
@@ -517,8 +652,25 @@ export default function ChampionDetail({
         {publicMode ? 'Todos los campeones' : 'Volver a la biblioteca'}
       </button>
 
+      {useSections && (
+        <div className="rd-panel-tabs rd-champ-tabs" role="tablist" aria-label="Secciones del campeón">
+          {sectionTabs.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activeSection === id}
+              onClick={() => setSection(id)}
+              className={`rd-panel-tab ${activeSection === id ? 'rd-panel-tab-active' : ''}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* HERO */}
-      <div className="rd-card overflow-hidden relative">
+      <div className="rd-champ-hero rd-card overflow-hidden relative">
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.18),transparent_35%)]" />
 
         <div className="relative p-6">
@@ -627,11 +779,14 @@ export default function ChampionDetail({
       </div>
 
       {/* layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
+      <div className="rd-champ-sections grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         {/* LEFT */}
         <div className={publicMode ? 'contents' : 'space-y-6'}>
           {/* profile */}
-          <div className={`rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-1' : ''}`}>
+          {show('profile') && <div className={`rd-champ-profile rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-1' : ''}`}>
+            {/* Primera "pantalla" del perfil: en smartphone horizontal ocupa todo el alto
+                visible y las notas quedan debajo, accesibles con scroll. */}
+            <div className="rd-champ-profile-main">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Perfil del Campeón</h2>
@@ -662,19 +817,20 @@ export default function ChampionDetail({
                 </div>
               </div>
             )}
+            </div>
 
             {champion.strategic_notes && (
-              <div className="mt-5 rd-mini-action">
+              <div className="rd-champ-profile-notes mt-5 rd-mini-action">
                 <p className="rd-label mb-2">Notas Estratégicas</p>
                 <p className="text-sm text-foreground leading-relaxed">
                   {champion.strategic_notes}
                 </p>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* base stats */}
-          <div className={`rd-card p-5 ${publicMode ? 'xl:col-start-1 xl:row-start-2' : ''}`}>
+          {show('stats') && <div className={`rd-champ-stats rd-card p-5 ${publicMode ? 'xl:col-start-1 xl:row-start-2' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Estadísticas Base</h2>
@@ -696,10 +852,10 @@ export default function ChampionDetail({
                 <BaseStatRow label="Resist. Mágica" value={champion.magic_res} />
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* matchups */}
-          <div className={`rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-3' : ''}`}>
+          {show('matchups') && <div className={`rd-champ-matchups rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-3' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Matchups y Sinergias</h2>
@@ -796,13 +952,13 @@ export default function ChampionDetail({
                 </div>
               </div>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* RIGHT */}
         <div className={publicMode ? 'space-y-6 xl:col-start-2 xl:row-start-2' : 'space-y-6'}>
           {/* personal */}
-          {!publicMode && <div className="rd-card p-5">
+          {!publicMode && show('personal') && <div className="rd-champ-personal rd-card p-5">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Rendimiento Personal</h2>
@@ -845,7 +1001,7 @@ export default function ChampionDetail({
                 </div>
 
                 {championInsight && (
-                  <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 px-3 py-3">
+                  <div className="rd-champ-personal-insight mt-4 rounded-xl border border-primary/20 bg-primary/5 px-3 py-3">
                     <p className="rd-label mb-2 text-primary">
                       Insight con {champion.name}
                     </p>
@@ -856,7 +1012,7 @@ export default function ChampionDetail({
                 )}
 
                 {champMatches.length < 5 && (
-                  <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-3 py-2">
+                  <div className="rd-champ-personal-warning mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-3 py-2">
                     <p className="text-xs text-yellow-400">Muestra pequeña.</p>
                   </div>
                 )}
@@ -865,19 +1021,40 @@ export default function ChampionDetail({
           </div>}
 
           {/* tier */}
-          {tierData.length > 0 && (
-            <div className="rd-card p-5">
+          {tierData.length > 0 && show('meta') && (
+            <div className="rd-champ-meta rd-card p-5">
               <div className="flex items-center gap-2 mb-5">
                 <span className="w-6 h-px bg-primary/50" />
                 <h2 className="rd-card-title">Posición Meta</h2>
+                {useSections && tierData.length > 1 && (
+                  <div className="rd-champ-meta-nav ml-auto flex items-center gap-1.5" aria-label="Cambiar posición">
+                    <button
+                      type="button"
+                      onClick={() => setMetaIndex((activeMetaIndex - 1 + tierData.length) % tierData.length)}
+                      aria-label="Posición anterior"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span>{activeMetaIndex + 1} / {tierData.length}</span>
+                    <button
+                      type="button"
+                      onClick={() => setMetaIndex((activeMetaIndex + 1) % tierData.length)}
+                      aria-label="Posición siguiente"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-5">
-                {tierData.map((t, index) => (
+              {/* --rd-fill: nivel 0-100% de cada valor; lo usan las barras de la ficha
+                  en smartphone horizontal (WR 40-60%, PR 0-25%, BR 0-50%, score 0-100). */}
+              <div className="rd-champ-meta-list space-y-5">
+                {visibleTierData.map((t, index) => (
                   <div
                     key={t.id}
                     className={`
-                      ${index !== tierData.length - 1
+                      ${index !== visibleTierData.length - 1
                         ? 'pb-5 border-b border-border/50'
                         : ''}
                     `}
@@ -888,19 +1065,19 @@ export default function ChampionDetail({
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-secondary/50 rounded-xl p-3 text-center">
+                      <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp((toNumber(t.winrate) - 40) * 5)}%` }}>
                         <p className="rd-label mb-1">WR</p>
                         <p className="font-bold text-foreground">
                           {t.winrate?.toFixed(1)}%
                         </p>
                       </div>
-                      <div className="bg-secondary/50 rounded-xl p-3 text-center">
+                      <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp(toNumber(t.pickrate) * 4)}%` }}>
                         <p className="rd-label mb-1">PR</p>
                         <p className="font-bold text-foreground">
                           {t.pickrate?.toFixed(1)}%
                         </p>
                       </div>
-                      <div className="bg-secondary/50 rounded-xl p-3 text-center">
+                      <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp(toNumber(t.banrate) * 2)}%` }}>
                         <p className="rd-label mb-1">BR</p>
                         <p className="font-bold text-foreground">
                           {t.banrate?.toFixed(1)}%
@@ -908,7 +1085,7 @@ export default function ChampionDetail({
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-border/40 space-y-1">
+                    <div className="rd-champ-meta-footer mt-4 pt-4 border-t border-border/40 space-y-1" style={{ '--rd-fill': `${clamp(toNumber(t.ranking_final))}%` }}>
                       <p className="text-xs text-muted-foreground">
                         Score:
                         <span className="text-primary font-semibold ml-1">
@@ -919,6 +1096,8 @@ export default function ChampionDetail({
                         #{t.position_in_lane} en {t.lane}
                       </p>
                     </div>
+
+                    {useSections && <MetaEvolution points={getLaneHistory(t.lane)} />}
                   </div>
                 ))}
               </div>

@@ -249,23 +249,23 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
   const categoryWinners = getCategoryWinners(computedA, computedB, buildA, buildB);
 
   return (
-    <div className="rd-page">
-      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-6">
+    <div className="rd-page rd-buildcmp">
+      <button onClick={onBack} className="rd-buildcmp-back flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-6">
         <ArrowLeft size={16} /> Volver
       </button>
 
-      <div className="flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Build Calculator</span></div>
+      <div className="rd-buildcmp-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Build Calculator</span></div>
       <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Comparar Builds</h1>
-      <p className="text-muted-foreground text-sm mb-6">Compará las estadísticas de dos builds, del mismo campeón o de campeones distintos.</p>
+      <p className="rd-buildcmp-desc text-muted-foreground text-sm mb-6">Compará las estadísticas de dos builds, del mismo campeón o de campeones distintos.</p>
 
       {/* Selectors */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="rd-buildcmp-selectors grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <BuildSelector slot="A" allBuilds={compatibleBuilds} allChampions={champions} selected={buildA} onSelect={setBuildA} />
         <BuildSelector slot="B" allBuilds={compatibleBuilds} allChampions={champions} selected={buildB} onSelect={setBuildB} />
       </div>
 
       {/* Champion Headers */}
-      <div className="flex items-stretch gap-4 mb-6">
+      <div className="rd-buildcmp-heads flex items-stretch gap-4 mb-6">
         <ChampionHeader build={buildA} champion={champA} side="left" itemCount={itemsA.length} />
         <div className="flex items-center justify-center shrink-0">
           <div className="bg-card border border-border rounded-full w-12 h-12 flex items-center justify-center">
@@ -278,7 +278,7 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
 
       {/* Stats table */}
       {canCompare && (
-        <div className="rd-card overflow-hidden">
+        <div className="rd-buildcmp-table rd-card overflow-hidden">
           {/* Header */}
           <div className="grid grid-cols-[125px_1fr_250px_1fr] gap-0 px-4 py-3 border-b border-border bg-secondary/30">
             <div />
@@ -341,13 +341,13 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
       )}
 
       {!canCompare && (buildA || buildB) && (
-        <div className="rd-card text-center py-12 text-muted-foreground text-sm">
+        <div className="rd-buildcmp-empty rd-card text-center py-12 text-muted-foreground text-sm">
           Seleccioná las dos builds para ver la comparación.
         </div>
       )}
 
       {!buildA && !buildB && (
-        <div className="rd-card text-center py-16 text-muted-foreground text-sm">
+        <div className="rd-buildcmp-empty rd-card text-center py-16 text-muted-foreground text-sm">
           Seleccioná dos builds para comenzar la comparación.
         </div>
       )}

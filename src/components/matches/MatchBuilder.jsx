@@ -7,6 +7,7 @@ import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { matchKda } from '@/domain/matchStats';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
@@ -123,7 +124,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
 }
 
 /** Selector segmentado de dos o más opciones (resultado, lado del mapa). */
-function SegmentedChoice({ value, onChange, options }) {
+export function SegmentedChoice({ value, onChange, options }) {
   return (
     <div className="flex gap-2">
       {options.map(option => (
@@ -144,7 +145,7 @@ function SegmentedChoice({ value, onChange, options }) {
 }
 
 /** Campo numérico de estadística: vacío significa "sin dato", no cero. */
-function StatInput({ label, value, onChange, placeholder = '—', autoFocus = false }) {
+export function StatInput({ label, value, onChange, placeholder = '—', autoFocus = false }) {
   return (
     <label className="block min-w-0">
       <span className="text-xs text-muted-foreground block mb-1">{label}</span>
@@ -173,6 +174,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const patchWasEdited = useRef(false);
 
   const [step, setStep] = useState('info'); // info, lane, myChamp, allies, enemies, build, stats
+  // Smartphone horizontal, paso "Tu build": objetos y hechizos fijos a la izquierda y
+  // un panel por vez (objetos / runas) a la derecha, como en el creador de builds.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const [buildPanel, setBuildPanel] = useState('items');
   const [lane, setLane] = useState('');
   const [myChampion, setMyChampion] = useState(null);
   const [allyChampions, setAllyChampions] = useState([]);
@@ -486,7 +491,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const fitsViewport = ['allies', 'enemies', 'build', 'stats'].includes(step);
 
   return (
-    <div className={`space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
+    <div className={`rd-match-flow space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
       {/* Progress */}
       <div className="flex gap-2">
         {['info', 'lane', 'myChamp', 'allies', 'enemies', 'build', 'stats'].map((s, i) => (
@@ -695,10 +700,27 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               </div>
 
               {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
-              <div className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+              <div data-panel={buildPanel} className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                {isPhoneLandscape && (
+                  <div className="rd-panel-tabs rd-buildstep-tabs" role="tablist" aria-label="Paneles de la build">
+                    {[['items', 'Objetos'], ['runes', 'Runas']].map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        role="tab"
+                        aria-selected={buildPanel === id}
+                        onClick={() => setBuildPanel(id)}
+                        className={`rd-panel-tab ${buildPanel === id ? 'rd-panel-tab-active' : ''}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className="rd-buildstep-items flex min-w-0 flex-col gap-4">
                   {/* Item Pool */}
-                  <div className="rd-card p-5">
+                  <div className="rd-buildstep-pool rd-card p-5">
                     <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <span className="w-5 h-px bg-primary/50" />

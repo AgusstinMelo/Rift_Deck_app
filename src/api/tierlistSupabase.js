@@ -15,6 +15,8 @@ export async function getTierlistEntries(order = "-ranking_final", limit = 1000,
       .order(orderConfig.column, { ascending: orderConfig.ascending });
 
     if (filters.patch) query = query.eq("patch", filters.patch);
+    // Historial de un campeón: evita traer las tablas completas de cada snapshot.
+    if (filters.championNames?.length) query = query.in("champion_name", filters.championNames);
     if (filters.patches?.length) query = query.in("patch", filters.patches);
 
     if (useSnapshotColumns) {
