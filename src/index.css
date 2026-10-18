@@ -6686,9 +6686,11 @@
     min-height: 0;
     flex: 1 1 0;
     grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: auto;
+    /* max-content: con "auto" y el min-h-0 de cada fila, la grilla comprimía las
+       filas para que entraran en el alto y se pisaban; así la lista scrollea. */
+    grid-auto-rows: max-content;
     align-content: start;
-    gap: 0.3rem;
+    gap: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: none;
@@ -6698,8 +6700,16 @@
     display: none;
   }
 
+  /* Filas sin borde, para que el solape no dibuje líneas cruzadas. */
   .rd-stats-layout .rd-stats-champ-list > * {
+    min-height: auto;
     padding: 0.3rem 0.45rem;
+    border: 0;
+  }
+
+  /* Solape leve entre filas: los retratos apenas se tocan. */
+  .rd-stats-layout .rd-stats-champ-list > * + * {
+    margin-top: -0.5rem;
   }
 
   .rd-stats-layout .rd-stats-champ-list > * > div:first-child {
