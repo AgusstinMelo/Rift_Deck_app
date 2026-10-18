@@ -2330,10 +2330,27 @@
     font-size: 13px;
   }
 
-  /* Datos de la partida: los cuatro campos en una fila. */
+  /* Datos de la partida: 2x2 con campos grandes que ocupan el alto disponible. */
   .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.6rem;
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    gap: 1rem 1.25rem;
+    padding-inline: 0.25rem;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) label {
+    margin-bottom: 0.35rem;
+    font-size: 12.5px;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) input,
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) select {
+    height: 2.9rem;
+    padding-inline: 0.85rem;
+    border-radius: 0.8rem;
+    font-size: 15px;
   }
 
   /* Línea: botones más bajos. */
