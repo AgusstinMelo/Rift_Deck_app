@@ -1,5 +1,6 @@
 import { cloneElement, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
 
 const uniqueText = (...values) => [...new Set(
   values
@@ -9,9 +10,10 @@ const uniqueText = (...values) => [...new Set(
 
 export default function EntityHoverCard({ entity, kind, children }) {
   const [position, setPosition] = useState(null);
+  const pressPreview = usePressPreview();
 
-  const show = event => {
-    const rect = event.currentTarget.getBoundingClientRect();
+  const show = element => {
+    const rect = element.getBoundingClientRect();
     const width = Math.min(320, window.innerWidth - 24);
     const wouldOverflowRight = rect.left + width > window.innerWidth - 12;
     const left = wouldOverflowRight
@@ -25,15 +27,18 @@ export default function EntityHoverCard({ entity, kind, children }) {
   };
 
   const descriptions = uniqueText(entity?.description, entity?.effect, entity?.passive);
+  // Mouse: al pasar por encima. Táctil: solo manteniendo presionado (ver usePressPreview).
+  const handlers = pressPreview.bind({ onShow: show, onHide: () => setPosition(null) });
+  const chained = Object.fromEntries(Object.entries(handlers).map(([name, handler]) => [
+    name,
+    event => {
+      children.props[name]?.(event);
+      handler(event);
+    },
+  ]));
   const trigger = cloneElement(children, {
-    onMouseEnter: event => {
-      children.props.onMouseEnter?.(event);
-      show(event);
-    },
-    onMouseLeave: event => {
-      children.props.onMouseLeave?.(event);
-      setPosition(null);
-    },
+    ...chained,
+    style: { ...children.props.style, ...PRESS_PREVIEW_STYLE },
     'aria-label': children.props['aria-label'] || entity?.name,
   });
 

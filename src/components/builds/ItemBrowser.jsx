@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
 
 const CATEGORIES = [
   { key: 'all', label: 'Todos' },
@@ -158,9 +159,11 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
   const [tooltip, setTooltip] = useState(null);
   const [tooltipTop, setTooltipTop] = useState(null);
   const tooltipRef = useRef(null);
+  // Mouse: al pasar por encima. Táctil: solo manteniendo presionado (ver usePressPreview).
+  const pressPreview = usePressPreview();
 
-  const showTooltip = (event, item, lockReason) => {
-    const rect = event.currentTarget.getBoundingClientRect();
+  const showTooltip = (element, item, lockReason) => {
+    const rect = element.getBoundingClientRect();
     // Las descripciones largas usan un tooltip más ancho: queda más bajo y entra en pantalla.
     const isLong = String(item.description || '').length > 280;
     const tooltipWidth = Math.min(isLong ? 380 : 320, window.innerWidth - 24);
@@ -250,8 +253,11 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
               <div
                 key={item.id}
                 className="relative group"
-                onMouseEnter={event => showTooltip(event, item, lockReason)}
-                onMouseLeave={() => setTooltip(null)}
+                style={PRESS_PREVIEW_STYLE}
+                {...pressPreview.bind({
+                  onShow: element => showTooltip(element, item, lockReason),
+                  onHide: () => setTooltip(null),
+                })}
               >
                 <button
                   onClick={() => addable && onSelect(item)}
