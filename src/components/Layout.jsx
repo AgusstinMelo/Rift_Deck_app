@@ -232,7 +232,7 @@ export default function Layout() {
       <aside
         className={`
           fixed lg:relative z-[300] h-full flex flex-col
-          rd-sidebar
+          rd-sidebar ${user?.role === 'admin' ? 'rd-sidebar-admin' : ''}
           transition-all duration-300 ease-in-out
           ${collapsed ? 'w-16' : 'w-60'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -270,7 +270,7 @@ export default function Layout() {
             />
           )}
 
-          <div className={`flex mt-3 items-center ${collapsed ? 'justify-center' : 'self-start ml-5 gap-1'}`}>
+          <div className={`rd-sidebar-tools flex mt-3 items-center ${collapsed ? 'justify-center' : 'self-start ml-5 gap-1'}`}>
             <button
               type="button"
               onClick={() => setCollapsed(!collapsed)}
@@ -308,7 +308,7 @@ export default function Layout() {
           </div>
         </div>
 
-        <nav className="flex-1 py-5 overflow-y-auto px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <nav className="rd-sidebar-nav flex-1 py-5 overflow-y-auto px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <SidebarSearch
             collapsed={collapsed}
             onNavigate={() => setMobileOpen(false)}
@@ -382,8 +382,8 @@ export default function Layout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex min-h-0 flex-col min-w-0 overflow-hidden">
-        <header className="relative lg:hidden flex items-center justify-center h-14 px-4 border-b border-primary/10 bg-card shrink-0">
+      <div className="rd-shell-column flex-1 flex min-h-0 flex-col min-w-0 overflow-hidden">
+        <header className="rd-mobile-topbar relative lg:hidden flex items-center justify-center h-14 px-4 border-b border-primary/10 bg-card shrink-0">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}

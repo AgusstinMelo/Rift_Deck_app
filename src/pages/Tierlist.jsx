@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Minus, RefreshCw, Trophy, Table2, Layers } fr
 import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
@@ -30,7 +31,12 @@ export default function Tierlist() {
   const [laneFilter, setLaneFilter] = useState('all');
   const [tierFilter, setTierFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('tier');
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  // En smartphone horizontal se entra directo a la tabla (se lee mejor a lo ancho);
+  // solo define el valor inicial, girar el teléfono después no cambia la vista.
+  const [viewMode, setViewMode] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia(PHONE_LANDSCAPE_QUERY).matches ? 'table' : 'tier'
+  ));
   const [patchFilter, setPatchFilter] = useState(''); // stores execution id
 
   const { data: executions = [] } = useQuery({
@@ -120,6 +126,40 @@ export default function Tierlist() {
     return <Minus size={12} className="text-muted-foreground" />;
   };
 
+  // Selector Por Tier / Tabla. En smartphone horizontal no entra en la fila de
+  // filtros: va en el encabezado, en la línea de "Parche X vs Parche Y".
+  const viewToggle = (
+    <div className="rd-tierlist-view-toggle flex gap-1 bg-secondary/50 p-1 rounded-xl ml-auto border border-border/60">
+      <button
+        onClick={() => setViewMode('tier')}
+        aria-pressed={viewMode === 'tier'}
+        className={`
+          flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+          ${viewMode === 'tier'
+            ? 'bg-primary/15 text-primary border border-primary/20'
+            : 'text-muted-foreground hover:text-foreground'}
+        `}
+      >
+        <Layers size={13} />
+        Por Tier
+      </button>
+
+      <button
+        onClick={() => setViewMode('table')}
+        aria-pressed={viewMode === 'table'}
+        className={`
+          flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+          ${viewMode === 'table'
+            ? 'bg-primary/15 text-primary border border-primary/20'
+            : 'text-muted-foreground hover:text-foreground'}
+        `}
+      >
+        <Table2 size={13} />
+        Tabla
+      </button>
+    </div>
+  );
+
   return (
     <div className="rd-page rd-dashboard rd-tierlist-layout">
 
@@ -136,7 +176,8 @@ export default function Tierlist() {
             Tierlist
           </h1>
 
-          <p className="text-muted-foreground text-sm mt-1">
+          <div className="rd-tierlist-subline mt-1 flex items-center gap-3">
+          <p className="text-muted-foreground text-sm">
             {activeExec ? (
               <>
                 <span className="text-foreground font-medium">Parche {activeExec.patch}</span>
@@ -151,6 +192,8 @@ export default function Tierlist() {
               </>
             ) : 'Sin datos de actualización'}
           </p>
+          {isPhoneLandscape && viewToggle}
+          </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-3 rd-status-pill">
@@ -234,33 +277,7 @@ export default function Tierlist() {
             </select>
           )}
 
-          <div className="flex gap-1 bg-secondary/50 p-1 rounded-xl ml-auto border border-border/60">
-            <button
-              onClick={() => setViewMode('tier')}
-              className={`
-                flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                ${viewMode === 'tier'
-                  ? 'bg-primary/15 text-primary border border-primary/20'
-                  : 'text-muted-foreground hover:text-foreground'}
-              `}
-            >
-              <Layers size={13} />
-              Por Tier
-            </button>
-
-            <button
-              onClick={() => setViewMode('table')}
-              className={`
-                flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                ${viewMode === 'table'
-                  ? 'bg-primary/15 text-primary border border-primary/20'
-                  : 'text-muted-foreground hover:text-foreground'}
-              `}
-            >
-              <Table2 size={13} />
-              Tabla
-            </button>
-          </div>
+          {!isPhoneLandscape && viewToggle}
         </div>
       </div>
 
@@ -280,14 +297,14 @@ export default function Tierlist() {
           />
         </div>
       ) : viewMode === 'tier' ? (
-        <div className="space-y-6">
+        <div className="rd-tier-groups space-y-6">
           {availableTiers.map(tier => {
             const championsInTier = filtered.filter(t => t.tier === tier);
             if (championsInTier.length === 0) return null;
 
             return (
-              <div key={tier} className="rd-card overflow-hidden">
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-border/70 bg-secondary/20">
+              <div key={tier} className="rd-tier-group rd-card overflow-hidden">
+                <div className="rd-tier-group-head flex items-center gap-3 px-5 py-4 border-b border-border/70 bg-secondary/20">
                   <TierBadge tier={tier} size="lg" />
 
                   <div>
@@ -298,12 +315,12 @@ export default function Tierlist() {
                   </div>
                 </div>
 
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+                <div className="rd-tier-group-grid p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
                   {championsInTier.map(entry => (
                     <div
                       key={entry.id}
                       className="
-                        group relative overflow-hidden rounded-xl
+                        rd-tier-tile group relative overflow-hidden rounded-xl
                         border border-border/60
                         bg-secondary/25
                         hover:bg-secondary/45

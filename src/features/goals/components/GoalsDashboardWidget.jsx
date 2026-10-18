@@ -24,10 +24,10 @@ function GoalSlide({ item }) {
   return (
     // Cada fila tiene un alto exacto: la barra/meta y la fila de estado y fechas
     // quedan siempre en la misma posición, sea cual sea el objetivo.
-    <Link to={`/objetivos/${goal.id}`} className="flex shrink-0 flex-col gap-2 overflow-hidden rounded-lg px-2 py-1.5 hover:bg-primary/5">
-      <div className="flex h-9 shrink-0 items-start justify-between gap-2">
+    <Link to={`/objetivos/${goal.id}`} className="rd-goal-slide flex shrink-0 flex-col gap-2 overflow-hidden rounded-lg px-2 py-1.5 hover:bg-primary/5">
+      <div className="rd-goal-slide-top flex h-9 shrink-0 items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-[10px] leading-4 uppercase tracking-[0.14em] text-muted-foreground">{getMetric(goal.metric).label}</p>
+          <p className="rd-goal-slide-kicker truncate text-[10px] leading-4 uppercase tracking-[0.14em] text-muted-foreground">{getMetric(goal.metric).label}</p>
           <p className="truncate text-sm leading-5 font-semibold text-foreground">{goal.name}</p>
         </div>
         <span className="shrink-0 text-xs leading-4 text-muted-foreground">
@@ -36,7 +36,7 @@ function GoalSlide({ item }) {
       </div>
 
       {/* Altura fija: barra o texto ocupan el mismo espacio, así nada se mueve al cambiar de objetivo. */}
-      <div className="flex h-5 shrink-0 items-center">
+      <div className="rd-goal-slide-meter flex h-5 shrink-0 items-center">
         {pct !== null ? (
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/15">
             <div className={`h-full rounded-full ${OUTCOME_BAR[evaluation.outcome]}`} style={{ width: `${pct}%` }} />
@@ -54,7 +54,7 @@ function GoalSlide({ item }) {
         )}
       </div>
 
-      <div className="flex h-6 shrink-0 items-center justify-between gap-2 overflow-hidden">
+      <div className="rd-goal-slide-status flex h-6 shrink-0 items-center justify-between gap-2 overflow-hidden">
         <GoalOutcomeBadge lifecycle={goal.lifecycle} evaluation={evaluation} size="sm" />
         <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] text-muted-foreground">
           <CalendarDays size={12} /> {formatPeriod(evaluation.period)}
@@ -78,10 +78,10 @@ export default function GoalsDashboardWidget() {
   const go = delta => setIndex(Math.min(Math.max(safeIndex + delta, 0), current.length - 1));
 
   return (
-    <article className="rd-card p-4 min-h-0 overflow-hidden flex flex-col gap-2" aria-label="Objetivos activos">
-      <div className="flex items-center justify-between gap-2">
-        <span className="rd-label flex items-center gap-2"><Target size={15} className="text-primary" /> Objetivos activos</span>
-        <Link to="/objetivos" className="flex items-center gap-1 text-xs text-primary hover:underline">
+    <article className="rd-card rd-goals-widget p-4 min-h-0 overflow-hidden flex flex-col gap-2" aria-label="Objetivos activos">
+      <div className="rd-goals-widget-head flex items-center justify-between gap-2">
+        <span className="rd-label flex items-center gap-2"><Target size={15} className="text-primary" /> Objetivos<span className="rd-goals-widget-title-extra"> activos</span></span>
+        <Link to="/objetivos" className="rd-goals-widget-all flex items-center gap-1 text-xs text-primary hover:underline">
           Ver todos <ArrowRight size={13} />
         </Link>
       </div>
@@ -95,14 +95,14 @@ export default function GoalsDashboardWidget() {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between gap-2">
-            <p className="min-w-0 truncate text-xs text-muted-foreground">
+          <div className="rd-goals-widget-summary flex items-center justify-between gap-2">
+            <p className="rd-goals-widget-count min-w-0 truncate text-xs text-muted-foreground">
               {summary.total} activos
               {summary.dueSoon > 0 && <> · <span className="text-amber-300">{summary.dueSoon} por vencer</span></>}
               {' · '}<span className="text-green-400">{summary.achieved} alcanzados</span>
             </p>
             {current.length > 1 && (
-              <div className="flex shrink-0 items-center gap-1.5">
+              <div className="rd-goals-widget-nav flex shrink-0 items-center gap-1.5">
                 <button type="button" onClick={() => go(-1)} disabled={safeIndex === 0} className={ARROW_CLASS} aria-label="Objetivo anterior">
                   <ChevronLeft size={15} />
                 </button>

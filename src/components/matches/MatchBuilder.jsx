@@ -7,6 +7,7 @@ import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
 import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { matchKda } from '@/domain/matchStats';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
@@ -123,7 +124,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
 }
 
 /** Selector segmentado de dos o más opciones (resultado, lado del mapa). */
-function SegmentedChoice({ value, onChange, options }) {
+export function SegmentedChoice({ value, onChange, options }) {
   return (
     <div className="flex gap-2">
       {options.map(option => (
@@ -144,7 +145,7 @@ function SegmentedChoice({ value, onChange, options }) {
 }
 
 /** Campo numérico de estadística: vacío significa "sin dato", no cero. */
-function StatInput({ label, value, onChange, placeholder = '—', autoFocus = false }) {
+export function StatInput({ label, value, onChange, placeholder = '—', autoFocus = false }) {
   return (
     <label className="block min-w-0">
       <span className="text-xs text-muted-foreground block mb-1">{label}</span>
@@ -162,6 +163,8 @@ function StatInput({ label, value, onChange, placeholder = '—', autoFocus = fa
   );
 }
 
+const BUILDER_STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
+
 export default function MatchBuilder({ champions: fallbackChampions = [], patches = [], defaultPatch = '', onSave, onCancel, isSaving = false }) {
   const clientRequestIdRef = useRef(null);
   if (!clientRequestIdRef.current) {
@@ -172,7 +175,11 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const [patch, setPatch] = useState(defaultPatch);
   const patchWasEdited = useRef(false);
 
-  const [step, setStep] = useState('info'); // info, lane, myChamp, allies, enemies, build, stats
+  const [step, setStep] = useState('info'); // info, champion, allies, enemies, build, stats
+  // Smartphone horizontal, paso "Tu build": objetos y hechizos fijos a la izquierda y
+  // un panel por vez (objetos / runas) a la derecha, como en el creador de builds.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const [buildPanel, setBuildPanel] = useState('items');
   const [lane, setLane] = useState('');
   const [myChampion, setMyChampion] = useState(null);
   const [allyChampions, setAllyChampions] = useState([]);
@@ -249,11 +256,27 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const [primaryBranch, setPrimaryBranch] = useState('Dominación');
   const [secondaryBranch, setSecondaryBranch] = useState('Precisión');
 
-  const handleSelectMyChampion = (champ) => {
-    setMyChampion(myChampion?.id === champ.id ? null : champ);
-    if (myChampion?.id !== champ.id) {
-      setAllyChampions(prev => [...prev.filter(a => a.role !== lane), { ...champ, role: lane }]);
+  // Paso "Rol y campeón": la línea y el campeón propio se eligen juntos. Tu campeón
+  // ocupa el slot de tu línea en el equipo aliado; si cambia la línea, se mueve.
+  const selectLane = (nextLane) => {
+    if (myChampion) {
+      setAllyChampions(prev => [
+        ...prev.filter(a => a.id !== myChampion.id && a.role !== nextLane),
+        { ...myChampion, role: nextLane },
+      ]);
     }
+    setLane(nextLane);
+  };
+
+  // Con la línea ya elegida, elegir el campeón avanza al equipo aliado (como antes).
+  const selectMyChampion = (champ) => {
+    setMyChampion(champ);
+    if (!lane) return;
+    setAllyChampions(prev => [
+      ...prev.filter(a => a.role !== lane && a.id !== myChampion?.id),
+      { ...champ, role: lane },
+    ]);
+    setStep('allies');
   };
 
   const toggleSpell = (spell) => {
@@ -486,47 +509,18 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const fitsViewport = ['allies', 'enemies', 'build', 'stats'].includes(step);
 
   return (
-    <div className={`space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
+    <div className={`rd-match-flow space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
       {/* Progress */}
       <div className="flex gap-2">
-        {['info', 'lane', 'myChamp', 'allies', 'enemies', 'build', 'stats'].map((s, i) => (
+        {BUILDER_STEPS.map((s, i) => (
           <div
             key={s}
             className={`h-1 flex-1 rounded-full transition-all ${
-              step === s ? 'bg-primary' : ['info', 'lane', 'myChamp', 'allies', 'enemies', 'build', 'stats'].indexOf(step) >= i ? 'bg-primary/50' : 'bg-border'
+              step === s ? 'bg-primary' : BUILDER_STEPS.indexOf(step) >= i ? 'bg-primary/50' : 'bg-border'
             }`}
           />
         ))}
       </div>
-
-      {/* Step: Lane */}
-      {step === 'lane' && (
-        <div className="space-y-4">
-          <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Selecciona tu rol</h2>
-            <p className="text-muted-foreground text-sm">¿En qué línea jugaste?</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {LANES.map(l => (
-              <button
-                key={l}
-                onClick={() => { setLane(l); setStep('myChamp'); }}
-                className={`px-4 py-3 rounded-lg border-2 font-medium transition-all capitalize ${
-                  lane === l
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border text-foreground hover:border-primary/50'
-                }`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-          <button onClick={() => setStep('info')}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
-            <ArrowLeft size={16} /> Atrás
-          </button>
-        </div>
-      )}
 
       {/* Step: Info (fecha y parche) */}
       {step === 'info' && (
@@ -561,7 +555,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
             </div>
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setStep('lane')}
+            <button onClick={() => setStep('champion')}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
               Siguiente
             </button>
@@ -569,27 +563,41 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
         </div>
       )}
 
-      {/* Step: My Champion */}
-      {step === 'myChamp' && (
+      {/* Step: Rol y campeón */}
+      {step === 'champion' && (
         <div className="space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Selecciona tu campeón</h2>
-            <p className="text-muted-foreground text-sm">¿A quién jugaste en {lane}?</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Rol y campeón</h2>
+            <p className="text-muted-foreground text-sm">Elegí la línea y el campeón que jugaste</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {LANES.map(l => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => selectLane(l)}
+                className={`px-4 py-3 rounded-lg border-2 font-medium transition-all capitalize ${
+                  lane === l
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-foreground hover:border-primary/50'
+                }`}
+              >
+                {l}
+              </button>
+            ))}
           </div>
           <div className="relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
           </div>
-          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-15rem))] overflow-y-auto pr-1">
+          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-20rem))] overflow-y-auto pr-1">
             {champions.filter(c => !champSearch || c.name?.toLowerCase().includes(champSearch.toLowerCase())).map(champ => (
               <button
                 key={champ.id}
-                onClick={() => {
-                  setMyChampion(champ);
-                  setAllyChampions(prev => [...prev.filter(a => a.role !== lane), { ...champ, role: lane }]);
-                  setStep('allies');
-                }}
+                type="button"
+                onClick={() => selectMyChampion(champ)}
+                title={champ.name}
                 className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center transition-all overflow-hidden
                   ${myChampion?.id === champ.id
                     ? 'border-primary ring-2 ring-primary/50'
@@ -602,12 +610,24 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setStep('lane')}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm"
-          >
-            <ArrowLeft size={16} /> Atrás
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setStep('info')}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
+            >
+              <ArrowLeft size={16} /> Atrás
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep('allies')}
+              disabled={!lane || !myChampion}
+              title={lane && myChampion ? undefined : 'Elegí tu línea y tu campeón para continuar'}
+              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       )}
 
@@ -628,7 +648,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
           />
           <div className="flex gap-3">
             <button
-              onClick={() => setStep('myChamp')}
+              onClick={() => setStep('champion')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
             >
               <ArrowLeft size={16} /> Atrás
@@ -695,10 +715,27 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               </div>
 
               {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
-              <div className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+              <div data-panel={buildPanel} className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                {isPhoneLandscape && (
+                  <div className="rd-panel-tabs rd-buildstep-tabs" role="tablist" aria-label="Paneles de la build">
+                    {[['items', 'Objetos'], ['runes', 'Runas']].map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        role="tab"
+                        aria-selected={buildPanel === id}
+                        onClick={() => setBuildPanel(id)}
+                        className={`rd-panel-tab ${buildPanel === id ? 'rd-panel-tab-active' : ''}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className="rd-buildstep-items flex min-w-0 flex-col gap-4">
                   {/* Item Pool */}
-                  <div className="rd-card p-5">
+                  <div className="rd-buildstep-pool rd-card p-5">
                     <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <span className="w-5 h-px bg-primary/50" />

@@ -10,6 +10,9 @@ import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
+import { SegmentedChoice, StatInput } from '@/components/matches/MatchBuilder';
+import { matchKda } from '@/domain/matchStats';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -67,7 +70,7 @@ function buildTeamSlots({ champions, names = [], ownName, ownLane, directEnemyNa
   return slots;
 }
 
-function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }) {
+function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole, mirrored = false }) {
   const [search, setSearch] = useState('');
   const filteredChampions = champions.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()));
   const selectedByRole = {};
@@ -76,8 +79,8 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
   });
 
   return (
-    <div className="rd-card p-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="rd-card rd-team-pool p-4">
+      <div className={`flex items-center justify-between mb-4 ${mirrored ? 'flex-row-reverse' : ''}`}>
         <div className="flex items-center gap-2">
           <span className="w-4 h-px bg-primary/50" />
           <h3 className="rd-card-title">{title}</h3>
@@ -85,15 +88,15 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
         <span className="text-xs text-muted-foreground">{selected.length}/{LANES.length}</span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <div className="space-y-2 pb-4 border-b border-border lg:border-b-0 lg:pb-0">
+      <div className="rd-team-pool-body grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <div className="space-y-3 pb-4 border-b border-border lg:border-b-0 lg:pb-0">
           {LANES.map(role => {
             const champ = selectedByRole[role];
             const locked = lockedRole === role;
             return (
-              <div key={role} className="flex items-center gap-3">
-                <div className="w-16 text-xs font-semibold text-muted-foreground">{ROLE_LABELS[role]}</div>
-                <div className="relative w-11 h-11 rounded-lg border-2 border-border bg-secondary/20 flex items-center justify-center overflow-hidden shrink-0">
+              <div key={role} className={`flex items-center gap-3 ${mirrored ? 'flex-row-reverse' : ''}`}>
+                <div className={`w-16 text-xs font-semibold text-muted-foreground ${mirrored ? 'text-right' : ''}`}>{ROLE_LABELS[role]}</div>
+                <div className="relative w-12 h-12 rounded-lg border-2 border-border bg-secondary/20 flex items-center justify-center overflow-hidden shrink-0">
                   {champ ? (
                     <>
                       {champ.image_url
@@ -113,7 +116,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
                     <span className="text-xl text-muted-foreground opacity-30">+</span>
                   )}
                 </div>
-                <div className="flex-1 text-xs text-foreground">
+                <div className={`flex-1 text-xs text-foreground ${mirrored ? 'text-right' : ''}`}>
                   {champ ? champ.name : '—'}
                 </div>
               </div>
@@ -121,7 +124,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
           })}
         </div>
 
-        <div className="min-w-0">
+        <div className="rd-team-pool-champions min-w-0">
           <div className="relative mb-2">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -131,7 +134,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
             />
           </div>
-          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
+          <div className="rd-team-pool-grid grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
             {filteredChampions.map(champ => {
               const selectedRole = Object.keys(selectedByRole).find(role => selectedByRole[role]?.name === champ.name);
               const isSelected = Boolean(selectedRole);
@@ -165,6 +168,10 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole }
 
 export default function MatchForm({ match, patches = [], defaultPatch = '', onClose, onSaved }) {
   const [step, setStep] = useState('info');
+  // Smartphone horizontal, paso "Tu build": objetos y hechizos fijos a la izquierda y
+  // un panel por vez (objetos / runas) a la derecha, como en el creador de builds.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const [buildPanel, setBuildPanel] = useState('items');
 
   // Champion & composition
   const [lane, setLane] = useState(match?.lane || '');
@@ -408,17 +415,43 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
     setRunesInitialized(true);
   };
 
-  const addItem = (item) => {
-    if (selectedItems.length >= 6) return;
+  const isMobilityBoots = (item) =>
+    item && item.category === 'Nivel Medio' && Array.isArray(item.type) && item.type.includes('Movimiento');
+  const isEnchantItem = (item) =>
+    item && item.category === 'Mejorado' && Array.isArray(item.type) && item.type.includes('Encantamiento');
+  const isMovementItem = (item) =>
+    item && Array.isArray(item.type) && item.type.includes('Movimiento');
 
-    const alreadySelected = selectedItems.some(i => i.id === item.id);
-    if (alreadySelected) return;
+  const UNIQUE_ITEMS = ['escudo reliquia', 'hoz espectral', 'guadaña de niebla oscura', 'baluarte de la montaña'];
+
+  const addItem = (item) => {
+    const enchantment = isEnchantItem(item);
+    const movement = isMovementItem(item);
+    const normalCount = selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length;
+    const hasMovement = selectedItems.some(isMovementItem);
+
+    if (enchantment) {
+      if (!selectedItems.some(isMobilityBoots) || selectedItems.some(isEnchantItem)) return;
+      setSelectedItems(prev => [...prev, item]);
+      return;
+    }
+
+    if (movement) {
+      if (hasMovement) return;
+      setSelectedItems(prev => [...prev, item]);
+      return;
+    }
+
+    if (normalCount >= 5) return;
+    if (UNIQUE_ITEMS.includes(item?.name?.toLowerCase()) &&
+        selectedItems.some(i => UNIQUE_ITEMS.includes(i?.name?.toLowerCase()))) return;
+    if (item.category === 'Mejorado' && selectedItems.some(i => i?.id === item.id)) return;
 
     setSelectedItems(prev => [...prev, item]);
   };
 
-  const removeItem = (index) => {
-    setSelectedItems(prev => prev.filter((_, i) => i !== index));
+  const removeItem = (index, index2) => {
+    setSelectedItems(prev => prev.filter((_, i) => i !== index && i !== index2));
   };
 
   // Rune helpers
@@ -477,26 +510,42 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
   const filteredChamps = champions.filter(c => !champSearch || c.name?.toLowerCase().includes(champSearch.toLowerCase()));
 
   const stepIndex = STEPS.indexOf(step);
+  const kdaPreview = kills !== '' && deaths !== '' && assists !== ''
+    ? matchKda(Number(kills), Number(deaths), Number(assists)).toFixed(2)
+    : '—';
+  const customTags = tags.filter(tag => !PRESET_MATCH_TAGS.some(preset => preset.toLowerCase() === tag.toLowerCase()));
+
+  const fitsViewport = ['allies', 'enemies', 'build', 'stats'].includes(step);
 
   return (
-    <div>
-      <button onClick={onClose} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 transition-colors">
-        <ArrowLeft size={16} /> Volver
-      </button>
-      <h1 className="font-rajdhani font-bold text-3xl text-foreground mb-4">Editar Partida</h1>
+    <div className={`rd-match-flow space-y-6 ${fitsViewport ? 'rd-match-builder-fit' : ''}`}>
+      {/* En los pasos que llenan el viewport no hay encabezado: se sale con "Cancelar" abajo. */}
+      {!fitsViewport && (
+      <div className="flex items-center gap-4">
+        <button onClick={onClose} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
+          <ArrowLeft size={16} /> Volver
+        </button>
+        <h1 className="font-rajdhani font-bold text-xl text-foreground">Editar partida</h1>
+      </div>
+      )}
 
       {/* Progress */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2">
         {STEPS.map((s, i) => (
-          <div key={s} className={`h-1 flex-1 rounded-full transition-all ${stepIndex >= i ? 'bg-primary' : 'bg-border'}`} />
+          <div
+            key={s}
+            className={`h-1 flex-1 rounded-full transition-all ${
+              step === s ? 'bg-primary' : stepIndex >= i ? 'bg-primary/50' : 'bg-border'
+            }`}
+          />
         ))}
       </div>
 
       {/* ── STEP 0: INFO ── */}
       {step === 'info' && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Datos de la partida</h2>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Datos de la partida</h2>
             <p className="text-muted-foreground text-sm">Elegí cuándo jugaste, el parche y el tipo de partida.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -524,72 +573,68 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
               </select>
             </div>
           </div>
-          <button onClick={() => setStep('champion')}
-            className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-            Siguiente
-          </button>
+          <div className="flex gap-3 pt-2">
+            <button onClick={() => setStep('champion')}
+              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              Siguiente
+            </button>
+          </div>
         </div>
       )}
 
-      {/* ── STEP 1: CAMPEONES ── */}
+      {/* ── STEP 1: CAMPEÓN Y LÍNEA ── */}
       {step === 'champion' && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Campeón y línea</h2>
-            <p className="text-muted-foreground text-sm">Seleccioná tu campeón, línea y el enemigo directo</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Campeón y línea</h2>
+            <p className="text-muted-foreground text-sm">Seleccioná tu línea y el campeón que jugaste</p>
           </div>
 
-          {/* Lane */}
-          <div>
-            <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium block mb-2">Línea</label>
-            <div className="grid grid-cols-5 gap-2">
-              {LANES.map(l => (
-                <button key={l} type="button" onClick={() => handleLaneSelect(l)}
-                  className={`py-2 rounded-lg border-2 text-sm font-medium capitalize transition-all ${lane === l ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}>
-                  {l}
-                </button>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {LANES.map(l => (
+              <button key={l} type="button" onClick={() => handleLaneSelect(l)}
+                className={`px-4 py-3 rounded-lg border-2 font-medium capitalize transition-all ${lane === l ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:border-primary/50'}`}>
+                {l}
+              </button>
+            ))}
           </div>
 
-          {/* My Champion */}
-          <div>
-            <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium block mb-2">Mi Campeón</label>
-            {ownChampion && (
-              <div className="flex items-center gap-3 mb-3 bg-primary/5 border border-primary/20 rounded-xl p-3">
-                <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0">
-                  {ownChampion.image_url ? <img src={ownChampion.image_url} alt={ownChampion.name} className="w-full h-full object-cover" /> : <span className="w-full h-full flex items-center justify-center font-bold text-primary">{ownChampion.name[0]}</span>}
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground">{ownChampion.name}</p>
-                  <p className="text-xs text-muted-foreground">{ownChampion.roles}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAllyChampions(prev => prev.filter(ally => ally.name !== ownChampion.name));
-                    setOwnChampion(null);
-                  }}
-                  className="text-muted-foreground hover:text-red-400 text-lg"
-                >
-                  ×
-                </button>
+          {ownChampion && (
+            <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl p-3">
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0">
+                {ownChampion.image_url ? <img src={ownChampion.image_url} alt={ownChampion.name} className="w-full h-full object-cover" /> : <span className="w-full h-full flex items-center justify-center font-bold text-primary">{ownChampion.name[0]}</span>}
               </div>
-            )}
-            <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
-              className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all mb-2" />
-            <div className="grid grid-cols-6 sm:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-34rem))] overflow-y-auto p-1">
-              {filteredChamps.map(champ => (
-                <button key={champ.id} type="button" onClick={() => handleOwnChampionSelect(champ)}
-                  className={`w-12 h-12 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all
-                    ${ownChampion?.id === champ.id ? 'border-primary ring-2 ring-primary/40' : 'border-border/40 hover:border-primary/50'}`}>
-                  {champ.image_url ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" /> : <span className="text-xs font-bold text-primary">{champ.name[0]}</span>}
-                </button>
-              ))}
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">{ownChampion.name}</p>
+                <p className="text-xs text-muted-foreground">{ownChampion.roles}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setAllyChampions(prev => prev.filter(ally => ally.name !== ownChampion.name));
+                  setOwnChampion(null);
+                }}
+                className="text-muted-foreground hover:text-red-400 text-lg"
+              >
+                ×
+              </button>
             </div>
+          )}
+
+          <div className="relative">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
+              className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
           </div>
-
-
+          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-30rem))] overflow-y-auto pr-1">
+            {filteredChamps.map(champ => (
+              <button key={champ.id} type="button" onClick={() => handleOwnChampionSelect(champ)}
+                className={`w-16 h-16 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all
+                  ${ownChampion?.id === champ.id ? 'border-primary ring-2 ring-primary/50' : 'border-border/40 hover:border-primary/50'}`}>
+                {champ.image_url ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" /> : <span className="text-sm font-bold text-primary text-center px-1">{champ.name}</span>}
+              </button>
+            ))}
+          </div>
 
           <div className="flex gap-3">
             <button onClick={() => setStep('info')}
@@ -597,7 +642,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
               <ArrowLeft size={16} /> Atrás
             </button>
             <button onClick={() => setStep('allies')}
-              className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
               Siguiente
             </button>
           </div>
@@ -606,15 +651,15 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
 
       {/* ── STEP 2: EQUIPO ALIADO ── */}
       {step === 'allies' && (
-        <div className="space-y-4">
+        <div className="rd-team-step space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Equipo aliado</h2>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Equipo aliado</h2>
             <p className="text-muted-foreground text-sm">Editá los campeones aliados. Tu campeón queda fijo en tu línea.</p>
           </div>
 
           <ChampionPoolByRole
             champions={champions}
-            title="Equipo aliado"
+            title="Equipo Azul"
             selected={allyChampions}
             onSelect={handleSelectAlly}
             lockedRole={lane}
@@ -625,8 +670,12 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
               <ArrowLeft size={16} /> Atrás
             </button>
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors">
+              Cancelar
+            </button>
             <button onClick={() => setStep('enemies')}
-              className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
               Siguiente
             </button>
           </div>
@@ -635,17 +684,18 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
 
       {/* ── STEP 3: EQUIPO ENEMIGO ── */}
       {step === 'enemies' && (
-        <div className="space-y-4">
+        <div className="rd-team-step space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Equipo enemigo</h2>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Equipo enemigo</h2>
             <p className="text-muted-foreground text-sm">Editá los campeones enemigos. El rival de tu línea se usa como matchup directo.</p>
           </div>
 
           <ChampionPoolByRole
             champions={champions}
-            title="Equipo enemigo"
+            title="Equipo Rojo"
             selected={enemyChampions}
             onSelect={handleSelectEnemy}
+            mirrored
           />
 
           <div className="flex gap-3">
@@ -653,8 +703,12 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
               <ArrowLeft size={16} /> Atrás
             </button>
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors">
+              Cancelar
+            </button>
             <button onClick={() => setStep('build')}
-              className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
               Siguiente
             </button>
           </div>
@@ -663,230 +717,211 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
 
       {/* ── STEP 4: BUILD ── */}
       {step === 'build' && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Tu build</h2>
-            <p className="text-muted-foreground text-sm">Items, runas y hechizos que usaste</p>
+        <div className="rd-buildstep space-y-6">
+          {/* Encabezado: título y build guardada en una sola franja. */}
+          <div className="rd-buildstep-header flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Tu build</h2>
+              <p className="text-muted-foreground text-sm">Items, runas y hechizos que usaste</p>
+            </div>
+            <div className="w-full xl:w-[min(36rem,55%)]">
+              <SavedBuildPicker champion={ownChampion} patch={patch} onApply={applySavedBuild} compact />
+            </div>
           </div>
 
-          <SavedBuildPicker champion={ownChampion} patch={patch} onApply={applySavedBuild} />
-
-          {/* Runas */}
-          <div className="rd-card p-4">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="w-5 h-px bg-primary/50" />
-              <h3 className="rd-card-title">Runas</h3>
-            </div>
-
-            <div className="space-y-5">
-              {/* Clave */}
-              {claveRunes.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-3">
-                    Clave
-                  </p>
-
-                  <div className="grid grid-cols-7 gap-x-3 gap-y-3">
-                    {claveRunes.map(rune => (
-                      <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
-<button
-                        type="button"
-                        onClick={() =>
-                          isRuneSelected(rune)
-                            ? setSelectedRunes(prev => prev.filter(r => r.id !== rune.id))
-                            : setSelectedRunes(prev => [
-                                ...prev.filter(r => r.branch !== 'Clave'),
-                                rune,
-                              ])
-                        }
-                        className={`relative w-7 h-7 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                          isRuneSelected(rune)
-                            ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
-                            : 'opacity-45 hover:opacity-85'
-                        }`}
-                      >
-                        {rune.image_url ? (
-                          <img
-                            src={rune.image_url}
-                            alt={rune.name}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <span className="text-xs font-bold text-primary">
-                            {rune.name?.[0]}
-                          </span>
-                        )}
-                      </button>
-                      </EntityHoverCard>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="h-px bg-border/50" />
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Rama Principal */}
-                <div className="min-w-0">
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                    Rama Principal
-                  </label>
-
-                  <select
-                    value={primaryBranch}
-                    onChange={e => handlePrimaryBranchChange(e.target.value)}
-                    className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
+          {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
+          <div data-panel={buildPanel} className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+            {isPhoneLandscape && (
+              <div className="rd-panel-tabs rd-buildstep-tabs" role="tablist" aria-label="Paneles de la build">
+                {[['items', 'Objetos'], ['runes', 'Runas']].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={buildPanel === id}
+                    onClick={() => setBuildPanel(id)}
+                    className={`rd-panel-tab ${buildPanel === id ? 'rd-panel-tab-active' : ''}`}
                   >
-                    {PRIMARY_BRANCHES.map(b => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="space-y-3">
-                    {Object.entries(groupRunes(primaryRunes)).map(([group, runesInGroup], index) => (
-                      <Fragment key={group}>
-                      {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
-                      <div>
-                        <div className="flex flex-wrap gap-2">
-                          {runesInGroup.map(rune => (
-                            <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
-<button
-                              type="button"
-                              onClick={() => handleTogglePrimaryRune(rune)}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                                isRuneSelected(rune)
-                                  ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
-                                  : 'opacity-45 hover:opacity-85'
-                              }`}
-                            >
-                              {rune.image_url ? (
-                                <img
-                                  src={rune.image_url}
-                                  alt={rune.name}
-                                  className="w-full h-full object-cover rounded-full"
-                                />
-                              ) : (
-                                <span className="text-xs font-bold text-primary">
-                                  {rune.name?.[0]}
-                                </span>
-                              )}
-                            </button>
-                      </EntityHoverCard>
-                          ))}
-                        </div>
-                      </div>
-                      </Fragment>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Rama Secundaria */}
-                <div className="min-w-0">
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                    Rama Secundaria
-                  </label>
-
-                  <select
-                    value={secondaryBranch}
-                    onChange={e => handleSecondaryBranchChange(e.target.value)}
-                    className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-3 outline-none focus:border-primary/40 transition-all"
-                  >
-                    {PRIMARY_BRANCHES.map(b => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="space-y-3">
-                    {Object.entries(groupRunes(secondaryRunes)).map(([group, runesInGroup], index) => (
-                      <Fragment key={group}>
-                      {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
-                      <div>
-                        <div className="flex flex-wrap gap-2">
-                          {runesInGroup.map(rune => (
-                            <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
-<button
-                              type="button"
-                              onClick={() => handleToggleSecondaryRune(rune)}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                                isRuneSelected(rune)
-                                  ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
-                                  : 'opacity-45 hover:opacity-85'
-                              }`}
-                            >
-                              {rune.image_url ? (
-                                <img
-                                  src={rune.image_url}
-                                  alt={rune.name}
-                                  className="w-full h-full object-cover rounded-full"
-                                />
-                              ) : (
-                                <span className="text-xs font-bold text-primary">
-                                  {rune.name?.[0]}
-                                </span>
-                              )}
-                            </button>
-                      </EntityHoverCard>
-                          ))}
-                        </div>
-                      </div>
-                      </Fragment>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Item Pool */}
-          <div className="rd-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="w-5 h-px bg-primary/50" />
-                <h3 className="rd-card-title">
-                  Objetos ({selectedItems.length}/6)
-                </h3>
-              </div>
-            </div>
-
-            <ItemPool
-              selectedItems={selectedItems}
-              onRemove={removeItem}
-            />
-          </div>
-
-          {/* Item Browser */}
-          <ItemBrowser
-            items={items}
-            selectedItems={selectedItems}
-            onSelect={addItem}
-          />
-    
-          {/* Hechizos */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-3">Hechizos ({selectedSpells.length}/2)</label>
-            <div className="grid w-full grid-cols-5 justify-items-center gap-2 sm:[grid-template-columns:repeat(var(--spell-count),minmax(0,1fr))]" style={/** @type {any} */ ({ '--spell-count': spells.length })}>
-              {spells.map(spell => {
-                const selected = selectedSpells.includes(spell.name);
-                const disabled = selectedSpells.length >= 2 && !selected;
-                return (
-                  <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
-<button type="button" onClick={() => toggleSpell(spell.name)}
-                    aria-disabled={disabled}
-                    className={`aspect-square w-full max-w-12 min-w-0 flex items-center justify-center rounded-full transition-all overflow-hidden ${
-                      selected ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]' : 'opacity-50 hover:opacity-90'
-                    } ${disabled ? '!opacity-25 cursor-not-allowed' : ''}`}>
-                    {spell.image_url
-                      ? <img src={spell.image_url} alt={spell.name} className="w-full h-full rounded-full object-cover" />
-                      : <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
-                    }
+                    {label}
                   </button>
+                ))}
+              </div>
+            )}
+
+            <div className="rd-buildstep-items flex min-w-0 flex-col gap-4">
+              {/* Item Pool */}
+              <div className="rd-buildstep-pool rd-card p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-px bg-primary/50" />
+                    <h3 className="rd-card-title">
+                      Objetos ({selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length}/5 + botas)
+                    </h3>
+                  </div>
+                </div>
+
+                <ItemPool
+                  selectedItems={selectedItems}
+                  onRemove={removeItem}
+                />
+              </div>
+
+              {/* Item Browser */}
+              <ItemBrowser
+                items={items}
+                selectedItems={selectedItems}
+                onSelect={addItem}
+              />
+            </div>
+
+            <div className="rd-buildstep-side flex min-w-0 flex-col gap-4">
+              {/* Runas */}
+              <div className="rd-card rd-buildstep-runes flex flex-col p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-5 h-px bg-primary/50" />
+                  <h3 className="rd-card-title">Runas</h3>
+                </div>
+
+                <div className="rd-runes-content flex flex-1 flex-col gap-3">
+                  {/* Clave */}
+                  {claveRunes.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">
+                        Clave
+                      </p>
+
+                      <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
+                        {claveRunes.map(rune => (
+                          <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                isRuneSelected(rune)
+                                  ? setSelectedRunes(prev => prev.filter(r => r.id !== rune.id))
+                                  : setSelectedRunes(prev => [
+                                      ...prev.filter(r => r.branch !== 'Clave'),
+                                      rune,
+                                    ])
+                              }
+                              className={`relative aspect-square w-full max-w-11 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                isRuneSelected(rune)
+                                  ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
+                                  : 'opacity-45 hover:opacity-85'
+                              }`}
+                            >
+                              {rune.image_url ? (
+                                <img
+                                  src={rune.image_url}
+                                  alt={rune.name}
+                                  className="w-full h-full object-cover rounded-full scale-[1.35]"
+                                />
+                              ) : (
+                                <span className="text-xs font-bold text-primary">
+                                  {rune.name?.[0]}
+                                </span>
+                              )}
+                            </button>
+                          </EntityHoverCard>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="h-px bg-border/50" />
+
+                  <div className="rd-runes-branches grid flex-1 grid-cols-2 gap-4">
+                    {[
+                      { label: 'Rama Principal', branch: primaryBranch, onBranchChange: handlePrimaryBranchChange, branchRunes: primaryRunes, onToggle: handleTogglePrimaryRune },
+                      { label: 'Rama Secundaria', branch: secondaryBranch, onBranchChange: handleSecondaryBranchChange, branchRunes: secondaryRunes, onToggle: handleToggleSecondaryRune },
+                    ].map(column => (
+                      <div key={column.label} className="flex min-w-0 flex-col">
+                        <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                          {column.label}
+                        </label>
+
+                        <select
+                          value={column.branch}
+                          onChange={e => column.onBranchChange(e.target.value)}
+                          className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
+                        >
+                          {PRIMARY_BRANCHES.map(b => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+
+                        <div className="flex flex-1 flex-col justify-evenly gap-2">
+                          {Object.entries(groupRunes(column.branchRunes)).map(([group, runesInGroup], index) => (
+                            <Fragment key={group}>
+                              {index > 0 && <div className="h-px origin-center scale-y-50 bg-primary/20" aria-hidden="true" />}
+                              <div className="flex items-center">
+                                <div className="flex flex-1 flex-wrap justify-around gap-2">
+                                  {runesInGroup.map(rune => (
+                                    <EntityHoverCard key={rune.id} entity={rune} kind={rune.branch}>
+                                      <button
+                                        type="button"
+                                        onClick={() => column.onToggle(rune)}
+                                        className={`w-8 h-8 xl:w-10 xl:h-10 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                          isRuneSelected(rune)
+                                            ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]'
+                                            : 'opacity-45 hover:opacity-85'
+                                        }`}
+                                      >
+                                        {rune.image_url ? (
+                                          <img
+                                            src={rune.image_url}
+                                            alt={rune.name}
+                                            className="w-full h-full object-cover rounded-full"
+                                          />
+                                        ) : (
+                                          <span className="text-xs font-bold text-primary">
+                                            {rune.name?.[0]}
+                                          </span>
+                                        )}
+                                      </button>
+                                    </EntityHoverCard>
+                                  ))}
+                                </div>
+                              </div>
+                            </Fragment>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Hechizos */}
+              <div className="rd-card rd-buildstep-spells p-4">
+                <label className="text-sm font-semibold text-foreground block mb-3">
+                  Hechizos ({selectedSpells.length}/2)
+                </label>
+                <div className="grid w-full grid-cols-5 justify-items-center gap-2 sm:[grid-template-columns:repeat(var(--spell-count),minmax(0,1fr))]" style={/** @type {any} */ ({ '--spell-count': spells.length })}>
+                  {spells.map(spell => {
+                    const selected = selectedSpells.includes(spell.name);
+                    const disabled = selectedSpells.length >= 2 && !selected;
+                    return (
+                      <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
+                        <button
+                          type="button"
+                          onClick={() => toggleSpell(spell.name)}
+                          aria-disabled={disabled}
+                          className={`aspect-square w-full max-w-12 min-w-0 flex items-center justify-center rounded-full transition-all overflow-hidden ${
+                            selected ? 'opacity-100 scale-110 ring-2 ring-primary/70 shadow-[0_0_10px_rgba(212,175,55,.45)]' : 'opacity-50 hover:opacity-90'
+                          } ${disabled ? '!opacity-25 cursor-not-allowed' : ''}`}
+                        >
+                          {spell.image_url
+                            ? <img src={spell.image_url} alt={spell.name} className="w-full h-full rounded-full object-cover" />
+                            : <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-primary">{spell.name[0]}</div>
+                          }
+                        </button>
                       </EntityHoverCard>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -894,6 +929,10 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
             <button type="button" onClick={() => setStep('enemies')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
               <ArrowLeft size={16} /> Atrás
+            </button>
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors">
+              Cancelar
             </button>
             <button type="button" onClick={() => setStep('stats')}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
@@ -903,145 +942,156 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
         </div>
       )}
 
-      {/* ── STEP 3: STATS ── */}
+      {/* ── STEP 5: STATS ── */}
       {step === 'stats' && (
-        <div className="space-y-6">
+        <div className="rd-statsstep space-y-6">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-1">Detalles de la partida</h2>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Detalles de la partida</h2>
             <p className="text-muted-foreground text-sm">Completá el resultado y las estadísticas</p>
           </div>
 
-          {/* Resultado */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-2">Resultado</label>
-            <div className="flex gap-3">
-              <button type="button" onClick={() => setResult('win')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${result === 'win' ? 'border-green-500 bg-green-500/10 text-green-400' : 'border-border text-foreground hover:border-green-500/50'}`}>
-                Victoria
-              </button>
-              <button type="button" onClick={() => setResult('loss')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${result === 'loss' ? 'border-red-500 bg-red-500/10 text-red-400' : 'border-border text-foreground hover:border-red-500/50'}`}>
-                Derrota
-              </button>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: 'Asesinatos', value: kills, set: setKills },
-              { label: 'Muertes', value: deaths, set: setDeaths },
-              { label: 'Asistencias', value: assists, set: setAssists },
-              { label: 'Oro', value: gold, set: setGold },
-            ].map(f => (
-              <div key={f.label}>
-                <label className="text-xs text-muted-foreground block mb-1">{f.label}</label>
-                <input type="number" value={f.value} onChange={e => f.set(e.target.value)} placeholder="—"
-                  className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
+          <div className="rd-statsstep-body grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            {/* Resultado y rendimiento. */}
+            <section className="rd-card flex flex-col gap-5 p-4 md:p-5" aria-label="Resultado y rendimiento">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-2">Resultado</p>
+                  <SegmentedChoice
+                    value={result}
+                    onChange={setResult}
+                    options={[
+                      { value: 'win', label: 'Victoria', activeClass: 'border-green-500 bg-green-500/10 text-green-400', hoverClass: 'hover:border-green-500/50' },
+                      { value: 'loss', label: 'Derrota', activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
+                    ]}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-2">
+                    Equipo <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                  </p>
+                  <SegmentedChoice
+                    value={side}
+                    onChange={value => setSide(side === value ? '' : value)}
+                    options={[
+                      { value: 'blue', label: 'Azul', activeClass: 'border-blue-500 bg-blue-500/10 text-blue-400', hoverClass: 'hover:border-blue-500/50' },
+                      { value: 'red', label: 'Rojo', activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
+                    ]}
+                  />
+                </div>
               </div>
-            ))}
-            <div className="col-span-2">
-              <label className="text-xs text-muted-foreground block mb-1">Duración (min)</label>
-              <input type="number" value={duration} onChange={e => setDuration(e.target.value)} placeholder="20"
-                className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
-            </div>
-          </div>
 
-          {/* Lado */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-2">Equipo <span className="text-muted-foreground font-normal text-xs">(opcional)</span></label>
-            <div className="flex gap-3">
-              <button type="button" onClick={() => setSide(side === 'blue' ? '' : 'blue')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${side === 'blue' ? 'border-blue-500 bg-blue-500/10 text-blue-400' : 'border-border text-muted-foreground hover:border-blue-500/50'}`}>
-                Azul
-              </button>
-              <button type="button" onClick={() => setSide(side === 'red' ? '' : 'red')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all border-2 ${side === 'red' ? 'border-red-500 bg-red-500/10 text-red-400' : 'border-border text-muted-foreground hover:border-red-500/50'}`}>
-                Rojo
-              </button>
-            </div>
-          </div>
+              <div>
+                <div className="mb-2 flex items-baseline justify-between gap-3">
+                  <p className="text-sm font-semibold text-foreground">K / D / A</p>
+                  <p className="text-xs text-muted-foreground">
+                    KDA <span className="font-semibold text-primary">{kdaPreview}</span>
+                  </p>
+                </div>
+                <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-end gap-2">
+                  <StatInput label="Asesinatos" value={kills} onChange={setKills} />
+                  <span className="pb-2 text-lg text-muted-foreground">/</span>
+                  <StatInput label="Muertes" value={deaths} onChange={setDeaths} />
+                  <span className="pb-2 text-lg text-muted-foreground">/</span>
+                  <StatInput label="Asistencias" value={assists} onChange={setAssists} />
+                </div>
+              </div>
 
-          {/* Tags */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-3">Etiquetas</label>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {PRESET_MATCH_TAGS.map(tag => {
-                const isSelected = tags.some(selectedTag => selectedTag.toLowerCase() === tag.toLowerCase());
+              <div className="grid grid-cols-2 gap-3">
+                <StatInput label="Oro" value={gold} onChange={setGold} placeholder="ej. 9500" />
+                <StatInput label="Duración (min)" value={duration} onChange={setDuration} placeholder="ej. 18" />
+              </div>
+              <p className="mt-auto text-[11px] text-muted-foreground">
+                Los datos vacíos se guardan como “sin dato”: no cuentan como cero en tus estadísticas ni en tus objetivos.
+              </p>
+            </section>
 
-                return (
+            {/* Contexto opcional: etiquetas y notas. */}
+            <section className="rd-card rd-statsstep-context flex flex-col gap-4 p-4 md:p-5" aria-label="Contexto">
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">
+                  Etiquetas <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {PRESET_MATCH_TAGS.map(tag => {
+                    const isSelected = tags.some(selectedTag => selectedTag.toLowerCase() === tag.toLowerCase());
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => togglePresetTag(tag)}
+                        aria-pressed={isSelected}
+                        className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                          isSelected
+                            ? 'bg-primary/20 border-primary/50 text-primary'
+                            : 'bg-secondary/50 border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                  {customTags.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      title="Quitar etiqueta"
+                      className="px-3 py-1.5 rounded-lg text-sm border bg-primary/20 border-primary/50 text-primary transition-all hover:bg-primary/30"
+                    >
+                      {tag} ×
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={e => setTagInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
+                    placeholder="Etiqueta propia (Enter para agregar)"
+                    className="min-w-0 flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
+                  />
                   <button
-                    key={tag}
                     type="button"
-                    onClick={() => togglePresetTag(tag)}
-                    aria-pressed={isSelected}
-                    className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
-                      isSelected
-                        ? 'bg-primary/20 border-primary/50 text-primary'
-                        : 'bg-secondary/50 border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
-                    }`}
+                    onClick={addTag}
+                    className="px-3 py-2 rounded-xl border border-primary/30 bg-primary/15 text-primary text-sm font-medium hover:bg-primary/25 transition-colors"
                   >
-                    {tag}
+                    Agregar
                   </button>
-                );
-              })}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-                placeholder="Agregar etiqueta..."
-                className="min-w-0 flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                Agregar
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  title="Quitar etiqueta"
-                  className="px-3 py-1.5 rounded-lg text-sm border bg-primary/20 border-primary/50 text-primary transition-all hover:bg-primary/30"
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
+                </div>
+              </div>
+
+              <div className="rd-statsstep-notes flex min-h-0 flex-1 flex-col">
+                <label htmlFor="match-edit-notes" className="text-sm font-semibold text-foreground mb-2">
+                  Notas <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                </label>
+                <textarea
+                  id="match-edit-notes"
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="Observaciones sobre la partida..."
+                  className="min-h-24 w-full flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all resize-none"
+                />
+              </div>
+            </section>
           </div>
 
-          {/* Notas */}
-          <div>
-            <label className="text-sm font-semibold text-foreground block mb-2">Notas</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)}
-              rows={3} placeholder="Observaciones sobre la partida..."
-              className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all resize-none" />
-          </div>
-
-          <div className="flex gap-3 pt-4 border-t border-border pb-6">
+          <div className="flex gap-3 pt-4 border-t border-border">
             <button type="button" onClick={() => setStep('build')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2">
               <ArrowLeft size={16} /> Atrás
             </button>
             <button type="button" onClick={onClose}
-              className="flex-1 bg-secondary border border-border text-foreground px-4 py-2.5 rounded-lg font-medium text-sm hover:bg-secondary/80 transition-colors">
+              className="flex-1 px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors">
               Cancelar
             </button>
             <button type="button" onClick={handleSave} disabled={saveMutation.isPending || !result}
-              className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50">
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <Save size={16} /> {saveMutation.isPending ? 'Guardando...' : 'Guardar'}
             </button>
           </div>

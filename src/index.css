@@ -659,6 +659,849 @@
   }
 }
 
+/* Sidebar (drawer) en smartphone horizontal: scrollea completa (marca, buscador
+   y pestañas) con la franja del usuario fija abajo. No aplica a desktop. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+  .rd-sidebar {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Primera pantalla: marca, íconos y buscador llenan el alto visible (sobre la
+     franja del usuario); las pestañas aparecen recién al scrollear.
+     Alturas: buscador = 0.75rem + 2.5rem (h-10) + 0.75rem (mb-3);
+     franja = 1.75rem (avatar) + paddings + borde (+2rem con "Config Tierlist"). */
+  .rd-sidebar {
+    --rd-sidebar-search-h: 4rem;
+    --rd-sidebar-footer-h: calc(2.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
+  }
+
+  .rd-sidebar-admin {
+    --rd-sidebar-footer-h: calc(4.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
+  }
+
+  .rd-sidebar > .rd-sidebar-brand {
+    display: flex;
+    min-height: calc(100dvh - var(--rd-sidebar-search-h) - var(--rd-sidebar-footer-h));
+    flex: none;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .rd-sidebar > .rd-sidebar-nav {
+    flex: none;
+    overflow: visible;
+    padding-top: 0.75rem;
+  }
+
+  .rd-sidebar-tools {
+    align-self: center;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .rd-sidebar > .rd-sidebar-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding: 0.5rem 0.9rem max(0.5rem, env(safe-area-inset-bottom));
+    background: rgb(15, 21, 36);
+  }
+}
+
+/* Elementos que solo existen en smartphone horizontal: libro del Insight,
+   "Ver consejo", selector de línea de Meta y "Equipo enemigo" en Partidas. */
+.rd-dashboard-insight-icon,
+.rd-dashboard-insight-more,
+.rd-meta-lane-picker,
+.rd-match-card-label-compact {
+  display: none;
+}
+
+/* Insight completo; se abre desde "Ver consejo" en smartphone horizontal. */
+.rd-insight-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.rd-insight-sheet-panel {
+  width: min(100%, 32rem);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+}
+
+/* Smartphone horizontal: falta alto y sobra ancho.
+   - La barra superior pasa a ser un riel vertical a la izquierda (todas las páginas).
+   - Resumen del Dashboard sin scroll: estadísticas 4x2 a la izquierda;
+     Insight del día y Objetivos apilados a la derecha. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-shell-column {
+    flex-direction: row;
+  }
+
+  .rd-mobile-topbar {
+    width: calc(3.25rem + env(safe-area-inset-left));
+    height: auto;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0.5rem 0 0.5rem env(safe-area-inset-left);
+    border-right: 1px solid hsl(var(--primary) / 0.1);
+    border-bottom: 0;
+  }
+
+  .rd-mobile-topbar button {
+    position: static;
+    width: 2.5rem;
+    height: 2.5rem;
+    transform: none;
+  }
+
+  .rd-mobile-topbar > div {
+    padding: 0;
+  }
+
+  .rd-mobile-topbar img + img {
+    display: none;
+  }
+
+  .rd-main-content:has(.rd-dashboard-tabs) {
+    overflow: hidden;
+  }
+
+  .rd-dashboard-tabs {
+    display: grid;
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-dashboard-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0;
+  }
+
+  .rd-dashboard-kicker,
+  .rd-dashboard-description {
+    display: none;
+  }
+
+  .rd-dashboard-header h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-dashboard-tablist {
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    padding: 0.2rem;
+  }
+
+  .rd-dashboard-tablist .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  /* El texto del label queda para lectores de pantalla; visualmente sobra. */
+  .rd-dashboard-patch {
+    min-width: 9rem;
+    font-size: 0;
+  }
+
+  .rd-dashboard-patch select {
+    margin-top: 0;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .rd-dashboard-panel,
+  .rd-dashboard-summary {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .rd-dashboard-summary {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-dashboard-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .rd-dashboard-side {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-dashboard-stat {
+    gap: 0.2rem;
+    padding: 0.5rem 0.55rem;
+  }
+
+  .rd-dashboard-stat > div:first-child {
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  /* Sin puntos suspensivos en las tarjetas: los textos pasan de línea en vez de cortarse. */
+  .rd-dashboard-stat .rd-label {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+  }
+
+  .rd-dashboard-label-extra {
+    display: none;
+  }
+
+  .rd-dashboard-stat svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+
+  .rd-dashboard-stat-value {
+    font-size: 1.65rem;
+  }
+
+  .rd-dashboard-stat .text-xs {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .rd-dashboard-stat .text-lg {
+    overflow: visible;
+    font-size: 0.95rem;
+    line-height: 1.1;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-dashboard-stat > div:nth-child(2) {
+    gap: 0.4rem;
+  }
+
+  /* El avatar ocupa el lugar del ícono (arriba a la derecha) y el nombre del
+     campeón usa todo el ancho de la tarjeta, sin cortarse. */
+  .rd-dashboard-stat {
+    position: relative;
+  }
+
+  /* .rd-card > * es relative: la fila del nombre se vuelve estática para que
+     el avatar se ubique respecto de la tarjeta y no de esa fila. */
+  .rd-dashboard-stat > .rd-dashboard-stat-champ {
+    position: static;
+  }
+
+  .rd-dashboard-stat-avatar {
+    position: absolute;
+    z-index: 1;
+    top: 0.45rem;
+    right: 0.5rem;
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-dashboard-stat-with-avatar > div:first-child {
+    padding-right: 1.9rem;
+  }
+
+  .rd-dashboard-stat-with-avatar > div:first-child svg {
+    display: none;
+  }
+
+  .rd-dashboard-stat-hint {
+    display: none;
+  }
+
+  .rd-dashboard-stat-tags {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .rd-dashboard-stat-tags span {
+    padding: 0.05rem 0.3rem;
+    font-size: 9px;
+    line-height: 1.3;
+  }
+
+  .rd-dashboard-insight {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .rd-dashboard-insight > div {
+    align-items: center;
+  }
+
+  .rd-dashboard-insight-art {
+    display: none;
+  }
+
+  /* Mismo tamaño que el ícono de Objetivos (15px). */
+  .rd-dashboard-insight-icon {
+    display: block;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  /* Mismo estilo que los títulos de las demás tarjetas (.rd-label). */
+  .rd-dashboard-insight .rd-section-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  /* Título completo; la explicación y el consejo se leen en el panel de "Ver consejo". */
+  .rd-dashboard-insight h2 {
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    line-height: 1.15;
+  }
+
+  .rd-dashboard-insight-thesis,
+  .rd-dashboard-insight-tip {
+    display: none;
+  }
+
+  .rd-dashboard-insight-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-top: 0.35rem;
+    color: hsl(var(--primary));
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Título, flechas y "Ver todos" en una sola fila; el objetivo ocupa el resto. */
+  .rd-goals-widget {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: start;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .rd-goals-widget > * {
+    grid-column: 1 / -1;
+  }
+
+  .rd-goals-widget-head,
+  .rd-goals-widget-summary {
+    display: contents;
+  }
+
+  .rd-goals-widget-head > :first-child {
+    overflow: hidden;
+    grid-row: 1;
+    grid-column: 1;
+    white-space: nowrap;
+  }
+
+  .rd-goals-widget-nav {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-goals-widget-all {
+    grid-row: 1;
+    grid-column: 3;
+    font-size: 0;
+  }
+
+  .rd-goals-widget-count {
+    display: none;
+  }
+
+  .rd-goals-widget-title-extra {
+    display: none;
+  }
+
+  .rd-goals-widget .rd-label {
+    font-size: 10px;
+  }
+
+  .rd-goals-widget button {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .rd-goal-slide {
+    gap: 0.3rem;
+    padding-block: 0.2rem;
+  }
+
+  .rd-goal-slide-kicker {
+    display: none;
+  }
+
+  /* Nombre arriba y valor debajo: el nombre deja de cortarse contra "3 partidas / 10 partidas". */
+  .rd-goal-slide-top {
+    height: 2.75rem;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .rd-goal-slide-top > span {
+    font-size: 10px;
+  }
+
+  /* Nombre y meta en hasta dos líneas; el alto fijo evita que la tarjeta se mueva. */
+  .rd-goal-slide-top p {
+    max-height: 2.2em;
+    overflow: hidden;
+    line-height: 1.1;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-goal-slide-meter {
+    height: 1.6rem;
+  }
+
+  .rd-goal-slide-meter p {
+    max-height: 2.5em;
+    overflow: hidden;
+    font-size: 10px;
+    line-height: 1.25;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-goal-slide-status {
+    height: 1.4rem;
+  }
+
+  .rd-goal-slide-status > span:first-child {
+    flex-wrap: nowrap;
+  }
+
+  /* El período queda en el detalle del objetivo; acá no entra junto a los estados. */
+  .rd-goal-slide-status > span:last-child {
+    display: none;
+  }
+
+  /* Actividad: las tres tarjetas lado a lado, compactas y sin scroll. */
+  .rd-dashboard-activity {
+    height: 100%;
+    overflow: hidden;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-dashboard-activity > .rd-card {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .rd-dashboard-activity > .rd-card > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-dashboard-activity .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-dashboard-activity .rd-link {
+    font-size: 11px;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-list {
+    min-height: 0;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-row .text-sm {
+    font-size: 12px;
+  }
+
+  /* Últimas partidas: las 6 más recientes; el resto en "Ver todas". */
+  .rd-dashboard-activity .rd-dashboard-match-list {
+    min-height: 0;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+  }
+
+  .rd-dashboard-match-list > .rd-dashboard-row:nth-child(n + 7) {
+    display: none;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-match-list .rd-dashboard-row > :first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  /* Últimas builds: íconos más chicos; el nombre usa hasta dos líneas y el
+     campeón se identifica por el avatar. */
+  .rd-dashboard-build-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.45rem;
+  }
+
+  .rd-dashboard-build-name {
+    gap: 0.4rem;
+  }
+
+  .rd-dashboard-build-name > :first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-dashboard-build-name .text-sm {
+    max-height: 2.3em;
+    overflow: hidden;
+    line-height: 1.15;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-dashboard-build-name .text-\[10px\] {
+    display: none;
+  }
+
+  .rd-build-loadout {
+    grid-template-columns: 1.5rem 1.05rem auto;
+    grid-template-rows: repeat(2, 1.05rem);
+    gap: 0.15rem 0.25rem;
+  }
+
+  .rd-build-keystone {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .rd-build-spells {
+    grid-template-rows: repeat(2, 1.05rem);
+    gap: 0.15rem;
+  }
+
+  .rd-build-spells img,
+  .rd-build-spells span {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .rd-build-items {
+    grid-template-columns: repeat(3, 1.05rem);
+    grid-template-rows: repeat(2, 1.05rem);
+    gap: 0.15rem;
+  }
+
+  .rd-build-items img,
+  .rd-build-items span {
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 0.25rem;
+  }
+
+  .rd-build-winrate {
+    min-width: 1.75rem;
+    font-size: 11px;
+  }
+
+  /* Matchups: los dos grupos apilados con filas más bajas. */
+  .rd-dashboard-activity .rd-dashboard-matchups {
+    gap: 0.4rem;
+  }
+
+  .rd-dashboard-activity .rd-dashboard-matchup-group {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .rd-dashboard-matchup-group .rd-mini-label {
+    margin-bottom: 0.15rem;
+    font-size: 9px;
+  }
+
+  .rd-dashboard-matchup-row > div:first-child {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .rd-dashboard-matchup-row .text-sm {
+    font-size: 11px;
+  }
+
+  /* Meta: "Meta por línea" a la izquierda con una sola línea visible (se elige
+     con los íconos) y "Mis mains" a la derecha. */
+  .rd-dashboard-meta {
+    height: 100%;
+    overflow: hidden;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-dashboard-meta > .rd-card {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .rd-dashboard-meta .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-dashboard-meta .rd-link {
+    font-size: 11px;
+  }
+
+  .rd-dashboard-meta > article:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .rd-dashboard-meta > article:first-child > div:first-child {
+    margin-bottom: 0;
+  }
+
+  .rd-meta-lane-picker {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-meta-lane-pick {
+    display: grid;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid hsl(var(--border) / 0.8);
+    border-radius: 0.6rem;
+    background: hsl(var(--secondary) / 0.25);
+    opacity: 0.55;
+    transition: opacity 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  }
+
+  .rd-meta-lane-pick img {
+    width: 1.15rem;
+    height: 1.15rem;
+    object-fit: contain;
+  }
+
+  .rd-meta-lane-pick-active {
+    border-color: hsl(var(--primary) / 0.45);
+    background: hsl(var(--primary) / 0.12);
+    opacity: 1;
+  }
+
+  .rd-dashboard-meta > article:first-child > div:last-child {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rd-meta-lane-card:not(.rd-meta-lane-card-active) {
+    display: none;
+  }
+
+  .rd-meta-lane-card {
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-meta-lane-card > div:first-child {
+    margin-bottom: 0.2rem;
+  }
+
+  /* El ícono ya está en el selector; queda solo el nombre de la línea. */
+  .rd-meta-lane-card > div:first-child img {
+    display: none;
+  }
+
+  .rd-meta-lane-row {
+    gap: 0.6rem;
+  }
+
+  .rd-meta-lane-row > div:first-of-type {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .rd-meta-lane-row p:first-child {
+    font-size: 0.85rem;
+  }
+
+  .rd-meta-lane-row [class*="text-[9px]"] {
+    font-size: 10px;
+  }
+
+  /* Mis mains: identidad arriba, las dos estadísticas lado a lado e insight debajo. */
+  .rd-main-card {
+    gap: 0.4rem;
+  }
+
+  .rd-main-card-header {
+    min-height: 1.5rem;
+    align-items: center;
+  }
+
+  .rd-main-arrow {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  /* Sin "Pool personal": título, contador y flechas entran en una línea. */
+  .rd-main-card-header .rd-inline-section-heading > span,
+  .rd-main-card-header .rd-section-kicker {
+    display: none;
+  }
+
+  .rd-main-navigation span {
+    white-space: nowrap;
+  }
+
+  /* Campeón a la izquierda; a su derecha "Estadísticas del meta" y "Tu rendimiento"
+     apiladas. El insight ocupa todo el ancho con el resto del alto. */
+  .rd-main-meta-layout {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.35rem 0.75rem;
+  }
+
+  .rd-main-identity {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    gap: 0.65rem;
+    padding: 0;
+  }
+
+  .rd-main-identity > div:first-child {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.55rem;
+  }
+
+  .rd-main-identity p {
+    font-size: 9px;
+  }
+
+  .rd-main-identity h3 {
+    font-size: 1.2rem;
+    line-height: 1.05;
+  }
+
+  .rd-main-identity h3 + div {
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+  }
+
+  .rd-main-identity h3 + div > span:first-child {
+    width: 1.2rem;
+    height: 1.2rem;
+    font-size: 10px;
+  }
+
+  .rd-main-identity h3 + div > span:last-child {
+    font-size: 10px;
+  }
+
+  .rd-main-stat-group {
+    display: flex;
+    grid-column: 2;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0 0 0 0.75rem;
+    border-top: 0;
+    border-left: 1px solid hsl(var(--border) / 0.8);
+  }
+
+  .rd-main-stat-group + .rd-main-stat-group {
+    padding-top: 0.35rem;
+    border-top: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .rd-main-stat-group .rd-mini-label {
+    margin-bottom: 0;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+  }
+
+  .rd-main-stat-group strong {
+    font-size: 0.95rem;
+  }
+
+  .rd-main-stat-group span {
+    font-size: 9px;
+  }
+
+  /* Si el insight no entra, scrollea dentro de la tarjeta con una barra dorada fina. */
+  .rd-main-insight {
+    display: block;
+    min-height: 0;
+    padding: 0.3rem 0.4rem 0 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    line-height: 1.35;
+    scrollbar-color: hsl(var(--primary) / 0.7) transparent;
+    scrollbar-width: thin;
+  }
+
+  .rd-main-insight::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .rd-main-insight::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .rd-main-insight::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  /* El título del insight va en la misma línea donde arranca el texto: ahorra una línea. */
+  .rd-main-insight .rd-mini-label {
+    display: inline;
+    margin: 0 0.4rem 0 0;
+    font-size: 9px;
+  }
+
+  /* Sin "…": el insight se muestra completo. */
+  .rd-main-insight p:last-child {
+    display: inline;
+    font-size: 10.5px;
+    line-height: 1.35;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+}
+
 .rd-compact-page {
   display: grid;
   gap: 1rem;
@@ -722,6 +1565,351 @@
 @media (max-width: 1023px), (max-height: 699px) {
   .rd-matches-layout > * + * {
     margin-top: 1.25rem;
+  }
+}
+
+/* Partidas en smartphone horizontal: título a la izquierda y un 2x2 a la derecha
+   (Eliminar todas | Nueva partida / Partidas | Record; sin Winrate). Encabezado,
+   acciones y métricas se "disuelven" (display: contents) en la grilla de la página. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-matches-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 12.5rem));
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .rd-matches-layout > * {
+    margin-top: 0;
+  }
+
+  .rd-matches-header,
+  .rd-matches-header > div:nth-child(2),
+  .rd-matches-metrics {
+    display: contents;
+  }
+
+  .rd-matches-header > div:first-child {
+    grid-row: 1 / 3;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:first-child:not(:last-child) {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:last-child {
+    grid-row: 1;
+    grid-column: 3;
+  }
+
+  /* Más específico que ".rd-matches-metrics > .rd-card" (display: flex) de abajo. */
+  .rd-matches-metrics > .rd-card:nth-child(2) {
+    display: none;
+  }
+
+  .rd-matches-metrics > :first-child {
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  .rd-matches-metrics > :last-child {
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  .rd-matches-layout > .rd-matches-filters,
+  .rd-matches-layout > .rd-matches-scroll {
+    grid-column: 1 / -1;
+  }
+
+  /* Filtros en una sola línea compacta: el buscador toma el ancho que sobra. */
+  .rd-matches-layout > .rd-matches-filters {
+    margin-top: 0.25rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .rd-matches-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .rd-matches-filters > div > div:first-child {
+    min-width: 0;
+  }
+
+  .rd-matches-filters input {
+    padding-block: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-matches-filters select {
+    flex-shrink: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* Tarjeta de cada partida, resumida para entrar en el ancho: sólo "V/D", info en una
+     línea, build en 2 filas de 3 y equipos sin etiquetas (aliados en azul, enemigos en rojo).
+     Los selectores llevan .rd-matches-scroll porque las variantes md: de Tailwind se
+     emiten al final de la hoja y, con la misma especificidad, ganarían. */
+  /* Alto fijo: todas las tarjetas miden lo mismo, tengan o no tags. */
+  .rd-matches-scroll .rd-match-card-grid {
+    display: grid;
+    height: 5.25rem;
+    grid-template-columns: minmax(0, 1fr) 1px auto 1px auto auto;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem 0.45rem 0.75rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-grid > div:nth-child(2) {
+    display: block;
+  }
+
+  .rd-matches-scroll .rd-match-card-main {
+    gap: 0.5rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result {
+    width: 1.1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > p:first-child {
+    font-size: 1.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > :not(:first-child) {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-champ {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info {
+    gap: 0.25rem;
+  }
+
+  /* Línea 1: campeón, rol, lado y tipo (el tipo se abrevia si no entra).
+     Línea 2: tags en una línea, abreviadas si no entran; existe aunque no haya tags. */
+  .rd-matches-scroll .rd-match-card-info > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line,
+  .rd-matches-scroll .rd-match-card-tags {
+    display: flex;
+    min-width: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    overflow: hidden;
+  }
+
+  .rd-matches-scroll .rd-match-card-tags {
+    height: 1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > * {
+    flex-shrink: 0;
+  }
+
+  .rd-matches-scroll .rd-match-card-info h2 {
+    flex-shrink: 1;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 8.5px;
+    white-space: nowrap;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span:last-child,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* KDA, oro, parche y fecha en una línea, con su referencia chica arriba. */
+  .rd-matches-scroll .rd-match-card-info > div:last-child {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.7rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:first-child {
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:last-child {
+    font-size: 11px;
+  }
+
+  .rd-matches-scroll .rd-match-card-build,
+  .rd-matches-scroll .rd-match-card-teams {
+    width: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* "Build" arriba de la primera fila de ítems; la segunda etiqueta (invisible, sólo
+     para alinear en desktop) no hace falta. Entra sin sumar alto a la tarjeta. */
+  .rd-matches-scroll .rd-match-card-build p {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-build > div:first-child p {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  /* "Tu equipo" / "Enemigos" a la izquierda de cada fila, para no sumar alto. */
+  .rd-matches-scroll .rd-match-card-teams > div {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-label-wide {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-label-compact {
+    display: inline;
+  }
+
+  /* Ancho fijo que entra "ENEMIGO": si no, esa fila se ensanchaba y los íconos
+     quedaban desalineados con los de "Tu equipo". */
+  .rd-matches-scroll .rd-match-card-teams p {
+    flex: 0 0 3.3rem;
+    width: 3.3rem;
+    margin: 0;
+    font-size: 7.5px;
+    letter-spacing: 0.1em;
+    line-height: 1.15;
+  }
+
+  .rd-matches-scroll .rd-match-card-build {
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams {
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid {
+    grid-template-columns: repeat(3, 1.4rem);
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams .grid {
+    grid-template-columns: repeat(5, 1.4rem);
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid > *,
+  .rd-matches-scroll .rd-match-card-teams .grid > * {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:first-child .grid > :not([class*="border-primary"]) {
+    border-color: rgb(96 165 250 / 0.4);
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:last-child .grid > * {
+    border-color: rgb(248 113 113 / 0.4);
+  }
+
+  .rd-matches-scroll .rd-match-card-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions button {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* El selector de tipo tomaba el ancho de "Clasificatoria Legendaria": queda justo
+     para "Todos los tipos" y el resto pasa al buscador. */
+  .rd-matches-filters select:last-child {
+    width: 8.25rem;
+  }
+
+  /* Tarjetas compactas: acciones y métricas con el mismo alto. */
+  .rd-matches-header .rd-action-card {
+    gap: 0.55rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-matches-header .rd-action-card > div:first-child {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-matches-header .rd-action-card svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .rd-matches-header .rd-action-card p:first-child {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-matches-header .rd-action-card p + p {
+    font-size: 10px;
+  }
+
+  .rd-matches-metrics > .rd-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-matches-metrics > .rd-card > div:first-child {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-matches-metrics > .rd-card .text-3xl {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .rd-matches-metrics > .rd-card p + p {
+    margin-top: 0.15rem;
+    font-size: 10px;
   }
 }
 
@@ -1031,6 +2219,1434 @@
   }
 }
 
+/* Registrar / editar partida en smartphone horizontal: cada paso entra en el
+   viewport. Barra de progreso arriba, título del paso en una línea, el contenido
+   con el alto restante (scroll propio donde hace falta) y los botones siempre al
+   pie. El paso "Tu build" replica el creador de builds: objetos y hechizos fijos
+   a la izquierda y pestañas Objetos / Runas a la derecha (las agrega el JSX). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-match-flow) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-match-flow) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-match-flow {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  /* Volver + "Editar partida" (pasos iniciales de la edición). */
+  .rd-match-flow > .flex.items-center.gap-4 {
+    gap: 0.75rem;
+  }
+
+  .rd-match-flow > .flex.items-center.gap-4 > button {
+    font-size: 12px;
+  }
+
+  .rd-match-flow > .flex.items-center.gap-4 > h1 {
+    font-size: 1rem;
+  }
+
+  /* Paso activo: llena el alto, botones al pie. */
+  .rd-match-flow > .space-y-4,
+  .rd-match-flow > .rd-team-step,
+  .rd-match-flow > .rd-buildstep,
+  .rd-match-flow > .rd-statsstep {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow > .space-y-4 > *,
+  .rd-match-flow > .rd-team-step > *,
+  .rd-match-flow > .rd-buildstep > *,
+  .rd-match-flow > .rd-statsstep > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-match-flow > .space-y-4 > :last-child,
+  .rd-match-flow > .rd-team-step > :last-child,
+  .rd-match-flow > .rd-buildstep > :last-child,
+  .rd-match-flow > .rd-statsstep > :last-child {
+    margin-top: auto !important;
+  }
+
+  /* Título y descripción del paso en una sola línea. */
+  .rd-match-flow > * > div:first-child:has(> h2),
+  .rd-match-flow .rd-buildstep-header > div:first-child {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .rd-match-flow h2 {
+    flex: none;
+    margin-bottom: 0;
+    font-size: 1.15rem;
+    line-height: 1.1;
+  }
+
+  .rd-match-flow h2 + p {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Botones de navegación al pie, más bajos. */
+  .rd-match-flow > * > .flex.gap-3:last-child {
+    gap: 0.5rem;
+    padding-top: 0.45rem;
+  }
+
+  .rd-match-flow > * > .flex.gap-3:last-child > button,
+  .rd-match-flow > * > button:last-child {
+    padding-block: 0.4rem;
+    font-size: 13px;
+  }
+
+  /* Datos de la partida: 2x2 con campos grandes que ocupan el alto disponible. */
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    gap: 1rem 1.25rem;
+    padding-inline: 0.25rem;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) label {
+    margin-bottom: 0.35rem;
+    font-size: 12.5px;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) input,
+  .rd-match-flow > .space-y-4 > .grid-cols-2:has(input[type="date"]) select {
+    height: 2.9rem;
+    padding-inline: 0.85rem;
+    border-radius: 0.8rem;
+    font-size: 15px;
+  }
+
+  /* Línea: botones más bajos. */
+  .rd-match-flow > .space-y-4 > .grid:has(> button.capitalize) {
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid > button.capitalize {
+    padding: 0.45rem 0.75rem;
+    font-size: 13px;
+  }
+
+  /* Campeón (registro y edición): la grilla llena el alto con scroll propio. */
+  .rd-match-flow > .space-y-4 > .relative:has(> input) input {
+    padding-block: 0.35rem;
+    font-size: 13px;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid.overflow-y-auto {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+    align-content: start;
+    gap: 0.4rem;
+    overscroll-behavior: contain;
+  }
+
+  .rd-match-flow > .space-y-4 > .grid.overflow-y-auto > button {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* Edición: campeón elegido en una franja baja. */
+  .rd-match-flow > .space-y-4 > .flex.items-center.rounded-xl {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .rd-match-flow > .space-y-4 > .flex.items-center.rounded-xl > div:first-child {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Equipos: slots a la izquierda y campeones a la derecha, todo el alto. */
+  .rd-match-flow > .rd-team-step > .rd-team-pool {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .rd-team-pool > div:first-child {
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-match-flow .rd-team-pool > .rd-team-pool-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .rd-match-flow .rd-team-pool-body > div:first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 0.6rem 0 0;
+    border-bottom: 0;
+    border-right: 1px solid hsl(var(--border));
+  }
+
+  .rd-match-flow .rd-team-pool-body > div:first-child > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .rd-match-flow .rd-team-pool-body > div:first-child > div {
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow .rd-team-pool-body > div:first-child .w-16 {
+    width: 3rem;
+    font-size: 10px;
+  }
+
+  .rd-match-flow .rd-team-pool-body > div:first-child .w-12 {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .rd-match-flow .rd-team-pool-champions {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .rd-match-flow .rd-team-pool-champions > .relative {
+    flex: none;
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-match-flow .rd-team-pool-champions input {
+    padding-block: 0.3rem;
+    font-size: 12px;
+  }
+
+  .rd-match-flow .rd-team-pool-champions > .rd-team-pool-grid {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+    align-content: start;
+    gap: 0.35rem;
+    overscroll-behavior: contain;
+  }
+
+  .rd-match-flow .rd-team-pool-grid > button {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  /* Tu build: encabezado con la build guardada en una línea. */
+  .rd-match-flow > .rd-buildstep > .rd-buildstep-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .rd-match-flow .rd-buildstep-header > div:last-child {
+    width: min(24rem, 55%);
+    flex: none;
+  }
+
+  .rd-match-flow .rd-buildstep-header .rd-card {
+    gap: 0.5rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .rd-match-flow .rd-buildstep-header .rd-card > div:first-child {
+    padding: 0.3rem;
+  }
+
+  .rd-match-flow .rd-buildstep-header select,
+  .rd-match-flow .rd-buildstep-header button {
+    padding-block: 0.3rem;
+    font-size: 12px;
+  }
+
+  /* Cuerpo: "tu build" a la izquierda, pestañas y panel a la derecha. */
+  .rd-match-flow > .rd-buildstep > .rd-buildstep-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow .rd-buildstep-items,
+  .rd-match-flow .rd-buildstep-side {
+    display: contents;
+  }
+
+  .rd-match-flow .rd-buildstep-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-match-flow .rd-buildstep-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.72rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-card-title {
+    font-size: 11px;
+  }
+
+  /* Objetos elegidos: 3x2 centrado (mismos tamaños que el creador). */
+  .rd-match-flow .rd-buildstep-pool {
+    display: flex;
+    min-height: 0;
+    grid-row: 1 / 3;
+    grid-column: 1;
+    flex-direction: column;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > div:first-child {
+    margin-bottom: 0.25rem;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 > div {
+    display: grid;
+    grid-template-columns: repeat(3, 1.8rem);
+    gap: 0.3rem 0.55rem;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 > div > div {
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 0.45rem;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 > div > div > img {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 > div > div > svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 > div > div > div {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .rd-match-flow .rd-buildstep-pool > .space-y-2 > div > div > span {
+    font-size: 8px;
+  }
+
+  /* Hechizos: 5 por fila. */
+  .rd-match-flow .rd-buildstep-spells {
+    grid-row: 3;
+    grid-column: 1;
+    padding: 0.4rem 0.55rem 0.45rem;
+  }
+
+  .rd-match-flow .rd-buildstep-spells > label {
+    margin-bottom: 0.25rem;
+    font-size: 11px;
+  }
+
+  .rd-match-flow .rd-buildstep-spells > .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .rd-match-flow .rd-buildstep-spells > .grid button {
+    max-width: 1.65rem;
+  }
+
+  /* Paneles: uno por vez, con todo el alto de la derecha. */
+  .rd-match-flow .rd-buildstep-body .rd-item-browser,
+  .rd-match-flow .rd-buildstep-runes {
+    height: 100%;
+    min-height: 0;
+    grid-row: 2 / 4;
+    grid-column: 2;
+  }
+
+  .rd-match-flow .rd-buildstep-body:not([data-panel="items"]) .rd-item-browser,
+  .rd-match-flow .rd-buildstep-body:not([data-panel="runes"]) .rd-buildstep-runes {
+    display: none;
+  }
+
+  /* Objetos: filtros en una línea y la grilla llena el resto con scroll propio. */
+  .rd-match-flow .rd-buildstep-body .rd-item-browser {
+    display: flex;
+    flex-direction: column;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > * {
+    flex: none;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) > div:first-child {
+    min-width: 3.5rem;
+    flex: 1 1 4rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) input,
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) select {
+    padding-block: 0.3rem;
+    font-size: 11px;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) select {
+    width: 7.25rem;
+    min-width: 5.5rem;
+    flex: 0 1 auto;
+    padding-inline: 0.4rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    flex: none;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > div:nth-child(2) button {
+    padding: 0.2rem 0.4rem;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser > .rd-item-browser-results {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser-results > .rd-item-browser-grid {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+    align-content: start;
+    gap: 0.35rem;
+    overscroll-behavior: contain;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser-grid .w-12 {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .rd-match-flow .rd-buildstep-body .rd-item-browser-grid .w-12 > img {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  /* Runas: clave en la misma línea que su etiqueta y ramas compactas, sin scroll. */
+  .rd-match-flow .rd-buildstep-runes {
+    padding: 0.45rem 0.6rem;
+    overflow: hidden;
+  }
+
+  /* El título "Runas" sobra: ya lo indica la pestaña. */
+  .rd-match-flow .rd-buildstep-runes > div:first-child {
+    display: none;
+  }
+
+  .rd-match-flow .rd-runes-content {
+    min-height: 0;
+    gap: 0.35rem;
+  }
+
+  .rd-match-flow .rd-runes-content > div:first-child:has(.max-w-11) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow .rd-runes-content > div:first-child:has(.max-w-11) > p {
+    flex: none;
+    margin-bottom: 0;
+    font-size: 11px;
+  }
+
+  .rd-match-flow .rd-runes-content > div:first-child:has(.max-w-11) > .grid {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-match-flow .rd-runes-content .max-w-11 {
+    max-width: 1.3rem;
+  }
+
+  .rd-match-flow .rd-runes-branches {
+    min-height: 0;
+    gap: 0.75rem;
+  }
+
+  .rd-match-flow .rd-runes-branches > div {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.5rem;
+  }
+
+  .rd-match-flow .rd-runes-branches > div > label {
+    margin-bottom: 0.2rem;
+    font-size: 11px;
+  }
+
+  .rd-match-flow .rd-runes-branches > div > select {
+    margin-bottom: 0.2rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 11px;
+  }
+
+  .rd-match-flow .rd-runes-branches > div > .justify-evenly {
+    min-height: 0;
+    grid-column: 1 / -1;
+    align-self: stretch;
+    gap: 0.1rem;
+  }
+
+  .rd-match-flow .rd-runes-branches .justify-around {
+    gap: 0.25rem;
+  }
+
+  .rd-match-flow .rd-runes-branches .w-8.h-8 {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  /* Detalles de la partida: dos tarjetas lado a lado, compactas. */
+  .rd-match-flow > .rd-statsstep > .rd-statsstep-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section {
+    min-height: 0;
+    gap: 0.5rem;
+    overflow-y: auto;
+    padding: 0.55rem 0.65rem;
+    scrollbar-width: none;
+  }
+
+  .rd-statsstep-body > section::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Resultado y rendimiento: Oro y Duración en la misma fila que K / D / A. */
+  .rd-match-flow .rd-statsstep-body > section:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-content: start;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section:first-child > :nth-child(1),
+  .rd-match-flow .rd-statsstep-body > section:first-child > :nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section:first-child > :nth-child(2) {
+    grid-column: 1;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section:first-child > :nth-child(3) {
+    grid-column: 2;
+    align-self: end;
+    align-items: end;
+    gap: 0.4rem;
+  }
+
+  /* Etiquetas de los campos en una línea: si "Duración (min)" pasaba a dos, su
+     casillero quedaba desalineado del de Oro. */
+  .rd-match-flow .rd-statsstep-body label > span.text-xs {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section:first-child > :nth-child(4) {
+    margin-top: 0;
+    line-height: 1.3;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section:first-child > :nth-child(2) > div:first-child {
+    margin-bottom: 0.2rem;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section:first-child .grid-cols-\[1fr_auto_1fr_auto_1fr\] {
+    gap: 0.3rem;
+  }
+
+  .rd-match-flow .rd-statsstep-body .text-sm.font-semibold,
+  .rd-match-flow .rd-statsstep-body label.text-sm {
+    margin-bottom: 0.25rem;
+    font-size: 11.5px;
+  }
+
+  .rd-match-flow .rd-statsstep-body .gap-4 {
+    gap: 0.5rem;
+  }
+
+  /* Solo Resultado / Equipo: las etiquetas también son botones con aria-pressed
+     dentro de un "flex gap-2" y esta regla las agrandaba. */
+  .rd-match-flow .rd-statsstep-body > section:first-child .flex.gap-2 > button[aria-pressed] {
+    padding: 0.3rem 0.5rem;
+    border-width: 1.5px;
+    font-size: 12px;
+  }
+
+  .rd-match-flow .rd-statsstep-body label > span.text-xs {
+    margin-bottom: 0.15rem;
+    font-size: 10px;
+  }
+
+  .rd-match-flow .rd-statsstep-body input[type="number"] {
+    padding: 0.25rem 0.4rem;
+    border-radius: 0.6rem;
+    font-size: 14px;
+  }
+
+  .rd-match-flow .rd-statsstep-body .text-lg {
+    padding-bottom: 0.25rem;
+    font-size: 1rem;
+  }
+
+  .rd-match-flow .rd-statsstep-body .text-\[11px\] {
+    font-size: 9.5px;
+  }
+
+  /* Etiquetas: chips más chicos. */
+  /* Contexto: las notas siempre a la vista. El campo de etiqueta propia sube a la
+     línea del título "Etiquetas" y, si las fichas no entran, solo esa zona se
+     desliza; las notas conservan un alto mínimo. */
+  .rd-match-flow .rd-statsstep-body > section.rd-statsstep-context {
+    gap: 0.4rem;
+    overflow: hidden;
+  }
+
+  .rd-match-flow .rd-statsstep-context > div:first-child {
+    display: grid;
+    min-height: 0;
+    flex: 0 1 auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.3rem 0.6rem;
+  }
+
+  .rd-match-flow .rd-statsstep-context > div:first-child > p {
+    margin-bottom: 0;
+  }
+
+  .rd-match-flow .rd-statsstep-context > div:first-child > p > span,
+  .rd-match-flow .rd-statsstep-notes > label > span {
+    display: none;
+  }
+
+  .rd-match-flow .rd-statsstep-context > div:first-child > .mt-2 {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-match-flow .rd-statsstep-context > div:first-child > .flex-wrap {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    align-self: stretch;
+    align-content: flex-start;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-statsstep-context .flex-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-match-flow .rd-statsstep-context .flex-wrap {
+    gap: 0.2rem;
+  }
+
+  .rd-match-flow .rd-statsstep-context .flex-wrap > button {
+    padding: 0 0.35rem;
+    border-width: 1px;
+    border-radius: 0.4rem;
+    font-size: 9.5px;
+    line-height: 1.6;
+  }
+
+  .rd-match-flow .rd-statsstep-context .mt-2 {
+    gap: 0.3rem;
+    margin-top: 0;
+  }
+
+  .rd-match-flow .rd-statsstep-body > section.rd-statsstep-context > .rd-statsstep-notes {
+    min-height: 3.6rem;
+    flex: 1 1 auto;
+  }
+
+  .rd-match-flow .rd-statsstep-context .mt-2 input,
+  .rd-match-flow .rd-statsstep-context .mt-2 button {
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.5rem;
+    font-size: 10.5px;
+  }
+
+  .rd-match-flow .rd-statsstep-notes {
+    min-height: 0;
+  }
+
+  .rd-match-flow .rd-statsstep-notes textarea {
+    min-height: 1.75rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 0.6rem;
+    font-size: 12px;
+  }
+}
+
+/* Creador de builds en smartphone horizontal: "taller" sin scroll de página.
+   - Fila 1: volver, retrato, nombre + tier y los controles (parche, nombre,
+     línea, limpiar, guardar) en una sola línea.
+   - Izquierda (14rem), "tu build" siempre visible: los 6 slots de objetos (3x2)
+     y los hechizos (5 por fila) para elegirlos directo.
+   - Derecha: pestañas Objetos / Runas / Stats (las agrega el JSX) y un panel por
+     vez con todo el alto. Los paneles inactivos se ocultan, no se desmontan. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-buildws) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-buildws {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-buildws > * {
+    flex: none;
+  }
+
+  /* Encabezado en una línea */
+  .rd-buildws .rd-buildws-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child > button {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child > div:nth-child(2) {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .rd-buildws .rd-buildws-header h2 {
+    font-size: 1.15rem;
+  }
+
+  /* Líneas, tipo de daño, rol y WR/PR/BR sobran acá: queda nombre + tier. */
+  .rd-buildws .rd-buildws-header h2 ~ span:not([class*="tier-"]),
+  .rd-buildws .rd-buildws-header > div:first-child p {
+    display: none;
+  }
+
+  .rd-buildws .rd-buildws-header h2 ~ span[class*="tier-"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child select,
+  .rd-buildws .rd-buildws-header > div:last-child input {
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 12px;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > select:first-child {
+    width: 7rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > input {
+    width: 8.5rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > select:nth-of-type(2) {
+    width: 5.5rem;
+  }
+
+  /* "Limpiar" solo con el ícono (el texto queda para lectores de pantalla). */
+  .rd-buildws .rd-buildws-header > div:last-child > button:not(:last-child) {
+    gap: 0;
+    padding: 0.4rem;
+    font-size: 0;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > button:last-child {
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.6rem;
+    font-size: 12px;
+  }
+
+  /* Cuerpo: "tu build" a la izquierda, pestañas y panel a la derecha. */
+  .rd-buildws > .rd-buildws-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-buildws-items,
+  .rd-buildws .rd-buildws-side {
+    display: contents;
+  }
+
+  .rd-buildws .rd-buildws-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-buildws .rd-buildws-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.72rem;
+  }
+
+  .rd-buildws .rd-card-title {
+    font-size: 11px;
+  }
+
+  /* Objetos elegidos: 3x2 centrado. */
+  .rd-buildws .rd-buildws-pool {
+    display: flex;
+    min-height: 0;
+    grid-row: 1 / 3;
+    grid-column: 1;
+    flex-direction: column;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > div:first-child {
+    margin-bottom: 0.25rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div {
+    display: grid;
+    grid-template-columns: repeat(3, 2.1rem);
+    gap: 0.35rem 0.55rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.5rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > img {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  /* Badge de botas sobre el encantamiento y textos del slot vacío. */
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > div {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > span {
+    font-size: 8px;
+  }
+
+  .rd-buildws .rd-buildws-recommended {
+    display: none;
+  }
+
+  /* Hechizos: 5 por fila. */
+  .rd-buildws .rd-buildws-spells {
+    grid-row: 3;
+    grid-column: 1;
+    padding: 0.4rem 0.55rem 0.45rem;
+  }
+
+  .rd-buildws .rd-buildws-spells > p {
+    margin-bottom: 0.25rem;
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid {
+    align-items: center;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid button {
+    max-width: 1.65rem;
+  }
+
+  /* Paneles: uno por vez, con todo el alto de la derecha. */
+  .rd-buildws .rd-item-browser,
+  .rd-buildws .rd-rune-picker,
+  .rd-buildws .rd-buildws-stats {
+    height: 100%;
+    min-height: 0;
+    grid-row: 2 / 4;
+    grid-column: 2;
+  }
+
+  .rd-buildws .rd-buildws-body:not([data-panel="items"]) .rd-item-browser,
+  .rd-buildws .rd-buildws-body:not([data-panel="runes"]) .rd-rune-picker,
+  .rd-buildws .rd-buildws-body:not([data-panel="stats"]) .rd-buildws-stats {
+    display: none;
+  }
+
+  /* Objetos: filtros en una línea y la grilla llena el resto con scroll propio. */
+  .rd-buildws .rd-item-browser {
+    display: flex;
+    flex-direction: column;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .rd-buildws .rd-item-browser > * {
+    flex: none;
+  }
+
+  .rd-buildws .rd-item-browser > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:first-child {
+    min-width: 3.5rem;
+    flex: 1 1 4rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) input,
+  .rd-buildws .rd-item-browser > div:nth-child(2) select {
+    padding-block: 0.3rem;
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) select {
+    width: 7.25rem;
+    min-width: 5.5rem;
+    flex: 0 1 auto;
+    padding-inline: 0.4rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    flex: none;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) button {
+    padding: 0.2rem 0.4rem;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  .rd-buildws .rd-item-browser > .rd-item-browser-results {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-buildws .rd-item-browser-results > .rd-item-browser-grid {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+    align-content: start;
+    gap: 0.35rem;
+    overscroll-behavior: contain;
+  }
+
+  .rd-buildws .rd-item-browser-grid .w-12 {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .rd-buildws .rd-item-browser-grid .w-12 > img {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  /* Runas: clave en una fila y las dos ramas compactas. */
+  .rd-buildws .rd-rune-picker {
+    padding: 0.45rem 0.6rem;
+    overflow: hidden;
+  }
+
+  .rd-buildws .rd-rune-picker > div:first-child {
+    margin-bottom: 0.2rem;
+  }
+
+  .rd-buildws .rd-rune-picker .mb-3 {
+    margin-bottom: 0.3rem;
+  }
+
+  .rd-buildws .rd-rune-picker .mb-2 {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-buildws .rd-rune-picker .text-xs.font-semibold {
+    font-size: 10.5px;
+  }
+
+  /* "Clave" y sus runas en la misma línea. */
+  .rd-buildws .rd-rune-picker > .mb-3:has(.max-w-11) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .mb-3:has(.max-w-11) > p {
+    flex: none;
+    margin-bottom: 0;
+  }
+
+  .rd-buildws .rd-rune-picker > .mb-3:has(.max-w-11) > .grid {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-buildws .rd-rune-picker .max-w-11 {
+    max-width: 1.6rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid {
+    min-height: 0;
+    gap: 0.75rem;
+  }
+
+  .rd-buildws .rd-rune-picker select {
+    margin-bottom: 0.2rem;
+    padding-block: 0.15rem;
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-rune-picker .justify-evenly {
+    min-height: 0;
+    gap: 0.15rem;
+  }
+
+  .rd-buildws .rd-rune-picker .justify-around {
+    gap: 0.25rem;
+  }
+
+  .rd-buildws .rd-rune-picker .w-9.h-9 {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+
+  /* Cada rama: etiqueta y selector en la misma línea, las runas debajo. */
+  .rd-buildws .rd-rune-picker > .grid > div {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid > div > label {
+    margin-bottom: 0.2rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid > div > .justify-evenly {
+    grid-column: 1 / -1;
+    align-self: stretch;
+  }
+
+  /* Stats: la lista en dos columnas, notas y aclaración compactas al pie. */
+  .rd-buildws .rd-buildws-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-buildws .rd-buildws-stats > .rd-stats-panel {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 0.55rem 0 0.5rem 0.65rem;
+  }
+
+  .rd-buildws .rd-stats-panel > * {
+    flex: none;
+  }
+
+  .rd-buildws .rd-stats-panel > .rd-stats-panel-rows {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    column-gap: 1.25rem;
+    overflow-y: auto;
+    padding-right: 0.65rem;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-panel-rows::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-buildws .rd-stats-panel-rows > div {
+    padding-block: 0.15rem;
+  }
+
+  /* El borde inferior "last:border-0" queda solo en la última; en dos columnas
+     la penúltima también cierra su columna. */
+  .rd-buildws .rd-stats-panel-rows > div:nth-last-child(2):nth-child(odd) {
+    border-bottom: 0;
+  }
+
+  .rd-buildws .rd-stats-panel-rows .text-xs {
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-stats-panel-rows .text-sm {
+    font-size: 12.5px;
+  }
+
+  .rd-buildws .rd-stats-panel > p {
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
+    font-size: 10px;
+  }
+
+  .rd-buildws .rd-buildws-stats > details {
+    flex: none;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-buildws .rd-buildws-stats > details p {
+    max-height: 5rem;
+    overflow-y: auto;
+  }
+
+  .rd-buildws .rd-buildws-stats > p {
+    flex: none;
+    font-size: 10px;
+  }
+}
+
+/* Comparar builds en smartphone horizontal: todo entra en el viewport.
+   - Fila 1: "Volver" y el título compacto (sin kicker ni descripción).
+   - Izquierda (15.5rem): los dos selectores y, debajo, las dos builds enfrentadas
+     (A · VS · B) apiladas.
+   - Derecha: la tabla comparativa con todo el alto, encabezado fijo y scroll
+     propio. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-buildcmp) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-buildcmp {
+    display: grid;
+    height: 100%;
+    grid-template-columns: 15.5rem minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.5rem 0.75rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-back {
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    margin-bottom: 0;
+    font-size: 12px;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-kicker,
+  .rd-buildcmp > .rd-buildcmp-desc {
+    display: none;
+  }
+
+  .rd-buildcmp > h1 {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: center;
+    margin-bottom: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  /* Selectores apilados y compactos. */
+  .rd-buildcmp > .rd-buildcmp-selectors {
+    grid-row: 2;
+    grid-column: 1;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+    margin-bottom: 0;
+  }
+
+  .rd-buildcmp-selectors > div > button {
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.65rem;
+    font-size: 12px;
+  }
+
+  .rd-buildcmp-selectors > div > button img {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .rd-buildcmp-selectors .max-h-72 {
+    max-height: 55dvh;
+  }
+
+  /* A · VS · B apilados. */
+  .rd-buildcmp > .rd-buildcmp-heads {
+    min-height: 0;
+    grid-row: 3;
+    grid-column: 1;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0;
+  }
+
+  .rd-buildcmp-heads > .flex-1 {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    align-items: center;
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.8rem;
+  }
+
+  .rd-buildcmp-heads > .flex-1 > div {
+    width: 100%;
+    gap: 0.6rem;
+  }
+
+  .rd-buildcmp-heads .w-16.h-16 {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .rd-buildcmp-heads h3 {
+    font-size: 0.9rem;
+  }
+
+  .rd-buildcmp-heads .mt-1 {
+    margin-top: 0.15rem;
+  }
+
+  .rd-buildcmp-heads .mt-1 > span {
+    padding: 0 0.35rem;
+    font-size: 10px;
+  }
+
+  .rd-buildcmp-heads .mt-2 {
+    gap: 0.5rem;
+    margin-top: 0.15rem;
+    font-size: 10px;
+  }
+
+  /* Sin build: tarjeta punteada baja. */
+  .rd-buildcmp-heads > .min-h-28 {
+    min-height: 0;
+    padding: 0.5rem;
+  }
+
+  .rd-buildcmp-heads > .shrink-0 > div {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-buildcmp-heads > .shrink-0 span {
+    font-size: 0.72rem;
+  }
+
+  /* Tabla: todo el alto, encabezado fijo y scroll propio. */
+  .rd-buildcmp > .rd-buildcmp-table,
+  .rd-buildcmp > .rd-buildcmp-empty {
+    min-height: 0;
+    grid-row: 2 / 4;
+    grid-column: 2;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-table {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .rd-buildcmp-table > div {
+    grid-template-columns: minmax(5.5rem, 1fr) minmax(0, 1fr) 5rem minmax(0, 1fr);
+    padding: 0.28rem 0.65rem;
+  }
+
+  /* z-index 2: .rd-card > * deja todas las filas en z-index 1 y, al venir
+     después, se pintaban encima del encabezado al scrollear. */
+  .rd-buildcmp-table > div:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-block: 0.4rem;
+    background: hsl(222 36% 12%);
+    box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.7);
+  }
+
+  .rd-buildcmp-table .pr-10 {
+    padding-right: 0.75rem;
+  }
+
+  .rd-buildcmp-table .pl-10 {
+    padding-left: 0.75rem;
+  }
+
+  .rd-buildcmp-table > div:first-child .text-sm {
+    font-size: 12px;
+  }
+
+  .rd-buildcmp-table > div:first-child .text-xs {
+    font-size: 9.5px;
+  }
+
+  .rd-buildcmp-table > div:not(:first-child) > span {
+    font-size: 11px;
+  }
+
+  .rd-buildcmp-table > div:not(:first-child) .text-sm {
+    font-size: 12.5px;
+  }
+
+  .rd-buildcmp-table > div:not(:first-child) .text-xs {
+    font-size: 11px;
+  }
+}
+
 /* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
    y las acciones del paso quedan siempre visibles abajo. */
 @media (min-width: 1024px) and (min-height: 700px) {
@@ -1229,6 +3845,276 @@
   }
 }
 
+/* Objetivos (vista general) en smartphone horizontal: todo entra en el viewport.
+   Fila 1: título compacto, pestañas y "Nuevo objetivo". Debajo, los 5 contadores en
+   una columna y el carril de objetivos (2 por vista) con el alto restante.
+   Los selectores llevan .rd-goals-layout porque las variantes lg:/sm: de Tailwind se
+   emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-goals-layout {
+    display: grid;
+    height: 100%;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout > *,
+  .rd-goals-panel > * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout > header.rd-goals-header {
+    display: contents;
+  }
+
+  .rd-goals-layout > header > div:first-child {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .rd-goals-layout > header > div:first-child > div:first-child,
+  .rd-goals-layout > header > div:first-child > p {
+    display: none;
+  }
+
+  .rd-goals-layout > header h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout > header > a {
+    grid-row: 1;
+    grid-column: 3;
+    gap: 0.5rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.35rem;
+    border-radius: 0.7rem;
+  }
+
+  .rd-goals-layout > header > a > div:first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-goals-layout > header > a svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-goals-layout > header > a p:first-child {
+    font-size: 12px;
+  }
+
+  .rd-goals-layout > header > a p + p {
+    display: none;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: center;
+    padding: 0.2rem;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.7rem;
+  }
+
+  /* Panel: contadores en una columna a la izquierda y carril a la derecha. */
+  .rd-goals-layout > .rd-goals-panel {
+    display: grid;
+    height: 100%;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.5rem;
+    align-self: stretch;
+  }
+
+  /* Historial: los filtros Finalizados / Archivados ocupan la columna izquierda. */
+  .rd-goals-layout > .rd-goals-panel > [role="tablist"] {
+    flex-direction: column;
+    align-self: start;
+  }
+
+  .rd-goals-layout .rd-goals-summary {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary > div:last-child {
+    grid-column: auto;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-card {
+    height: 100%;
+    gap: 0.45rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label + p {
+    font-size: 1.2rem;
+  }
+
+  /* Carril: navegación compacta y tarjetas que ocupan todo el alto restante. */
+  .rd-goals-layout .rd-goals-carousel {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > * + * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child button {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child p {
+    font-size: 11px;
+  }
+
+  .rd-goals-layout .rd-goals-track {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.5rem;
+  }
+
+  /* Ancho fijo: sin min-width 0, una tarjeta con pie largo (Historial: fechas +
+     Finalizado + Alcanzado) se ensanchaba y la segunda quedaba cortada. */
+  .rd-goals-layout .rd-goals-track > * {
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex-basis: calc((100% - 0.5rem) / 2);
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Tarjeta compacta: sin la descripción larga; el gráfico usa el espacio que sobra. */
+  .rd-goals-layout .rd-goal-card {
+    min-height: 0;
+    gap: 0.3rem;
+    padding: 0.5rem 0.65rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 {
+    font-size: 0.8rem;
+    line-height: 1.1;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 + p {
+    display: none;
+  }
+
+  /* Aviso de evidencia insuficiente: la "Muestra x/y" ya lo indica. */
+  .rd-goals-layout .rd-goal-card > p[class*="border-amber"] {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card > .border-t {
+    padding-top: 0.3rem;
+  }
+
+  .rd-goals-layout .rd-goal-card .space-y-2 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card .text-2xl {
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout .rd-goal-card .text-xs,
+  .rd-goals-layout .rd-goal-card .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  .rd-goals-layout .rd-goal-card [role="progressbar"] {
+    height: 0.35rem;
+  }
+
+  /* El gráfico conserva un alto mínimo; su etiqueta sobra (la línea de meta lo explica). */
+  .rd-goals-layout .rd-goal-card-chart {
+    min-height: 4.5rem;
+    gap: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > .rd-label {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+
+  /* Pie en una sola línea: período (sin ícono) y estados, más chicos. */
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child {
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child svg {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+}
+
 /* Tierlist: encabezado y filtros fijos; sólo scrollea la tierlist o la tabla. */
 .rd-tierlist-layout,
 .rd-tierlist-scroll {
@@ -1279,6 +4165,244 @@
 @media (max-width: 1023px), (max-height: 699px) {
   .rd-tierlist-layout > * + * {
     margin-top: 1.5rem;
+  }
+}
+
+/* Tierlist en smartphone horizontal: todos los filtros en una sola línea compacta.
+   El selector Por Tier / Tabla no entra en esa fila: el JSX lo mueve al
+   encabezado, en la línea de "Parche X vs Parche Y". Si en un teléfono chico los
+   filtros no entran, la fila se desliza en horizontal en vez de saltar de línea. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-tierlist-layout .rd-tierlist-filters {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-tierlist-filters > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > * {
+    flex: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > div:first-child {
+    width: auto;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > div:first-child > div {
+    display: flex;
+    gap: 0.15rem;
+    padding: 0.2rem;
+    border-radius: 0.65rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters > div > div:first-child button {
+    width: auto;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 11px;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-filters select {
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 11px;
+  }
+
+  /* Encabezado en grilla: la línea del parche ocupa todo el ancho (también bajo
+     la píldora "Actualizado…"), con el texto a la izquierda y el selector de
+     vista alineado a la derecha, siempre en una sola línea. */
+  .rd-tierlist-layout .rd-tierlist-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header > div:first-child {
+    display: contents;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header > div:first-child > :not(.rd-tierlist-subline) {
+    grid-column: 1;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header > .rd-status-pill {
+    grid-row: 1 / 3;
+    grid-column: 2;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline {
+    grid-column: 1 / -1;
+    min-width: 0;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline > p {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Por Tier: cada tier es una fila de tierlist clásica. A la izquierda un riel
+     angosto con el badge y la cantidad; a la derecha una grilla fluida de fichas
+     compactas (retrato, nombre + variación, línea + WR). */
+  /* Mismo selector que space-y-6 de Tailwind, para ganarle. */
+  .rd-tierlist-layout .rd-tier-groups > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    border-radius: 0.9rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.25rem;
+    border-right: 1px solid hsl(var(--border) / 0.7);
+    border-bottom: 0;
+    text-align: center;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head > :first-child {
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1rem;
+  }
+
+  /* "Tier S+" repite el badge: queda solo la cantidad. */
+  .rd-tierlist-layout .rd-tier-group-head .rd-card-title {
+    display: none;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head .text-xs {
+    font-size: 9.5px;
+    line-height: 1.2;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-grid {
+    grid-template-columns: repeat(auto-fill, minmax(9.25rem, 1fr));
+    align-content: start;
+    gap: 0.35rem;
+    padding: 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile {
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile > .relative {
+    gap: 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile > .relative > :first-child {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .text-sm {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .mt-1 {
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .mt-1 > :first-child {
+    padding: 0 0.3rem;
+    border-radius: 0.3rem;
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .mt-1 > span:last-child {
+    font-size: 10px;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile .text-xs {
+    font-size: 10px;
+  }
+
+  /* Tabla: anchos fijos para que las 9 columnas entren en el ancho de la tarjeta.
+     Las columnas cortas (#, chips y números) tienen ancho propio y "Campeón" se
+     lleva el resto, recortando el nombre si no entra. */
+  .rd-tierlist-layout .rd-tierlist-table table {
+    table-layout: fixed;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table th,
+  .rd-tierlist-layout .rd-tierlist-table td {
+    padding: 0.4rem 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table th {
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table td,
+  .rd-tierlist-layout .rd-tierlist-table td .text-sm {
+    font-size: 12px;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(1) { width: 2rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(3) { width: 4.5rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(4) { width: 3rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(5),
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(6),
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(7) { width: 4.25rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(8) { width: 3.75rem; }
+  .rd-tierlist-layout .rd-tierlist-table th:nth-child(9) { width: 2.75rem; }
+
+  .rd-tierlist-layout .rd-tierlist-table td:nth-child(2) > div {
+    min-width: 0;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table td:nth-child(2) > div > div {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-table td:nth-child(2) span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Selector de vista en la línea del parche: compacto y pegado a la derecha. */
+  .rd-tierlist-layout .rd-tierlist-subline .rd-tierlist-view-toggle {
+    flex: none;
+    margin-left: auto;
+    gap: 0.15rem;
+    padding: 0.15rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline .rd-tierlist-view-toggle > button {
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.45rem;
+    font-size: 11px;
   }
 }
 
@@ -1393,6 +4517,999 @@
   .rd-library-header,
   .rd-library-tabs {
     margin-bottom: 1.25rem;
+  }
+}
+
+/* Builds en mobile: en desktop la separación la da el gap de la grilla; acá la
+   página es un bloque y subtítulo, buscador y lista quedaban pegados. */
+@media (max-width: 1023px), (max-height: 699px) {
+  .rd-build-picker-header,
+  .rd-build-picker .rd-build-picker-filters {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Builds en smartphone horizontal: filtros en una sola línea compacta. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-build-picker .rd-build-picker-filters {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .rd-build-picker-filters > div {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .rd-build-picker-filters input {
+    padding-block: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-build-picker-filters > div > div:last-child {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .rd-build-picker-filters > div > div:last-child > div {
+    display: flex;
+    padding: 0.2rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-build-picker-filters button {
+    width: auto;
+    padding: 0.3rem 0.55rem;
+    font-size: 11px;
+  }
+}
+
+/* Biblioteca en smartphone horizontal: las pestañas van en la misma línea que la
+   descripción ("Archivo táctico…") y buscador + selectores en una línea compacta.
+   Encabezado y bloque del título se "disuelven" (display: contents) para ubicar
+   sus partes en la grilla de la página. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-library-layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    /* Sin el gap base de .rd-library-layout (1.25rem), que separaba cada fila. */
+    gap: 0 1rem;
+  }
+
+  .rd-library-header,
+  .rd-library-header > div:first-child {
+    display: contents;
+  }
+
+  .rd-library-header > div:first-child > :first-child {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .rd-library-header h1 {
+    grid-row: 2;
+    grid-column: 1;
+    line-height: 0.78;
+  }
+
+  .rd-library-header > div:first-child > p {
+    grid-row: 3;
+    grid-column: 1;
+    margin-top: 0.2rem;
+  }
+
+  /* "Base de conocimiento" flota arriba a la derecha, a la altura del kicker,
+     sin agrandar ninguna fila de la grilla. */
+  .rd-library-header > div:last-child {
+    position: absolute;
+    top: clamp(1rem, 2.2vw, 1.5rem);
+    right: clamp(1rem, 2.2vw, 1.5rem);
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .rd-library-header > div:last-child svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .rd-library-header > div:last-child span {
+    font-size: 11px;
+  }
+
+  .rd-library-layout > .rd-library-content {
+    grid-row: 4;
+    grid-column: 1 / -1;
+    margin-top: 0.6rem;
+  }
+
+  /* space-y-6 deja 1.5rem entre filtros y lista: se reduce para ganar alto. */
+  .rd-library-content > .space-y-6 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  /* Abarca título y descripción alineada abajo: no estira la fila de la descripción. */
+  .rd-library-tabs {
+    grid-row: 2 / 4;
+    grid-column: 2;
+    align-self: end;
+    justify-self: end;
+    margin-bottom: 0;
+    padding: 0.2rem;
+  }
+
+  .rd-library-tabs > div {
+    flex-wrap: nowrap;
+  }
+
+  .rd-library-tabs button {
+    gap: 0.45rem;
+    padding: 0.2rem 0.65rem 0.2rem 0.25rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-library-tabs button > div:first-child {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.45rem;
+  }
+
+  .rd-library-tabs button svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-library-tabs button p + p {
+    display: none;
+  }
+
+  .rd-library-filters {
+    margin-bottom: 0;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .rd-library-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .rd-library-filters > div > div:first-child {
+    min-width: 0;
+  }
+
+  .rd-library-filters input {
+    padding-block: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-library-filters select {
+    flex-shrink: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Ficha de campeón (Biblioteca) en smartphone horizontal: "dossier" sin scroll
+   de página.
+   - Fila 1: "Biblioteca" compacto y las pestañas Campeones / Objetos / Runas.
+   - Izquierda (13.5rem): "Volver" y la tarjeta de identidad (arte, carriles,
+     daño, nombre, rol y 2x2 de escalado / proyección / WR / partidas).
+   - Derecha: pestañas de sección (las agrega el JSX) y una sección a la vez con
+     todo el alto; si el contenido no entra, scrollea dentro de su tarjeta.
+   No aplica a la ficha pública (/campeones/...), que no usa .rd-library-layout. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-champ-detail) {
+    overflow: hidden;
+  }
+
+  .rd-library-layout:has(.rd-champ-detail) {
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  /* Encabezado: kicker, descripción y "Base de conocimiento" sobran en la ficha. */
+  .rd-library-layout:has(.rd-champ-detail) .rd-library-header > div:first-child > :first-child,
+  .rd-library-layout:has(.rd-champ-detail) .rd-library-header > div:first-child > p,
+  .rd-library-layout:has(.rd-champ-detail) .rd-library-header > div:last-child {
+    display: none;
+  }
+
+  .rd-library-layout:has(.rd-champ-detail) .rd-library-header h1 {
+    grid-row: 1;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-library-layout:has(.rd-champ-detail) .rd-library-tabs {
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .rd-library-layout:has(.rd-champ-detail) > .rd-library-content {
+    grid-row: 2;
+    height: 100%;
+    min-height: 0;
+    margin-top: 0;
+  }
+
+  /* Grilla del dossier */
+  .rd-library-layout .rd-champ-detail {
+    display: grid;
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  /* Mismo selector que space-y-6 de Tailwind, para anular sus márgenes. */
+  .rd-library-layout .rd-champ-detail > :not([hidden]) ~ :not([hidden]),
+  .rd-library-layout .rd-champ-sections > * > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .rd-library-layout .rd-champ-detail > button:first-child {
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    gap: 0.35rem;
+    font-size: 12px;
+  }
+
+  .rd-library-layout .rd-champ-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-library-layout .rd-champ-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  /* Tarjeta de identidad: el arte es el fondo de toda la tarjeta (tenue y con un
+     degradé hacia abajo) y el contenido se apoya abajo, sobre él. */
+  .rd-library-layout .rd-champ-hero {
+    grid-row: 2;
+    grid-column: 1;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative {
+    height: 100%;
+    padding: 0.55rem;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div {
+    height: 100%;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :first-child {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :first-child img {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    object-position: center 15%;
+    opacity: 0.3;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :first-child::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(222 36% 9% / 0.35) 45%,
+      hsl(222 36% 9% / 0.85) 100%
+    );
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :last-child {
+    position: relative;
+    z-index: 1;
+    flex: none;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :last-child > div:first-child {
+    gap: 0.3rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :last-child > div:first-child img {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .rd-library-layout .rd-champ-hero .rd-status-pill {
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.45rem;
+    box-shadow: none;
+    font-size: 10px;
+  }
+
+  .rd-library-layout .rd-champ-hero h1 {
+    overflow: hidden;
+    font-size: 1.65rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-library-layout .rd-champ-hero h1 + p {
+    margin-top: 0.1rem;
+    font-size: 11px;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t {
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.3rem 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t .rd-label {
+    margin-bottom: 0;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t .text-base {
+    font-size: 12.5px;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t .text-\[11px\] {
+    margin-top: 0;
+    font-size: 9.5px;
+  }
+
+  /* Sección activa: una tarjeta a todo el alto, con scroll propio de respaldo. */
+  .rd-library-layout .rd-champ-sections {
+    grid-row: 2;
+    grid-column: 2;
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .rd-library-layout .rd-champ-sections > div {
+    display: contents;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-card {
+    height: 100%;
+    min-height: 0;
+    padding: 0.65rem 0.8rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-card > div:first-child {
+    margin-bottom: 0.55rem;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-mini-action {
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.7rem;
+  }
+
+  /* Perfil: barras 2x2, tags y notas compactas. La primera parte (título, barras
+     y tags) ocupa todo el alto visible de la tarjeta; las notas quedan justo
+     debajo del borde y se ven con scroll. Una pista al pie lo indica. */
+  .rd-library-layout .rd-champ-profile > .rd-champ-profile-main {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+  }
+
+  .rd-library-layout .rd-champ-profile-main > div:first-child {
+    margin-bottom: 0.55rem;
+  }
+
+  .rd-library-layout .rd-champ-profile:has(> .rd-champ-profile-notes) .rd-champ-profile-main::after {
+    content: "Notas estratégicas ↓";
+    align-self: center;
+    margin-top: auto;
+    padding-top: 0.4rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .rd-library-layout .rd-champ-profile-main > .grid {
+    gap: 0.4rem;
+  }
+
+  .rd-library-layout .rd-champ-profile .text-\[11px\] {
+    font-size: 9.5px;
+  }
+
+  .rd-library-layout .rd-champ-profile .h-2 {
+    height: 0.4rem;
+  }
+
+  .rd-library-layout .rd-champ-profile-main > .mt-5,
+  .rd-library-layout .rd-champ-profile > .rd-champ-profile-notes {
+    margin-top: 0.55rem;
+  }
+
+  /* La pista "Notas estratégicas ↓" ya hace de título: el propio se oculta. */
+  .rd-library-layout .rd-champ-profile-notes > .rd-label {
+    display: none;
+  }
+
+  .rd-library-layout .rd-champ-profile .rd-label {
+    margin-bottom: 0.25rem;
+    font-size: 9px;
+  }
+
+  .rd-library-layout .rd-champ-profile .rd-status-pill {
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    font-size: 11px;
+  }
+
+  .rd-library-layout .rd-champ-profile .flex-wrap.gap-2 {
+    gap: 0.3rem;
+  }
+
+  .rd-library-layout .rd-champ-profile .rd-mini-action > .text-sm {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  /* Estadísticas base: dos columnas de filas finas. */
+  .rd-library-layout .rd-champ-stats > .grid {
+    column-gap: 1.5rem;
+  }
+
+  .rd-library-layout .rd-champ-stats .py-2 {
+    padding-block: 0.35rem;
+  }
+
+  /* Entra completa: sin barra de scroll (si un teléfono más bajo la necesitara,
+     se puede deslizar igual). */
+  .rd-library-layout .rd-champ-sections .rd-champ-stats {
+    scrollbar-width: none;
+  }
+
+  .rd-champ-stats::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-library-layout .rd-champ-stats .text-sm {
+    font-size: 12.5px;
+  }
+
+  /* Matchups: tres columnas que ocupan todo el alto de la tarjeta; cada una
+     reparte sus campeones a lo alto, con retratos y nombres más grandes. */
+  .rd-library-layout .rd-champ-sections .rd-champ-matchups {
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
+  }
+
+  .rd-champ-matchups::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-library-layout .rd-champ-matchups > .grid {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    padding: 0.55rem 0.7rem;
+  }
+
+  /* Título en una sola línea (antes "Fuerte / Contra" se partía en dos). */
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:first-child {
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:first-child svg {
+    width: 13px;
+    height: 13px;
+    flex: none;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:first-child p {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child {
+    min-height: 0;
+    flex: 1 1 auto;
+    justify-content: space-evenly;
+    gap: 0.35rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child > div {
+    gap: 0.6rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child img,
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child > div > div {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child .text-xs {
+    font-size: 13px;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child > p {
+    align-self: center;
+  }
+
+  /* Rendimiento: entra completo sin scroll. Izquierda: WR y las 4 métricas como
+     filas finas (nombre / valor, sin textos de ayuda). Derecha: el insight con
+     más ancho y todo el alto de la columna. */
+  .rd-library-layout .rd-champ-sections .rd-champ-personal {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    column-gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    scrollbar-width: none;
+  }
+
+  .rd-champ-personal::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-library-layout .rd-champ-personal > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-champ-personal > div:first-child {
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(2) {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(2) .text-5xl {
+    font-size: 1.85rem;
+    line-height: 1;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(2) p {
+    margin-top: 0.1rem;
+    font-size: 10px;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) {
+    grid-row: 3;
+    grid-column: 1;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 0.2rem;
+    margin-top: 0.4rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.22rem 0.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) .rd-label {
+    min-width: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) .text-lg {
+    flex: none;
+    font-size: 0.85rem;
+    line-height: 1.15;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) .text-\[11px\] {
+    display: none;
+  }
+
+  .rd-library-layout .rd-champ-personal-insight {
+    grid-row: 2 / 5;
+    grid-column: 2;
+    align-self: stretch;
+    margin-top: 0;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .rd-library-layout .rd-champ-personal-insight .rd-label {
+    margin-bottom: 0.2rem;
+    font-size: 8.5px;
+  }
+
+  .rd-library-layout .rd-champ-personal-insight .text-sm {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .rd-library-layout .rd-champ-personal-warning {
+    grid-row: 4;
+    grid-column: 1;
+    margin-top: 0.3rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-personal-warning p {
+    font-size: 10px;
+  }
+
+  /* Meta: cada línea es una tarjeta "emblema". Izquierda: el tier grande con
+     brillo y la línea debajo. Derecha: WR / PR / BR con una barra de nivel cada
+     uno (--rd-fill viene del JSX) y al pie el score con su barra y la posición
+     como chip. Varias líneas van lado a lado. */
+  .rd-library-layout .rd-champ-meta-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0.4rem 0.6rem;
+    overflow: hidden;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid rgba(212, 175, 55, 0.16);
+    border-radius: 0.9rem;
+    background:
+      radial-gradient(circle at 0% 50%, rgba(212, 175, 55, 0.1), transparent 45%),
+      linear-gradient(135deg, hsl(222 36% 13% / 0.9), hsl(222 36% 9% / 0.9));
+  }
+
+  /* Emblema: tier arriba, línea abajo, separado por una línea vertical. */
+  .rd-library-layout .rd-champ-meta-list > div > div:first-child {
+    grid-row: 1 / 3;
+    grid-column: 1;
+    flex-direction: column-reverse;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-bottom: 0;
+    padding-right: 0.6rem;
+    border-right: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div > div:first-child > span:last-child {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 0.55rem;
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.06),
+      0 0 14px rgba(212, 175, 55, 0.35);
+    font-size: 1rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div > div:first-child > span:first-child {
+    padding: 0 0.35rem;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  /* WR / PR / BR con barra de nivel. */
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 {
+    grid-row: 1;
+    grid-column: 2;
+    gap: 0.3rem;
+  }
+
+  /* Etiqueta y número en la misma línea. */
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 > div {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding: 0.3rem 0.45rem 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.55rem;
+    background: rgba(255, 255, 255, 0.035);
+    text-align: left;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 > div::after {
+    content: "";
+    position: absolute;
+    right: 0.45rem;
+    bottom: 0.28rem;
+    left: 0.45rem;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--primary)) 0 var(--rd-fill, 0%),
+      rgba(255, 255, 255, 0.08) var(--rd-fill, 0%) 100%
+    );
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-label {
+    margin-bottom: 0;
+    font-size: 8px;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 p + p {
+    font-size: 12px;
+    line-height: 1.15;
+  }
+
+  /* Pie: score con barra y posición como chip. */
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer {
+    display: flex;
+    grid-row: 2;
+    grid-column: 2;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:first-child {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: baseline;
+    gap: 0.3rem;
+    padding-bottom: 0.3rem;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:first-child > span {
+    margin-left: 0;
+    font-size: 0.82rem;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:first-child::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      #f7d774 0,
+      hsl(var(--primary)) var(--rd-fill, 0%),
+      rgba(255, 255, 255, 0.08) var(--rd-fill, 0%) 100%
+    );
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:last-child {
+    flex: none;
+    padding: 0.1rem 0.45rem;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.08);
+    color: hsl(var(--primary));
+    font-size: 9.5px;
+    font-weight: 600;
+  }
+
+  /* La tarjeta de Meta llena el alto: la lista y cada línea se estiran y la
+     evolución absorbe el espacio que sobra. */
+  .rd-library-layout .rd-champ-sections .rd-champ-meta {
+    display: flex;
+    flex-direction: column;
+    padding: 0.55rem 0.7rem;
+    scrollbar-width: none;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-champ-meta > div:first-child {
+    margin-bottom: 0.4rem;
+  }
+
+  /* Flechas para cambiar de posición cuando el campeón tiene varias. */
+  .rd-library-layout .rd-champ-meta-nav > button {
+    display: flex;
+    width: 1.6rem;
+    height: 1.6rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    background: hsl(var(--secondary) / 0.5);
+    color: hsl(var(--muted-foreground));
+    transition: color 160ms ease, border-color 160ms ease;
+  }
+
+  .rd-library-layout .rd-champ-meta-nav > button:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    color: hsl(var(--primary));
+  }
+
+  .rd-library-layout .rd-champ-meta-nav > span {
+    min-width: 2.25rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .rd-champ-meta::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-library-layout .rd-champ-meta > .rd-champ-meta-list {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div:has(> .rd-champ-meta-evolution) {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  /* Evolución: encabezado con el cambio total, curva del score y una columna
+     por parche con su tier. */
+  .rd-library-layout .rd-champ-meta-evolution {
+    display: flex;
+    min-height: 0;
+    grid-row: 3;
+    grid-column: 1 / -1;
+    flex-direction: column;
+    gap: 0.15rem;
+    overflow: hidden;
+    padding: 0.3rem 0.5rem 0.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.7rem;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-empty {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution .rd-label {
+    margin-bottom: 0;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-head .text-xs {
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-chart {
+    position: relative;
+    /* Se adapta al alto que queda; el mínimo es chico para no desbordar. */
+    min-height: 1rem;
+    flex: 1 1 0;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-chart svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-dot {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 2px solid hsl(222 36% 11%);
+    border-radius: 999px;
+    background: hsl(var(--primary));
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.55);
+    transform: translate(-50%, -50%);
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-patches {
+    display: grid;
+    flex: none;
+    gap: 0.25rem;
+  }
+
+  /* Tier, parche y fecha (dd/mm) en una sola línea; el score de cada parche se
+     lee en la curva (y en el tooltip de la columna). */
+  .rd-library-layout .rd-champ-meta-evolution-patches > li {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    font-size: 9px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-patches > li > span:nth-child(3) {
+    font-size: 8.5px;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-patches > li > span:first-child {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 0.3rem;
+    font-size: 9px;
   }
 }
 
@@ -1585,6 +5702,642 @@
   }
 }
 
+/* Sugeridor (Builds y Campeones) en smartphone horizontal: asistente a viewport
+   completo, un paso por vez y el resultado como último paso (lo agrega el JSX).
+   - Fila 1: título compacto, selector Builds / Campeones y píldora "Intelligence".
+   - Centro: el paso activo (o el resultado) a todo el ancho y alto restante.
+   - Pie: barra de navegación con Atrás a la izquierda, los pasos al centro y
+     Siguiente / Generar a la derecha (al alcance de los pulgares).
+   El aside se "disuelve" (display: contents) para ubicar sus partes en la grilla.
+   Los selectores llevan .rd-v2-build-page porque las variantes md:/xl: de
+   Tailwind se emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-v2-build-page) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-v2-build-page {
+    height: 100%;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-v2-build-page .rd-v2-build {
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+
+  /* Encabezado: kicker y descripción sobran; el selector de pestañas va en línea. */
+  .rd-v2-build-page .rd-v2-build-header {
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:first-child,
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > p {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header h1 {
+    overflow: hidden;
+    font-size: 1.5rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:last-child {
+    flex: none;
+    margin-top: 0;
+    padding: 0.15rem;
+    border-radius: 0.65rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:last-child > button {
+    padding: 0.25rem 0.7rem;
+    border-radius: 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill {
+    flex: none;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 0.65rem;
+    box-shadow: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill span {
+    font-size: 11px;
+  }
+
+  /* Grilla del asistente: contenido arriba, error (si hay) y barra al pie. */
+  .rd-v2-build-page .rd-v2-build-body {
+    height: 100%;
+    grid-template-columns: 7rem minmax(0, 1fr) 11rem;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    align-items: stretch;
+    gap: 0.45rem 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside,
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child {
+    display: contents;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside-scroll,
+  .rd-v2-build-page .rd-v2-build-result {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-v2-build-aside-scroll::-webkit-scrollbar,
+  .rd-v2-build-result::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Un paso por vez: el formulario o el resultado. */
+  .rd-v2-build-page .rd-v2-build-body:not(.rd-v2-result-step) > .rd-v2-build-result,
+  .rd-v2-build-page .rd-v2-result-step .rd-v2-build-aside-scroll {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > p {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    padding: 0.3rem 0.6rem;
+    font-size: 11px;
+  }
+
+  /* Barra de navegación */
+  .rd-v2-build-page .rd-v2-build-aside > nav {
+    grid-row: 3;
+    grid-column: 2;
+    align-self: center;
+    padding: 0.2rem;
+    border-radius: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav ol {
+    gap: 0.2rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav button {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.25rem;
+    font-size: 10.5px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav button > span {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 9px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button {
+    grid-row: 3;
+    align-self: center;
+    min-height: 2.25rem;
+    padding-block: 0.35rem;
+    border-radius: 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button:not(:last-child) {
+    grid-column: 1;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button:last-child {
+    grid-column: 3;
+  }
+
+  /* Paso activo: tarjeta a todo el ancho y alto. */
+  .rd-v2-build-page .rd-v2-step-card {
+    height: 100%;
+    min-height: 0;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > div:first-child {
+    margin-bottom: 0.55rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .rd-card-title {
+    font-size: 12px;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .rd-status-pill {
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    font-size: 10.5px;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .rd-label {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card label.rd-label {
+    margin-bottom: 0.3rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card textarea {
+    min-height: 0;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  /* Builds · Campeón: selectores a la izquierda, temática a la derecha. */
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) > .space-y-2\.5 {
+    grid-row: 2;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .space-y-2\.5 > * + * {
+    margin-top: 0.6rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid:has(> button[aria-haspopup]) {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t {
+    grid-row: 2;
+    grid-column: 2;
+    min-height: 0;
+    margin-top: 0;
+    padding: 0 0 0 1rem;
+    border-top: 0;
+    border-left: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t > div:first-child {
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t > div:last-child {
+    margin-top: 0.3rem;
+    font-size: 10px;
+  }
+
+  /* Builds · Aliados / Enemigos: una ficha vertical por línea, con retrato grande. */
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly {
+    display: grid;
+    min-height: 0;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > .rd-label {
+    text-align: center;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] {
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 0.9rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup]:has(> img) {
+    border-color: hsl(var(--primary) / 0.35);
+    background: hsl(var(--primary) / 0.06);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > :first-child {
+    width: min(3.75rem, 100%);
+    height: auto;
+    aspect-ratio: 1;
+    font-size: 1.1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > span:nth-child(2) {
+    width: 100%;
+    flex: none;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > svg {
+    display: none;
+  }
+
+  /* Campeones · Pool: selector arriba y chips en tres columnas. */
+  .rd-v2-build-page .rd-v2-step-card > .relative.mb-3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .relative > button[aria-haspopup] {
+    min-height: 2.4rem;
+    padding-block: 0.3rem;
+    font-size: 0.82rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: 0.4rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 > * + * {
+    margin-top: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 > * {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .flex-1.items-center.justify-center p {
+    font-size: 12px;
+  }
+
+  /* Campeones · Parámetros: línea, objetivo y contexto en tres columnas. */
+  .rd-v2-build-page .rd-v2-step-card.gap-3 {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem 1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card.gap-3 > div:first-child {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card.gap-3 > div:not(:first-child) {
+    min-height: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card select {
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid-cols-2 {
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid-cols-2 > button {
+    gap: 0.4rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 0.65rem;
+    font-size: 11px;
+  }
+
+  /* Resultado: cargando / error a todo el alto. */
+  .rd-v2-build-page .rd-v2-build-placeholder {
+    height: 100%;
+    min-height: 0;
+    padding: 1rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder > div {
+    height: 100%;
+    min-height: 0;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder > div > div:first-child {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder > div > div:first-child svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder .rd-label {
+    margin-bottom: 0.25rem;
+    font-size: 9.5px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder h2 {
+    font-size: 1.45rem;
+    line-height: 1.05;
+  }
+
+  .rd-v2-build-page .rd-v2-build-placeholder h2 ~ p {
+    margin-top: 0.35rem;
+    font-size: 12px;
+  }
+
+  /* Éxito: franja de íconos fija y el análisis con el alto restante. */
+  .rd-v2-build-page .rd-v2-build-success {
+    height: 100%;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > * {
+    flex-shrink: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > .rd-v2-build-analysis {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 0.6rem 0.75rem;
+  }
+
+  /* Build (Builds): íconos a la izquierda (35%) y el análisis a la derecha (65%)
+     con todo el alto, para leer más texto sin scroll. */
+  .rd-v2-build-page .rd-v2-build-success:has(> section:first-child) {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 13fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  /* Objetos, runas y hechizos apilados, cada grupo en su fila. Sin wrap: con
+     flex-wrap (de Tailwind) los grupos que no entraban saltaban a otra columna. */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    gap: 0.45rem;
+    padding: 0.55rem 0.65rem;
+    overflow: hidden;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div {
+    flex: none;
+  }
+
+  /* Separadores horizontales entre grupos (en vez de los verticales de md:). */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div + div {
+    padding-top: 0.45rem;
+    padding-left: 0;
+    border-top: 1px solid hsl(var(--border) / 0.5);
+    border-left: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .rd-label {
+    font-size: 9px;
+  }
+
+  /* Íconos fluidos: los tres grupos comparten una grilla de 6 columnas (objetos
+     llenan la fila, runas 5 y hechizos 2), así entran siempre en una línea y
+     quedan alineados entre sí. */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    justify-items: start;
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .group {
+    width: 100%;
+    max-width: 2.6rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .group > :first-child {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  /* Métricas del pool (Campeones): cuatro en una fila baja. */
+  .rd-v2-build-page .rd-v2-build-success > div:first-child {
+    gap: 0.4rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child > .rd-mini-action {
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child > .rd-mini-action > div {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child .rd-mini-action > p {
+    font-size: 12.5px;
+  }
+
+  /* Pestañas del análisis: se reparten el ancho de la tarjeta; si no entran en
+     una línea, el texto de cada una pasa a dos líneas en vez de cortarse. */
+  .rd-v2-build-page .rd-v2-build-analysis > [role="tablist"] {
+    width: 100%;
+    flex-wrap: nowrap;
+    align-self: stretch;
+    margin-bottom: 0.45rem;
+    padding: 0.2rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis > [role="tablist"] > button {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding: 0.3rem 0.4rem;
+    font-size: 10.5px;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  /* Explicación de objetos, runas y hechizos completa (sin "…"): el panel ya
+     tiene scroll propio si hace falta. */
+  .rd-v2-build-page .rd-v2-reason {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  /* Con el texto completo, cada fila toma su alto (auto-rows-fr las igualaba a la
+     más alta y dejaba huecos). */
+  .rd-v2-build-page .rd-v2-build-analysis-body .auto-rows-fr {
+    grid-auto-rows: auto;
+    align-content: start;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  /* Texto del análisis más compacto para que entre sin scroll en la mayoría
+     de las builds (la IA puede devolver textos largos: ahí sí scrollea). */
+  .rd-v2-build-page .rd-v2-build-analysis-body {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .text-\[13px\] {
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .space-y-2 > * + * {
+    margin-top: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .gap-3 {
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .gap-2\.5 {
+    gap: 0.45rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .rounded-xl {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis-body .rounded-xl .mb-1\.5 {
+    margin-bottom: 0.25rem;
+  }
+
+  /* Recomendaciones (Campeones): lista angosta y detalle con más aire. */
+  .rd-v2-build-page .rd-rec-layout {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol > li + li {
+    margin-top: 0.3rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol button {
+    gap: 0.45rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol button > :first-child {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > div {
+    padding: 0.65rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout h3 {
+    font-size: 1.1rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout img.h-12 {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+}
+
+/* Teléfonos chicos en horizontal: la píldora de "Intelligence" no entra y la
+   barra de navegación cede ancho a los pasos. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 759px) {
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-body {
+    grid-template-columns: 5.5rem minmax(0, 1fr) 9rem;
+  }
+}
+
 @media (min-width: 1024px) and (min-height: 700px) {
   .rd-main-content:has(.rd-stats-layout) {
     overflow: hidden;
@@ -1623,6 +6376,571 @@
 
   .rd-stats-layout .rd-analytics-panel .rd-card {
     height: 100%;
+  }
+}
+
+/* Pool de campeones: el lienzo de burbujas escala con la tarjeta (posiciones en %). */
+.rd-pool-bubbles {
+  width: min(100%, 380px);
+}
+
+/* Flechas del carril de Rendimiento: solo existen en smartphone horizontal. */
+.rd-stats-track-arrow {
+  display: none;
+}
+
+/* Estadísticas en smartphone horizontal: todo entra en el viewport.
+   Fila 1: título + "Basado en…" en línea y filtros compactos a la derecha.
+   Fila 2: pestañas. Debajo, el panel activo con el alto restante:
+   - Rendimiento: hero en una columna (splash de fondo, winrate arriba y 2x2 de
+     KDA / lados / pool) y un carril horizontal con las tres tarjetas.
+   - Matchups y sinergias: las dos listas lado a lado, cada una con scroll propio.
+   - Coach: encabezado en una franja fina y un consejo por página, a lo ancho.
+   Los selectores llevan .rd-stats-layout porque las variantes md:/lg:/xl: de
+   Tailwind se emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-stats-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-stats-layout {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  /* Encabezado */
+  .rd-stats-layout .rd-stats-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-title {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-title > div:first-child {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-title h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-title p {
+    margin-top: 0;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-stats-filters {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    gap: 0.4rem;
+  }
+
+  /* El texto del label queda para lectores de pantalla; visualmente sobra. */
+  .rd-stats-layout .rd-stats-filter {
+    width: 8.25rem;
+    min-width: 0;
+    font-size: 0;
+  }
+
+  .rd-stats-layout .rd-stats-filter-patch {
+    width: 7.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-filter select {
+    height: 1.85rem;
+    margin-top: 0;
+    padding: 0 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  /* Pestañas */
+  .rd-stats-layout > .rd-panel-tabs {
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-stats-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-analytics-panel {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-stats-layout .rd-card-title {
+    font-size: 12px;
+  }
+
+  /* Rendimiento: carril 1x4 (hero, campeón, línea y pool) con dos tarjetas por
+     vista; se navega con swipe o con las flechas superpuestas en los bordes. */
+  .rd-stats-layout .rd-stats-overview-panel {
+    position: relative;
+  }
+
+  .rd-stats-layout .rd-stats-track {
+    height: 100%;
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-cards {
+    display: contents;
+  }
+
+  .rd-stats-layout .rd-stats-track > .rd-stats-hero,
+  .rd-stats-layout .rd-stats-cards > * {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex: 0 0 calc((100% - 0.5rem) / 2);
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 20;
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 999px;
+    background: rgba(11, 15, 26, 0.82);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    color: hsl(var(--primary));
+    backdrop-filter: blur(6px);
+    transform: translateY(-50%);
+    transition: opacity 160ms ease;
+  }
+
+  .rd-stats-track-arrow-prev {
+    left: 0.35rem;
+  }
+
+  .rd-stats-track-arrow-next {
+    right: 0.35rem;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero {
+    min-height: 0;
+  }
+
+  /* Splash a tamaño completo, con una sombra que se cierra hacia los datos. */
+  .rd-stats-layout .rd-stats-hero-art {
+    inset: 0;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art > div {
+    width: 100%;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 18%;
+    filter: brightness(0.62) saturate(1.12) !important;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art img + div {
+    inset: 0;
+    width: auto;
+    background: linear-gradient(
+      180deg,
+      hsl(222 36% 9% / 0.15) 0%,
+      hsl(222 36% 9% / 0.55) 38%,
+      hsl(222 36% 9% / 0.92) 62%,
+      hsl(222 36% 9% / 0.96) 100%
+    );
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid {
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child {
+    grid-column: 1 / -1;
+    padding: 0.35rem 0.5rem;
+    transform: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > div {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child span {
+    font-size: 0.95rem;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > p:last-child {
+    margin-top: 0.2rem;
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents > * {
+    min-width: 0;
+    padding: 0.3rem 0.35rem;
+    border-bottom: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    transform: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents > :nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid .rd-label {
+    margin-bottom: 0.15rem;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-4xl {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-xs {
+    margin-top: 0.1rem;
+    font-size: 9.5px;
+    line-height: 1.2;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card {
+    height: 100%;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child {
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:last-child {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child p {
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child p + p {
+    font-size: 9px;
+  }
+
+  /* Winrate por campeón: lista con scroll propio. */
+  .rd-stats-layout .rd-stats-champ-list {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 1fr);
+    /* max-content: con "auto" y el min-h-0 de cada fila, la grilla comprimía las
+       filas para que entraran en el alto y se pisaban; así la lista scrollea. */
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-champ-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Filas sin borde, para que el solape no dibuje líneas cruzadas. */
+  .rd-stats-layout .rd-stats-champ-list > * {
+    min-height: auto;
+    padding: 0.3rem 0.45rem;
+    border: 0;
+  }
+
+  /* Solape leve entre filas: los retratos apenas se tocan. */
+  .rd-stats-layout .rd-stats-champ-list > * + * {
+    margin-top: -0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list > * > div:first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-lane-chart {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Pool: el lienzo se ajusta al alto y al ancho disponibles. */
+  .rd-stats-layout .rd-pool-frame {
+    min-height: 0;
+    container-type: size;
+  }
+
+  .rd-stats-layout .rd-pool-bubbles {
+    width: min(100cqw, 172.7cqh);
+  }
+
+  /* Matchups y sinergias: dos columnas con scroll propio. */
+  .rd-stats-layout .rd-stats-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-pair > * {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-stats-pair .rd-card {
+    height: 100%;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-pair .rd-card > div:last-child {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-matchup-list {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-matchup-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-matchup-list > * + * {
+    margin-top: 0.3rem;
+  }
+
+  .rd-stats-layout .rd-matchup-list .text-\[13px\] {
+    font-size: 12px;
+  }
+
+  .rd-stats-layout .rd-matchup-list .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  /* Coach: encabezado en una franja fina y un consejo por página, a lo ancho.
+     Izquierda: dominio, título, tesis (con scroll propio) y evidencia.
+     Derecha: el consejo como panel destacado, siempre visible entero. */
+  .rd-stats-layout .rd-stats-coach {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.75rem 0.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header img {
+    width: 1.9rem;
+  }
+
+  /* Kicker, descripción y nota de confianza sobran: el chip de cada consejo ya
+     indica su respaldo. */
+  .rd-stats-layout .rd-stats-coach-header > div:first-child > div > div,
+  .rd-stats-layout .rd-stats-coach-header h2 + p,
+  .rd-stats-layout .rd-stats-coach-header > div:last-child > p {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header h2 {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-coach-grid {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .rd-stats-layout .rd-stats-insight {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 0.85rem;
+    padding: 0.65rem 0.75rem 0.65rem 1rem;
+    border-radius: 0.9rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) p {
+    margin-bottom: 0.2rem;
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-insight h3 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) > span {
+    padding: 0.15rem 0.4rem;
+    font-size: 9px;
+  }
+
+  /* Tesis: ocupa el alto que sobra y scrollea si es larga. */
+  .rd-stats-layout .rd-stats-insight-body {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+    margin-top: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p:first-child {
+    margin-bottom: 0.25rem;
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p + p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .rd-stats-layout .rd-stats-insight-evidence {
+    grid-column: 1;
+    grid-row: 3;
+    flex-wrap: nowrap;
+    gap: 0.3rem;
+    margin-top: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-evidence::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-evidence > span {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-stats-insight-spacer {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 0.8rem;
+    overflow-y: auto;
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 0.75rem;
+    background: rgba(212, 175, 55, 0.06);
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-action::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action svg {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* "Consejo:" pasa a ser el título del panel. */
+  .rd-stats-layout .rd-stats-insight-action p > span:first-child {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: hsl(var(--primary));
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 }
 

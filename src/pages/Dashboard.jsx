@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  X,
 } from 'lucide-react';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
@@ -25,6 +26,8 @@ import { computeInsights } from '@/hooks/useInsights';
 import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda } from '@/domain/matchStats';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
+
+const COACH_IMAGE_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png';
 
 const DASHBOARD_TABS = [
   { id: 'summary', label: 'Resumen' },
@@ -74,6 +77,9 @@ export default function Dashboard() {
   const [patchFilter, setPatchFilter] = useState('');
   const [activeTab, setActiveTab] = useState('summary');
   const [mainIndex, setMainIndex] = useState(0);
+  const [insightOpen, setInsightOpen] = useState(false);
+  // Línea visible en Meta en mobile horizontal; en desktop se ven todas.
+  const [metaLane, setMetaLane] = useState('top');
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
 
   const { data: allMatches = [] } = useQuery({
@@ -105,9 +111,10 @@ export default function Dashboard() {
     queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: recentSnapshotKeys }),
     enabled: recentSnapshotKeys.length > 0,
   });
-  const tierlist = latestSuccessExec?.snapshot_key
-    ? tierlistHistory.filter(entry => entry.snapshot_key === latestSuccessExec.snapshot_key)
-    : [];
+  const latestSnapshotKey = latestSuccessExec?.snapshot_key;
+  const tierlist = useMemo(() => (latestSnapshotKey
+    ? tierlistHistory.filter(entry => entry.snapshot_key === latestSnapshotKey)
+    : []), [tierlistHistory, latestSnapshotKey]);
 
   const { data: champions = [] } = useQuery({ queryKey: ['champions'], queryFn: () => Champion.list('name') });
   const { data: wrItems = [] } = useQuery({ queryKey: ['wr-items'], queryFn: () => WRItem.list('name') });
@@ -118,8 +125,7 @@ export default function Dashboard() {
     champion => champion.name?.toLowerCase() === name?.toLowerCase()
   )?.image_url;
   const getSpellImg = (name) => spellsData.find(spell => spell.name === name)?.image_url;
-  const matches = filterByPatch(allMatches, patchFilter);
-  const builds = filterByPatch(allBuilds, patchFilter);
+  const builds = useMemo(() => filterByPatch(allBuilds, patchFilter), [allBuilds, patchFilter]);
 
   const getMatchTimestamp = (match) => {
     if (!match?.date) return 0;
@@ -129,7 +135,12 @@ export default function Dashboard() {
     return new Date(year, month - 1, day, hours || 0, minutes || 0).getTime();
   };
 
-  const sortedMatches = [...matches].sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a));
+  // Los cálculos pesados se memorizan: cambiar de pestaña re-renderiza el Dashboard y,
+  // sin esto, se recalculaba todo (incluido computeInsights) en cada clic.
+  const sortedMatches = useMemo(
+    () => [...filterByPatch(allMatches, patchFilter)].sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a)),
+    [allMatches, patchFilter],
+  );
   const latestMatches = sortedMatches.slice(0, 10);
   const totalMatches = sortedMatches.length;
   const wins = sortedMatches.filter(match => match.result === 'win').length;
@@ -154,20 +165,22 @@ export default function Dashboard() {
     ? (currentStreak === -1 ? sortedMatches.length : currentStreak)
     : 0;
 
-  const championGroups = sortedMatches.reduce((groups, match) => {
-    const name = match.own_champion_name;
-    if (!name) return groups;
-    if (!groups[name]) groups[name] = [];
-    groups[name].push(match);
-    return groups;
-  }, {});
-  const topChamps = Object.entries(championGroups).sort((a, b) => b[1].length - a[1].length);
+  const topChamps = useMemo(() => {
+    const championGroups = sortedMatches.reduce((groups, match) => {
+      const name = match.own_champion_name;
+      if (!name) return groups;
+      if (!groups[name]) groups[name] = [];
+      groups[name].push(match);
+      return groups;
+    }, {});
+    return Object.entries(championGroups).sort((a, b) => b[1].length - a[1].length);
+  }, [sortedMatches]);
   const mostUsed = topChamps[0];
   const mostUsedWR = mostUsed
     ? (mostUsed[1].filter(match => match.result === 'win').length / mostUsed[1].length) * 100
     : null;
 
-  const topInsight = computeInsights({
+  const topInsight = useMemo(() => computeInsights({
     matches: sortedMatches,
     tierlist: tierlistHistory,
     wrItems,
@@ -177,7 +190,7 @@ export default function Dashboard() {
     spells: spellsData,
     limit: 1,
     minimum: 1,
-  })[0] || null;
+  })[0] || null, [sortedMatches, tierlistHistory, wrItems, builds, champions, runes, spellsData]);
 
   const bestRecentMatch = [...recentSevenDayMatches]
     .filter(match => match.result === 'win')
@@ -222,7 +235,7 @@ export default function Dashboard() {
       .slice(0, 3),
   }));
 
-  const mainChampions = topChamps.slice(0, 3).map(([name, championMatches]) => {
+  const mainChampions = useMemo(() => topChamps.slice(0, 3).map(([name, championMatches]) => {
     const meta = tierlist
       .filter(entry => entry.champion_name?.toLowerCase() === name.toLowerCase())
       .sort((a, b) => Number(b.ranking_final || 0) - Number(a.ranking_final || 0))[0] || null;
@@ -273,7 +286,7 @@ export default function Dashboard() {
       position: rankIndex >= 0 ? rankIndex + 1 : null,
       insight,
     };
-  });
+  }), [topChamps, tierlist]);
   const selectedMain = mainChampions[Math.min(mainIndex, Math.max(mainChampions.length - 1, 0))];
 
   const changeMain = (direction) => {
@@ -300,12 +313,12 @@ export default function Dashboard() {
     <div className="rd-page rd-dashboard-tabs">
       <header className="rd-dashboard-header">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="rd-dashboard-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Centro Táctico</span>
           </div>
           <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{activeHeading.title}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
+          <p className="rd-dashboard-description mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
         </div>
 
         <div className="rd-panel-tabs rd-dashboard-tablist" role="tablist" aria-label="Secciones del Dashboard">
@@ -336,6 +349,7 @@ export default function Dashboard() {
             <Sparkles size={14} className="text-primary" />
           </div>
           <PatchFilter
+            className="rd-dashboard-patch"
             value={patchFilter}
             onChange={(value) => { setPatchFilter(value); setMainIndex(0); }}
             patches={[
@@ -350,7 +364,7 @@ export default function Dashboard() {
       <main className="rd-dashboard-panel rd-analytics-panel">
         {activeTab === 'summary' && (
           <section className="rd-dashboard-summary" aria-label="Resumen">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-h-0">
+            <div className="rd-dashboard-stats grid grid-cols-2 lg:grid-cols-4 gap-3 min-h-0">
               <article className="rd-card rd-dashboard-stat">
                 <div className="flex items-center justify-between"><span className="rd-label">Partidas</span><Swords size={17} className="text-primary" /></div>
                 <p className="font-rajdhani rd-dashboard-stat-value text-primary">{totalMatches || '—'}</p>
@@ -361,13 +375,13 @@ export default function Dashboard() {
                 <p className={`font-rajdhani rd-dashboard-stat-value ${wrColor}`}>{winrate === null ? '—' : `${winrate.toFixed(1)}%`}</p>
                 <p className="text-xs text-muted-foreground">Rendimiento global filtrado</p>
               </article>
-              <article className="rd-card rd-dashboard-stat">
+              <article className="rd-card rd-dashboard-stat rd-dashboard-stat-with-avatar">
                 <div className="flex items-center justify-between"><span className="rd-label">Campeón más usado</span><Target size={17} className="text-accent" /></div>
-                <div className="flex items-center gap-3 min-h-0">
-                  {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10')}
-                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="text-xs text-muted-foreground">Pick principal del historial</p></div>
+                <div className="rd-dashboard-stat-champ flex items-center gap-3 min-h-0">
+                  {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10 rd-dashboard-stat-avatar')}
+                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="rd-dashboard-stat-hint text-xs text-muted-foreground">Pick principal del historial</p></div>
                 </div>
-                {mostUsed ? <div className="flex items-center gap-2">
+                {mostUsed ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
                   <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{mostUsed[1].length} partidas</span>
                   <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${mostUsedWR >= 50 ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{mostUsedWR.toFixed(0)}% WR</span>
                 </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
@@ -396,34 +410,48 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground">Picks diferentes registrados</p>
               </article>
 
-              <article className="rd-card rd-dashboard-stat rd-card-watermark">
-                <div className="flex items-center justify-between"><span className="rd-label">Mejor partida reciente</span><Trophy size={17} className="text-green-400" /></div>
-                {bestRecentMatch ? <div className="flex items-center gap-3 min-h-0">
-                  {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10')}
+              <article className={`rd-card rd-dashboard-stat rd-card-watermark ${bestRecentMatch ? 'rd-dashboard-stat-with-avatar' : ''}`}>
+                <div className="flex items-center justify-between"><span className="rd-label">Mejor partida<span className="rd-dashboard-label-extra"> reciente</span></span><Trophy size={17} className="text-green-400" /></div>
+                {bestRecentMatch ? <div className="rd-dashboard-stat-champ flex items-center gap-3 min-h-0">
+                  {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10 rd-dashboard-stat-avatar')}
                   <div className="min-w-0 flex-1">
                     <p className="font-rajdhani text-lg font-bold text-foreground truncate">{bestRecentMatch.own_champion_name}</p>
-                    <p className="text-xs text-muted-foreground">{bestRecentMatch.lane} · {formatDate(bestRecentMatch.date)}</p>
+                    <p className="rd-dashboard-stat-hint text-xs text-muted-foreground">{bestRecentMatch.lane} · {formatDate(bestRecentMatch.date)}</p>
                   </div>
                 </div> : <p className="font-rajdhani rd-dashboard-stat-value text-muted-foreground">—</p>}
-                {bestRecentMatch ? <div className="flex items-center gap-2">
+                {bestRecentMatch ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
                   <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${bestRecentMatch.result === 'win' ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{bestRecentMatch.result === 'win' ? 'Victoria' : 'Derrota'}</span>
                   <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{formatKdaLine(bestRecentMatch)} · KDA {getKda(bestRecentMatch).toFixed(2)}</span>
                 </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
               </article>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
-              <article className="rd-card rd-card-watermark p-5 min-h-0 overflow-hidden">
+            <div className="rd-dashboard-side grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
+              <article className="rd-card rd-card-watermark rd-dashboard-insight p-5 min-h-0 overflow-hidden">
                 <div className="flex items-start gap-4 h-full">
-                  <img src="https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png" alt="Rift Deck Coach" className="w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
+                  <img src={COACH_IMAGE_URL} alt="Rift Deck Coach" className="rd-dashboard-insight-art w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
                   <div className="min-w-0 self-center">
-                    <p className="rd-section-kicker">Insight del día</p>
-                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
+                    <p className="rd-section-kicker"><img src={COACH_IMAGE_URL} alt="" className="rd-dashboard-insight-icon" />Insight del día</p>
+                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="rd-dashboard-insight-thesis text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="rd-dashboard-insight-tip text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p><button type="button" className="rd-dashboard-insight-more" onClick={() => setInsightOpen(true)}>Ver consejo <ChevronRight size={12} /></button></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
                   </div>
                 </div>
               </article>
               <GoalsDashboardWidget />
             </div>
+            {/* Solo se abre desde mobile horizontal, donde la tarjeta muestra únicamente el título. */}
+            {insightOpen && topInsight && (
+              <div className="rd-insight-sheet" role="dialog" aria-modal="true" aria-label="Insight del día" onClick={() => setInsightOpen(false)}>
+                <div className="rd-card rd-insight-sheet-panel" onClick={event => event.stopPropagation()}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="rd-label flex items-center gap-2"><img src={COACH_IMAGE_URL} alt="" className="h-[15px] w-[15px] object-contain" />Insight del día</p>
+                    <button type="button" onClick={() => setInsightOpen(false)} className="text-muted-foreground transition-colors hover:text-primary" aria-label="Cerrar"><X size={16} /></button>
+                  </div>
+                  <h2 className="font-rajdhani text-lg font-bold leading-tight text-foreground mt-2">{topInsight.title}</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2">{topInsight.thesis}</p>
+                  <p className="text-xs text-primary mt-3">Consejo: {topInsight.action}</p>
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -487,7 +515,7 @@ export default function Dashboard() {
 
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Análisis de matchups</h2><Link to="/stats" className="rd-link">Ampliar</Link></div>
-              {matchupStats.length ? <div className="grid grid-rows-2 gap-3 min-h-0 flex-1">
+              {matchupStats.length ? <div className="rd-dashboard-matchups grid grid-rows-2 gap-3 min-h-0 flex-1">
                 {[{ title: 'Favorables', rows: bestMatchups, positive: true }, { title: 'Problemáticos', rows: worstMatchups, positive: false }].map(group => <div key={group.title} className={`rd-dashboard-matchup-group rounded-xl border p-2 min-h-0 overflow-hidden ${group.positive ? 'bg-green-500/[0.05] border-green-400/15' : 'bg-red-500/[0.05] border-red-400/15'}`}><p className={`rd-mini-label ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{group.title}</p>{group.rows.map(item => <div key={item.champ} className="rd-dashboard-matchup-row flex items-center gap-2 min-h-0">{renderChampionAvatar(item.champ, 'w-6 h-6')}<span className="text-sm flex-1 truncate">{item.champ}</span><span className="text-[10px] text-muted-foreground">{item.total}p</span><span className={`text-xs font-bold ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{item.wr.toFixed(0)}%</span></div>)}</div>)}
               </div> : <p className="text-sm text-muted-foreground text-center my-auto">Necesitás más partidas para detectar matchups.</p>}
             </article>
@@ -497,9 +525,12 @@ export default function Dashboard() {
         {activeTab === 'meta' && (
           <section className="rd-dashboard-meta" aria-label="Meta">
             <article className="rd-card p-4 min-h-0 overflow-hidden">
-              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">Meta por línea</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Parche {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">Tierlist completa <ChevronRight size={12} /></Link></div>
+              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">Meta por línea</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Parche {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">Tierlist<span className="rd-dashboard-label-extra"> completa</span> <ChevronRight size={12} /></Link></div>
+              <div className="rd-meta-lane-picker" role="tablist" aria-label="Línea">
+                {laneHighlights.map(({ lane }) => <button key={lane} type="button" role="tab" aria-selected={metaLane === lane} aria-label={LANE_LABELS[lane]} title={LANE_LABELS[lane]} onClick={() => setMetaLane(lane)} className={`rd-meta-lane-pick ${metaLane === lane ? 'rd-meta-lane-pick-active' : ''}`}><img src={LANE_ICONS[lane]} alt="" /></button>)}
+              </div>
               <div className="grid grid-cols-5 gap-2 h-[calc(100%-2.75rem)]">
-                {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className="rd-meta-lane-card rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden">
+                {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className={`rd-meta-lane-card ${metaLane === lane ? 'rd-meta-lane-card-active' : ''} rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden`}>
                   <div className="flex items-center gap-2 mb-1.5"><img src={LANE_ICONS[lane]} alt="" className="w-5 h-5 object-contain" /><span className="text-[11px] font-bold text-muted-foreground">{LANE_LABELS[lane]}</span></div>
                   {laneChampions.length ? laneChampions.map((champion, index) => <div key={champion.id || `${champion.champion_name}-${index}`} className="rd-meta-lane-row font-rajdhani flex items-center gap-2 border-t border-border/50 first:border-0">
                     <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(1)}% WR</p></div><TierBadge tier={champion.tier} size="sm" />

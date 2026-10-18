@@ -12,6 +12,7 @@ import RunePicker from './RunePicker';
 import TierBadge from '@/components/ui/TierBadge';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import PatchSelect from '@/components/patches/PatchSelect';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
 
 export default function BuildWorkspace({ champion, tierEntries, items, runes, patches, patchVersion, onPatchChange, existingBuild, onBack }) {
   const isEditing = !!existingBuild;
@@ -31,6 +32,11 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
   const [buildName, setBuildName] = useState(isEditing ? existingBuild.name : `Build de ${champion.name}`);
   const [lane, setLane] = useState(isEditing ? existingBuild.lane || '' : champion.lane?.[0] || '');
   const [saved, setSaved] = useState(false);
+  // Smartphone horizontal: "tu build" (objetos y hechizos) fija a la izquierda y un
+  // panel por vez a la derecha. Los paneles se ocultan con CSS, no se desmontan:
+  // RunePicker inicializa las runas de una build guardada al montarse.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const [panel, setPanel] = useState('items');
 
   const toggleRune = (rune) => {
     setSelectedRunes(prev =>
@@ -209,13 +215,30 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
       </div>
 
       {/* Espacio de trabajo: objetos · runas y hechizos · stats. */}
-      <div className="rd-buildws-body grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.75fr)]">
+      <div data-panel={panel} className="rd-buildws-body grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.75fr)]">
+        {isPhoneLandscape && (
+          <div className="rd-panel-tabs rd-buildws-tabs" role="tablist" aria-label="Paneles de la build">
+            {[['items', 'Objetos'], ['runes', 'Runas'], ['stats', 'Stats']].map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={panel === id}
+                onClick={() => setPanel(id)}
+                className={`rd-panel-tab ${panel === id ? 'rd-panel-tab-active' : ''}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="rd-buildws-items flex min-w-0 flex-col gap-4">
-          <div className="rd-card p-4">
+          <div className="rd-buildws-pool rd-card p-4">
             <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Objetos ({normalItemCount}/5 + botas)</h3></div>
             <ItemPool selectedItems={selectedItems} onRemove={removeItem} />
             {recommendedItems.length > 0 && (
-              <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
+              <div className="rd-buildws-recommended mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
                 <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recomendados</span>
                 <div className="flex min-w-0 flex-wrap gap-1.5">
                   {recommendedItems.map(({ itemName, item }, i) => (
@@ -243,7 +266,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             onRunesInitialized={setSelectedRunes}
           />
 
-          <div className="rd-card p-4">
+          <div className="rd-buildws-spells rd-card p-4">
             <p className="text-sm font-semibold text-foreground mb-3">
               Hechizos ({selectedSpells.length}/2)
             </p>
