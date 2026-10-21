@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ARROW_CLASS =
-  'flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-secondary/70 text-muted-foreground transition-all hover:border-primary/40 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed';
+const ARROW_CLASS = 'rd-arrow h-9 w-9';
 
 /** Rango de elementos visibles (1-based) dentro del carril. */
 function visibleRange(track) {

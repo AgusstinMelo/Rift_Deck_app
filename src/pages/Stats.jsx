@@ -225,7 +225,7 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
               />
             </svg>
 
-            <span className="relative font-rajdhani text-lg font-bold text-green-400 tracking-[-0.08em]">
+            <span className="relative font-rajdhani text-sm font-bold text-green-400 tracking-[-0.06em]">
               {winrate.toFixed(1)}%
             </span>
           </div>
@@ -325,6 +325,14 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
     if (champ.wr >= 50) return 'ring-green-400';
     return 'ring-red-400';
   };
+
+  const getPoolWrTone = (champ) => {
+    if (champ.games < 3) return 'text-yellow-400';
+    if (champ.wr >= 50) return 'text-green-400';
+    return 'text-red-400';
+  };
+
+  const topChamps = [...champArr].sort((a, b) => b.games - a.games).slice(0, 5);
 
   // Pack-placement: itera intentando colocar cada burbuja sin salirse
   // y con mínima superposición. Orden asimétrico por diseño.
@@ -475,6 +483,21 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
           ))}
         </div>
       </div>
+
+      {/* Más jugados: solo en smartphone vertical, donde el lienzo deja alto libre. */}
+      <ul className="rd-stats-pool-list" aria-hidden="true">
+        {topChamps.map(champ => (
+          <li key={champ.name}>
+            {getChampImg(champ.name)
+              ? <img src={getChampImg(champ.name)} alt="" className={`ring-2 ${getRingColor(champ)}`} />
+              : <span className={`ring-2 ${getRingColor(champ)}`} />}
+            <span>{champ.name}</span>
+            <span className="rd-stats-pool-bar"><span style={{ width: `${(champ.games / totalGames) * 100}%` }} /></span>
+            <em>{champ.games}p</em>
+            <strong className={getPoolWrTone(champ)}>{champ.wr.toFixed(0)}%</strong>
+          </li>
+        ))}
+      </ul>
       </div>
     </SectionCard>
   );
@@ -528,7 +551,7 @@ function OverviewTrack({ children }) {
         type="button"
         onClick={() => scrollByCard(-1)}
         disabled={!edges.prev}
-        className="rd-stats-track-arrow rd-stats-track-arrow-prev"
+        className="rd-arrow rd-stats-track-arrow rd-stats-track-arrow-prev"
         aria-label="Tarjetas anteriores"
       >
         <ChevronLeft size={16} />
@@ -537,7 +560,7 @@ function OverviewTrack({ children }) {
         type="button"
         onClick={() => scrollByCard(1)}
         disabled={!edges.next}
-        className="rd-stats-track-arrow rd-stats-track-arrow-next"
+        className="rd-arrow rd-stats-track-arrow rd-stats-track-arrow-next"
         aria-label="Tarjetas siguientes"
       >
         <ChevronRight size={16} />
@@ -1264,10 +1287,10 @@ export default function Stats() {
                     type="button"
                     onClick={() => setCoachPage(Math.max(0, effectiveCoachPage - 1))}
                     disabled={effectiveCoachPage === 0}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-secondary/50 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary disabled:opacity-30"
+                    className="rd-arrow h-7 w-7"
                     aria-label="Consejos anteriores"
                   >
-                    ‹
+                    <ChevronLeft size={15} />
                   </button>
                   <span className="min-w-12 text-center text-[10px] text-muted-foreground">
                     {effectiveCoachPage + 1} / {coachPageCount}
@@ -1276,10 +1299,10 @@ export default function Stats() {
                     type="button"
                     onClick={() => setCoachPage(Math.min(coachPageCount - 1, effectiveCoachPage + 1))}
                     disabled={effectiveCoachPage >= coachPageCount - 1}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-secondary/50 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary disabled:opacity-30"
+                    className="rd-arrow h-7 w-7"
                     aria-label="Consejos siguientes"
                   >
-                    ›
+                    <ChevronRight size={15} />
                   </button>
                 </div>
               )}
