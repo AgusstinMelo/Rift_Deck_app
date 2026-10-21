@@ -16,6 +16,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
+import { PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const BRANCH_COLORS = {
   Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
@@ -39,6 +40,8 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [search, setSearch] = useState('');
   const [branchFilter, setBranchFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialRunes, selectedSlug) : null);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
 
   const { data: runes = [], isLoading } = useQuery({
     queryKey: ['runes'],
@@ -161,6 +164,54 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         .sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), 'es', { sensitivity: 'base' }))
         .slice(0, 6)
     : [];
+
+  // En smartphone (vertical u horizontal): el mismo "dossier" que objetos y campeones, sin
+  // pestañas (la runa solo tiene descripción): identidad compacta arriba y la
+  // descripción con todo el alto que queda (no aplica a la ficha pública).
+  if (selected && (isPhonePortrait || isPhoneLandscape) && !publicBasePath) {
+    const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
+
+    return (
+      <div className="rd-entity-detail">
+        <button
+          onClick={() => {
+            setSelected(null);
+            onClearSelected?.();
+          }}
+          className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={15} />
+          Volver a runas
+        </button>
+
+        <div className="rd-card rd-entity-hero">
+          {selected.image_url
+            ? <img src={selected.image_url} alt={selected.name} className="rd-entity-hero-img rd-entity-hero-img-round" />
+            : <div className="rd-entity-hero-img rd-entity-hero-img-round bg-secondary flex items-center justify-center"><BranchIcon size={26} className="text-primary" /></div>}
+          <div className="min-w-0">
+            {selected.branch && (
+              <div className="rd-entity-hero-pills">
+                <span className={`rd-entity-pill border ${BRANCH_COLORS[selected.branch] || 'bg-secondary border-border text-foreground'}`}>
+                  {selected.branch}
+                </span>
+              </div>
+            )}
+            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{selected.name}</h1>
+          </div>
+        </div>
+
+        <div className="rd-card rd-entity-section">
+          <div className="rd-entity-section-head">
+            <span className="w-6 h-px bg-primary/50" />
+            <h2 className="rd-card-title">Descripción</h2>
+          </div>
+          {selected.description
+            ? <p className="rd-entity-desc text-muted-foreground">{selected.description}</p>
+            : <p className="text-sm text-muted-foreground">Sin descripción.</p>}
+        </div>
+      </div>
+    );
+  }
 
   if (selected) {
     const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;

@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const CATEGORY_LABELS = {
   'Básico': 'Básico',
@@ -25,6 +26,9 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const [section, setSection] = useState('description');
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['writems'],
@@ -231,6 +235,145 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const recommendedAgainst = selected ? resolveChampionList(selected.good_against) : [];
   const avoidAgainst = selected ? resolveChampionList(selected.avoid_against) : [];
 
+  const clearSelected = () => {
+    setSelected(null);
+    setSection('description');
+    onClearSelected?.();
+  };
+
+  const itemImage = (className, iconSize) => (selected?.image_url ? (
+    <img src={selected.image_url} alt={selected.name} className={className} />
+  ) : (
+    <div className={`${className} bg-secondary flex items-center justify-center`}>
+      <Sword size={iconSize} className="text-primary" />
+    </div>
+  ));
+
+  const itemDescription = selected?.description && (
+    <ReactMarkdown
+      components={{
+        p: ({ children }) => <p className="my-1.5">{children}</p>,
+        strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
+      }}
+    >
+      {selected.description.replace(/\\n/g, '\n')}
+    </ReactMarkdown>
+  );
+
+  // En smartphone (vertical u horizontal) la ficha es un "dossier" como la de campeón: identidad
+  // compacta arriba, pestañas y una sección a la vez con todo el alto que queda
+  // (no aplica a la ficha pública).
+  if (selected && (isPhonePortrait || isPhoneLandscape) && !publicBasePath) {
+    const tags = (selected.tags || '').split(',').map(tag => tag.trim()).filter(Boolean);
+    const sectionTabs = [
+      ['description', 'Detalle'],
+      ['matchups', 'Enfrentamientos'],
+    ];
+    const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
+    const matchupGroups = [
+      { id: 'good', title: 'Recomendado vs', icon: CheckCircle2, champions: recommendedAgainst },
+      { id: 'avoid', title: 'Evitar vs', icon: Ban, champions: avoidAgainst },
+    ];
+
+    return (
+      <div className="rd-entity-detail">
+        <button onClick={clearSelected} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft size={15} />
+          Volver a objetos
+        </button>
+
+        <div className="rd-card rd-entity-hero">
+          {itemImage('rd-entity-hero-img', 26)}
+          <div className="min-w-0">
+            <div className="rd-entity-hero-pills">
+              {selected.category && (
+                <span className={`rd-entity-pill border ${CATEGORY_COLORS[selected.category] || 'bg-secondary border-border text-foreground'}`}>
+                  {CATEGORY_LABELS[selected.category] || selected.category}
+                </span>
+              )}
+              {selected.price && (
+                <span className="rd-status-pill">
+                  <Coins size={12} className="inline mr-1 text-primary" />
+                  {selected.price} oro
+                </span>
+              )}
+            </div>
+            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{selected.name}</h1>
+          </div>
+        </div>
+
+        <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label="Secciones del objeto">
+          {sectionTabs.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activeSection === id}
+              onClick={() => setSection(id)}
+              className={`rd-panel-tab ${activeSection === id ? 'rd-panel-tab-active' : ''}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="rd-card rd-entity-section">
+          <div className="rd-entity-section-head">
+            <span className="w-6 h-px bg-primary/50" />
+            <h2 className="rd-card-title">{sectionTabs.find(([id]) => id === activeSection)[1]}</h2>
+          </div>
+
+          {activeSection === 'description' && (
+            <>
+              {/* Estadísticas como chips en una sola fila, antes de la descripción
+                  (si no entran, la fila se desliza de costado). */}
+              {activeStats.length > 0 && (
+                <div className="rd-entity-stats" aria-label="Estadísticas">
+                  {activeStats.map(stat => (
+                    <span key={stat.key} className="rd-entity-stat" title={stat.label}>
+                      <span className="rd-entity-stat-label">{stat.label}</span>
+                      <strong className={`font-rajdhani ${stat.color}`}>+{selected[stat.key]}{stat.unit}</strong>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {itemDescription
+                ? <div className="rd-entity-desc text-muted-foreground">{itemDescription}</div>
+                : <p className="text-sm text-muted-foreground">Sin descripción.</p>}
+              {tags.length > 0 && (
+                <div className="rd-entity-tags">
+                  {tags.map(tag => <span key={tag} className="rd-status-pill">{tag}</span>)}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeSection === 'matchups' && (
+            <div className="rd-entity-matchups">
+              {matchupGroups.map(({ id, title, icon: Icon, champions: groupChampions }) => (
+                <div key={id} className={`rd-mini-action rd-entity-matchup-${id}`}>
+                  <h3><Icon size={14} /> {title}</h3>
+                  {groupChampions.length > 0 ? (
+                    <div className="rd-entity-matchup-list">
+                      {groupChampions.map(champion => (
+                        <div key={champion.id}>
+                          {champion.image_url
+                            ? <img src={champion.image_url} alt={champion.name} />
+                            : <span className="rd-entity-matchup-fallback" />}
+                          <span>{champion.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (selected) {
     return (
       <div className="space-y-6">
@@ -312,14 +455,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
 
                 {selected.description && (
                   <div className="text-muted-foreground text-sm leading-relaxed mt-4 max-w-3xl prose prose-invert prose-p:my-2 prose-strong:text-foreground">
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => <p className="my-1.5">{children}</p>,
-                        strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
-                      }}
-                    >
-                      {selected.description.replace(/\\n/g, '\n')}
-                    </ReactMarkdown>
+                    {itemDescription}
                   </div>
                 )}
 

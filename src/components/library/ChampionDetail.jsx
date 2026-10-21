@@ -19,7 +19,7 @@ import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { championSlug } from '@/utils/championSlug';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 const SCALING_LABEL = {
   earlygame: 'Early Game',
@@ -434,6 +434,7 @@ export default function ChampionDetail({
 }) {
   const { user } = useAuth();
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const [section, setSection] = useState('profile');
   const [metaIndex, setMetaIndex] = useState(0);
 
@@ -587,9 +588,9 @@ export default function ChampionDetail({
     tierEntry: selectedTierEntry,
   });
 
-  // En smartphone horizontal la ficha es un "dossier": identidad fija a la
-  // izquierda y una sección a la vez a la derecha (no aplica a la ficha pública).
-  const useSections = isPhoneLandscape && !publicMode;
+  // En smartphone la ficha es un "dossier": identidad fija (a la izquierda en
+  // horizontal, arriba en vertical) y una sección a la vez (no aplica a la ficha pública).
+  const useSections = (isPhoneLandscape || isPhonePortrait) && !publicMode;
   const sectionTabs = [
     ['profile', 'Perfil'],
     ['stats', 'Estadísticas'],
@@ -599,11 +600,11 @@ export default function ChampionDetail({
   ];
   const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'profile';
   const show = id => !useSections || activeSection === id;
-  // En el dossier horizontal se ve una posición meta por vez (flechas para cambiar).
+  // En el dossier se ve una posición meta por vez (flechas para cambiar).
   const activeMetaIndex = Math.min(metaIndex, Math.max(0, tierData.length - 1));
   const visibleTierData = useSections ? tierData.slice(activeMetaIndex, activeMetaIndex + 1) : tierData;
 
-  // Evolución en el meta (solo en el dossier horizontal): últimos 6 snapshots,
+  // Evolución en el meta (solo en el dossier): últimos 6 snapshots,
   // consultando únicamente las filas de este campeón.
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],

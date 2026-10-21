@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, Minus, RefreshCw, Trophy, Table2, Layers } fr
 import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
@@ -32,6 +32,9 @@ export default function Tierlist() {
   const [tierFilter, setTierFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  // En smartphone el selector de vista va en la línea del parche, no en los filtros.
+  const toggleInHeader = isPhoneLandscape || isPhonePortrait;
   // En smartphone horizontal se entra directo a la tabla (se lee mejor a lo ancho);
   // solo define el valor inicial, girar el teléfono después no cambia la vista.
   const [viewMode, setViewMode] = useState(() => (
@@ -126,7 +129,7 @@ export default function Tierlist() {
     return <Minus size={12} className="text-muted-foreground" />;
   };
 
-  // Selector Por Tier / Tabla. En smartphone horizontal no entra en la fila de
+  // Selector Por Tier / Tabla. En smartphone no entra en la fila de
   // filtros: va en el encabezado, en la línea de "Parche X vs Parche Y".
   const viewToggle = (
     <div className="rd-tierlist-view-toggle flex gap-1 bg-secondary/50 p-1 rounded-xl ml-auto border border-border/60">
@@ -192,7 +195,7 @@ export default function Tierlist() {
               </>
             ) : 'Sin datos de actualización'}
           </p>
-          {isPhoneLandscape && viewToggle}
+          {toggleInHeader && viewToggle}
           </div>
         </div>
 
@@ -246,7 +249,7 @@ export default function Tierlist() {
             onChange={event => setTierFilter(event.target.value)}
             className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">Todos los tiers</option>
+            <option value="all">{isPhonePortrait ? 'Tier' : 'Todos los tiers'}</option>
             {availableTiers.map(tier => (
               <option key={tier} value={tier}>Tier {tier}</option>
             ))}
@@ -271,13 +274,13 @@ export default function Tierlist() {
             >
               {successfulExecs.map(execution => (
                 <option key={execution.id} value={execution.id}>
-                  {execution.patch} · {formatSnapshotDate(execution)}
+                  {isPhonePortrait ? `${execution.patch} · ${formatSnapshotDate(execution).replace(/\/\d{4}$/, '')}` : `${execution.patch} · ${formatSnapshotDate(execution)}`}
                 </option>
               ))}
             </select>
           )}
 
-          {!isPhoneLandscape && viewToggle}
+          {!toggleInHeader && viewToggle}
         </div>
       </div>
 
@@ -361,7 +364,7 @@ export default function Tierlist() {
                             <LaneBadge lane={entry.lane} />
 
                             <span className="text-[11px] text-muted-foreground">
-                              {entry.winrate?.toFixed(1)}% WR
+                              {entry.winrate?.toFixed(1)}%<span className="rd-tier-tile-wr"> WR</span>
                             </span>
                           </div>
                         </div>

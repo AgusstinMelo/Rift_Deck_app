@@ -12,7 +12,7 @@ import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
 import { SegmentedChoice, StatInput } from '@/components/matches/MatchBuilder';
 import { matchKda } from '@/domain/matchStats';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 import { useSpells } from '@/hooks/useSpells';
 
@@ -168,9 +168,10 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole, 
 
 export default function MatchForm({ match, patches = [], defaultPatch = '', onClose, onSaved }) {
   const [step, setStep] = useState('info');
-  // Smartphone horizontal, paso "Tu build": objetos y hechizos fijos a la izquierda y
-  // un panel por vez (objetos / runas) a la derecha, como en el creador de builds.
+  // Smartphone, paso "Tu build": objetos y hechizos fijos (a la izquierda en horizontal,
+  // arriba en vertical) y un panel por vez (objetos / runas), como en el creador de builds.
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const [buildPanel, setBuildPanel] = useState('items');
 
   // Champion & composition
@@ -731,7 +732,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
 
           {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
           <div data-panel={buildPanel} className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-            {isPhoneLandscape && (
+            {(isPhoneLandscape || isPhonePortrait) && (
               <div className="rd-panel-tabs rd-buildstep-tabs" role="tablist" aria-label="Paneles de la build">
                 {[['items', 'Objetos'], ['runes', 'Runas']].map(([id, label]) => (
                   <button

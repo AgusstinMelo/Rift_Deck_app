@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -50,6 +50,9 @@ const DASHBOARD_HEADINGS = {
   },
 };
 
+// Tarjetas de Actividad; en mobile vertical son un carrusel y estos chips saltan entre ellas.
+const ACTIVITY_SLIDES = ['Partidas', 'Builds', 'Matchups'];
+
 const LANE_LABELS = { top: 'TOP', jungler: 'JUNGLA', mid: 'MID', adc: 'ADC', support: 'SUPPORT' };
 const LANE_ICONS = {
   top: 'https://media.base44.com/images/public/6a0005628d71002f05120013/abe747f2d_top.png',
@@ -78,8 +81,10 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('summary');
   const [mainIndex, setMainIndex] = useState(0);
   const [insightOpen, setInsightOpen] = useState(false);
-  // Línea visible en Meta en mobile horizontal; en desktop se ven todas.
+  // Línea visible en Meta en mobile; en desktop se ven todas.
   const [metaLane, setMetaLane] = useState('top');
+  const activityRef = useRef(null);
+  const [activitySlide, setActivitySlide] = useState(0);
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
 
   const { data: allMatches = [] } = useQuery({
@@ -294,6 +299,21 @@ export default function Dashboard() {
     setMainIndex(current => (current + direction + mainChampions.length) % mainChampions.length);
   };
 
+  // El scroll del carrusel se mapea de forma proporcional: 0 → primera tarjeta, máximo → última.
+  const handleActivityScroll = (event) => {
+    const { scrollLeft, scrollWidth, clientWidth } = event.currentTarget;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll <= 0) return;
+    setActivitySlide(Math.round((scrollLeft / maxScroll) * (ACTIVITY_SLIDES.length - 1)));
+  };
+
+  const goToActivitySlide = (index) => {
+    const carousel = activityRef.current;
+    if (!carousel || index < 0 || index >= ACTIVITY_SLIDES.length) return;
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+    carousel.scrollTo({ left: (maxScroll * index) / (ACTIVITY_SLIDES.length - 1), behavior: 'smooth' });
+  };
+
   const wrColor = winrate === null
     ? 'text-muted-foreground'
     : winrate >= 55 ? 'text-green-400' : winrate >= 45 ? 'text-primary' : 'text-red-400';
@@ -329,7 +349,7 @@ export default function Dashboard() {
               role="tab"
               aria-selected={activeTab === tab.id}
               className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); setActivitySlide(0); }}
             >
               {tab.label}
             </button>
@@ -438,7 +458,7 @@ export default function Dashboard() {
               </article>
               <GoalsDashboardWidget />
             </div>
-            {/* Solo se abre desde mobile horizontal, donde la tarjeta muestra únicamente el título. */}
+            {/* Solo se abre desde mobile, donde la tarjeta muestra únicamente el título. */}
             {insightOpen && topInsight && (
               <div className="rd-insight-sheet" role="dialog" aria-modal="true" aria-label="Insight del día" onClick={() => setInsightOpen(false)}>
                 <div className="rd-card rd-insight-sheet-panel" onClick={event => event.stopPropagation()}>
@@ -456,7 +476,17 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'activity' && (
-          <section className="rd-dashboard-activity" aria-label="Actividad">
+          <>
+          <div className="rd-dashboard-pager" aria-label="Tarjetas de actividad">
+            <button type="button" className="rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide - 1)} disabled={activitySlide === 0} aria-label="Tarjeta anterior"><ChevronLeft size={16} /></button>
+            <div className="rd-dashboard-pager-chips">
+              {ACTIVITY_SLIDES.map((label, index) => (
+                <button key={label} type="button" aria-pressed={activitySlide === index} onClick={() => goToActivitySlide(index)}>{label}</button>
+              ))}
+            </div>
+            <button type="button" className="rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide + 1)} disabled={activitySlide === ACTIVITY_SLIDES.length - 1} aria-label="Tarjeta siguiente"><ChevronRight size={16} /></button>
+          </div>
+          <section ref={activityRef} onScroll={handleActivityScroll} className="rd-dashboard-activity" aria-label="Actividad">
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Últimas partidas</h2><Link to="/matches" className="rd-link">Ver todas</Link></div>
               <div className="rd-dashboard-list rd-dashboard-match-list">
@@ -520,6 +550,7 @@ export default function Dashboard() {
               </div> : <p className="text-sm text-muted-foreground text-center my-auto">Necesitás más partidas para detectar matchups.</p>}
             </article>
           </section>
+          </>
         )}
 
         {activeTab === 'meta' && (

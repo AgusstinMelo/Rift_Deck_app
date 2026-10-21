@@ -12,7 +12,7 @@ import RunePicker from './RunePicker';
 import TierBadge from '@/components/ui/TierBadge';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import PatchSelect from '@/components/patches/PatchSelect';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 export default function BuildWorkspace({ champion, tierEntries, items, runes, patches, patchVersion, onPatchChange, existingBuild, onBack }) {
   const isEditing = !!existingBuild;
@@ -32,10 +32,11 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
   const [buildName, setBuildName] = useState(isEditing ? existingBuild.name : `Build de ${champion.name}`);
   const [lane, setLane] = useState(isEditing ? existingBuild.lane || '' : champion.lane?.[0] || '');
   const [saved, setSaved] = useState(false);
-  // Smartphone horizontal: "tu build" (objetos y hechizos) fija a la izquierda y un
-  // panel por vez a la derecha. Los paneles se ocultan con CSS, no se desmontan:
-  // RunePicker inicializa las runas de una build guardada al montarse.
+  // Smartphone: "tu build" (objetos y hechizos) fija (a la izquierda en horizontal,
+  // arriba en vertical) y un panel por vez. Los paneles se ocultan con CSS, no se
+  // desmontan: RunePicker inicializa las runas de una build guardada al montarse.
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const [panel, setPanel] = useState('items');
 
   const toggleRune = (rune) => {
@@ -209,14 +210,14 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !buildName}
             className="flex shrink-0 items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">
-            <Save size={14} /> {saved ? '¡Guardado!' : 'Guardar Build'}
+            <Save size={14} /> {saved ? '¡Guardado!' : isPhonePortrait ? 'Guardar' : 'Guardar Build'}
           </button>
         </div>
       </div>
 
       {/* Espacio de trabajo: objetos · runas y hechizos · stats. */}
       <div data-panel={panel} className="rd-buildws-body grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.75fr)]">
-        {isPhoneLandscape && (
+        {(isPhoneLandscape || isPhonePortrait) && (
           <div className="rd-panel-tabs rd-buildws-tabs" role="tablist" aria-label="Paneles de la build">
             {[['items', 'Objetos'], ['runes', 'Runas'], ['stats', 'Stats']].map(([id, label]) => (
               <button

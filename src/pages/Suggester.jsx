@@ -36,7 +36,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import V2BuildTab from '@/features/buildV2/V2BuildTab';
 import StepNav from '@/components/suggester/StepNav';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
@@ -600,7 +600,7 @@ function normalizeRecommendations(recommendations, candidates) {
     );
   }
 const LEGACY_STEPS = ['Pool', 'Parámetros'];
-// En smartphone horizontal el asistente ocupa el viewport y las sugerencias son un paso más.
+// En smartphone el asistente ocupa el viewport y las sugerencias son un paso más.
 const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
 
   function LegacySuggester({ tabSelector }) {
@@ -616,8 +616,11 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
   const [view, setView] = useState('recs');
   const [selectedRec, setSelectedRec] = useState(0);
   const { user } = useAuth();
+  // En smartphone (horizontal o vertical) el asistente ocupa el viewport y el resultado es un paso más.
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
-  const steps = isPhoneLandscape ? [...LEGACY_STEPS, 'Sugerencias'] : LEGACY_STEPS;
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const isPhone = isPhoneLandscape || isPhonePortrait;
+  const steps = isPhone ? [...LEGACY_STEPS, 'Sugerencias'] : LEGACY_STEPS;
   const viewStep = Math.min(step, steps.length - 1);
   const onResultStep = viewStep === LEGACY_RESULT_STEP;
 
@@ -700,7 +703,7 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
       return;
     }
 
-    if (isPhoneLandscape) setStep(LEGACY_RESULT_STEP);
+    if (isPhone) setStep(LEGACY_RESULT_STEP);
     setError('');
     setGenerating(true);
     setRecommendations([]);
