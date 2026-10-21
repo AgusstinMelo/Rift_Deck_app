@@ -11,8 +11,7 @@ import { cumulativeProgressPct } from '../engine/evaluateGoal';
 import GoalOutcomeBadge from './GoalOutcomeBadge';
 import { OUTCOME_BAR } from './goalUi';
 
-const ARROW_CLASS =
-  'flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-secondary/70 text-muted-foreground transition-all hover:border-primary/40 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed';
+const ARROW_CLASS = 'rd-arrow h-7 w-7';
 
 /** Un objetivo a la vez: nombre, valor contra meta y estado. */
 function GoalSlide({ item }) {

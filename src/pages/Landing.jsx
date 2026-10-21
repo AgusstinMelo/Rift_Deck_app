@@ -2,22 +2,32 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2, Mail, Lock, Eye, EyeOff, ChevronLeft, ChevronRight, X, ArrowLeft, KeyRound } from 'lucide-react';
-import wordmarkUrl from '@/assets/riftdeck-final.png';
+import logoUrl from '@/assets/riftdeck-logo.png';
+import shotBiblioteca from '@/assets/landing/biblioteca.webp';
+import shotBuilds from '@/assets/landing/builds.webp';
+import shotDashboard from '@/assets/landing/dashboard.webp';
+import shotStatsCoach from '@/assets/landing/estadisticas-coach.webp';
+import shotStatsMatchups from '@/assets/landing/estadisticas-matchups.webp';
+import shotStatsRendimiento from '@/assets/landing/estadisticas-rendimiento.webp';
+import shotObjetivos from '@/assets/landing/objetivos.webp';
+import shotSugeridorBuilds from '@/assets/landing/sugeridor-builds.webp';
+import shotSugeridorCampeones from '@/assets/landing/sugeridor-campeones.webp';
+import shotTierlist from '@/assets/landing/tierlist.webp';
 
+// En el orden del menú lateral.
 const SCREENSHOTS = [
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/16a92a6fb_1_RiftDeck_Dashboard.jpg', label: 'Dashboard' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/e5ad7acc2_2_RiftDeck_ChampDashboard.jpg', label: 'Biblioteca' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/81c02ebae_3_RiftDeck_Build.jpg', label: 'Builds' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/1f65b3a47_4_RiftDeck_Tierlist.jpg', label: 'Tierlist' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/ffa13a6b0_5_RiftDeck_Partidas.jpg', label: 'Partidas' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/834f7ae1f_6_RiftDeck_Stats.jpg', label: 'Estadísticas' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/07aaef9cf_7_RiftDeck_Stats2.jpg', label: 'Estadísticas' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/059cf5ce0_8_RiftDeck_Stats3.jpg', label: 'Estadísticas' },
-  { url: 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/b8a4c5f58_9_RiftDeck_Sugeridor.jpg', label: 'Sugeridor' },
+  { url: shotDashboard, label: 'Dashboard' },
+  { url: shotBiblioteca, label: 'Biblioteca' },
+  { url: shotTierlist, label: 'Tierlist' },
+  { url: shotBuilds, label: 'Builds' },
+  { url: shotObjetivos, label: 'Objetivos' },
+  { url: shotStatsRendimiento, label: 'Estadísticas · Rendimiento' },
+  { url: shotStatsMatchups, label: 'Estadísticas · Matchups generales' },
+  { url: shotStatsCoach, label: 'Estadísticas · Coach' },
+  { url: shotSugeridorCampeones, label: 'Sugeridor de campeones' },
+  { url: shotSugeridorBuilds, label: 'Sugeridor de builds' },
 ];
 
-const LOGO_URL = 'https://media.base44.com/images/public/69f960ee6e584cfa5a577a24/aedbcc40d_FullColor.png';
-const WORDMARK_URL = wordmarkUrl;
 const BG_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/9309d557d_Targon.webp';
 const AUTH_REDIRECT_PATH = '/';
 
@@ -177,17 +187,14 @@ export default function Landing() {
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Card */}
-      <div className="relative z-10 w-full max-w-md mx-4">
+      <div className="rd-landing-shell relative z-10 w-full max-w-md mx-4 py-10 lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:content-center lg:items-center lg:gap-x-16">
         {/* Brand */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <img src={LOGO_URL} alt="" width="56" height="56" className="w-14 h-14 object-contain drop-shadow-[0_0_24px_rgba(77,166,255,.35)]" />
-            <img src={WORDMARK_URL} alt="Rift Deck" height="64" className="h-16 object-contain drop-shadow-[0_0_14px_rgba(212,175,55,.40)]" />
-          </div>
-          <h1 className="text-center font-rajdhani text-xl font-bold text-foreground">
+        <div className="rd-landing-brand flex flex-col items-center mb-8 lg:col-start-1 lg:row-start-1 lg:mb-0">
+          <img src={logoUrl} alt="Rift Deck" height="96" className="rd-landing-logo mb-4 h-24 object-contain" />
+          <h1 className="rd-landing-title text-center font-rajdhani text-xl font-bold text-foreground">
             Builds, estadísticas y meta de Wild Rift
           </h1>
-          <p className="mt-1 max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
+          <p className="rd-landing-desc mt-1 max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
             Registra tus partidas, analiza tu rendimiento, consulta campeones, tierlists, objetos y runas en un solo lugar.
           </p>
           <div className="flex items-center gap-2 opacity-60 mt-1">
@@ -197,13 +204,13 @@ export default function Landing() {
           </div>
           <a
             href="/campeones"
-            className="mt-4 inline-flex items-center justify-center rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:border-primary/70 hover:bg-primary/20"
+            className="rd-landing-library mt-4 inline-flex items-center justify-center rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:border-primary/70 hover:bg-primary/20"
           >
             Biblioteca de Rift Deck
           </a>
         </div>
 
-        <div className="rd-card p-8">
+        <div className="rd-landing-card rd-card p-8 lg:col-start-2 lg:row-span-3 lg:row-start-1">
           {mode === 'check-email' ? (
             /* Email confirmation step */
             <div>
@@ -433,8 +440,8 @@ export default function Landing() {
         </div>
 
         {/* Carousel */}
-        <div className="mt-6 mb-2">
-          <p className="text-center text-[10px] uppercase tracking-[0.26em] text-primary/70 font-semibold mb-3">Muestra</p>
+        <div className="rd-landing-showcase mt-6 mb-2 lg:col-start-1 lg:row-start-2 lg:mb-0 lg:mt-8">
+          <p className="rd-landing-showcase-label text-center text-[10px] uppercase tracking-[0.26em] text-primary/70 font-semibold mb-3">Muestra</p>
           <div className="relative rounded-xl border border-border/40 bg-secondary/20 p-2">
             <div ref={scrollRef} className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
               {SCREENSHOTS.map((s, i) => (
@@ -444,28 +451,28 @@ export default function Landing() {
                   className={`shrink-0 rounded-lg p-1.5 border-2 transition-all ${i === carouselIdx ? 'border-primary bg-primary/10' : 'border-border/40 bg-secondary/40 hover:border-primary/50'}`}
                   onMouseEnter={() => setCarouselIdx(i)}
                 >
-                  <img src={s.url} alt={`Vista de ${s.label} en Rift Deck`} width="96" height="64" loading="lazy" className="w-24 h-16 object-cover object-top rounded" />
+                  <img src={s.url} alt={`Vista de ${s.label} en Rift Deck`} width="96" height="64" loading="lazy" className="rd-landing-thumb w-24 h-16 object-cover object-top rounded" />
                 </button>
               ))}
             </div>
             <button
               onClick={() => navigateCarousel(-1)}
               aria-label="Ver captura anterior"
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center hover:bg-secondary transition-all z-10 shadow"
+              className="rd-arrow absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 z-10"
             >
-              <ChevronLeft size={13} className="text-foreground" />
+              <ChevronLeft size={14} />
             </button>
             <button
               onClick={() => navigateCarousel(1)}
               aria-label="Ver captura siguiente"
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center hover:bg-secondary transition-all z-10 shadow"
+              className="rd-arrow absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 z-10"
             >
-              <ChevronRight size={13} className="text-foreground" />
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-4">
+        <p className="rd-landing-footer text-center text-xs text-muted-foreground mt-4 lg:col-start-1 lg:row-start-3">
           Rift Deck · Tu centro táctico de Wild Rift
         </p>
       </div>
@@ -497,17 +504,17 @@ export default function Landing() {
             <button
               onClick={() => setModalIdx(i => (i - 1 + SCREENSHOTS.length) % SCREENSHOTS.length)}
               aria-label="Ver captura anterior"
-              className="fixed left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 border border-border flex items-center justify-center hover:bg-background transition-all z-10"
+              className="rd-arrow fixed left-4 top-1/2 -translate-y-1/2 w-10 h-10 z-10"
             >
-              <ChevronLeft size={20} className="text-foreground" />
+              <ChevronLeft size={20} />
             </button>
             {/* Next */}
             <button
               onClick={() => setModalIdx(i => (i + 1) % SCREENSHOTS.length)}
               aria-label="Ver captura siguiente"
-              className="fixed right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 border border-border flex items-center justify-center hover:bg-background transition-all z-10"
+              className="rd-arrow fixed right-4 top-1/2 -translate-y-1/2 w-10 h-10 z-10"
             >
-              <ChevronRight size={20} className="text-foreground" />
+              <ChevronRight size={20} />
             </button>
           </div>
         </div>

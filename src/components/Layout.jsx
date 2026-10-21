@@ -10,10 +10,10 @@ import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import BugReportModal from '@/components/BugReportModal';
 import LegalInfoModal from '@/components/LegalInfoModal';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
-import wordmarkUrl from '@/assets/riftdeck-final.png';
-
-const LOGO_URL = 'https://media.base44.com/images/public/69f960ee6e584cfa5a577a24/aedbcc40d_FullColor.png';
-const WORDMARK_URL = wordmarkUrl;
+import logoUrl from '@/assets/riftdeck-logo.png';
+import markUrl from '@/assets/riftdeck-mark.png';
+import logoHorizontalUrl from '@/assets/riftdeck-logo-horizontal.png';
+import watermarkUrl from '@/assets/riftdeck-watermark.png';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -241,18 +241,11 @@ export default function Layout() {
         <div className="rd-sidebar-brand">
           {!collapsed ? (
             <div className="flex flex-col items-center justify-center gap-2">
-              <div className="flex items-center justify-center gap-3">
-                <img
-                  src={LOGO_URL}
-                  alt="Rift Deck"
-                  className="w-12 h-12 object-contain drop-shadow-[0_0_18px_rgba(77,166,255,.22)] shrink-0"
-                />
-                <img
-                  src={WORDMARK_URL}
-                  alt="Rift Deck"
-                  className="h-16 object-contain drop-shadow-[0_0_12px_rgba(212,175,55,.30)]"
-                />
-              </div>
+              <img
+                src={logoUrl}
+                alt="Rift Deck"
+                className="h-20 object-contain"
+              />
 
               <div className="flex items-center gap-2 opacity-70">
                 <span className="h-px w-4 bg-primary/40" />
@@ -264,9 +257,9 @@ export default function Layout() {
             </div>
           ) : (
             <img
-              src={LOGO_URL}
+              src={markUrl}
               alt="Rift Deck"
-              className="w-10 h-10 object-contain mx-auto drop-shadow-[0_0_18px_rgba(77,166,255,.22)]"
+              className="w-9 h-9 object-contain mx-auto"
             />
           )}
 
@@ -403,8 +396,8 @@ export default function Layout() {
           </button>
 
           <div className="pointer-events-none flex min-w-0 items-center justify-center gap-2 overflow-hidden px-16">
-            <img src={LOGO_URL} alt="Rift Deck" className="w-7 h-7 object-contain" />
-            <img src={WORDMARK_URL} alt="Rift Deck" className="h-6 object-contain" />
+            <img src={logoHorizontalUrl} alt="Rift Deck" className="rd-mobile-topbar-logo h-6 max-w-full object-contain" />
+            <img src={watermarkUrl} alt="Rift Deck" className="rd-mobile-topbar-mark hidden w-8 h-8 object-contain" />
           </div>
 
           <button

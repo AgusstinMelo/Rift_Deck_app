@@ -17,6 +17,20 @@ const formatSnapshotDate = (execution) => {
   return new Date(`${datePart}T00:00:00`).toLocaleDateString('es-ES');
 };
 
+// Color de acento de cada tier (mismas variables que TierBadge).
+const TIER_COLOR_VAR = {
+  'S+': '--tier-splus',
+  'S': '--tier-s',
+  'A': '--tier-a',
+  'B': '--tier-b',
+  'C': '--tier-c',
+};
+
+const average = (values) => {
+  const numbers = values.map(Number).filter(Number.isFinite);
+  return numbers.length > 0 ? numbers.reduce((sum, value) => sum + value, 0) / numbers.length : null;
+};
+
 const sortTiers = (tiers) => [...tiers].sort((a, b) => {
   const aIndex = TIER_ORDER.indexOf(a);
   const bIndex = TIER_ORDER.indexOf(b);
@@ -304,9 +318,16 @@ export default function Tierlist() {
           {availableTiers.map(tier => {
             const championsInTier = filtered.filter(t => t.tier === tier);
             if (championsInTier.length === 0) return null;
+            const tierColorVar = TIER_COLOR_VAR[tier];
+            const avgWinrate = average(championsInTier.map(t => t.winrate));
+            const avgPickrate = average(championsInTier.map(t => t.pickrate));
 
             return (
-              <div key={tier} className="rd-tier-group rd-card overflow-hidden">
+              <div
+                key={tier}
+                className="rd-tier-group rd-card overflow-hidden"
+                style={tierColorVar ? { '--rd-tier-color': `var(${tierColorVar})` } : undefined}
+              >
                 <div className="rd-tier-group-head flex items-center gap-3 px-5 py-4 border-b border-border/70 bg-secondary/20">
                   <TierBadge tier={tier} size="lg" />
 
@@ -316,6 +337,22 @@ export default function Tierlist() {
                       {championsInTier.length} campeones
                     </p>
                   </div>
+
+                  {/* Promedios del tier: solo escritorio (ver index.css). */}
+                  <dl className="rd-tier-group-stats hidden">
+                    {avgWinrate !== null && (
+                      <div>
+                        <dt>WR prom.</dt>
+                        <dd>{avgWinrate.toFixed(1)}%</dd>
+                      </div>
+                    )}
+                    {avgPickrate !== null && (
+                      <div>
+                        <dt>PR prom.</dt>
+                        <dd>{avgPickrate.toFixed(1)}%</dd>
+                      </div>
+                    )}
+                  </dl>
                 </div>
 
                 <div className="rd-tier-group-grid p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
@@ -367,6 +404,23 @@ export default function Tierlist() {
                               {entry.winrate?.toFixed(1)}%<span className="rd-tier-tile-wr"> WR</span>
                             </span>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Pick / ban rate, posición en la línea y score: solo escritorio (ver index.css). */}
+                      <div className="rd-tier-tile-extra hidden" style={{ '--rd-fill': `${Math.max(0, Math.min(100, Number(entry.ranking_final) || 0))}%` }}>
+                        <div className="rd-tier-tile-rates">
+                          <span><b>PR</b> {entry.pickrate != null ? `${Number(entry.pickrate).toFixed(1)}%` : '—'}</span>
+                          <span><b>BR</b> {entry.banrate != null ? `${Number(entry.banrate).toFixed(1)}%` : '—'}</span>
+                          {entry.position_in_lane != null && (
+                            <span className="rd-tier-tile-rank">#{entry.position_in_lane}</span>
+                          )}
+                        </div>
+                        <div className="rd-tier-tile-score">
+                          <span className="rd-tier-tile-score-bar" />
+                          <span className="rd-tier-tile-score-value">
+                            {entry.ranking_final != null ? Number(entry.ranking_final).toFixed(1) : '—'}
+                          </span>
                         </div>
                       </div>
                     </div>

@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
-import { PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const CATEGORY_LABELS = {
   'Básico': 'Básico',
@@ -28,6 +28,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
   const [section, setSection] = useState('description');
 
   const { data: items = [], isLoading } = useQuery({
@@ -260,10 +261,10 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
     </ReactMarkdown>
   );
 
-  // En smartphone (vertical u horizontal) la ficha es un "dossier" como la de campeón: identidad
-  // compacta arriba, pestañas y una sección a la vez con todo el alto que queda
+  // En smartphone (vertical u horizontal) y en escritorio la ficha es un "dossier" como la
+  // de campeón: identidad compacta, pestañas y una sección a la vez con todo el alto que queda
   // (no aplica a la ficha pública).
-  if (selected && (isPhonePortrait || isPhoneLandscape) && !publicBasePath) {
+  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit) && !publicBasePath) {
     const tags = (selected.tags || '').split(',').map(tag => tag.trim()).filter(Boolean);
     const sectionTabs = [
       ['description', 'Detalle'],

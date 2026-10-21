@@ -19,7 +19,7 @@ import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { championSlug } from '@/utils/championSlug';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT_QUERY } from '@/hooks/useMatchMedia';
 
 const SCALING_LABEL = {
   earlygame: 'Early Game',
@@ -435,6 +435,7 @@ export default function ChampionDetail({
   const { user } = useAuth();
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
   const [section, setSection] = useState('profile');
   const [metaIndex, setMetaIndex] = useState(0);
 
@@ -588,9 +589,10 @@ export default function ChampionDetail({
     tierEntry: selectedTierEntry,
   });
 
-  // En smartphone la ficha es un "dossier": identidad fija (a la izquierda en
-  // horizontal, arriba en vertical) y una sección a la vez (no aplica a la ficha pública).
-  const useSections = (isPhoneLandscape || isPhonePortrait) && !publicMode;
+  // En smartphone y en escritorio la ficha es un "dossier": identidad fija (a la
+  // izquierda en horizontal y escritorio, arriba en vertical) y una sección a la vez
+  // (no aplica a la ficha pública).
+  const useSections = (isPhoneLandscape || isPhonePortrait || isDesktopFit) && !publicMode;
   const sectionTabs = [
     ['profile', 'Perfil'],
     ['stats', 'Estadísticas'],
@@ -1031,6 +1033,7 @@ export default function ChampionDetail({
                   <div className="rd-champ-meta-nav ml-auto flex items-center gap-1.5" aria-label="Cambiar posición">
                     <button
                       type="button"
+                      className="rd-arrow"
                       onClick={() => setMetaIndex((activeMetaIndex - 1 + tierData.length) % tierData.length)}
                       aria-label="Posición anterior"
                     >
@@ -1039,6 +1042,7 @@ export default function ChampionDetail({
                     <span>{activeMetaIndex + 1} / {tierData.length}</span>
                     <button
                       type="button"
+                      className="rd-arrow"
                       onClick={() => setMetaIndex((activeMetaIndex + 1) % tierData.length)}
                       aria-label="Posición siguiente"
                     >

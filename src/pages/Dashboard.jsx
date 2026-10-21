@@ -478,13 +478,13 @@ export default function Dashboard() {
         {activeTab === 'activity' && (
           <>
           <div className="rd-dashboard-pager" aria-label="Tarjetas de actividad">
-            <button type="button" className="rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide - 1)} disabled={activitySlide === 0} aria-label="Tarjeta anterior"><ChevronLeft size={16} /></button>
+            <button type="button" className="rd-arrow rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide - 1)} disabled={activitySlide === 0} aria-label="Tarjeta anterior"><ChevronLeft size={16} /></button>
             <div className="rd-dashboard-pager-chips">
               {ACTIVITY_SLIDES.map((label, index) => (
                 <button key={label} type="button" aria-pressed={activitySlide === index} onClick={() => goToActivitySlide(index)}>{label}</button>
               ))}
             </div>
-            <button type="button" className="rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide + 1)} disabled={activitySlide === ACTIVITY_SLIDES.length - 1} aria-label="Tarjeta siguiente"><ChevronRight size={16} /></button>
+            <button type="button" className="rd-arrow rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide + 1)} disabled={activitySlide === ACTIVITY_SLIDES.length - 1} aria-label="Tarjeta siguiente"><ChevronRight size={16} /></button>
           </div>
           <section ref={activityRef} onScroll={handleActivityScroll} className="rd-dashboard-activity" aria-label="Actividad">
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
@@ -573,7 +573,7 @@ export default function Dashboard() {
             <article className="rd-card rd-card-watermark rd-main-card p-5 min-h-0 overflow-hidden">
               <div className="rd-main-card-header">
                 <div className="rd-inline-section-heading"><h2 className="rd-card-title">Mis mains en el meta</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Pool personal</p></div>
-                <div className="rd-main-navigation"><button type="button" onClick={() => changeMain(-1)} disabled={mainChampions.length < 2} className="rd-main-arrow" aria-label="Main anterior"><ChevronLeft size={18} /></button><span className="font-rajdhani text-xs text-muted-foreground tabular-nums">{mainChampions.length ? mainIndex + 1 : 0} / {mainChampions.length}</span><button type="button" onClick={() => changeMain(1)} disabled={mainChampions.length < 2} className="rd-main-arrow" aria-label="Main siguiente"><ChevronRight size={18} /></button></div>
+                <div className="rd-main-navigation"><button type="button" onClick={() => changeMain(-1)} disabled={mainChampions.length < 2} className="rd-arrow rd-main-arrow" aria-label="Main anterior"><ChevronLeft size={18} /></button><span className="font-rajdhani text-xs text-muted-foreground tabular-nums">{mainChampions.length ? mainIndex + 1 : 0} / {mainChampions.length}</span><button type="button" onClick={() => changeMain(1)} disabled={mainChampions.length < 2} className="rd-arrow rd-main-arrow" aria-label="Main siguiente"><ChevronRight size={18} /></button></div>
               </div>
 
               {selectedMain ? <div className="rd-main-meta-layout">

@@ -16,7 +16,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
-import { PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const BRANCH_COLORS = {
   Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
@@ -42,6 +42,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialRunes, selectedSlug) : null);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
 
   const { data: runes = [], isLoading } = useQuery({
     queryKey: ['runes'],
@@ -165,10 +166,10 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         .slice(0, 6)
     : [];
 
-  // En smartphone (vertical u horizontal): el mismo "dossier" que objetos y campeones, sin
-  // pestañas (la runa solo tiene descripción): identidad compacta arriba y la
+  // En smartphone (vertical u horizontal) y en escritorio: el mismo "dossier" que objetos y
+  // campeones, sin pestañas (la runa solo tiene descripción): identidad compacta y la
   // descripción con todo el alto que queda (no aplica a la ficha pública).
-  if (selected && (isPhonePortrait || isPhoneLandscape) && !publicBasePath) {
+  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit) && !publicBasePath) {
     const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
 
     return (
