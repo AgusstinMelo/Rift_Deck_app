@@ -9584,7 +9584,7 @@
   }
 }
 
-/* Sugeridor (Builds y Campeones) en smartphone horizontal: asistente a viewport
+/* Sugeridor (Builds y Campeones) en smartphone (horizontal; vertical lo reapila en el bloque siguiente): asistente a viewport
    completo, un paso por vez y el resultado como último paso (lo agrega el JSX).
    - Fila 1: título compacto, selector Builds / Campeones y píldora "Intelligence".
    - Centro: el paso activo (o el resultado) a todo el ancho y alto restante.
@@ -9593,7 +9593,7 @@
    El aside se "disuelve" (display: contents) para ubicar sus partes en la grilla.
    Los selectores llevan .rd-v2-build-page porque las variantes md:/xl: de
    Tailwind se emiten al final de la hoja y, con la misma especificidad, ganarían. */
-@media (orientation: landscape) and (max-height: 500px) {
+@media (orientation: landscape) and (max-height: 500px), (orientation: portrait) and (max-width: 639px) {
   .rd-main-content:has(.rd-v2-build-page) {
     overflow: hidden;
   }
@@ -10205,6 +10205,312 @@
   .rd-v2-build-page .rd-rec-layout img.h-12 {
     width: 2.6rem;
     height: 2.6rem;
+  }
+}
+
+/* Sugeridor (Builds y Campeones) en smartphone vertical: comparte el asistente
+   del bloque anterior (un paso por vez, resultado como último paso, scroll
+   propio) y lo apila:
+   - Encabezado: título y selector Builds / Campeones a todo el ancho.
+   - Centro: el paso activo o el resultado con todo el alto restante.
+   - Pie: la barra de pasos a todo el ancho y debajo Atrás | Siguiente / Generar.
+   Cada paso pasa de columnas a filas. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-page.rd-v2-build-page {
+    padding: 0.7rem 0.75rem max(0.6rem, env(safe-area-inset-bottom));
+  }
+
+  /* Encabezado: título arriba, selector debajo a todo el ancho. */
+  .rd-v2-build-page .rd-v2-build-header > .rd-status-pill {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header h1 {
+    font-size: 1.55rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-v2-build-page .rd-v2-build-header > div:first-child > div:last-child > button {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Grilla: contenido, error, pasos y botones apilados. */
+  .rd-v2-build-page .rd-v2-build-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav {
+    grid-row: 3;
+    grid-column: 1 / -1;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button {
+    grid-row: 4;
+    min-height: 2.6rem;
+    font-size: 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button:last-child {
+    grid-column: 2;
+  }
+
+  /* Primer paso (sin "Atrás"): el botón principal usa todo el ancho. */
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button:only-child {
+    grid-column: 1 / -1;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav button {
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.3rem 0.15rem;
+    font-size: 10px;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > nav button > span {
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 10px;
+  }
+
+  /* Builds · Campeón: selectores arriba y la temática debajo, con el resto del alto. */
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .border-t {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    margin-top: 0.85rem;
+    padding: 0.85rem 0 0;
+    border-top: 1px solid hsl(var(--border) / 0.5);
+    border-left: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .space-y-2\.5 > * + * {
+    margin-top: 0.75rem;
+  }
+
+  /* Selectores a todo el ancho (horizontal los centra en su columna). */
+  .rd-v2-build-page .rd-v2-step-card:has(> .border-t) > .space-y-2\.5 {
+    align-self: stretch;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .space-y-2\.5 button[aria-haspopup] {
+    width: 100%;
+  }
+
+  /* Botón principal en una línea ("Generar recomendaciones"). */
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button {
+    gap: 0.4rem;
+    padding-inline: 0.6rem;
+    white-space: nowrap;
+  }
+
+  .rd-v2-build-page .rd-v2-build-aside > div:last-child > button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid:has(> button[aria-haspopup]) {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .space-y-2\.5 button[aria-haspopup] {
+    min-height: 3rem;
+  }
+
+  /* Builds · Aliados / Enemigos: una fila por línea (etiqueta | campeón) que se
+     reparten el alto, con retrato grande. */
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid {
+    display: grid;
+    min-height: 0;
+    flex: 1 1 0;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > .rd-label {
+    align-self: center;
+    text-align: left;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > :first-child {
+    width: auto;
+    height: min(100%, 2.75rem);
+    flex: none;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > span:nth-child(2) {
+    width: auto;
+    flex: 1 1 auto;
+    font-size: 0.9rem;
+    text-align: left;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .justify-evenly > .grid > button[aria-haspopup] > svg {
+    display: block;
+  }
+
+  /* Campeones · Pool: chips en una columna con scroll propio. */
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card > .space-y-1\.5 > * {
+    padding: 0.4rem 0.6rem;
+  }
+
+  /* Campeones · Parámetros: línea, objetivo y contexto apilados. */
+  .rd-v2-build-page .rd-v2-step-card.gap-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card select {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card .grid-cols-2 > button {
+    padding: 0.45rem 0.6rem;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-v2-build-page .rd-v2-step-card.gap-3 textarea {
+    min-height: 3.5rem;
+  }
+
+  /* Resultado (Builds): íconos arriba y el análisis con el resto del alto. */
+  .rd-v2-build-page .rd-v2-build-success:has(> section:first-child) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child {
+    flex: none;
+    gap: 0.4rem;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div + div {
+    padding-top: 0.4rem;
+  }
+
+  /* Íconos y etiqueta de cada grupo en la misma fila. */
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div {
+    display: grid;
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child > div > div:first-child {
+    margin-bottom: 0;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > section:first-child .group {
+    max-width: 2.3rem;
+  }
+
+  /* Resultado (Campeones): métricas en una fila de cuatro. */
+  .rd-v2-build-page .rd-v2-build-success > div:first-child {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child > .rd-mini-action {
+    padding: 0.35rem 0.4rem;
+    text-align: center;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child > .rd-mini-action > div {
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child .rd-label {
+    font-size: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .rd-v2-build-page .rd-v2-build-success > div:first-child svg {
+    display: none;
+  }
+
+  /* Pestañas del análisis: en dos líneas si no entran. */
+  .rd-v2-build-page .rd-v2-build-analysis > [role="tablist"] {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    grid-auto-flow: column;
+  }
+
+  .rd-v2-build-page .rd-v2-build-analysis > [role="tablist"] > button {
+    font-size: 10px;
+  }
+
+  /* Recomendaciones: los cinco campeones en una fila deslizable y el detalle debajo. */
+  .rd-v2-build-page .rd-rec-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol > li {
+    flex: none;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol > li + li {
+    margin-top: 0;
+  }
+
+  .rd-v2-build-page .rd-rec-layout > ol button > span:last-child > span:last-child {
+    display: none;
+  }
+
+  .rd-v2-build-page .rd-rec-layout .md\:grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

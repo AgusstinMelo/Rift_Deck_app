@@ -12,7 +12,7 @@ import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
 import StepNav from '@/components/suggester/StepNav';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const LABELS = { top: 'Top', jungler: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
@@ -119,7 +119,7 @@ function DraftCard({ title, icon: Icon, team, setter, champions, onMemberChange,
 }
 
 const STEPS = ['Campeón', 'Aliados', 'Enemigos'];
-// En smartphone horizontal el asistente ocupa el viewport y la build es un paso más.
+// En smartphone el asistente ocupa el viewport y la build es un paso más.
 const RESULT_STEP = STEPS.length;
 
 export default function V2BuildTab({ tabSelector }) {
@@ -133,8 +133,11 @@ export default function V2BuildTab({ tabSelector }) {
   const [error, setError] = useState('');
   const [buildPreference, setBuildPreference] = useState('');
   const [step, setStep] = useState(0);
+  // En smartphone (horizontal o vertical) el asistente ocupa el viewport y el resultado es un paso más.
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
-  const steps = isPhoneLandscape ? [...STEPS, 'Build'] : STEPS;
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const isPhone = isPhoneLandscape || isPhonePortrait;
+  const steps = isPhone ? [...STEPS, 'Build'] : STEPS;
   const viewStep = Math.min(step, steps.length - 1);
   const onResultStep = viewStep === RESULT_STEP;
   const champions =useMemo(() => [...(snapshot?.champions || [])].sort((a, b) => a.name.localeCompare(b.name)), [snapshot]);
@@ -161,7 +164,7 @@ export default function V2BuildTab({ tabSelector }) {
   };
 
   async function generate() {
-    if (isPhoneLandscape) setStep(RESULT_STEP);
+    if (isPhone) setStep(RESULT_STEP);
     if (!snapshot || !championId || !role) { setState('validation_error'); setError('Seleccioná un campeón y su rol.'); return; }
     if (allies[role] !== championId) { setState('validation_error'); setError('El campeón elegido debe ocupar el rol seleccionado en aliados.'); return; }
     const selectedAllies = Object.values(allies).filter(Boolean);
