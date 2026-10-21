@@ -15,7 +15,7 @@ import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda, winratePct } from '@/domain/matchStats';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
@@ -484,7 +484,7 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
 // horizontal el CSS lo vuelve un carril de dos tarjetas por vista y muestra
 // las flechas, que se ocultan al llegar a cada extremo.
 function OverviewTrack({ children }) {
-  const trackRef = useRef(null);
+  const trackRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const [edges, setEdges] = useState({ prev: false, next: false });
 
   const updateEdges = useCallback(() => {
@@ -507,13 +507,16 @@ function OverviewTrack({ children }) {
     return () => observer.disconnect();
   }, [updateEdges]);
 
-  // Avanza una tarjeta: media vista más medio gap (el snap corrige el resto).
+  // Avanza una tarjeta: su ancho más el gap (dos por vista en horizontal, una en
+  // vertical); el snap corrige el resto.
   const scrollByCard = (direction) => {
     const track = trackRef.current;
     if (!track) return;
 
     const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-    track.scrollBy({ left: direction * ((track.clientWidth + gap) / 2), behavior: 'smooth' });
+    const card = track.firstElementChild;
+    const step = card ? card.getBoundingClientRect().width + gap : (track.clientWidth + gap) / 2;
+    track.scrollBy({ left: direction * step, behavior: 'smooth' });
   };
 
   return (
@@ -575,7 +578,7 @@ function LaneBarChart({ laneArr }) {
   }).join(' ');
 
   return (
-    <div className="flex h-full min-h-0 items-center justify-center">
+    <div className="rd-stats-lane flex h-full min-h-0 items-center justify-center">
       <svg viewBox="0 0 300 210" className="rd-stats-lane-chart h-full max-h-[276px] w-full" role="img" aria-label="Winrate por línea">
         {[0.33, 0.66, 1].map(level => (
           <polygon key={level} points={polygon(radius * level)} fill="none" stroke="rgba(148,163,184,.16)" strokeWidth="1" />
@@ -602,6 +605,17 @@ function LaneBarChart({ laneArr }) {
           );
         })}
       </svg>
+      {/* Detalle por línea: solo se muestra en smartphone vertical, debajo del radar. */}
+      <ul className="rd-stats-lane-list" aria-hidden="true">
+        {data.map(entry => (
+          <li key={entry.lane} style={/** @type {any} */ ({ '--rd-lane': /** @type {Record<string, string>} */ (LANE_COLORS)[entry.lane] })}>
+            <span>{/** @type {Record<string, string>} */ (LANE_LABELS)[entry.lane]}</span>
+            <span className="rd-stats-lane-bar"><span style={{ width: `${entry.wr}%` }} /></span>
+            <strong>{entry.wr}%</strong>
+            <em>{entry.games}p</em>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -652,6 +666,7 @@ export default function Stats() {
   const [analyticsView, setAnalyticsView] = useState('overview');
   const [coachPage, setCoachPage] = useState(0);
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const patchDefaultApplied = useRef(false);
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
@@ -997,8 +1012,8 @@ export default function Stats() {
     .slice(0, 10);
 
   const insights = computeInsights({ matches, tierlist, wrItems, builds: insightBuilds, champions, runes, spells });
-  // En smartphone horizontal no entran dos consejos legibles: va uno por página.
-  const insightsPerPage = isPhoneLandscape ? 1 : 2;
+  // En smartphone no entran dos consejos legibles: va uno por página.
+  const insightsPerPage = isPhoneLandscape || isPhonePortrait ? 1 : 2;
   const coachPageCount = Math.max(1, Math.ceil(insights.length / insightsPerPage));
   const effectiveCoachPage = Math.min(coachPage, coachPageCount - 1);
   const visibleInsights = insights.slice(effectiveCoachPage * insightsPerPage, (effectiveCoachPage + 1) * insightsPerPage);
@@ -1055,10 +1070,11 @@ export default function Stats() {
       </section>
 
       <div className="rd-panel-tabs" role="tablist" aria-label="Secciones de estadísticas">
+        {/* En smartphone vertical las cinco pestañas comparten una fila: nombres cortos. */}
         {[
           ['overview', 'Rendimiento'],
-          ['direct', 'Matchups directos'],
-          ['general', 'Matchups generales'],
+          ['direct', isPhonePortrait ? 'Directos' : 'Matchups directos'],
+          ['general', isPhonePortrait ? 'Generales' : 'Matchups generales'],
           ['synergy', 'Sinergias'],
           ...(insights.length ? [['coach', 'Coach']] : []),
         ].map(([id, label]) => (

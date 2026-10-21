@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ChampionDetail from './ChampionDetail';
+import { PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 import {
   getBestTierForChampion,
   getCurrentTierlistEntries,
@@ -38,6 +39,8 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
   const [roleFilter, setRoleFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
   const [selected, setSelected] = useState(null);
+  // En smartphone vertical buscador y tres selectores van en una fila: textos cortos.
+  const compactFilters = useMatchMedia(PHONE_PORTRAIT_QUERY);
 
   const { data: champions = [], isLoading } = useQuery({
     queryKey: ['champions'],
@@ -114,7 +117,8 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar campeón..."
+              placeholder={compactFilters ? 'Buscar' : 'Buscar campeón...'}
+              aria-label="Buscar campeón"
               className="
                 w-full bg-secondary/60 border border-border rounded-xl
                 pl-10 pr-4 py-2.5 text-sm text-foreground
@@ -130,7 +134,7 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
             onChange={e => setLaneFilter(e.target.value)}
             className="bg-secondary/60 border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40"
           >
-            <option value="all">Todas las líneas</option>
+            <option value="all">{compactFilters ? 'Línea' : 'Todas las líneas'}</option>
             <option value="top">Top</option>
             <option value="jungle">Jungle</option>
             <option value="mid">Mid</option>
@@ -143,7 +147,7 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
             onChange={e => setRoleFilter(e.target.value)}
             className="bg-secondary/60 border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40"
           >
-            <option value="all">Todos los roles</option>
+            <option value="all">{compactFilters ? 'Rol' : 'Todos los roles'}</option>
             <option value="Luchador">Luchador</option>
             <option value="Tanque">Tanque</option>
             <option value="Mago">Mago</option>

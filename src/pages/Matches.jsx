@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { MATCH_TYPES } from '@/constants/matchTypes';
 import { toast } from '@/components/ui/use-toast';
 import { getPublishedGamePatches } from '@/api/gameCatalogSupabase';
+import { PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const showTemporaryToast = (options) => {
   const notification = toast(options);
@@ -59,6 +60,8 @@ export default function Matches() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const createInFlightRef = useRef(false);
+  // En smartphone vertical los tres selectores comparten una fila: textos cortos.
+  const compactFilters = useMatchMedia(PHONE_PORTRAIT_QUERY);
 
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
@@ -394,7 +397,7 @@ export default function Matches() {
             onChange={e => setLaneFilter(e.target.value)}
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">Todas las líneas</option>
+            <option value="all">{compactFilters ? 'Línea' : 'Todas las líneas'}</option>
             <option value="top">Top</option>
             <option value="jungler">Jungler</option>
             <option value="mid">Mid</option>
@@ -407,7 +410,7 @@ export default function Matches() {
             onChange={e => setResultFilter(e.target.value)}
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">Todos los resultados</option>
+            <option value="all">{compactFilters ? 'Resultado' : 'Todos los resultados'}</option>
             <option value="win">Victorias</option>
             <option value="loss">Derrotas</option>
           </select>
@@ -417,7 +420,7 @@ export default function Matches() {
             onChange={e => setMatchTypeFilter(e.target.value)}
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">Todos los tipos</option>
+            <option value="all">{compactFilters ? 'Tipo' : 'Todos los tipos'}</option>
             {MATCH_TYPES.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
