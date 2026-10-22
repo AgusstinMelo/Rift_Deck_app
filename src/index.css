@@ -140,7 +140,11 @@
   height: 100vh;
   height: 100dvh;
   min-height: 0;
+  /* Las dos primeras capas eran el fondo de .rd-main-content: viven acá para
+     quedar debajo del fondo animado (AnimatedBackground) en vez de taparlo. */
   background:
+    linear-gradient(180deg, rgba(11, 15, 26, 0.32), rgba(11, 15, 26, 0.9)),
+    radial-gradient(circle at top right, rgba(77, 166, 255, 0.06), transparent 38%),
     radial-gradient(circle at 16% 0%, rgba(77, 166, 255, 0.08), transparent 30%),
     radial-gradient(circle at 80% 0%, rgba(212, 175, 55, 0.05), transparent 26%),
     hsl(var(--background));
@@ -153,9 +157,6 @@
   scroll-behavior: smooth;
   scroll-padding-block: clamp(1rem, 3vh, 2rem);
   scrollbar-gutter: stable;
-  background:
-    linear-gradient(180deg, rgba(11, 15, 26, 0.32), rgba(11, 15, 26, 0.9)),
-    radial-gradient(circle at top right, rgba(77, 166, 255, 0.06), transparent 38%);
 }
 
 .rd-dashboard {

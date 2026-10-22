@@ -10,6 +10,7 @@ import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import BugReportModal from '@/components/BugReportModal';
 import LegalInfoModal from '@/components/LegalInfoModal';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
+import AnimatedBackground from '@/components/AnimatedBackground';
 import logoUrl from '@/assets/riftdeck-logo.png';
 import markUrl from '@/assets/riftdeck-mark.png';
 import logoHorizontalUrl from '@/assets/riftdeck-logo-horizontal.png';
@@ -222,6 +223,8 @@ export default function Layout() {
 
   return (
     <div className="flex h-dvh min-h-0 bg-background overflow-hidden rd-app-shell">
+      <AnimatedBackground scrollSelector=".rd-main-content" />
+
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/70 z-[250] lg:hidden backdrop-blur-sm"
@@ -375,7 +378,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <div className="rd-shell-column flex-1 flex min-h-0 flex-col min-w-0 overflow-hidden">
+      <div className="rd-shell-column relative z-10 flex-1 flex min-h-0 flex-col min-w-0 overflow-hidden">
         <header className="rd-mobile-topbar relative lg:hidden flex items-center justify-center h-14 px-4 border-b border-primary/10 bg-card shrink-0">
           <button
             type="button"
