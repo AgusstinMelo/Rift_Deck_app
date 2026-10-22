@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Champion } from '@/api/entitiesSupabase';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import ChampionDetail from '@/components/library/ChampionDetail';
 import PublicHeader from '@/components/public/PublicHeader';
 import Seo from '@/components/Seo';
@@ -17,7 +17,7 @@ import { getChampionSeo } from '@/seo/publicSeo';
 import { getCurrentTierlistEntries, getTierEntriesForChampion } from '@/utils/tierlist';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 
-export default function PublicChampionDetail({ initialChampions, initialExecutions, initialTierlist }) {
+export default function PublicChampionDetail({ initialChampions, initialTierlist }) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { data: champions, isLoading, isError } = useQuery({
@@ -27,20 +27,10 @@ export default function PublicChampionDetail({ initialChampions, initialExecutio
     ...publicCatalogQueryOptions,
   });
   const champion = findChampionBySlug(champions, slug);
-  const { data: executions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10),
-    initialData: initialExecutions,
-    ...publicCatalogQueryOptions,
-  });
-  const currentSnapshotKey = executions.find(execution =>
-    execution.status === 'success' || execution.status === 'partial'
-  )?.snapshot_key;
   const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist', currentSnapshotKey],
-    queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
+    queryKey: ['tierlist-current'],
+    queryFn: getCurrentTierlist,
     initialData: initialTierlist,
-    enabled: Boolean(currentSnapshotKey),
     ...publicCatalogQueryOptions,
   });
 
@@ -52,7 +42,7 @@ export default function PublicChampionDetail({ initialChampions, initialExecutio
     return <div className="min-h-screen bg-background text-foreground"><Seo title="Campeón no encontrado | Rift Deck" description="La página de campeón solicitada no existe en Rift Deck." canonicalPath={`/campeones/${slug}`} indexable={false} /><PublicHeader /><main className="mx-auto flex max-w-3xl flex-col items-center px-5 py-24 text-center"><p className="text-sm font-semibold text-primary">404</p><h1 className="mt-2 font-rajdhani text-4xl font-bold">Campeón no encontrado</h1><p className="mt-3 text-muted-foreground">No existe un campeón asociado a esta URL.</p><Link to="/campeones" className="mt-7 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><ArrowLeft size={16} /> Ver campeones</Link></main></div>;
   }
 
-  const currentTierlist = getCurrentTierlistEntries(tierlist, executions);
+  const currentTierlist = getCurrentTierlistEntries(tierlist);
   const tierData = getTierEntriesForChampion(champion, currentTierlist);
   const lanes = getChampionLanes(champion);
   const relatedChampions = (champions || [])

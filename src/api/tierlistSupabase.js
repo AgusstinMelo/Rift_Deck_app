@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { normalizeTierlistSnapshotRecord } from '@/utils/tierlist';
+import { normalizePatchAverage, normalizeTierlistSnapshotRecord } from '@/utils/tierlist';
 
 export async function getTierlistEntries(order = "-ranking_final", limit = 1000, filters = {}) {
   const orderConfig = order === "-updated_at"
@@ -88,13 +88,17 @@ export async function getTierlistExecutions(limit = 10) {
 
   if (error) throw error;
 
-  const seenSnapshots = new Set();
-  const uniqueExecutions = (data || []).map(normalizeTierlistSnapshotRecord).filter(execution => {
+  // One row per snapshot; a later failed run must not hide a successful one.
+  const isSuccessful = execution => execution.status === 'success' || execution.status === 'partial';
+  const bySnapshot = new Map();
+  (data || []).map(normalizeTierlistSnapshotRecord).forEach(execution => {
     const snapshotIdentity = execution.snapshot_key || String(execution.id);
-    if (seenSnapshots.has(snapshotIdentity)) return false;
-    seenSnapshots.add(snapshotIdentity);
-    return true;
+    const current = bySnapshot.get(snapshotIdentity);
+    if (!current || (!isSuccessful(current) && isSuccessful(execution))) {
+      bySnapshot.set(snapshotIdentity, execution);
+    }
   });
+  const uniqueExecutions = [...bySnapshot.values()];
 
   return limit ? uniqueExecutions.slice(0, limit) : uniqueExecutions;
 }
@@ -111,97 +115,47 @@ export async function getTierlistConfig() {
   return data || null;
 }
 
-export async function saveTierlistConfig(payload) {
-  const currentConfig = await getTierlistConfig();
+export async function getTierlistPatchGroups(limit = 10) {
+  let query = supabase
+    .from("tierlist_patch_groups")
+    .select("*")
+    .order("last_snapshot_date", { ascending: false });
 
-  if (currentConfig?.id) {
-    const { data, error } = await supabase
-      .from("tierlist_configs")
-      .update(payload)
-      .eq("id", currentConfig.id)
-      .select()
-      .single();
+  if (limit) query = query.limit(limit);
 
-    if (error) throw error;
-    return data;
-  }
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+// Promedio acumulado de uno o más grupos de parche (7.3 = 7.3, 7.3a, 7.3b...).
+export async function getTierlistPatchAverages(patchGroups = []) {
+  const groups = [...new Set(patchGroups.filter(Boolean))];
+  if (!groups.length) return [];
 
   const { data, error } = await supabase
-    .from("tierlist_configs")
-    .insert(payload)
-    .select()
-    .single();
+    .from("tierlist_patch_averages")
+    .select("*")
+    .in("patch_group", groups)
+    .order("ranking_final", { ascending: false })
+    .limit(1000 * groups.length);
 
   if (error) throw error;
-  return data;
+  return (data || []).map(normalizePatchAverage);
 }
 
-export async function runTierlistUpdate(config) {
-  const startedAt = new Date().toISOString();
-  const { data, error } = await supabase.functions.invoke("update-tierlist", {
-    body: { config },
-  });
-
-  if (error) {
-    const patch = config?.active_patch?.trim() || "unknown";
-    const snapshotDate = config?.active_snapshot_date?.trim();
-
-    // The Edge gateway can close a long-running request even though the
-    // function finishes and persists the tierlist successfully. Give the final
-    // database writes a few seconds to become visible before reporting a false
-    // failure.
-    if (snapshotDate) {
-      const snapshotKey = `${patch.toLocaleLowerCase().trim()}::${snapshotDate}`;
-      const maxAttempts = 10;
-
-      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        const [{ data: execution }, { data: refreshedEntries }] = await Promise.all([
-          supabase
-            .from("tierlist_executions")
-            .select("status, champions_processed, patch, snapshot_date, snapshot_key, executed_at, logs, error_message")
-            .eq("snapshot_key", snapshotKey)
-            .gte("executed_at", startedAt)
-            .order("executed_at", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from("tierlist_entries")
-            .select("patch, snapshot_date, snapshot_key, updated_at")
-            .eq("snapshot_key", snapshotKey)
-            .gte("updated_at", startedAt)
-            .limit(1),
-        ]);
-
-        if (execution?.status === "success") {
-          return execution;
-        }
-
-        // This also covers installations where RLS allows reading the public
-        // tierlist but not the administrative execution history.
-        if (refreshedEntries?.length) {
-          return {
-            status: "success",
-            patch,
-            snapshot_date: snapshotDate,
-            snapshot_key: snapshotKey,
-            message: "La actualización terminó correctamente aunque se perdió la respuesta de la Edge Function.",
-          };
-        }
-
-        if (execution?.status === "failed") {
-          throw new Error(execution.error_message || error.message);
-        }
-
-        if (attempt < maxAttempts - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-    }
-
-    throw error;
-  }
-
-  return data;
+export async function getCurrentTierlist() {
+  const [latestGroup] = await getTierlistPatchGroups(1);
+  return latestGroup ? getTierlistPatchAverages([latestGroup.patch_group]) : [];
 }
 
-export const runTierlistUpdateStub = runTierlistUpdate;
+export async function getRecentTierlistRuns(limit = 7) {
+  const { data, error } = await supabase
+    .from("tierlist_executions")
+    .select("id, patch, snapshot_date, executed_at, status, champions_processed, error_message, weights_used")
+    .order("executed_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data || [];
+}

@@ -12789,3 +12789,49 @@
     align-self: center;
   }
 }
+
+/* Cómo calculamos la tierlist (escritorio): la página ocupa el alto del viewport
+   y solo la lista de últimas ejecuciones scrollea por dentro. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .rd-main-content:has(.rd-tierlist-method) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-tierlist-method) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .rd-tierlist-method {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .rd-tierlist-method > :first-child {
+    margin-bottom: 1rem;
+  }
+
+  .rd-tierlist-method-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-tierlist-method-grid > div {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-tierlist-method-runs {
+    flex: 1 1 auto;
+  }
+
+  .rd-tierlist-method-runlist {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}

@@ -23,7 +23,7 @@ export default function BugReportModal({ onClose }) {
   const pathToPage = {
     '/': 'Dashboard', '/library': 'Biblioteca', '/tierlist': 'Tierlist',
     '/build-calculator': 'Builds', '/matches': 'Partidas', '/stats': 'Estadísticas',
-    '/suggester': 'Sugeridor', '/admin/tierlist-config': 'Config Tierlist', '/profile': 'Perfil',
+    '/suggester': 'Sugeridor', '/tierlist/como-se-calcula': 'Cómo calculamos la tierlist', '/profile': 'Perfil',
   };
 
   const [form, setForm] = useState({

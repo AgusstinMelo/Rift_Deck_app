@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Champion } from '@/api/entitiesSupabase';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import PublicHeader from '@/components/public/PublicHeader';
 import Seo from '@/components/Seo';
 import TierBadge from '@/components/ui/TierBadge';
@@ -22,7 +22,7 @@ const LANE_FILTERS = {
 
 const normalizeLane = lane => String(lane || '').toLowerCase().replace(/[^a-z]/g, '');
 
-export default function PublicChampions({ initialChampions, initialExecutions, initialTierlist }) {
+export default function PublicChampions({ initialChampions, initialTierlist }) {
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -33,23 +33,13 @@ export default function PublicChampions({ initialChampions, initialExecutions, i
     initialData: initialChampions,
     ...publicCatalogQueryOptions,
   });
-  const { data: executions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10),
-    initialData: initialExecutions,
-    ...publicCatalogQueryOptions,
-  });
-  const currentSnapshotKey = executions.find(execution =>
-    execution.status === 'success' || execution.status === 'partial'
-  )?.snapshot_key;
   const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist', currentSnapshotKey],
-    queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
+    queryKey: ['tierlist-current'],
+    queryFn: getCurrentTierlist,
     initialData: initialTierlist,
-    enabled: Boolean(currentSnapshotKey),
     ...publicCatalogQueryOptions,
   });
-  const currentTierlist = getCurrentTierlistEntries(tierlist, executions);
+  const currentTierlist = getCurrentTierlistEntries(tierlist);
   const filtered = champions.filter(champion => {
     const matchesSearch = !search || champion.name.toLowerCase().includes(search.toLowerCase());
     const lanes = Array.isArray(champion.lane) ? champion.lane : [champion.lane];

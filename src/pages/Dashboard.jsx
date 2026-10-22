@@ -17,13 +17,13 @@ import {
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getTierlistEntries, getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
 import TierBadge from '@/components/ui/TierBadge';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
 import { computeInsights } from '@/hooks/useInsights';
-import { filterByPatch, patchMatchesSelection } from '@/utils/patches';
+import { filterByPatch, getPatchGroup, patchMatchesSelection } from '@/utils/patches';
 import { matchKda } from '@/domain/matchStats';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
 
@@ -116,10 +116,13 @@ export default function Dashboard() {
     queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: recentSnapshotKeys }),
     enabled: recentSnapshotKeys.length > 0,
   });
-  const latestSnapshotKey = latestSuccessExec?.snapshot_key;
-  const tierlist = useMemo(() => (latestSnapshotKey
-    ? tierlistHistory.filter(entry => entry.snapshot_key === latestSnapshotKey)
-    : []), [tierlistHistory, latestSnapshotKey]);
+  // "Meta por línea" muestra el promedio del parche; los insights usan los snapshots diarios.
+  const latestPatchGroup = getPatchGroup(latestSuccessExec?.patch);
+  const { data: tierlist = [] } = useQuery({
+    queryKey: ['tierlist-patch-averages', [latestPatchGroup]],
+    queryFn: () => getTierlistPatchAverages([latestPatchGroup]),
+    enabled: Boolean(latestPatchGroup),
+  });
 
   const { data: champions = [] } = useQuery({ queryKey: ['champions'], queryFn: () => Champion.list('name') });
   const { data: wrItems = [] } = useQuery({ queryKey: ['wr-items'], queryFn: () => WRItem.list('name') });

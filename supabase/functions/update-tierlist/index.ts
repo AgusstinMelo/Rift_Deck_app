@@ -21,6 +21,17 @@ const COMPETITIVE_BASE_FACTOR = 0.50;
 const PRESENCE_FACTOR_WEIGHT = 0.20;
 const HIGH_RANK_FACTOR_WEIGHT = 0.30;
 
+// Días desde que se activa un parche de número nuevo hasta aplicar la penalización por elos.
+const ELO_PENALTY_GRACE_DAYS = 21;
+
+// Promedio por parche ponderado: un día de hace AVERAGE_HALF_LIFE_DAYS pesa la mitad
+// que el de hoy, así un nerfeo/buff se refleja en pocos días sin perder estabilidad.
+const AVERAGE_HALF_LIFE_DAYS = 3;
+
+// Penalidad por días ausentes: factor = base + (peso de días presente / peso total) × peso.
+const DAY_PRESENCE_BASE_FACTOR = 0.60;
+const DAY_PRESENCE_FACTOR_WEIGHT = 0.40;
+
 const POSITIONS: Record<string, string> = {
   "1": "mid",
   "2": "top",
@@ -189,7 +200,7 @@ const DICT_CHAMP: Record<string, string> = {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -484,6 +495,267 @@ function buildAveragedLaneData(dataRank: any, dataChamp: any, log: (message: str
   return laneData;
 }
 
+// Grupo de parche: 7.3, 7.3a y 7.3b promedian juntos como 7.3.
+function getPatchGroup(patch: unknown) {
+  const match = String(patch || "").trim().match(/^(\d+\.\d+)/);
+  return match ? match[1] : null;
+}
+
+function toIsoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+// Fecha de los datos que publica Tencent (dtstatdate, formato YYYYMMDD).
+function getLatestStatDate(dataRank: any) {
+  let latest = "";
+
+  for (const rankKey of RANK_KEYS) {
+    const rankData = dataRank?.data?.[rankKey] || {};
+
+    for (const posKey of Object.keys(POSITIONS)) {
+      for (const campeon of rankData?.[posKey] || []) {
+        const value = String(campeon?.dtstatdate || "");
+        if (/^\d{8}$/.test(value) && value > latest) latest = value;
+      }
+    }
+  }
+
+  return latest ? `${latest.slice(0, 4)}-${latest.slice(4, 6)}-${latest.slice(6, 8)}` : null;
+}
+
+// La penalización por ausencia en elos arranca ELO_PENALTY_GRACE_DAYS después
+// de activar en la app el primer parche de ese número (las letras no reinician).
+function getEloPenaltyStartsOn(patches: any[], patchGroup: string) {
+  const activations = patches
+    .filter((patch) => getPatchGroup(patch.version) === patchGroup)
+    .map((patch) => Date.parse(patch.release_at || patch.created_at))
+    .filter(Number.isFinite);
+
+  if (!activations.length) return null;
+
+  const startsOn = new Date(Math.min(...activations));
+  startsOn.setUTCDate(startsOn.getUTCDate() + ELO_PENALTY_GRACE_DAYS);
+  return toIsoDate(startsOn);
+}
+
+async function fetchAllRows(buildQuery: (from: number, to: number) => any) {
+  const PAGE_SIZE = 1000;
+  const rows: any[] = [];
+
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await buildQuery(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    rows.push(...(data || []));
+    if (!data || data.length < PAGE_SIZE) break;
+  }
+
+  return rows;
+}
+
+async function rebuildPatchGroupAverages(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  patchGroup: string,
+  eloPenaltyStartsOn: string | null,
+  log: (message: string) => void,
+) {
+  const executions = await fetchAllRows((from, to) =>
+    supabaseAdmin
+      .from("tierlist_executions")
+      .select("snapshot_key, snapshot_date, patch, executed_at")
+      .eq("patch_group", patchGroup)
+      .in("status", ["success", "partial"])
+      .order("executed_at", { ascending: false })
+      .range(from, to)
+  );
+
+  // Un snapshot por día de datos: si el mismo día hay dos (ej. 7.3 y 7.3a), vale el último.
+  const snapshotsByDate = new Map<string, any>();
+  for (const execution of executions) {
+    if (execution.snapshot_key && execution.snapshot_date && !snapshotsByDate.has(execution.snapshot_date)) {
+      snapshotsByDate.set(execution.snapshot_date, execution);
+    }
+  }
+
+  if (!snapshotsByDate.size) {
+    log(`Promedio ${patchGroup}: sin snapshots exitosos, se omite.`);
+    return 0;
+  }
+
+  const snapshots = [...snapshotsByDate.values()]
+    .sort((a, b) => String(a.snapshot_date).localeCompare(String(b.snapshot_date)));
+  const snapshotDateByKey = new Map<string, string>(
+    snapshots.map((snapshot) => [snapshot.snapshot_key, snapshot.snapshot_date]),
+  );
+  const daysTotal = snapshots.length;
+
+  const entries = await fetchAllRows((from, to) =>
+    supabaseAdmin
+      .from("tierlist_entries")
+      .select(
+        "id, champion_name, original_name, external_id, lane, winrate, pickrate, banrate, " +
+          "difficulty, ranking_final, image_url, snapshot_key",
+      )
+      .in("snapshot_key", [...snapshotDateByKey.keys()])
+      .order("id", { ascending: true })
+      .range(from, to)
+  );
+
+  const byChampionLane = new Map<string, any>();
+
+  for (const entry of entries) {
+    const snapshotDate = snapshotDateByKey.get(entry.snapshot_key);
+    const championKey = String(entry.external_id || "").trim() ||
+      String(entry.champion_name || "").trim().toLowerCase();
+
+    if (!snapshotDate || !championKey || !entry.lane) continue;
+
+    const key = `${entry.lane}|${championKey}`;
+    let current = byChampionLane.get(key);
+
+    if (!current) {
+      current = {
+        key,
+        championKey,
+        lane: entry.lane,
+        days: new Map<string, any>(),
+        latest: entry,
+        latestDate: snapshotDate,
+      };
+      byChampionLane.set(key, current);
+    }
+
+    if (current.days.has(snapshotDate)) continue;
+
+    current.days.set(snapshotDate, {
+      score: toNumber(entry.ranking_final),
+      winrate: toNumber(entry.winrate),
+      pickrate: toNumber(entry.pickrate),
+      banrate: toNumber(entry.banrate),
+    });
+
+    if (snapshotDate >= current.latestDate) {
+      current.latest = entry;
+      current.latestDate = snapshotDate;
+    }
+  }
+
+  // Peso de un día respecto de lastDate: los días recientes pesan más (media móvil exponencial).
+  const dayWeight = (date: string, lastDate: string) => {
+    const ageDays = (Date.parse(`${lastDate}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`)) / 86_400_000;
+    return Math.pow(0.5, Math.max(ageDays, 0) / AVERAGE_HALF_LIFE_DAYS);
+  };
+
+  // Promedio ponderado acumulado hasta lastDate (inclusive), ordenado por línea.
+  const buildAverageRows = (lastDate: string) => {
+    const rowsByLane: Record<string, any[]> = {};
+    const groupWeight = snapshots
+      .filter((snapshot) => snapshot.snapshot_date <= lastDate)
+      .reduce((sum, snapshot) => sum + dayWeight(snapshot.snapshot_date, lastDate), 0);
+
+    for (const champ of byChampionLane.values()) {
+      const days = [...champ.days.entries()]
+        .filter(([date]) => date <= lastDate)
+        .map(([date, day]) => ({ ...day, weight: dayWeight(date, lastDate) }));
+
+      if (!days.length) continue;
+
+      const presentWeight = days.reduce((sum, day) => sum + day.weight, 0);
+      const weightedMean = (key: string) =>
+        days.reduce((sum, day) => sum + day[key] * day.weight, 0) / presentWeight;
+
+      const rankingAverage = Number(weightedMean("score").toFixed(2));
+      // Igual que con los elos: faltar días del parche resta score (más si son recientes).
+      const dayPresenceFactor = DAY_PRESENCE_BASE_FACTOR +
+        Math.min(presentWeight / groupWeight, 1) * DAY_PRESENCE_FACTOR_WEIGHT;
+      const rankingFinal = Number(clamp(rankingAverage * dayPresenceFactor, 0, 100).toFixed(2));
+
+      (rowsByLane[champ.lane] ||= []).push({
+        champ,
+        daysPresent: days.length,
+        rankingAverage,
+        dayPresenceFactor,
+        rankingFinal,
+        winrate: Number(weightedMean("winrate").toFixed(4)),
+        pickrate: Number(weightedMean("pickrate").toFixed(4)),
+        banrate: Number(weightedMean("banrate").toFixed(4)),
+      });
+    }
+
+    return Object.values(rowsByLane).flatMap((laneRows) =>
+      laneRows
+        .sort((a, b) => b.rankingFinal - a.rankingFinal)
+        .map((row, idx) => ({ ...row, position: idx + 1 }))
+    );
+  };
+
+  // La variación se mide contra el promedio del día anterior dentro del mismo parche.
+  const previousPositions = new Map<string, number>();
+  if (daysTotal > 1) {
+    for (const row of buildAverageRows(snapshots[daysTotal - 2].snapshot_date)) {
+      previousPositions.set(row.champ.key, row.position);
+    }
+  }
+
+  const now = new Date().toISOString();
+  const rows = buildAverageRows(snapshots[daysTotal - 1].snapshot_date).map((row) => ({
+    patch_group: patchGroup,
+    champion_key: row.champ.championKey,
+    champion_name: row.champ.latest.champion_name,
+    original_name: row.champ.latest.original_name,
+    external_id: row.champ.latest.external_id || null,
+    lane: row.champ.lane,
+    tier: assignTier(row.rankingFinal),
+    winrate: row.winrate,
+    pickrate: row.pickrate,
+    banrate: row.banrate,
+    difficulty: row.champ.latest.difficulty,
+    ranking_average: row.rankingAverage,
+    day_presence_factor: Number(row.dayPresenceFactor.toFixed(4)),
+    ranking_final: row.rankingFinal,
+    position_in_lane: row.position,
+    previous_position_in_lane: previousPositions.get(row.champ.key) ?? null,
+    days_present: row.daysPresent,
+    days_total: daysTotal,
+    image_url: row.champ.latest.image_url || "",
+    updated_at: now,
+  }));
+
+  const { error: groupError } = await supabaseAdmin
+    .from("tierlist_patch_groups")
+    .upsert({
+      patch_group: patchGroup,
+      latest_patch: snapshots[snapshots.length - 1].patch,
+      snapshots_count: daysTotal,
+      first_snapshot_date: snapshots[0].snapshot_date,
+      last_snapshot_date: snapshots[snapshots.length - 1].snapshot_date,
+      elo_penalty_starts_on: eloPenaltyStartsOn,
+      updated_at: now,
+    }, { onConflict: "patch_group" });
+
+  if (groupError) throw groupError;
+
+  const BULK_BATCH = 100;
+
+  for (let i = 0; i < rows.length; i += BULK_BATCH) {
+    const { error } = await supabaseAdmin
+      .from("tierlist_patch_averages")
+      .upsert(rows.slice(i, i + BULK_BATCH), { onConflict: "patch_group,lane,champion_key" });
+
+    if (error) throw error;
+  }
+
+  const { error: staleError } = await supabaseAdmin
+    .from("tierlist_patch_averages")
+    .delete()
+    .eq("patch_group", patchGroup)
+    .lt("updated_at", now);
+
+  if (staleError) throw staleError;
+
+  log(`Promedio ${patchGroup}: ${rows.length} entradas sobre ${daysTotal} snapshot(s).`);
+  return rows.length;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -491,44 +763,26 @@ Deno.serve(async (req) => {
 
   let supabaseAdmin: ReturnType<typeof createClient> | null = null;
   let executionId: string | null = null;
+  let snapshotSaved = false;
   let executionPatch = "unknown";
+  let executionPatchGroup: string | null = null;
   let executionSnapshotDate = new Date().toISOString().slice(0, 10);
   let executionSnapshotKey = `unknown::${executionSnapshotDate}`;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const supabaseServiceRoleKey = Deno.env.get("SERVICE_ROLE_KEY");
+    const cronSecret = Deno.env.get("TIERLIST_CRON_SECRET");
 
-    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
+    if (!supabaseUrl || !supabaseServiceRoleKey || !cronSecret) {
       return jsonResponse({ error: "Missing Supabase environment variables" }, 500);
     }
 
-    const authorization = req.headers.get("Authorization") || "";
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authorization } },
-    });
-
-    supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    const user = authData?.user;
-
-    if (authError || !user) {
+    if (req.headers.get("x-cron-secret") !== cronSecret) {
       return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profileError) throw profileError;
-
-    if (profile?.role !== "admin") {
-      return jsonResponse({ error: "Forbidden: Admin access required" }, 403);
-    }
+    supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     const logs: string[] = [];
     const log = (msg: string) => {
@@ -537,14 +791,66 @@ Deno.serve(async (req) => {
     };
 
     const body = await req.json().catch(() => ({}));
-    const configPayload = body?.config || {};
-    const weights = normalizeWeights(configPayload);
-    const applyEloPresencePenalty = configPayload.apply_elo_presence_penalty !== false;
+    // force: recalcula aunque los datos de ese día ya estén procesados.
+    // rebuild_averages: "all" recalcula los promedios de todos los grupos de parche.
+    const force = body?.force === true;
+    const rebuildAllAverages = body?.rebuild_averages === "all";
 
+    const [configResult, stateResult, patchesResult] = await Promise.all([
+      supabaseAdmin
+        .from("tierlist_configs")
+        .select("*")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("game_state")
+        .select("active_patch_id")
+        .eq("id", 1)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("game_patches")
+        .select("id, version, status, release_at, created_at"),
+    ]);
+
+    if (configResult.error) throw configResult.error;
+    if (stateResult.error) throw stateResult.error;
+    if (patchesResult.error) throw patchesResult.error;
+
+    const gamePatches = patchesResult.data || [];
+    const activePatch = gamePatches.find(
+      (gamePatch) => String(gamePatch.id) === String(stateResult.data?.active_patch_id),
+    );
+
+    if (!activePatch) {
+      throw new Error("No hay un parche activo configurado en la app (game_state).");
+    }
+
+    const patch = String(activePatch.version).trim();
+    const patchGroup = getPatchGroup(patch);
+    executionPatch = patch;
+    executionPatchGroup = patchGroup;
+
+    if (!patchGroup) {
+      throw new Error(`El parche activo "${patch}" no tiene formato número.número.`);
+    }
+
+    const publishedPatches = gamePatches.filter(
+      (gamePatch) => gamePatch.status === "active" || gamePatch.status === "archived",
+    );
+    const eloPenaltyStartsOn = getEloPenaltyStartsOn(publishedPatches, patchGroup);
+    const applyEloPresencePenalty = eloPenaltyStartsOn !== null &&
+      toIsoDate(new Date()) >= eloPenaltyStartsOn;
+    const weights = normalizeWeights(configResult.data || {});
+
+    log(`Parche activo: ${patch} (grupo ${patchGroup})`);
     log("Iniciando extracción de datos desde API de Tencent...");
     log(`Rangos a promediar: ${RANK_KEYS.join(", ")}`);
     log(`Pesos normalizados: ${JSON.stringify(weights)}`);
-    log(`Penalización por ausencia en elos: ${applyEloPresencePenalty ? "activada" : "desactivada"}`);
+    log(
+      `Penalización por ausencia en elos: ${applyEloPresencePenalty ? "activada" : "desactivada"}` +
+        (eloPenaltyStartsOn ? ` (se activa el ${eloPenaltyStartsOn})` : ""),
+    );
 
     const [respRank, respChamp] = await Promise.all([
       fetch(RANK_URL, { headers: { "User-Agent": "Mozilla/5.0" } }),
@@ -564,170 +870,235 @@ Deno.serve(async (req) => {
       respChamp.json(),
     ]);
 
-    log("Datos obtenidos. Promediando rangos por campeón y línea...");
-
-    const patch = configPayload.active_patch?.trim() || "unknown";
-    const snapshotDate = configPayload.active_snapshot_date?.trim() ||
-      new Date().toISOString().slice(0, 10);
-
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(snapshotDate) || Number.isNaN(Date.parse(`${snapshotDate}T00:00:00Z`))) {
-      throw new Error("La fecha de la tierlist debe tener formato YYYY-MM-DD.");
-    }
-
-    const snapshotKey = `${patch.toLocaleLowerCase().trim()}::${snapshotDate}`;
-    executionPatch = patch;
+    const snapshotDate = getLatestStatDate(dataRank) || toIsoDate(new Date());
+    const snapshotKey = `${patch.toLocaleLowerCase()}::${snapshotDate}`;
     executionSnapshotDate = snapshotDate;
     executionSnapshotKey = snapshotKey;
 
-    log(`Snapshot: parche ${patch}, fecha ${snapshotDate}`);
+    log(`Datos obtenidos. Fecha de los datos de Tencent: ${snapshotDate}`);
 
-    const laneData = buildAveragedLaneData(dataRank, dataChamp, log);
-    const allEntries: Array<{ lane: string; champ: any; patch: string }> = [];
-    const unmapped: string[] = [];
+    const { data: processedSnapshots, error: processedError } = await supabaseAdmin
+      .from("tierlist_executions")
+      .select("id")
+      .eq("snapshot_date", snapshotDate)
+      .in("status", ["success", "partial"])
+      .limit(1);
 
-    for (const [lane, champions] of Object.entries(laneData)) {
-      const processed = processLane(champions, weights, applyEloPresencePenalty);
+    if (processedError) throw processedError;
 
-      for (const champ of processed) {
-        if (champ.name_es === champ.original_name && champ.original_name) {
-          unmapped.push(`${champ.original_name} (${lane})`);
+    const alreadyProcessed = !force && (processedSnapshots?.length || 0) > 0;
+
+    if (alreadyProcessed && !rebuildAllAverages) {
+      log(`Los datos del ${snapshotDate} ya estaban procesados; no se genera un snapshot nuevo.`);
+      return jsonResponse({
+        status: "skipped",
+        patch,
+        patch_group: patchGroup,
+        snapshot_date: snapshotDate,
+        logs: logs.join("\n"),
+      });
+    }
+
+    let championsProcessed = 0;
+
+    if (!alreadyProcessed) {
+      log(`Snapshot: parche ${patch}, fecha ${snapshotDate}. Promediando rangos por campeón y línea...`);
+
+      const laneData = buildAveragedLaneData(dataRank, dataChamp, log);
+      const allEntries: Array<{ lane: string; champ: any }> = [];
+      const unmapped: string[] = [];
+
+      for (const [lane, champions] of Object.entries(laneData)) {
+        const processed = processLane(champions, weights, applyEloPresencePenalty);
+
+        for (const champ of processed) {
+          if (champ.name_es === champ.original_name && champ.original_name) {
+            unmapped.push(`${champ.original_name} (${lane})`);
+          }
+
+          allEntries.push({ lane, champ });
         }
 
-        allEntries.push({ lane, champ, patch });
+        log(
+          `${lane}: procesado. ` +
+            `Tier S+: ${processed.filter((c) => c.tier === "S+").length}, ` +
+            `S: ${processed.filter((c) => c.tier === "S").length}`,
+        );
       }
 
-      log(
-        `${lane}: procesado. ` +
-          `Tier S+: ${processed.filter((c) => c.tier === "S+").length}, ` +
-          `S: ${processed.filter((c) => c.tier === "S").length}`,
+      const executionPayload = {
+        patch,
+        patch_group: patchGroup,
+        snapshot_date: snapshotDate,
+        snapshot_key: snapshotKey,
+        executed_at: new Date().toISOString(),
+        status: "running",
+        champions_processed: allEntries.length,
+        lanes_processed: Object.keys(laneData).length,
+        data_source: "mlol.qt.qq.com",
+        admin_user: body?.trigger === "cron" ? "cron" : "manual",
+        weights_used: {
+          ...weights,
+          difficulty_default: 2,
+          averaged_ranks: RANK_KEYS,
+          rank_weights: RANK_WEIGHTS,
+          competitive_base_factor: COMPETITIVE_BASE_FACTOR,
+          presence_factor_weight: PRESENCE_FACTOR_WEIGHT,
+          high_rank_factor_weight: HIGH_RANK_FACTOR_WEIGHT,
+          apply_elo_presence_penalty: applyEloPresencePenalty,
+          elo_penalty_starts_on: eloPenaltyStartsOn,
+        },
+        unmapped_champions: unmapped,
+        logs: logs.join("\n"),
+        error_message: null,
+      };
+
+      const { data: previousExecution, error: previousExecutionError } = await supabaseAdmin
+        .from("tierlist_executions")
+        .select("id")
+        .eq("snapshot_key", snapshotKey)
+        .order("executed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (previousExecutionError) throw previousExecutionError;
+
+      if (previousExecution?.id) {
+        const { data: updatedExecution, error: updateExecutionError } = await supabaseAdmin
+          .from("tierlist_executions")
+          .update(executionPayload)
+          .eq("id", previousExecution.id)
+          .select("id")
+          .single();
+
+        if (updateExecutionError) throw updateExecutionError;
+        executionId = String(updatedExecution.id);
+      } else {
+        const { data: createdExecution, error: createExecutionError } = await supabaseAdmin
+          .from("tierlist_executions")
+          .insert(executionPayload)
+          .select("id")
+          .single();
+
+        if (createExecutionError) throw createExecutionError;
+        executionId = String(createdExecution.id);
+      }
+
+      log("Eliminando entradas anteriores del mismo snapshot...");
+
+      const { error: deleteError } = await supabaseAdmin
+        .from("tierlist_entries")
+        .delete()
+        .eq("snapshot_key", snapshotKey);
+
+      if (deleteError) throw deleteError;
+
+      const now = new Date().toISOString();
+      const records = allEntries.map(({ lane, champ }) => ({
+        champion_name: champ.name_es,
+        original_name: champ.original_name,
+        external_id: String(champ.hero_id || ""),
+        lane,
+        tier: champ.tier,
+        patch,
+        patch_group: patchGroup,
+        snapshot_date: snapshotDate,
+        snapshot_key: snapshotKey,
+        winrate: champ.win_rate_percent,
+        pickrate: champ.appear_rate_percent,
+        banrate: champ.forbid_rate_percent,
+        difficulty: champ.difficultyL,
+        ranking_winrate: champ.ranking_winrate,
+        ranking_pickrate: champ.ranking_pickrate,
+        ranking_banrate: champ.ranking_banrate,
+        ranking_facilidad: champ.ranking_facilidad,
+        ranking_final: champ.ranking_final,
+        position_in_lane: champ.position_in_lane,
+        image_url: champ.avatar || "",
+        data_source: "mlol.qt.qq.com",
+        updated_at: now,
+      }));
+
+      log(`Guardando ${records.length} entradas nuevas...`);
+
+      const BULK_BATCH = 100;
+
+      for (let i = 0; i < records.length; i += BULK_BATCH) {
+        const { error: insertError } = await supabaseAdmin
+          .from("tierlist_entries")
+          .insert(records.slice(i, i + BULK_BATCH));
+
+        if (insertError) throw insertError;
+      }
+
+      log(`Guardadas ${records.length} entradas correctamente.`);
+      championsProcessed = records.length;
+
+      const { error: executionError } = await supabaseAdmin
+        .from("tierlist_executions")
+        .update({
+          ...executionPayload,
+          executed_at: new Date().toISOString(),
+          status: "success",
+          champions_processed: records.length,
+          logs: logs.join("\n"),
+        })
+        .eq("id", executionId);
+
+      if (executionError) throw executionError;
+      snapshotSaved = true;
+    }
+
+    // Promedio acumulado del grupo actual, más los grupos que todavía no tienen
+    // promedio (primer despliegue) o todos si se pidió rebuild_averages: "all".
+    const [executionGroups, existingGroups] = await Promise.all([
+      fetchAllRows((from, to) =>
+        supabaseAdmin!
+          .from("tierlist_executions")
+          .select("patch_group")
+          .in("status", ["success", "partial"])
+          .not("patch_group", "is", null)
+          .range(from, to)
+      ),
+      fetchAllRows((from, to) =>
+        supabaseAdmin!
+          .from("tierlist_patch_groups")
+          .select("patch_group")
+          .range(from, to)
+      ),
+    ]);
+
+    const existingGroupSet = new Set(existingGroups.map((row) => row.patch_group));
+    const groupsToRebuild = new Set<string>([patchGroup]);
+
+    for (const { patch_group: group } of executionGroups) {
+      if (rebuildAllAverages || !existingGroupSet.has(group)) groupsToRebuild.add(group);
+    }
+
+    for (const group of groupsToRebuild) {
+      await rebuildPatchGroupAverages(
+        supabaseAdmin,
+        group,
+        getEloPenaltyStartsOn(publishedPatches, group),
+        log,
       );
     }
 
-    const executionPayload = {
-      patch: String(patch),
-      snapshot_date: snapshotDate,
-      snapshot_key: snapshotKey,
-      executed_at: new Date().toISOString(),
-      status: "running",
-      champions_processed: allEntries.length,
-      lanes_processed: Object.keys(laneData).length,
-      data_source: "mlol.qt.qq.com",
-      admin_user: user.email,
-      weights_used: {
-        ...weights,
-        difficulty_default: 2,
-        averaged_ranks: RANK_KEYS,
-        rank_weights: RANK_WEIGHTS,
-        competitive_base_factor: COMPETITIVE_BASE_FACTOR,
-        presence_factor_weight: PRESENCE_FACTOR_WEIGHT,
-        high_rank_factor_weight: HIGH_RANK_FACTOR_WEIGHT,
-        apply_elo_presence_penalty: applyEloPresencePenalty,
-      },
-      unmapped_champions: unmapped,
-      logs: logs.join("\n"),
-      error_message: null,
-    };
-
-    const { data: previousExecution, error: previousExecutionError } = await supabaseAdmin
-      .from("tierlist_executions")
-      .select("id")
-      .eq("snapshot_key", snapshotKey)
-      .order("executed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (previousExecutionError) throw previousExecutionError;
-
-    if (previousExecution?.id) {
-      const { data: updatedExecution, error: updateExecutionError } = await supabaseAdmin
+    if (executionId) {
+      await supabaseAdmin
         .from("tierlist_executions")
-        .update(executionPayload)
-        .eq("id", previousExecution.id)
-        .select("id")
-        .single();
-
-      if (updateExecutionError) throw updateExecutionError;
-      executionId = String(updatedExecution.id);
-    } else {
-      const { data: createdExecution, error: createExecutionError } = await supabaseAdmin
-        .from("tierlist_executions")
-        .insert(executionPayload)
-        .select("id")
-        .single();
-
-      if (createExecutionError) throw createExecutionError;
-      executionId = String(createdExecution.id);
+        .update({ logs: logs.join("\n") })
+        .eq("id", executionId);
     }
-
-    log("Eliminando entradas anteriores del mismo snapshot...");
-
-    const { error: deleteError } = await supabaseAdmin
-      .from("tierlist_entries")
-      .delete()
-      .eq("snapshot_key", snapshotKey);
-
-    if (deleteError) throw deleteError;
-
-    const now = new Date().toISOString();
-    const records = allEntries.map(({ lane, champ, patch: p }) => ({
-      champion_name: champ.name_es,
-      original_name: champ.original_name,
-      external_id: String(champ.hero_id || ""),
-      lane,
-      tier: champ.tier,
-      patch: p,
-      snapshot_date: snapshotDate,
-      snapshot_key: snapshotKey,
-      winrate: champ.win_rate_percent,
-      pickrate: champ.appear_rate_percent,
-      banrate: champ.forbid_rate_percent,
-      difficulty: champ.difficultyL,
-      ranking_winrate: champ.ranking_winrate,
-      ranking_pickrate: champ.ranking_pickrate,
-      ranking_banrate: champ.ranking_banrate,
-      ranking_facilidad: champ.ranking_facilidad,
-      ranking_final: champ.ranking_final,
-      position_in_lane: champ.position_in_lane,
-      image_url: champ.avatar || "",
-      data_source: "mlol.qt.qq.com",
-      updated_at: now,
-    }));
-
-    log(`Guardando ${records.length} entradas nuevas...`);
-
-    const BULK_BATCH = 100;
-
-    for (let i = 0; i < records.length; i += BULK_BATCH) {
-      const { error: insertError } = await supabaseAdmin
-        .from("tierlist_entries")
-        .insert(records.slice(i, i + BULK_BATCH));
-
-      if (insertError) throw insertError;
-    }
-
-    log(`Guardadas ${records.length} entradas correctamente.`);
-
-    const execution = {
-      ...executionPayload,
-      executed_at: new Date().toISOString(),
-      status: "success",
-      champions_processed: records.length,
-      logs: logs.join("\n"),
-    };
-
-    const { error: executionError } = await supabaseAdmin
-      .from("tierlist_executions")
-      .update(execution)
-      .eq("id", executionId);
-
-    if (executionError) throw executionError;
 
     return jsonResponse({
       status: "success",
-      champions_processed: records.length,
+      champions_processed: championsProcessed,
       patch,
+      patch_group: patchGroup,
       snapshot_date: snapshotDate,
       snapshot_key: snapshotKey,
+      averages_rebuilt: [...groupsToRebuild],
       logs: logs.join("\n"),
     });
   } catch (error) {
@@ -737,9 +1108,15 @@ Deno.serve(async (req) => {
     const stack = error instanceof Error ? error.stack || error.message : message;
 
     try {
-      if (supabaseAdmin && executionId) {
+      if (supabaseAdmin && executionId && snapshotSaved) {
+        // El snapshot diario quedó bien; solo falló el promedio del parche.
+        await supabaseAdmin.from("tierlist_executions").update({
+          error_message: `Snapshot guardado, pero falló el promedio del parche: ${message}`,
+        }).eq("id", executionId);
+      } else if (supabaseAdmin && executionId) {
         await supabaseAdmin.from("tierlist_executions").update({
           patch: executionPatch,
+          patch_group: executionPatchGroup,
           snapshot_date: executionSnapshotDate,
           snapshot_key: executionSnapshotKey,
           executed_at: new Date().toISOString(),
@@ -751,6 +1128,7 @@ Deno.serve(async (req) => {
       } else if (supabaseAdmin) {
         await supabaseAdmin.from("tierlist_executions").insert({
           patch: executionPatch,
+          patch_group: executionPatchGroup,
           snapshot_date: executionSnapshotDate,
           snapshot_key: executionSnapshotKey,
           executed_at: new Date().toISOString(),

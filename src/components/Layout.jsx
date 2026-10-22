@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, BookOpen, TrendingUp, Wrench, Swords,
-  BarChart3, Sparkles, Settings, Menu, LogOut, Bug, Info, Scale, ShieldCheck, Search, Target
+  BarChart3, Sparkles, Settings, Menu, LogOut, Bug, Info, Scale, ShieldCheck, Search, Target, Calculator
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
@@ -291,6 +291,18 @@ export default function Layout() {
             ))}
 
             {!collapsed && (
+              <Link
+                to="/tierlist/como-se-calcula"
+                onClick={() => setMobileOpen(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
+                title="Cómo calculamos la tierlist"
+                aria-label="Cómo calculamos la tierlist"
+              >
+                <Calculator size={15} />
+              </Link>
+            )}
+
+            {!collapsed && (
               <button
                 type="button"
                 onClick={() => setBugModalOpen(true)}
@@ -346,7 +358,7 @@ export default function Layout() {
         <div className="rd-sidebar-footer space-y-3">
           {user?.role === 'admin' && (
             <Link
-              to="/admin/tierlist-config"
+              to="/tierlist/como-se-calcula"
               className={`flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors text-sm ${collapsed ? 'justify-center' : ''}`}
             >
               <Settings size={16} />

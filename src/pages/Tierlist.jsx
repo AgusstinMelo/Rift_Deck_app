@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import {
+  getTierlistEntries,
+  getTierlistExecutions,
+  getTierlistPatchAverages,
+  getTierlistPatchGroups,
+} from '@/api/tierlistSupabase';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, Trophy, Table2, Layers } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
 import LaneBadge from '@/components/ui/LaneBadge';
@@ -10,12 +15,22 @@ import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/ho
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
 
+const formatDays = (group) => {
+  const days = Number(group?.snapshots_count) || 0;
+  return `${days} ${days === 1 ? 'día' : 'días'}`;
+};
+
 const formatSnapshotDate = (execution) => {
   const rawDate = execution?.snapshot_date || execution?.executed_at;
   if (!rawDate) return 'sin fecha';
   const datePart = String(rawDate).slice(0, 10);
   return new Date(`${datePart}T00:00:00`).toLocaleDateString('es-ES');
 };
+
+const TIERLIST_MODES = [
+  { id: 'average', label: 'Tierlist promediada', shortLabel: 'Promediada' },
+  { id: 'daily', label: 'Tierlist del día', shortLabel: 'Del día' },
+];
 
 // Color de acento de cada tier (mismas variables que TierBadge).
 const TIER_COLOR_VAR = {
@@ -54,53 +69,77 @@ export default function Tierlist() {
   const [viewMode, setViewMode] = useState(() => (
     typeof window !== 'undefined' && window.matchMedia(PHONE_LANDSCAPE_QUERY).matches ? 'table' : 'tier'
   ));
-  const [patchFilter, setPatchFilter] = useState(''); // stores execution id
+  // 'average': promedio acumulado del parche. 'daily': snapshot de un día sin promediar.
+  const [tierlistMode, setTierlistMode] = useState('average');
+  const isDaily = tierlistMode === 'daily';
+  const [patchFilter, setPatchFilter] = useState(''); // stores patch_group (7.3, 7.2...)
+  const [snapshotFilter, setSnapshotFilter] = useState(''); // stores execution id
+
+  // Cada grupo de parche muestra el promedio acumulado de sus tierlists diarias.
+  const { data: patchGroups = [] } = useQuery({
+    queryKey: ['tierlist-patch-groups'],
+    queryFn: () => getTierlistPatchGroups(10),
+  });
+
+  const latestGroup = patchGroups[0] || null;
+  const selectedGroupIndex = patchFilter
+    ? patchGroups.findIndex(group => group.patch_group === patchFilter)
+    : 0;
+  const activeGroup = patchGroups[Math.max(selectedGroupIndex, 0)] || latestGroup;
+  const activePatchGroup = activeGroup?.patch_group || '';
+
+  const { data: averageTierlist = [], isLoading: isLoadingAverage } = useQuery({
+    queryKey: ['tierlist-patch-averages', [activePatchGroup]],
+    queryFn: () => getTierlistPatchAverages([activePatchGroup]),
+    enabled: !isDaily && Boolean(activePatchGroup),
+  });
 
   const { data: executions = [] } = useQuery({
     queryKey: ['executions'],
     queryFn: () => getTierlistExecutions(10),
+    enabled: isDaily,
   });
 
   const successfulExecs = executions.filter(e => e.status === 'success' || e.status === 'partial');
-
-  const latestExec = successfulExecs[0] || null;
-  const selectedIndex = patchFilter
-    ? successfulExecs.findIndex(execution => String(execution.id) === String(patchFilter))
+  const selectedSnapshotIndex = snapshotFilter
+    ? successfulExecs.findIndex(execution => String(execution.id) === String(snapshotFilter))
     : 0;
-  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
-  const activeExec = successfulExecs[activeIndex] || latestExec;
-  const comparisonExec = successfulExecs[activeIndex + 1] || null;
-
-  const activeSnapshotKey = activeExec?.snapshot_key || '';
-  const comparisonSnapshotKey = comparisonExec?.snapshot_key || '';
-
-  const snapshotKeysToLoad = useMemo(
-    () => [activeSnapshotKey, comparisonSnapshotKey].filter(Boolean),
-    [activeSnapshotKey, comparisonSnapshotKey]
+  const activeSnapshotIndex = Math.max(selectedSnapshotIndex, 0);
+  const activeExec = successfulExecs[activeSnapshotIndex] || null;
+  const comparisonExec = successfulExecs[activeSnapshotIndex + 1] || null;
+  const dailySnapshotKeys = useMemo(
+    () => [activeExec?.snapshot_key, comparisonExec?.snapshot_key].filter(Boolean),
+    [activeExec?.snapshot_key, comparisonExec?.snapshot_key]
   );
 
-  const { data: tierlist = [], isLoading } = useQuery({
-    queryKey: ['tierlist-full', snapshotKeysToLoad],
-    queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: snapshotKeysToLoad }),
-    enabled: snapshotKeysToLoad.length > 0,
+  const { data: dailyTierlist = [], isLoading: isLoadingDaily } = useQuery({
+    queryKey: ['tierlist-full', dailySnapshotKeys],
+    queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: dailySnapshotKeys }),
+    enabled: isDaily && dailySnapshotKeys.length > 0,
   });
 
-  const prevEntries = comparisonSnapshotKey
-    ? tierlist.filter(entry => entry.snapshot_key === comparisonSnapshotKey)
+  const tierlist = isDaily ? dailyTierlist : averageTierlist;
+  const isLoading = isDaily ? isLoadingDaily : isLoadingAverage;
+  const activeSnapshotKey = isDaily
+    ? activeExec?.snapshot_key || ''
+    : activePatchGroup ? `${activePatchGroup}::average` : '';
+
+  // Promediada: Δ vs el promedio del día anterior. Del día: Δ vs el snapshot anterior.
+  const hasPreviousDay = isDaily ? Boolean(comparisonExec) : Number(activeGroup?.snapshots_count) > 1;
+  const prevDailyEntries = isDaily && comparisonExec
+    ? dailyTierlist.filter(entry => entry.snapshot_key === comparisonExec.snapshot_key)
     : [];
 
   const getPositionVariation = (entry) => {
-    if (!comparisonSnapshotKey || prevEntries.length === 0) return null;
+    const previousPosition = isDaily
+      ? prevDailyEntries.find(p => p.champion_name === entry.champion_name && p.lane === entry.lane)?.position_in_lane
+      : entry.previous_position_in_lane;
 
-    const prev = prevEntries.find(
-      p => p.champion_name === entry.champion_name && p.lane === entry.lane
-    );
-
-    if (!prev || prev.position_in_lane == null || entry.position_in_lane == null) {
+    if (previousPosition == null || entry.position_in_lane == null) {
       return null;
     }
 
-    return prev.position_in_lane - entry.position_in_lane;
+    return previousPosition - entry.position_in_lane;
   };
 
   const filtered = tierlist.filter(t => {
@@ -143,10 +182,42 @@ export default function Tierlist() {
     return <Minus size={12} className="text-muted-foreground" />;
   };
 
+  // Selector promediada / del día, al lado del selector de vista.
+  const modeToggle = (
+    <div
+      role="tablist"
+      aria-label="Tipo de tierlist"
+      className="rd-tierlist-view-toggle flex gap-1 bg-secondary/50 p-1 rounded-xl border border-border/60"
+    >
+      {TIERLIST_MODES.map(mode => (
+        <button
+          key={mode.id}
+          type="button"
+          role="tab"
+          aria-selected={tierlistMode === mode.id}
+          aria-label={mode.label}
+          title={mode.label}
+          onClick={() => {
+            setTierlistMode(mode.id);
+            setTierFilter('all');
+          }}
+          className={`
+            flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap
+            ${tierlistMode === mode.id
+              ? 'bg-primary/15 text-primary border border-primary/20'
+              : 'text-muted-foreground hover:text-foreground'}
+          `}
+        >
+          {mode.shortLabel}
+        </button>
+      ))}
+    </div>
+  );
+
   // Selector Por Tier / Tabla. En smartphone no entra en la fila de
   // filtros: va en el encabezado, en la línea de "Parche X vs Parche Y".
   const viewToggle = (
-    <div className="rd-tierlist-view-toggle flex gap-1 bg-secondary/50 p-1 rounded-xl ml-auto border border-border/60">
+    <div className="rd-tierlist-view-toggle flex gap-1 bg-secondary/50 p-1 rounded-xl border border-border/60">
       <button
         onClick={() => setViewMode('tier')}
         aria-pressed={viewMode === 'tier'}
@@ -177,6 +248,13 @@ export default function Tierlist() {
     </div>
   );
 
+  const toggles = (
+    <div className="rd-tierlist-toggles flex items-center gap-2 ml-auto shrink-0">
+      {modeToggle}
+      {viewToggle}
+    </div>
+  );
+
   return (
     <div className="rd-page rd-dashboard rd-tierlist-layout">
 
@@ -195,36 +273,38 @@ export default function Tierlist() {
 
           <div className="rd-tierlist-subline mt-1 flex items-center gap-3">
           <p className="text-muted-foreground text-sm">
-            {activeExec ? (
+            {isDaily ? (
+              activeExec ? (
+                <>
+                  <span className="text-foreground font-medium">Parche {activeExec.patch}</span>
+                  <span> · {formatSnapshotDate(activeExec)}</span>
+                  {comparisonExec && <span> · Δ vs {formatSnapshotDate(comparisonExec)}</span>}
+                </>
+              ) : 'Sin datos de actualización'
+            ) : activeGroup ? (
               <>
-                <span className="text-foreground font-medium">Parche {activeExec.patch}</span>
-                <span> · {formatSnapshotDate(activeExec)}</span>
-                {comparisonExec && (
-                  <>
-                    <span> vs </span>
-                    <span className="text-foreground font-medium">Parche {comparisonExec.patch}</span>
-                    <span> · {formatSnapshotDate(comparisonExec)}</span>
-                  </>
-                )}
+                <span className="text-foreground font-medium">Parche {activeGroup.patch_group}</span>
+                <span> · promedio ponderado de {formatDays(activeGroup)}</span>
+                {hasPreviousDay && <span> · Δ vs día anterior</span>}
               </>
             ) : 'Sin datos de actualización'}
           </p>
-          {toggleInHeader && viewToggle}
+          {toggleInHeader && toggles}
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-3 rd-status-pill">
           <Trophy size={16} className="text-primary" />
           <span className="text-xs text-muted-foreground">
-            {latestExec
-              ? `Actualizado ${new Date(latestExec.executed_at).toLocaleDateString('es-ES')}`
+            {latestGroup
+              ? `Actualizado ${new Date(latestGroup.updated_at).toLocaleDateString('es-ES')}`
               : 'Sin ejecución reciente'}
           </span>
         </div>
       </div>
 
       <div className="rd-tierlist-filters rd-card p-4">
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-wrap gap-3 lg:gap-2 items-center">
           <div className="w-full sm:w-auto min-w-0">
             <div className="grid grid-cols-3 sm:flex sm:w-auto gap-1 bg-secondary/40 border border-border/50 p-1 rounded-xl">
               <button
@@ -280,10 +360,10 @@ export default function Tierlist() {
             <option value="3">Difícil</option>
           </select>
 
-          {successfulExecs.length > 1 && (
+          {isDaily && successfulExecs.length > 1 && (
             <select
-              value={patchFilter || latestExec?.id || ''}
-              onChange={event => setPatchFilter(event.target.value)}
+              value={snapshotFilter || activeExec?.id || ''}
+              onChange={event => setSnapshotFilter(event.target.value)}
               className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
             >
               {successfulExecs.map(execution => (
@@ -294,7 +374,21 @@ export default function Tierlist() {
             </select>
           )}
 
-          {!toggleInHeader && viewToggle}
+          {!isDaily && patchGroups.length > 1 && (
+            <select
+              value={patchFilter || latestGroup?.patch_group || ''}
+              onChange={event => setPatchFilter(event.target.value)}
+              className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
+            >
+              {patchGroups.map(group => (
+                <option key={group.patch_group} value={group.patch_group}>
+                  {isPhonePortrait ? `Parche ${group.patch_group}` : `Parche ${group.patch_group} · ${formatDays(group)}`}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {!toggleInHeader && toggles}
         </div>
       </div>
 
@@ -310,7 +404,7 @@ export default function Tierlist() {
           <EmptyState
             icon={RefreshCw}
             title="Sin datos de tierlist"
-            description="La tierlist aún no tiene datos. Un administrador debe ejecutar la actualización automática."
+            description="La tierlist aún no tiene datos. Se calcula automáticamente todos los días."
           />
         </div>
       ) : viewMode === 'tier' ? (

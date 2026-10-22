@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Champion } from '@/api/entitiesSupabase';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import { Search } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
 import EmptyState from '@/components/ui/EmptyState';
@@ -47,19 +47,9 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
     queryFn: () => Champion.list('name'),
   });
 
-  const { data: executions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10),
-  });
-
-  const currentSnapshotKey = executions.find(execution =>
-    execution.status === 'success' || execution.status === 'partial'
-  )?.snapshot_key;
-
   const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist', currentSnapshotKey],
-    queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
-    enabled: !!currentSnapshotKey,
+    queryKey: ['tierlist-current'],
+    queryFn: getCurrentTierlist,
   });
 
   useEffect(() => {
@@ -86,7 +76,7 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
     return matchSearch && matchLane && matchRole && matchDiff;
   }).sort((a, b) => a.name.localeCompare(b.name));
 
-  const currentTierlist = getCurrentTierlistEntries(tierlist, executions);
+  const currentTierlist = getCurrentTierlistEntries(tierlist);
 
   if (selected) {
     const tierData = getTierEntriesForChampion(selected, currentTierlist);

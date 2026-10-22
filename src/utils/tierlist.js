@@ -29,6 +29,14 @@ export const normalizeTierlistSnapshotRecord = (record = {}) => {
   };
 };
 
+// Filas de tierlist_patch_averages con la misma forma que tierlist_entries,
+// para que los componentes de la tierlist las usen sin cambios.
+export const normalizePatchAverage = (row = {}) => ({
+  ...row,
+  patch: row.patch_group,
+  snapshot_key: `${row.patch_group}::average`,
+});
+
 const getEntryTime = (entry) =>
   new Date(entry?.updated_at || entry?.created_date || entry?.updated_date || 0).getTime() || 0;
 

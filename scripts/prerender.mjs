@@ -31,7 +31,7 @@ const renderHead = seo => {
 
 const template = await readFile(resolve('dist/index.html'), 'utf8');
 const publicData = JSON.parse(await readFile(resolve('.prerender/public-data.json'), 'utf8'));
-const { champions, items, runes, executions, tierlist } = publicData;
+const { champions, items, runes, tierlist } = publicData;
 const { renderPublicRoute } = await import(pathToFileURL(resolve('dist-ssr/entry-server.js')).href);
 const paths = ['/', '/campeones', ...champions.map(champion => `/campeones/${championSlug(champion.name)}`), '/objetos', ...items.map(item => `/objetos/${entitySlug(item.name)}`), '/runas', ...runes.map(rune => `/runas/${entitySlug(rune.name)}`)];
 
@@ -57,7 +57,7 @@ for (const pathname of paths) {
   const routeData = pathname === '/' ? undefined
     : pathname.startsWith('/objetos') ? { items, champions }
       : pathname.startsWith('/runas') ? { runes }
-        : { champions, executions, tierlist };
+        : { champions, tierlist };
   const markup = renderPublicRoute(pathname, routeData);
   if (!markup.includes('<h1')) throw new Error(`El prerender de ${pathname} no contiene H1.`);
 

@@ -5,7 +5,7 @@ import { entitySlug } from '../src/utils/entitySlug.js';
 import { SITE_URL } from '../src/seo/publicSeo.js';
 import {
   getCurrentTierlistEntries,
-  normalizeTierlistSnapshotRecord,
+  normalizePatchAverage,
 } from '../src/utils/tierlist.js';
 
 const readLocalEnv = async () => {
@@ -64,42 +64,34 @@ const itemColumns = [
 const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description'];
 const items = await fetchPublicRows('current_wr_items', itemColumns, '&active=eq.true');
 const runes = await fetchPublicRows('current_runes', runeColumns);
-const executionParams = new URLSearchParams({
-  select: '*',
-  order: 'snapshot_date.desc,executed_at.desc',
-  limit: '30',
+const groupParams = new URLSearchParams({
+  select: 'patch_group',
+  order: 'last_snapshot_date.desc',
+  limit: '1',
 });
-const executionsResponse = await fetch(`${supabaseUrl}/rest/v1/tierlist_executions?${executionParams}`, {
+const groupsResponse = await fetch(`${supabaseUrl}/rest/v1/tierlist_patch_groups?${groupParams}`, {
   headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
 });
 
-if (!executionsResponse.ok) {
-  throw new Error(`No se pudo consultar el último cálculo de tierlist (${executionsResponse.status}).`);
+if (!groupsResponse.ok) {
+  throw new Error(`No se pudo consultar el parche actual de la tierlist (${groupsResponse.status}).`);
 }
 
-const executionRows = (await executionsResponse.json()).map(normalizeTierlistSnapshotRecord);
-const seenSnapshots = new Set();
-const executions = executionRows.filter(execution => {
-  const identity = execution.snapshot_key || String(execution.id);
-  if (seenSnapshots.has(identity)) return false;
-  seenSnapshots.add(identity);
-  return true;
-}).slice(0, 10);
-const latestExecution = executions.find(execution => execution.status === 'success' || execution.status === 'partial');
+const [latestGroup] = await groupsResponse.json();
 let tierlist = [];
-if (latestExecution?.snapshot_key) {
+if (latestGroup?.patch_group) {
   const params = new URLSearchParams({
     select: '*',
-    snapshot_key: `eq.${latestExecution.snapshot_key}`,
+    patch_group: `eq.${latestGroup.patch_group}`,
     order: 'ranking_final.desc',
   });
-  const tierlistResponse = await fetch(`${supabaseUrl}/rest/v1/tierlist_entries?${params}`, {
+  const tierlistResponse = await fetch(`${supabaseUrl}/rest/v1/tierlist_patch_averages?${params}`, {
     headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
   });
   if (!tierlistResponse.ok) {
     throw new Error(`No se pudo consultar la posición meta actual (${tierlistResponse.status}).`);
   }
-  tierlist = (await tierlistResponse.json()).map(normalizeTierlistSnapshotRecord);
+  tierlist = (await tierlistResponse.json()).map(normalizePatchAverage);
 }
 const slugs = champions.map(champion => championSlug(champion.name)).filter(Boolean);
 if (new Set(slugs).size !== slugs.length) {
@@ -120,6 +112,6 @@ ${paths.map(path => `  <url>\n    <loc>${SITE_URL}${path}</loc>\n  </url>`).join
 
 await writeFile(resolve('public/sitemap.xml'), sitemap, 'utf8');
 await mkdir(resolve('.prerender'), { recursive: true });
-const currentTierlist = getCurrentTierlistEntries(tierlist, executions);
-await writeFile(resolve('.prerender/public-data.json'), JSON.stringify({ champions, items, runes, executions, tierlist: currentTierlist }), 'utf8');
+const currentTierlist = getCurrentTierlistEntries(tierlist);
+await writeFile(resolve('.prerender/public-data.json'), JSON.stringify({ champions, items, runes, tierlist: currentTierlist }), 'utf8');
 console.log(`Sitemap generado con ${paths.length} URLs públicas.`);

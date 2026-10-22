@@ -89,3 +89,9 @@ export function filterByPatch(records, selection) {
     ? records.filter(record => patchMatchesSelection(record?.patch, selection))
     : records;
 }
+
+// Grupo de parche de la tierlist: 7.3, 7.3a y 7.3b -> "7.3".
+export function getPatchGroup(value) {
+  const parsed = parsePatch(value);
+  return parsed && parsed.minor !== null ? `${parsed.major}.${parsed.minor}` : null;
+}

@@ -171,3 +171,39 @@ ORDER BY start_time DESC
 LIMIT 5;
 
 ```
+
+## Tierlist automática
+
+La tierlist se calcula sola todos los días a las 03:30 (hora de España) con el cron `update-tierlist-daily`, que llama a la Edge Function `update-tierlist`.
+
+- **Parche:** se usa el parche activo de la app (`game_state`). Activar un parche nuevo hace que las tierlists siguientes queden en ese parche.
+- **Promedio:** se muestra el promedio ponderado de todas las tierlists diarias del mismo número de parche (`7.3`, `7.3a` y `7.3b` cuentan como `7.3`). Los días recientes pesan más: un día de hace 3 días vale la mitad que el de hoy (`AVERAGE_HALF_LIFE_DAYS` en la Edge Function), así un nerfeo o buff se refleja en pocos días. Un campeón que falta algunos días del parche recibe una penalización proporcional, mayor si los días que faltó son recientes.
+- **Penalización por ausencia en elos:** queda desactivada durante 21 días desde que se activa el primer parche de un número nuevo (por ejemplo `7.4`); activar una letra (`7.4a`) no reinicia la cuenta.
+
+Configuración inicial (una sola vez):
+
+```sql
+select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/update-tierlist', 'tierlist_function_url');
+select vault.create_secret('<secreto-largo-aleatorio>', 'tierlist_cron_secret');
+```
+
+```bash
+supabase secrets set TIERLIST_CRON_SECRET=<secreto-largo-aleatorio>
+supabase functions deploy update-tierlist --no-verify-jwt
+```
+
+Ejecución manual (por ejemplo para probar, o para recalcular los promedios de todos los parches):
+
+```sql
+select net.http_post(
+  url := (select decrypted_secret from vault.decrypted_secrets where name = 'tierlist_function_url'),
+  headers := jsonb_build_object(
+    'Content-Type', 'application/json',
+    'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'tierlist_cron_secret')
+  ),
+  body := '{"rebuild_averages": "all"}'::jsonb,
+  timeout_milliseconds := 150000
+);
+```
+
+Si los datos de Tencent de ese día ya estaban procesados no se crea un snapshot nuevo; con `{"force": true}` se recalcula igual.

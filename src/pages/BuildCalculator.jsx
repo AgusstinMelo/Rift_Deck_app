@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import ChampionPicker from '@/components/builds/ChampionPicker';
 import BuildWorkspace from '@/components/builds/BuildWorkspace';
 import ChampionBuilds from '@/components/builds/ChampionBuilds';
@@ -43,19 +43,9 @@ export default function BuildCalculator() {
     }
   }, [champions, selectedChampion]);
 
-  const { data: executions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10),
-  });
-
-  const currentSnapshotKey = executions.find(execution =>
-    execution.status === 'success' || execution.status === 'partial'
-  )?.snapshot_key;
-
   const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist-full', currentSnapshotKey],
-    queryFn: () => getTierlistEntries('-updated_at', 1000, { snapshotKey: currentSnapshotKey }),
-    enabled: !!currentSnapshotKey,
+    queryKey: ['tierlist-current'],
+    queryFn: getCurrentTierlist,
   });
 
   const handleSelectChampion = (champ) => {
@@ -81,8 +71,9 @@ export default function BuildCalculator() {
     setView('workspace');
   };
 
-  const currentTierlist = getCurrentTierlistEntries(tierlist, executions)
-    .filter(entry => !selectedPatch || patchMatchesSelection(entry.patch, selectedPatch));
+  const currentTierlist = getCurrentTierlistEntries(tierlist)
+    // La tierlist es el promedio del grupo (7.3); el parche elegido puede tener letra (7.3b).
+    .filter(entry => !selectedPatch || patchMatchesSelection(selectedPatch, entry.patch));
 
   if (catalogFailed) {
     return (

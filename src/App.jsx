@@ -76,7 +76,8 @@ const AuthenticatedApp = () => {
           <Route path="/stats" element={<Stats />} />
           <Route path="/objetivos/*" element={<Goals />} />
           <Route path="/suggester" element={<Suggester />} />
-          <Route path="/admin/tierlist-config" element={user?.role === 'admin' ? <TierlistConfig /> : <Navigate to="/" replace />} />
+          <Route path="/tierlist/como-se-calcula" element={<TierlistConfig />} />
+          <Route path="/admin/tierlist-config" element={<Navigate to="/tierlist/como-se-calcula" replace />} />
           <Route path="/membresia/resultado" element={<MembresiaResultado />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<PageNotFound />} />

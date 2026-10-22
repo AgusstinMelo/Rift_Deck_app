@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Champion } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import { suggestWithAI } from '@/api/aiSupabase';
 import { useAuth } from '@/lib/AuthContext';
 import {
@@ -629,19 +629,9 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
     queryFn: () => Champion.list('name'),
   });
 
-  const { data: tierlistExecutions = [] } = useQuery({
-    queryKey: ['executions'],
-    queryFn: () => getTierlistExecutions(10),
-  });
-
-  const currentSnapshotKey = tierlistExecutions.find(execution =>
-    execution.status === 'success' || execution.status === 'partial'
-  )?.snapshot_key;
-
   const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist', currentSnapshotKey],
-    queryFn: () => getTierlistEntries('-ranking_final', 1000, { snapshotKey: currentSnapshotKey }),
-    enabled: !!currentSnapshotKey,
+    queryKey: ['tierlist-current'],
+    queryFn: getCurrentTierlist,
   });
 
   const { data: matches = [] } = useQuery({
