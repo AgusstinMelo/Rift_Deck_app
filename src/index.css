@@ -6880,8 +6880,9 @@
 
 /* Tierlist en smartphone vertical: la página entra en la pantalla. Encabezado y
    filtros quedan fijos arriba y solo scrollea la lista.
-   - Encabezado: título; debajo, "Parche X vs Parche Y" y el selector Por Tier /
-     Tabla (el JSX lo mueve ahí) en una línea.
+   - Encabezado: título; debajo, el texto del parche en una línea y, en la línea
+     siguiente, los selectores Promediada / Del día y Por Tier / Tabla (el JSX
+     los mueve ahí).
    - Filtros en dos filas: las líneas a todo el ancho y los selectores
      repartiéndose la segunda.
    - Por Tier: un riel con el badge a la izquierda y las fichas en 2 columnas.
@@ -6927,17 +6928,26 @@
 
   .rd-tierlist-layout .rd-tierlist-subline {
     min-width: 0;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.4rem;
     margin-top: 0.35rem;
   }
 
   .rd-tierlist-layout .rd-tierlist-subline > p {
+    flex: 1 0 100%;
     min-width: 0;
     overflow: hidden;
     font-size: 11px;
     line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-subline .rd-tierlist-toggles {
+    flex: 1 0 100%;
+    justify-content: space-between;
+    margin-left: 0;
   }
 
   .rd-tierlist-layout .rd-tierlist-subline .rd-tierlist-view-toggle {
