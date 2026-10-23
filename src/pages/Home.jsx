@@ -22,9 +22,9 @@ const PRIMARY_BUTTON = 'inline-flex w-full max-w-xs items-center whitespace-nowr
 const SECONDARY_BUTTON = 'inline-flex w-full max-w-xs items-center whitespace-nowrap justify-center gap-2 rounded-xl border border-border bg-card/40 px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary sm:w-auto land:w-auto land:px-4 land:py-2.5';
 
 const HIGHLIGHTS = [
-  { value: '7 módulos', label: 'Dashboard, tierlist, builds, estadísticas y más', icon: Layers },
-  { value: 'Por parche', label: 'Tierlist del día y promedio del parche', icon: TrendingUp },
-  { value: 'Tus datos', label: 'Análisis sobre tus propias partidas', icon: UserRound },
+  { value: 'módulos', label: 'Dashboard, tierlist, builds, estadísticas y más', icon: Layers },
+  { value: 'Parches', label: 'Tierlist al día y promediada del parche', icon: TrendingUp },
+  { value: 'Datos', label: 'Análisis sobre tus propias partidas', icon: UserRound },
   { value: 'En español', label: 'Pensado para la comunidad hispana', icon: Globe2 },
 ];
 
@@ -261,11 +261,11 @@ export default function Home() {
           <div className={`${CONTAINER} relative text-center`}>
             <Eyebrow centered>Juega con información</Eyebrow>
             <h1 id="home-title" className="mx-auto mt-5 max-w-6xl font-rajdhani text-[clamp(2.25rem,min(10vw,11svh),5.5rem)] font-bold uppercase leading-[0.95] tracking-[-0.06em] text-foreground md:mt-7 land:mt-3">
-              Deja de jugar con <span className="text-primary">sensaciones.</span>
+              Empieza a jugar con <span className="text-primary">criterio</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:mt-7 md:text-xl land:mt-3 land:text-sm">
               Rift Deck convierte tus partidas de Wild Rift en decisiones: qué campeón te rinde, contra quién sufres,
-              qué build armar contra este draft y qué cambiar en tu próximo bloque de ranked.
+              qué build armar contra este draft y qué cambiar en tu próximo bloque de rankeds.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-10 land:mt-5 land:flex-row">
               <Link to="/registro" className={PRIMARY_BUTTON}>
@@ -331,8 +331,8 @@ export default function Home() {
               <SectionHeading
                 id="como-funciona-title"
                 eyebrow="Cómo funciona"
-                title="Tres pasos, ningún misterio."
-                lead="No hace falta saber de estadística: registras lo que jugaste y Rift Deck te devuelve qué hacer distinto."
+                title="Pasos simples, carga rápida."
+                lead="Registras lo que jugaste y Rift Deck te devuelve datos claros para que sepas qué hacer en tus próximos juegos."
                 centered
               />
             </div>
@@ -370,7 +370,7 @@ export default function Home() {
             <SectionHeading
               id="coach-title"
               eyebrow="Rift Deck Coach"
-              title="Un coach que lee tus números."
+              title="Un coach personal que analiza tus partidas."
               lead="Hipótesis priorizadas para tu próximo bloque de partidas: qué muestran los datos, qué tan confiables son y qué hacer al respecto."
             />
             {/* En smartphone vertical las cartas se deslizan de a una; en el resto, dos columnas. */}

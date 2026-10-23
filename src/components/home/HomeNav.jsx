@@ -8,7 +8,7 @@ export const HOME_ANCHORS = [
   { href: '#inicio', label: 'Home' },
   { href: '#asi-se-ve', label: 'Así se ve' },
   { href: '#como-funciona', label: 'Cómo funciona' },
-  { href: '#progreso', label: 'Tu progreso' },
+  { href: '#progreso', label: 'Progreso' },
   { href: '#coach', label: 'Coach' },
   { href: '#preguntas', label: 'Preguntas' },
   { href: '#empieza', label: 'Empieza' },
