@@ -18,9 +18,10 @@ const getLocalDateInput = () => {
 };
 
 const DEFAULT_CONFIG = {
-  winrate_weight: 0.47,
+  // Mismos pesos por defecto que DEFAULT_WEIGHTS en la Edge Function update-tierlist.
+  winrate_weight: 0.50,
   pickrate_weight: 0.37,
-  banrate_weight: 0.11,
+  banrate_weight: 0.08,
   facilidad_weight: 0.05,
   active_data_source: 'https://lolm.qq.com/',
   active_region: 'China',
@@ -39,10 +40,10 @@ const TIER_THRESHOLDS = [
 ];
 
 const WEIGHT_FIELDS = [
-  { key: 'winrate_weight', label: 'Winrate', desc: 'Qué tanto gana el campeón', tone: 'bg-primary' },
-  { key: 'pickrate_weight', label: 'Pickrate', desc: 'Popularidad y consistencia', tone: 'bg-primary/70' },
-  { key: 'banrate_weight', label: 'Banrate', desc: 'Presión dentro del meta', tone: 'bg-primary/45' },
-  { key: 'facilidad_weight', label: 'Facilidad', desc: 'Bonus a campeones más fáciles', tone: 'bg-primary/25' },
+  { key: 'winrate_weight', label: 'Winrate', desc: 'Cuánto gana', tone: 'bg-primary' },
+  { key: 'pickrate_weight', label: 'Pickrate', desc: 'Popularidad', tone: 'bg-primary/70' },
+  { key: 'banrate_weight', label: 'Banrate', desc: 'Presión en el meta', tone: 'bg-primary/45' },
+  { key: 'facilidad_weight', label: 'Facilidad', desc: 'Bonus si es fácil', tone: 'bg-primary/25' },
 ];
 
 const SOURCE_FIELDS = [
@@ -86,15 +87,14 @@ export default function TierlistConfig() {
           subtitle="Los pesos, las fuentes y las reglas que usamos para armar la tierlist del día y el promedio por parche."
         />
 
-        <div className="rd-tierlist-method-grid grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="rd-tierlist-method-grid grid grid-cols-1 lg:grid-cols-12 gap-3">
           {/* Columna izquierda: cómo se calcula el score del día */}
-          <div className="lg:col-span-7 flex flex-col gap-4 min-h-0">
-            <section className="bg-card border border-border rounded-xl p-5">
+          <div className="lg:col-span-7 flex flex-col gap-3 min-h-0">
+            <section className="bg-card border border-border rounded-xl p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">Paso 1 · Score del día</p>
               <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">Pesos del algoritmo</h2>
               <p className="text-xs leading-relaxed text-muted-foreground mt-1">
-                Cada métrica se convierte en un percentil (0–100) dentro de su línea, promediando los elos con más peso
-                en los más altos. Después se combinan con estos pesos:
+                Cada métrica pasa a percentil (0–100) dentro de su línea, con más peso en los elos altos, y se combina con estos pesos:
               </p>
 
               {/* Composición del score: cada segmento es el peso de una métrica */}
@@ -116,12 +116,12 @@ export default function TierlistConfig() {
                         {Math.round(Number(values[key]) * 100)}%
                       </span>
                     </div>
-                    <p className="mt-1 text-xs leading-snug text-muted-foreground">{desc}</p>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">{desc}</p>
                   </div>
                 ))}
               </div>
 
-              <p className="mt-3 rounded-lg bg-secondary/40 border border-border/60 px-3 py-2 text-xs text-muted-foreground">
+              <p className="mt-2.5 rounded-lg bg-secondary/40 border border-border/60 px-3 py-1.5 text-xs text-muted-foreground">
                 Score = Winrate × {Number(values.winrate_weight).toFixed(2)}
                 {' '}+ Pickrate × {Number(values.pickrate_weight).toFixed(2)}
                 {' '}+ Banrate × {Number(values.banrate_weight).toFixed(2)}
@@ -129,7 +129,7 @@ export default function TierlistConfig() {
               </p>
             </section>
 
-            <section className="bg-card border border-border rounded-xl p-5">
+            <section className="bg-card border border-border rounded-xl p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">Paso 3 · Tiers</p>
               <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">Del score al tier</h2>
               <div className="mt-3 grid grid-cols-5 gap-2">
@@ -142,7 +142,7 @@ export default function TierlistConfig() {
               </div>
             </section>
 
-            <section className="bg-card border border-border rounded-xl p-5">
+            <section className="bg-card border border-border rounded-xl p-4">
               <h2 className="font-rajdhani font-bold text-lg text-foreground">Fuente de datos</h2>
               <dl className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {SOURCE_FIELDS.map(({ key, label, icon: Icon }) => (
@@ -161,8 +161,8 @@ export default function TierlistConfig() {
           </div>
 
           {/* Columna derecha: ajustes, promedio y actualización automática */}
-          <div className="lg:col-span-5 flex flex-col gap-4 min-h-0">
-            <section className="bg-card border border-border rounded-xl p-5">
+          <div className="lg:col-span-5 flex flex-col gap-3 min-h-0">
+            <section className="bg-card border border-border rounded-xl p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">Paso 2 · Ajustes</p>
               <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">Penalizaciones y promedio</h2>
 
@@ -214,13 +214,13 @@ export default function TierlistConfig() {
               </ul>
             </section>
 
-            <section className="rd-tierlist-method-runs bg-card border border-border rounded-xl p-5 flex flex-col min-h-0">
+            <section className="rd-tierlist-method-runs bg-card border border-border rounded-xl p-4 flex flex-col min-h-0">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="font-rajdhani font-bold text-lg text-foreground">Actualización automática</h2>
                   <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <CalendarClock size={13} className="text-primary" />
-                    Todos los días a las 03:30 (hora de España)
+                    Todos los días a las 06:00 (hora de España)
                   </p>
                 </div>
                 <div className="text-right shrink-0">

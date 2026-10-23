@@ -174,7 +174,7 @@ LIMIT 5;
 
 ## Tierlist automática
 
-La tierlist se calcula sola todos los días a las 03:30 (hora de España) con el cron `update-tierlist-daily`, que llama a la Edge Function `update-tierlist`.
+La tierlist se calcula sola todos los días a las 06:00 (hora de España) con el cron `update-tierlist-daily`, que llama a la Edge Function `update-tierlist`.
 
 - **Parche:** se usa el parche activo de la app (`game_state`). Activar un parche nuevo hace que las tierlists siguientes queden en ese parche.
 - **Promedio:** se muestra el promedio ponderado de todas las tierlists diarias del mismo número de parche (`7.3`, `7.3a` y `7.3b` cuentan como `7.3`). Los días recientes pesan más: un día de hace 3 días vale la mitad que el de hoy (`AVERAGE_HALF_LIFE_DAYS` en la Edge Function), así un nerfeo o buff se refleja en pocos días. Un campeón que falta algunos días del parche recibe una penalización proporcional, mayor si los días que faltó son recientes.

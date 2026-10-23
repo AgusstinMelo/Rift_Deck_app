@@ -700,14 +700,10 @@
   /* Primera pantalla: marca, íconos y buscador llenan el alto visible (sobre la
      franja del usuario); las pestañas aparecen recién al scrollear.
      Alturas: buscador = 0.75rem + 2.5rem (h-10) + 0.75rem (mb-3);
-     franja = 1.75rem (avatar) + paddings + borde (+2rem con "Config Tierlist"). */
+     franja = 1.75rem (avatar) + paddings + borde. */
   .rd-sidebar {
     --rd-sidebar-search-h: 4rem;
     --rd-sidebar-footer-h: calc(2.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
-  }
-
-  .rd-sidebar-admin {
-    --rd-sidebar-footer-h: calc(4.25rem + max(0.5rem, env(safe-area-inset-bottom)) + 1px);
   }
 
   .rd-sidebar > .rd-sidebar-brand {

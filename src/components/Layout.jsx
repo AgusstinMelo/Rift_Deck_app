@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, BookOpen, TrendingUp, Wrench, Swords,
-  BarChart3, Sparkles, Settings, Menu, LogOut, Bug, Info, Scale, ShieldCheck, Search, Target, Calculator
+  BarChart3, Sparkles, Menu, LogOut, Bug, Info, Scale, ShieldCheck, Search, Target, Calculator
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
@@ -235,7 +235,7 @@ export default function Layout() {
       <aside
         className={`
           fixed lg:relative z-[300] h-full flex flex-col
-          rd-sidebar ${user?.role === 'admin' ? 'rd-sidebar-admin' : ''}
+          rd-sidebar
           transition-all duration-300 ease-in-out
           ${collapsed ? 'w-16' : 'w-60'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -356,16 +356,6 @@ export default function Layout() {
         </nav>
 
         <div className="rd-sidebar-footer space-y-3">
-          {user?.role === 'admin' && (
-            <Link
-              to="/tierlist/como-se-calcula"
-              className={`flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors text-sm ${collapsed ? 'justify-center' : ''}`}
-            >
-              <Settings size={16} />
-              {!collapsed && <span>Config Tierlist</span>}
-            </Link>
-          )}
-
           {user && (
             <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
