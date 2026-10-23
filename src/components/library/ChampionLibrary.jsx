@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link, useNavigate } from 'react-router-dom';
 import { Champion } from '@/api/entitiesSupabase';
 import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import { Search } from 'lucide-react';
@@ -7,6 +8,9 @@ import TierBadge from '@/components/ui/TierBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import ChampionDetail from './ChampionDetail';
 import { PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
+import { championSlug, findChampionBySlug } from '@/utils/championSlug';
+import { getChampionLanes } from '@/utils/championPresentation';
 import {
   getBestTierForChampion,
   getCurrentTierlistEntries,
@@ -33,36 +37,53 @@ const normalizeLane = (lane) =>
     .toLowerCase()
     .replace(/[^a-z]/g, '');
 
-export default function ChampionLibrary({ selectedId, onSelectId, onClearSelected }) {
+// Modo público (publicBasePath): la selección viene del slug de la URL, las tarjetas son
+// enlaces y los datos iniciales llegan prerenderizados (initialChampions / initialTierlist).
+export default function ChampionLibrary({
+  selectedId,
+  selectedSlug,
+  onSelectId,
+  onClearSelected,
+  initialChampions,
+  initialTierlist,
+  publicBasePath,
+}) {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => selectedSlug ? findChampionBySlug(initialChampions, selectedSlug) : null);
   // En smartphone vertical buscador y tres selectores van en una fila: textos cortos.
-  const compactFilters = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const compactFilters = useMatchMedia(PHONE_PORTRAIT_QUERY, { ssrSafe: Boolean(publicBasePath) });
 
   const { data: champions = [], isLoading } = useQuery({
-    queryKey: ['champions'],
+    queryKey: [publicBasePath ? 'public-champions' : 'champions'],
     queryFn: () => Champion.list('name'),
+    initialData: initialChampions,
+    ...(publicBasePath ? publicCatalogQueryOptions : {}),
   });
 
   const { data: tierlist = [] } = useQuery({
     queryKey: ['tierlist-current'],
     queryFn: getCurrentTierlist,
+    initialData: initialTierlist,
+    ...(publicBasePath ? publicCatalogQueryOptions : {}),
   });
 
   useEffect(() => {
-    if (!selectedId) {
+    if (!selectedId && !selectedSlug) {
       setSelected(null);
       return;
     }
 
-    const nextSelected = champions.find(champ => String(champ.id) === String(selectedId));
+    const nextSelected = selectedSlug
+      ? findChampionBySlug(champions, selectedSlug)
+      : champions.find(champ => String(champ.id) === String(selectedId));
     if (nextSelected) {
       setSelected(nextSelected);
     }
-  }, [champions, selectedId]);
+  }, [champions, selectedId, selectedSlug]);
 
   const filtered = champions.filter(c => {
     const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase());
@@ -80,6 +101,32 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
 
   if (selected) {
     const tierData = getTierEntriesForChampion(selected, currentTierlist);
+
+    if (publicBasePath) {
+      const lanes = getChampionLanes(selected);
+      const relatedChampions = champions
+        .filter(candidate => candidate.id !== selected.id)
+        .map(candidate => {
+          const sharedLane = getChampionLanes(candidate).some(lane => lanes.includes(lane));
+          const sharedRole = Boolean(selected.roles && candidate.roles === selected.roles);
+          return { candidate, score: Number(sharedLane) + Number(sharedRole) };
+        })
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score || a.candidate.name.localeCompare(b.candidate.name))
+        .slice(0, 6)
+        .map(({ candidate }) => candidate);
+
+      return (
+        <ChampionDetail
+          champion={selected}
+          champions={champions}
+          tierData={tierData}
+          relatedChampions={relatedChampions}
+          publicMode
+          onBack={() => navigate(publicBasePath)}
+        />
+      );
+    }
 
     return (
       <ChampionDetail
@@ -171,19 +218,22 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
         <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-12 xl:grid-cols-14 gap-1.5">
           {filtered.map((champ, index) => {
             const tier = getBestTierForChampion(champ, currentTierlist);
+            const Card = publicBasePath ? Link : 'button';
             return (
-              <button
+              <Card
                 key={champ.id}
-                onClick={() => {
-                  setSelected(champ);
-                  onSelectId?.(champ.id);
-                }}
-                className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/40 hover:bg-primary/5 transition-all group aspect-square relative"
+                {...(publicBasePath
+                  ? { to: `${publicBasePath}/${championSlug(champ.name)}`, title: champ.name }
+                  : { onClick: () => {
+                    setSelected(champ);
+                    onSelectId?.(champ.id);
+                  } })}
+                className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/40 hover:bg-primary/5 transition-all group aspect-square relative block"
               >
                 {champ.image_url
                   ? <img
                       src={champ.image_url}
-                      alt={champ.name}
+                      alt={publicBasePath ? `${champ.name} en Wild Rift` : champ.name}
                       width="160"
                       height="160"
                       loading={index < 14 ? 'eager' : 'lazy'}
@@ -196,7 +246,7 @@ export default function ChampionLibrary({ selectedId, onSelectId, onClearSelecte
                     <TierBadge tier={tier.tier} size="sm" />
                   </div>
                 )}
-              </button>
+              </Card>
             );
           })}
         </div>

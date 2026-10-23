@@ -4,6 +4,12 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
+      screens: {
+        // Smartphone horizontal (mismo criterio que PHONE_LANDSCAPE_QUERY en useMatchMedia).
+        land: { raw: '(orientation: landscape) and (max-height: 500px)' },
+        // Smartphone vertical de poca altura (ej. 360×740).
+        short: { raw: '(orientation: portrait) and (max-width: 767px) and (max-height: 760px)' },
+      },
       fontFamily: {
         inter: ['var(--font-inter)'],
         rajdhani: ['var(--font-rajdhani)'],

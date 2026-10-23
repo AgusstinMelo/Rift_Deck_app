@@ -26,9 +26,11 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
-  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
-  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
-  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
+  // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
+  const mediaOptions = { ssrSafe: Boolean(publicBasePath) };
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, mediaOptions);
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, mediaOptions);
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY, mediaOptions);
   const [section, setSection] = useState('description');
 
   const { data: items = [], isLoading } = useQuery({
@@ -262,13 +264,14 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   );
 
   // En smartphone (vertical u horizontal) y en escritorio la ficha es un "dossier" como la
-  // de campeón: identidad compacta, pestañas y una sección a la vez con todo el alto que queda
-  // (no aplica a la ficha pública).
-  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit) && !publicBasePath) {
+  // de campeón: identidad compacta, pestañas y una sección a la vez con todo el alto que queda.
+  // La ficha pública suma la pestaña con los objetos del mismo tipo.
+  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit)) {
     const tags = (selected.tags || '').split(',').map(tag => tag.trim()).filter(Boolean);
     const sectionTabs = [
       ['description', 'Detalle'],
       ['matchups', 'Enfrentamientos'],
+      ...(relatedItems.length > 0 ? [['related', 'Relacionados']] : []),
     ];
     const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
     const matchupGroups = [
@@ -278,10 +281,17 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
 
     return (
       <div className="rd-entity-detail">
-        <button onClick={clearSelected} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft size={15} />
-          Volver a objetos
-        </button>
+        {publicBasePath ? (
+          <Link to={publicBasePath} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft size={15} />
+            Volver a objetos
+          </Link>
+        ) : (
+          <button onClick={clearSelected} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft size={15} />
+            Volver a objetos
+          </button>
+        )}
 
         <div className="rd-card rd-entity-hero">
           {itemImage('rd-entity-hero-img', 26)}
@@ -367,6 +377,27 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     </div>
                   ) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
                 </div>
+              ))}
+            </div>
+          )}
+
+          {activeSection === 'related' && (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {relatedItems.map(item => (
+                <Link
+                  key={item.id}
+                  to={`${publicBasePath}/${entitySlug(item.name)}`}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                >
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={`${item.name} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                  ) : (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                      <Sword size={16} className="text-primary" />
+                    </div>
+                  )}
+                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{item.name}</h3>
+                </Link>
               ))}
             </div>
           )}

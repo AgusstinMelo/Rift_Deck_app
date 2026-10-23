@@ -1,9 +1,25 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Solo usuarios logueados: evita que terceros usen las claves de Gemini y que
+// se envíen a Google datos fuera del servicio.
+const getAuthenticatedUser = async (req: Request) => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: req.headers.get('Authorization') || '' } },
+  });
+  const { data } = await client.auth.getUser();
+  return data?.user || null;
+};
+
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const respond = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return respond({ ok: false, kind: 'provider_error', error: 'Method not allowed' }, 405);
+  if (!(await getAuthenticatedUser(req))) return respond({ ok: false, kind: 'provider_error', error: 'Unauthorized' }, 401);
   try {
     const { prompt, response_json_schema, provider_attempt = 1 } = await req.json();
     if (typeof prompt !== 'string' || !prompt.trim() || !response_json_schema) return respond({ ok: false, kind: 'provider_error', error: 'Missing prompt or schema' }, 400);

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Unbounded:wght@200..900&display=swap');
-@import url('https://fonts.cdnfonts.com/css/satoshi');
 
 @tailwind base;
 @tailwind components;
@@ -37,8 +35,9 @@
 
     --radius: 0.75rem;
 
-    --font-inter: 'Inter', sans-serif;
-    --font-rajdhani: 'Unbounded', sans-serif;
+    /* Fuentes alojadas en el propio sitio (@fontsource-variable, importadas en main.jsx). */
+    --font-inter: 'Inter Variable', 'Inter', sans-serif;
+    --font-rajdhani: 'Unbounded Variable', 'Unbounded', sans-serif;
     --font-rajdhani-weight: 500;
 
     --tier-splus: 45 100% 60%;
@@ -7393,25 +7392,25 @@
     flex-wrap: nowrap;
   }
 
-  .rd-library-tabs button {
+  .rd-library-tabs :is(button, a) {
     gap: 0.45rem;
     padding: 0.2rem 0.65rem 0.2rem 0.25rem;
     border-radius: 0.6rem;
     font-size: 0.8rem;
   }
 
-  .rd-library-tabs button > div:first-child {
+  .rd-library-tabs :is(button, a) > div:first-child {
     width: 1.4rem;
     height: 1.4rem;
     border-radius: 0.45rem;
   }
 
-  .rd-library-tabs button svg {
+  .rd-library-tabs :is(button, a) svg {
     width: 14px;
     height: 14px;
   }
 
-  .rd-library-tabs button p + p {
+  .rd-library-tabs :is(button, a) p + p {
     display: none;
   }
 
@@ -7457,7 +7456,7 @@
   }
 
   /* Ícono arriba y nombre abajo: "Campeones" entra completo aun en 360px. */
-  .rd-library-tabs button {
+  .rd-library-tabs :is(button, a) {
     flex: 1 1 0;
     min-width: 0;
     flex-direction: column;
@@ -7468,27 +7467,27 @@
     font-size: 0.8rem;
   }
 
-  .rd-library-tabs button > div:last-child {
+  .rd-library-tabs :is(button, a) > div:last-child {
     text-align: center;
   }
 
-  .rd-library-tabs button > div:first-child {
+  .rd-library-tabs :is(button, a) > div:first-child {
     width: 1.5rem;
     height: 1.5rem;
     flex-shrink: 0;
     border-radius: 0.45rem;
   }
 
-  .rd-library-tabs button svg {
+  .rd-library-tabs :is(button, a) svg {
     width: 14px;
     height: 14px;
   }
 
-  .rd-library-tabs button > div:last-child {
+  .rd-library-tabs :is(button, a) > div:last-child {
     min-width: 0;
   }
 
-  .rd-library-tabs button p + p {
+  .rd-library-tabs :is(button, a) p + p {
     display: none;
   }
 
@@ -11730,7 +11729,7 @@
 }
 
 .rd-card-title {
-  font-family: "Unbounded", sans-serif;
+  font-family: var(--font-rajdhani);
   font-weight: 800;
   font-size: 15px;
   letter-spacing: -0.035em;
@@ -12839,5 +12838,84 @@
   .rd-tierlist-method-runlist {
     flex: 1 1 auto;
     min-height: 0;
+  }
+}
+
+/* Home pública: cada sección ocupa el alto visible debajo de la nav fija, y las
+   anclas de la nav dejan la sección justo debajo de ella. */
+.rd-home {
+  --home-nav-h: 4rem;
+}
+
+.rd-home-nav {
+  height: var(--home-nav-h);
+}
+
+.rd-home-section {
+  display: flex;
+  min-height: calc(100svh - var(--home-nav-h));
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(1.5rem, 5svh, 3.5rem);
+  scroll-margin-top: var(--home-nav-h);
+}
+
+/* Captura del Dashboard: toma todo el alto que queda en su pantalla, sin pasarse
+   del viewport. 2rem = barra del marco tipo ventana. */
+.rd-home-hero-shot {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 11rem;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.rd-home-hero-frame {
+  position: relative;
+  width: min(100cqw, calc((100cqh - 2rem) * 1910 / 915));
+}
+
+.rd-home-closing {
+  justify-content: space-between;
+  padding-bottom: 0;
+}
+
+/* Smartphone vertical: la captura (apaisada) quedaría diminuta; el marco llena el
+   alto disponible y muestra ampliada la parte izquierda del Dashboard. */
+@media (orientation: portrait) and (max-width: 767px) {
+  .rd-home-hero-frame {
+    width: 100%;
+    height: min(100cqh, 40rem);
+  }
+
+  .rd-home-hero-frame > figure {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .rd-home-hero-frame > figure > img {
+    min-height: 0;
+    flex: 1 1 0;
+    object-fit: cover;
+    object-position: 21% 0;
+  }
+}
+
+/* Smartphone horizontal: nav más baja y menos aire vertical. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-home {
+    --home-nav-h: 3.25rem;
+  }
+
+  .rd-home-section {
+    padding-block: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.rd-home) {
+    scroll-behavior: smooth;
   }
 }

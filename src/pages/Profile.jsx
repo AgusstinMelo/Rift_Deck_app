@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { AllChampions, AllWRItems, AllRunes } from '@/api/entitiesSupabase';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
+import LegalInfoModal, { LEGAL_DOCUMENTS } from '@/components/LegalInfoModal';
+import { deleteMyAccount, downloadJson, exportMyData } from '@/api/accountSupabase';
 import {
   Save,
   Loader2,
@@ -11,7 +13,9 @@ import {
   Trash2,
   AlertTriangle,
   Search,
-  Image
+  Image,
+  Download,
+  ShieldCheck,
 } from 'lucide-react';
 
 const AVATAR_TYPES = [
@@ -24,7 +28,7 @@ const AVATAR_TYPES = [
 const normalize = value => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 export default function Profile() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
 
   const [visibleName, setVisibleName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,6 +43,10 @@ export default function Profile() {
 
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const [legalModal, setLegalModal] = useState(null);
 
   const DELETE_CONFIRM_TEXT = 'ELIMINAR MI CUENTA';
 
@@ -113,10 +121,31 @@ export default function Profile() {
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirm !== DELETE_CONFIRM_TEXT) return;
+    if (deleteConfirm !== DELETE_CONFIRM_TEXT || deleting) return;
 
-    // TODO: implementar borrado de cuenta con Supabase y limpieza segura de datos privados.
-    setDeleteError('La eliminaciÃ³n de cuenta todavÃ­a no estÃ¡ disponible durante la migraciÃ³n a Supabase.');
+    setDeleteError('');
+    setDeleting(true);
+    try {
+      await deleteMyAccount(deleteConfirm);
+      await logout?.();
+      window.location.href = '/';
+    } catch (err) {
+      setDeleteError(err?.message || 'No se pudo eliminar la cuenta. Inténtalo de nuevo.');
+      setDeleting(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    setExportError('');
+    setExporting(true);
+    try {
+      const payload = await exportMyData(user);
+      downloadJson(payload, `rift-deck-mis-datos-${new Date().toISOString().slice(0, 10)}.json`);
+    } catch (err) {
+      setExportError(err?.message || 'No se pudieron descargar tus datos.');
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -263,6 +292,53 @@ export default function Profile() {
         {avatarSuccess && <p className="mt-4 flex items-center gap-2 text-sm text-green-400"><CheckCircle size={14} /> Imagen de perfil actualizada.</p>}
       </div>
 
+      <div className="rd-card p-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
+            <ShieldCheck size={19} className="text-primary" />
+          </div>
+
+          <div>
+            <h2 className="font-rajdhani font-bold text-xl text-foreground uppercase tracking-tight">
+              Tus datos y privacidad
+            </h2>
+
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Descarga una copia de todos tus datos (perfil, partidas, builds y objetivos) en formato JSON.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleExportData}
+          disabled={exporting}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 bg-primary/10 text-primary font-semibold text-sm hover:bg-primary/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+          Descargar mis datos
+        </button>
+
+        {exportError && (
+          <p className="mt-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+            {exportError}
+          </p>
+        )}
+
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-border/60 pt-4 text-sm">
+          {LEGAL_DOCUMENTS.map(({ type, label }) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setLegalModal(type)}
+              className="text-muted-foreground transition-colors hover:text-primary"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="rd-card p-6 border-red-500/25 bg-red-500/[0.03]">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center shrink-0">
@@ -285,7 +361,7 @@ export default function Profile() {
         <div className="space-y-4">
           <div>
             <label className="rd-label mb-1.5 block text-red-400">
-              Para confirmar, escribí: {DELETE_CONFIRM_TEXT}
+              Para confirmar, escribe: {DELETE_CONFIRM_TEXT}
             </label>
 
             <input
@@ -306,15 +382,17 @@ export default function Profile() {
           <button
             type="button"
             onClick={handleDeleteAccount}
-            disabled={true}
+            disabled={deleteConfirm !== DELETE_CONFIRM_TEXT || deleting}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-500/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            <Trash2 size={14} />
+            {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
 
             Eliminar mi cuenta definitivamente
           </button>
         </div>
       </div>
+
+      {legalModal && <LegalInfoModal type={legalModal} onClose={() => setLegalModal(null)} />}
     </div>
   );
 }

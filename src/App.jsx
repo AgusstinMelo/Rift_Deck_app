@@ -61,8 +61,9 @@ const AuthenticatedApp = () => {
       {!usesPageSeo && <Seo isAuthenticated={isAuthenticated} />}
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-      {/* Public: landing/login */}
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Landing />} />
+      {/* Public: auth (la home pública vive en PublicRoutes) */}
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Landing initialMode="login" />} />
+      <Route path="/registro" element={isAuthenticated ? <Navigate to="/" replace /> : <Landing initialMode="register" />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected routes */}

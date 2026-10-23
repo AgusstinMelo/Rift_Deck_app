@@ -38,11 +38,14 @@ const BRANCHES = ['Clave', 'Dominación', 'Precisión', 'Valor', 'Brujería'];
 
 export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialRunes, publicBasePath }) {
   const [search, setSearch] = useState('');
+  const [section, setSection] = useState('description');
   const [branchFilter, setBranchFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialRunes, selectedSlug) : null);
-  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
-  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
-  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
+  // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
+  const mediaOptions = { ssrSafe: Boolean(publicBasePath) };
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, mediaOptions);
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, mediaOptions);
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY, mediaOptions);
 
   const { data: runes = [], isLoading } = useQuery({
     queryKey: ['runes'],
@@ -167,23 +170,35 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     : [];
 
   // En smartphone (vertical u horizontal) y en escritorio: el mismo "dossier" que objetos y
-  // campeones, sin pestañas (la runa solo tiene descripción): identidad compacta y la
-  // descripción con todo el alto que queda (no aplica a la ficha pública).
-  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit) && !publicBasePath) {
+  // campeones: identidad compacta y la descripción con todo el alto que queda. Sin pestañas
+  // (la runa solo tiene descripción), salvo en la ficha pública, que suma las runas de la
+  // misma rama.
+  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit)) {
     const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
+    const sectionTabs = relatedRunes.length > 0
+      ? [['description', 'Descripción'], ['related', 'Relacionadas']]
+      : [];
+    const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
 
     return (
       <div className="rd-entity-detail">
-        <button
-          onClick={() => {
-            setSelected(null);
-            onClearSelected?.();
-          }}
-          className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={15} />
-          Volver a runas
-        </button>
+        {publicBasePath ? (
+          <Link to={publicBasePath} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft size={15} />
+            Volver a runas
+          </Link>
+        ) : (
+          <button
+            onClick={() => {
+              setSelected(null);
+              onClearSelected?.();
+            }}
+            className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft size={15} />
+            Volver a runas
+          </button>
+        )}
 
         <div className="rd-card rd-entity-hero">
           {selected.image_url
@@ -201,12 +216,51 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
           </div>
         </div>
 
+        {sectionTabs.length > 0 && (
+          <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label="Secciones de la runa">
+            {sectionTabs.map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={activeSection === id}
+                onClick={() => setSection(id)}
+                className={`rd-panel-tab ${activeSection === id ? 'rd-panel-tab-active' : ''}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="rd-card rd-entity-section">
           <div className="rd-entity-section-head">
             <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">Descripción</h2>
+            <h2 className="rd-card-title">{activeSection === 'related' ? 'Runas de la misma rama' : 'Descripción'}</h2>
           </div>
-          {selected.description
+          {activeSection === 'related' ? (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {relatedRunes.map(rune => {
+                const RelatedIcon = BRANCH_ICONS[rune.branch] || Gem;
+                return (
+                  <Link
+                    key={rune.id}
+                    to={`${publicBasePath}/${entitySlug(rune.name)}`}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    {rune.image_url ? (
+                      <img src={rune.image_url} alt={`${rune.name} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
+                        <RelatedIcon size={16} className="text-primary" />
+                      </div>
+                    )}
+                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{rune.name}</h3>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : selected.description
             ? <p className="rd-entity-desc text-muted-foreground">{selected.description}</p>
             : <p className="text-sm text-muted-foreground">Sin descripción.</p>}
         </div>

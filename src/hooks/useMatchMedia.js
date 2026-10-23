@@ -7,8 +7,10 @@ export const PHONE_PORTRAIT_QUERY = '(orientation: portrait) and (max-width: 639
 // Mismo corte que el CSS de escritorio ajustado al viewport (index.css).
 export const DESKTOP_FIT_QUERY = '(min-width: 1024px) and (min-height: 700px)';
 
-export function useMatchMedia(query) {
-  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
+// ssrSafe: en páginas prerenderizadas (biblioteca pública) el primer render tiene que
+// coincidir con el HTML del servidor, así que arranca en false y se actualiza al montar.
+export function useMatchMedia(query, { ssrSafe = false } = {}) {
+  const [matches, setMatches] = useState(() => !ssrSafe && typeof window !== 'undefined' && window.matchMedia(query).matches);
 
   useEffect(() => {
     const mql = window.matchMedia(query);

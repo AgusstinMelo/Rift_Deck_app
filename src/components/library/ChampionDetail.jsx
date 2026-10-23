@@ -433,9 +433,10 @@ export default function ChampionDetail({
   relatedChampions = [],
 }) {
   const { user } = useAuth();
-  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
-  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
-  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
+  // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, { ssrSafe: publicMode });
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, { ssrSafe: publicMode });
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY, { ssrSafe: publicMode });
   const [section, setSection] = useState('profile');
   const [metaIndex, setMetaIndex] = useState(0);
 
@@ -590,15 +591,18 @@ export default function ChampionDetail({
   });
 
   // En smartphone y en escritorio la ficha es un "dossier": identidad fija (a la
-  // izquierda en horizontal y escritorio, arriba en vertical) y una sección a la vez
-  // (no aplica a la ficha pública).
-  const useSections = (isPhoneLandscape || isPhonePortrait || isDesktopFit) && !publicMode;
+  // izquierda en horizontal y escritorio, arriba en vertical) y una sección a la vez.
+  // La ficha pública no tiene rendimiento personal y suma los campeones relacionados.
+  const useSections = isPhoneLandscape || isPhonePortrait || isDesktopFit;
+  // Sin dossier, la ficha pública reparte las tarjetas en su propia grilla de dos columnas.
+  const publicGrid = publicMode && !useSections;
   const sectionTabs = [
     ['profile', 'Perfil'],
     ['stats', 'Estadísticas'],
     ['matchups', 'Matchups'],
-    ['personal', 'Rendimiento'],
+    ...(publicMode ? [] : [['personal', 'Rendimiento']]),
     ...(tierData.length > 0 ? [['meta', 'Meta']] : []),
+    ...(publicMode && relatedChampions.length > 0 ? [['related', 'Relacionados']] : []),
   ];
   const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'profile';
   const show = id => !useSections || activeSection === id;
@@ -784,9 +788,9 @@ export default function ChampionDetail({
       {/* layout */}
       <div className="rd-champ-sections grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         {/* LEFT */}
-        <div className={publicMode ? 'contents' : 'space-y-6'}>
+        <div className={publicGrid ? 'contents' : 'space-y-6'}>
           {/* profile */}
-          {show('profile') && <div className={`rd-champ-profile rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-1' : ''}`}>
+          {show('profile') && <div className={`rd-champ-profile rd-card p-5 ${publicGrid ? 'xl:col-span-2 xl:row-start-1' : ''}`}>
             {/* Primera "pantalla" del perfil: en smartphone horizontal ocupa todo el alto
                 visible y las notas quedan debajo, accesibles con scroll. */}
             <div className="rd-champ-profile-main">
@@ -833,7 +837,7 @@ export default function ChampionDetail({
           </div>}
 
           {/* base stats */}
-          {show('stats') && <div className={`rd-champ-stats rd-card p-5 ${publicMode ? 'xl:col-start-1 xl:row-start-2' : ''}`}>
+          {show('stats') && <div className={`rd-champ-stats rd-card p-5 ${publicGrid ? 'xl:col-start-1 xl:row-start-2' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Estadísticas Base</h2>
@@ -858,7 +862,7 @@ export default function ChampionDetail({
           </div>}
 
           {/* matchups */}
-          {show('matchups') && <div className={`rd-champ-matchups rd-card p-5 ${publicMode ? 'xl:col-span-2 xl:row-start-3' : ''}`}>
+          {show('matchups') && <div className={`rd-champ-matchups rd-card p-5 ${publicGrid ? 'xl:col-span-2 xl:row-start-3' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
               <h2 className="rd-card-title">Matchups y Sinergias</h2>
@@ -959,7 +963,7 @@ export default function ChampionDetail({
         </div>
 
         {/* RIGHT */}
-        <div className={publicMode ? 'space-y-6 xl:col-start-2 xl:row-start-2' : 'space-y-6'}>
+        <div className={publicGrid ? 'space-y-6 xl:col-start-2 xl:row-start-2' : 'space-y-6'}>
           {/* personal */}
           {!publicMode && show('personal') && <div className="rd-champ-personal rd-card p-5">
             <div className="flex items-center gap-2 mb-5">
@@ -1108,10 +1112,26 @@ export default function ChampionDetail({
               </div>
             </div>
           )}
+          {publicMode && useSections && show('related') && relatedChampions.length > 0 && (
+            <div className="rd-champ-related rd-card p-5">
+              <div className="flex items-center gap-2 mb-5">
+                <span className="w-6 h-px bg-primary/50" />
+                <h2 className="rd-card-title">Campeones del mismo rol o línea</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {relatedChampions.map(related => (
+                  <Link key={related.id} to={`/campeones/${championSlug(related.name)}`} className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5">
+                    {related.image_url && <img src={related.image_url} alt={`${related.name} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
+                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{related.name}</h3>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {publicMode && relatedChampions.length > 0 && (
+      {publicGrid && relatedChampions.length > 0 && (
         <section className="rd-card p-5">
           <div className="flex items-center gap-2 mb-5">
             <span className="w-6 h-px bg-primary/50" />

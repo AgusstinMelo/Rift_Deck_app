@@ -1,3 +1,18 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Solo usuarios logueados: evita que terceros usen las claves de Gemini y que
+// se envíen a Google datos fuera del servicio.
+const getAuthenticatedUser = async (req: Request) => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: req.headers.get('Authorization') || '' } },
+  });
+  const { data } = await client.auth.getUser();
+  return data?.user || null;
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -14,6 +29,7 @@ const isRetryableStatus = (status: number) => status === 429 || status >= 500;
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+  if (!(await getAuthenticatedUser(req))) return jsonResponse({ error: 'Unauthorized' }, 401);
 
   try {
     const { prompt, response_json_schema } = await req.json();

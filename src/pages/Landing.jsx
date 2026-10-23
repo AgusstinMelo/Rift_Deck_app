@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import LegalInfoModal, { LEGAL_VERSION, MIN_AGE } from '@/components/LegalInfoModal';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2, Mail, Lock, Eye, EyeOff, ChevronLeft, ChevronRight, X, ArrowLeft, KeyRound } from 'lucide-react';
 import logoUrl from '@/assets/riftdeck-logo.png';
@@ -31,9 +33,13 @@ const SCREENSHOTS = [
 const BG_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/9309d557d_Targon.webp';
 const AUTH_REDIRECT_PATH = '/';
 
-export default function Landing() {
+// initialMode: 'login' (/login) o 'register' (/registro).
+export default function Landing({ initialMode = 'login' }) {
   const { checkUserAuth, refreshUser } = useAuth();
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState(initialMode);
+  // Registro: aceptación expresa de términos y privacidad, y declaración de edad mínima.
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [legalModal, setLegalModal] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -42,7 +48,7 @@ export default function Landing() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(() => (
     new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('password_updated') === '1'
-      ? 'Contraseña creada correctamente. Ya podés ingresar con tu email y la nueva contraseña.'
+      ? 'Contraseña creada correctamente. Ya puedes ingresar con tu email y la nueva contraseña.'
       : ''
   ));
   const [carouselIdx, setCarouselIdx] = useState(0);
@@ -93,6 +99,10 @@ export default function Landing() {
             data: {
               full_name: fullName || '',
               visible_name: fullName || '',
+              // Constancia de la aceptación (versión de los textos y fecha).
+              terms_version: LEGAL_VERSION,
+              terms_accepted_at: new Date().toISOString(),
+              min_age_confirmed: MIN_AGE,
             },
           },
         });
@@ -127,7 +137,7 @@ export default function Landing() {
     });
 
     if (oauthError) {
-      setError(oauthError.message || 'No se pudo iniciar sesiÃ³n con Google.');
+      setError(oauthError.message || 'No se pudo iniciar sesión con Google.');
       setLoading(false);
     }
   };
@@ -186,6 +196,14 @@ export default function Landing() {
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
+      <Link
+        to="/"
+        className="absolute left-4 top-4 z-20 inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+      >
+        <ArrowLeft size={15} />
+        Volver al inicio
+      </Link>
+
       {/* Card */}
       <div className="rd-landing-shell relative z-10 w-full max-w-md mx-4 py-10 lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:content-center lg:items-center lg:gap-x-16">
         {/* Brand */}
@@ -218,12 +236,12 @@ export default function Landing() {
                 <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3">
                   <Mail size={22} className="text-primary" />
                 </div>
-                <h2 className="font-rajdhani font-bold text-xl text-foreground">Revisá tu correo</h2>
+                <h2 className="font-rajdhani font-bold text-xl text-foreground">Revisa tu correo</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Te enviamos un enlace de confirmación. Abrilo desde tu email para activar tu cuenta y acceder a Rift Deck.
+                  Te enviamos un enlace de confirmación. Ábrelo desde tu email para activar tu cuenta y acceder a Rift Deck.
                 </p>
                 <p className="text-xs text-muted-foreground mt-3">
-                  Si no lo encontrás, revisá la carpeta de spam o correo no deseado.
+                  Si no lo encuentras, revisa la carpeta de spam o correo no deseado.
                 </p>
               </div>
 
@@ -261,11 +279,11 @@ export default function Landing() {
                 <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3">
                   <Mail size={22} className="text-primary" />
                 </div>
-                <h2 className="font-rajdhani font-bold text-xl text-foreground">Revisá tu correo</h2>
+                <h2 className="font-rajdhani font-bold text-xl text-foreground">Revisa tu correo</h2>
                 <p className="text-sm text-muted-foreground mt-2">
                   Si existe una cuenta para <span className="text-foreground">{email}</span>, vas a recibir un enlace para crear una contraseña.
                 </p>
-                <p className="text-xs text-muted-foreground mt-3">También revisá spam o correo no deseado.</p>
+                <p className="text-xs text-muted-foreground mt-3">También revisa spam o correo no deseado.</p>
               </div>
               <button
                 type="button"
@@ -349,6 +367,13 @@ export default function Landing() {
                 </svg>
                 Continuar con Google
               </button>
+              <p className="-mt-3 mb-5 text-center text-[11px] leading-relaxed text-muted-foreground">
+                Al continuar con Google aceptas los{' '}
+                <button type="button" onClick={() => setLegalModal('terms')} className="text-primary hover:underline">Términos</button>
+                {' '}y la{' '}
+                <button type="button" onClick={() => setLegalModal('privacy')} className="text-primary hover:underline">Política de privacidad</button>
+                {' '}y declaras tener al menos {MIN_AGE} años.
+              </p>
 
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex-1 h-px bg-border" />
@@ -419,6 +444,25 @@ export default function Landing() {
                   </div>
                 </div>
 
+                {mode === 'register' && (
+                  <label className="flex items-start gap-2.5 text-xs leading-relaxed text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={e => setAcceptedTerms(e.target.checked)}
+                      required
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                    />
+                    <span>
+                      He leído y acepto los{' '}
+                      <button type="button" onClick={() => setLegalModal('terms')} className="text-primary hover:underline">Términos y condiciones</button>
+                      {' '}y la{' '}
+                      <button type="button" onClick={() => setLegalModal('privacy')} className="text-primary hover:underline">Política de privacidad</button>
+                      , y declaro tener al menos {MIN_AGE} años.
+                    </span>
+                  </label>
+                )}
+
                 {error && (
                   <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
                 )}
@@ -428,7 +472,7 @@ export default function Landing() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (mode === 'register' && !acceptedTerms)}
                   className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_28px_rgba(212,175,55,.15)] flex items-center justify-center gap-2"
                 >
                   {loading && <Loader2 size={15} className="animate-spin" />}
@@ -519,6 +563,7 @@ export default function Landing() {
           </div>
         </div>
       )}
+      {legalModal && <LegalInfoModal type={legalModal} onClose={() => setLegalModal(null)} />}
     </main>
   );
 }
