@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
     email: authUser.email,
     full_name: profile?.full_name || authUser.user_metadata?.full_name || '',
     visible_name: profile?.visible_name || '',
+    // La imagen elegida en la app vive en profiles; la de Google es solo el valor por defecto.
     avatar_url: profile?.avatar_url || authUser.user_metadata?.avatar_url || '',
     role: profile?.role || 'user',
   });
@@ -153,7 +154,6 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = async (data) => {
     const profileUpdates = {};
-    let avatarUrl;
 
     if (Object.prototype.hasOwnProperty.call(data || {}, 'visible_name')) {
       const visibleName = typeof data.visible_name === 'string' ? data.visible_name.trim() : '';
@@ -163,11 +163,14 @@ export const AuthProvider = ({ children }) => {
       profileUpdates.visible_name = visibleName;
     }
 
+    // Se guarda en profiles y no en el metadata de Auth: el login con Google
+    // reescribe user_metadata.avatar_url y la imagen elegida se perdía.
     if (Object.prototype.hasOwnProperty.call(data || {}, 'avatar_url')) {
-      avatarUrl = typeof data.avatar_url === 'string' ? data.avatar_url.trim() : '';
+      const avatarUrl = typeof data.avatar_url === 'string' ? data.avatar_url.trim() : '';
+      profileUpdates.avatar_url = avatarUrl || null;
     }
 
-    if (Object.keys(profileUpdates).length === 0 && avatarUrl === undefined) {
+    if (Object.keys(profileUpdates).length === 0) {
       throw new Error('Nombre de usuario requerido.');
     }
 
@@ -175,22 +178,12 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Usuario no autenticado.');
     }
 
-    if (Object.keys(profileUpdates).length > 0) {
-      const { error } = await supabase
-        .from('profiles')
-        .update(profileUpdates)
-        .eq('id', user.id);
+    const { error } = await supabase
+      .from('profiles')
+      .update(profileUpdates)
+      .eq('id', user.id);
 
-      if (error) throw error;
-    }
-
-    if (avatarUrl !== undefined) {
-      const { error } = await supabase.auth.updateUser({
-        data: { avatar_url: avatarUrl || null },
-      });
-
-      if (error) throw error;
-    }
+    if (error) throw error;
 
     const updatedUser = await checkUserAuth();
     setUser(updatedUser);

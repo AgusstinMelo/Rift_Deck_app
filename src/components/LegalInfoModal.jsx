@@ -17,7 +17,7 @@ export const MIN_AGE = 14;
 
 // Versión de los textos legales; se guarda junto a la aceptación del registro.
 export const LEGAL_VERSION = '2026-10-23';
-const UPDATED = '23 de octubre de 2026';
+const UPDATED = '27 de octubre de 2026';
 
 // Documentos legales, en el orden en que se enlazan desde el footer y el perfil.
 export const LEGAL_DOCUMENTS = [
@@ -164,7 +164,7 @@ Esta política explica cómo se tratan tus datos personales en Rift Deck, confor
 
 ## Qué datos tratamos
 
-- **Cuenta:** correo electrónico, nombre visible, avatar elegido y contraseña (que se guarda cifrada). Si entras con Google, recibimos tu nombre y tu correo de tu cuenta de Google.
+- **Cuenta:** correo electrónico, nombre visible, imagen de perfil y contraseña (que se guarda cifrada). Si entras con Google, recibimos de tu cuenta de Google tu nombre, tu correo y la dirección de tu foto de perfil, que usamos como imagen de perfil hasta que elijas otra desde tu perfil.
 - **Contenido que registras:** partidas (campeón, línea, resultado, KDA, draft y otros datos de juego), builds y objetivos personales.
 - **Reportes de errores:** el texto que envías, junto con tu correo y tu nombre visible.
 - **Datos técnicos:** dirección IP y registros técnicos que generan los proveedores de alojamiento al servir la plataforma.
@@ -195,7 +195,7 @@ No vendemos tus datos. Solo los comparten los proveedores que necesitamos para p
 - **Supabase Inc.** (base de datos, autenticación y funciones del servidor) — Estados Unidos.
 - **Vercel Inc.** (alojamiento de la web) — Estados Unidos.
 - **Google LLC** (Gemini, para el sugeridor, e inicio de sesión con Google) — Estados Unidos.
-- **Servidores de imágenes** de la plataforma (media.base44.com) y de Tencent (game.gtimg.cn), que reciben tu dirección IP al mostrar imágenes de campeones, objetos y runas.
+- **Servidores de imágenes** de la plataforma (media.base44.com) y de Tencent (game.gtimg.cn), que reciben tu dirección IP al mostrar imágenes de campeones, objetos y runas; y de Google (googleusercontent.com), que la recibe al mostrar la foto de perfil de Google mientras la uses.
 - Cuando haya pagos: **PayPal (Europe) S.à r.l. et Cie, S.C.A.** — Luxemburgo; y **Mercado Pago** — Argentina.
 
 También podremos comunicar datos a autoridades cuando una ley lo exija.
@@ -246,7 +246,7 @@ Rift Deck **no usa** cookies de análisis, de publicidad ni de seguimiento, ni c
 
 ## Contenido de terceros
 
-Algunas imágenes (de campeones, objetos y runas) se cargan desde servidores externos, que reciben la dirección IP necesaria para enviarlas. Si al iniciar sesión eliges Google, ese proceso se rige por la política de privacidad de Google.
+Algunas imágenes (de campeones, objetos y runas, y la foto de perfil de Google si entras con Google y no elegiste otra) se cargan desde servidores externos, que reciben la dirección IP necesaria para enviarlas. Si al iniciar sesión eliges Google, ese proceso se rige por la política de privacidad de Google.
 
 ## Cómo gestionarlo
 
