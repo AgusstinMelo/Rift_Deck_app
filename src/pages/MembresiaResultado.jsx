@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { getMyMembership } from '@/api/membershipSupabase';
+import { syncPayPalSubscription } from '@/api/paypalSupabase';
 import { CheckCircle2, Clock, XCircle, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -9,6 +10,8 @@ export default function MembresiaResultado() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [membership, setMembership] = useState(null);
+  const [searchParams] = useSearchParams();
+  const paypalSubscriptionId = searchParams.get('provider') === 'paypal' ? searchParams.get('subscription_id') : null;
 
   useEffect(() => {
     let attempts = 0;
@@ -38,8 +41,13 @@ export default function MembresiaResultado() {
       }
     };
 
-    check();
-  }, [user?.id]);
+    // PayPal vuelve con subscription_id: se confirma en el momento; si falla, el
+    // webhook lo hace y el polling lo detecta.
+    const sync = paypalSubscriptionId
+      ? syncPayPalSubscription(paypalSubscriptionId).catch(() => {})
+      : Promise.resolve();
+    sync.then(check);
+  }, [user?.id, paypalSubscriptionId]);
 
   if (loading) {
     return (

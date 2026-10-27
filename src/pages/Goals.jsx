@@ -1,10 +1,10 @@
 import { Link, Route, Routes, useLocation, useMatch, useParams, useSearchParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeft, Plus, Target } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Crown, Plus, Target } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { useGoalsAccess } from '@/features/goals/access';
 import { useEvaluatedGoals } from '@/features/goals/hooks/useGoals';
-import { partitionGoals } from '@/features/goals/model/goalLists';
+import { countOpenGoals, partitionGoals } from '@/features/goals/model/goalLists';
 import GoalsCarousel from '@/features/goals/components/GoalsCarousel';
 import GoalsErrorBoundary from '@/features/goals/components/GoalsErrorBoundary';
 import GoalDetail from '@/features/goals/components/GoalDetail';
@@ -12,7 +12,7 @@ import GoalEditor from '@/features/goals/components/GoalEditor';
 import GoalsHistory from '@/features/goals/components/GoalsHistory';
 import GoalsSummary from '@/features/goals/components/GoalsSummary';
 import GoalWizard from '@/features/goals/components/wizard/GoalWizard';
-import { BUTTON_SECONDARY } from '@/features/goals/components/goalUi';
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/features/goals/components/goalUi';
 
 function CreateGoalButton() {
   return (
@@ -33,7 +33,35 @@ const OVERVIEW_TABS = [
   { id: 'historial', label: 'Historial' },
 ];
 
-function GoalsHeader() {
+/** Aviso de la cuenta free: 1 objetivo en curso; Premium, ilimitados. */
+function FreePlanHint({ openCount, limit }) {
+  return (
+    <p className="text-xs text-muted-foreground mt-1">
+      Cuenta free: {Math.min(openCount, limit)}/{limit} objetivo en curso ·{' '}
+      <Link to="/membresia" className="text-primary hover:underline">Premium: ilimitados</Link>
+    </p>
+  );
+}
+
+function GoalLimitReached() {
+  return (
+    <div className="rd-card p-6">
+      <EmptyState
+        icon={Crown}
+        title="Llegaste al límite de la cuenta free"
+        description="Con la cuenta free podés tener 1 objetivo en curso. Cuando termine, o si lo cancelás o archivás, podés crear otro. Con Premium creás objetivos ilimitados."
+        action={(
+          <div className="flex flex-wrap justify-center gap-2">
+            <Link to="/membresia" className={BUTTON_PRIMARY}><Crown size={15} /> Ver Premium</Link>
+            <Link to="/objetivos" className={BUTTON_SECONDARY}><ArrowLeft size={15} /> Volver a Objetivos</Link>
+          </div>
+        )}
+      />
+    </div>
+  );
+}
+
+function GoalsHeader({ limit }) {
   return (
     <header className="rd-goals-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
@@ -43,6 +71,7 @@ function GoalsHeader() {
         </div>
         <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
         <p className="text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
+        {limit && <FreePlanHint openCount={limit.openCount} limit={limit.max} />}
       </div>
       <CreateGoalButton />
     </header>
@@ -115,7 +144,7 @@ function ActiveGoalsPanel({ current, all }) {
   );
 }
 
-function GoalsOverview({ items }) {
+function GoalsOverview({ items, limit }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') === 'historial' ? 'historial' : 'activos';
   const { current, finished, archived } = partitionGoals(items);
@@ -123,7 +152,7 @@ function GoalsOverview({ items }) {
 
   return (
     <>
-      <GoalsHeader />
+      <GoalsHeader limit={limit} />
       <GoalsTabs
         activeTab={activeTab}
         onTabChange={changeTab}
@@ -158,7 +187,7 @@ function GoalRoute({ items, matches, now, editing = false }) {
     : <GoalDetail item={item} matches={matches} now={now} />;
 }
 
-function NewGoal({ matches }) {
+function NewGoal({ matches, limitReached }) {
   return (
     <div className="rd-goal-flow space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
@@ -170,7 +199,7 @@ function NewGoal({ matches }) {
         </div>
         <p className="text-sm text-muted-foreground">Elegí una meta, configurala y revisá cómo se va a medir.</p>
       </header>
-      <GoalWizard matches={matches} />
+      {limitReached ? <GoalLimitReached /> : <GoalWizard matches={matches} />}
     </div>
   );
 }
@@ -184,6 +213,11 @@ export default function Goals() {
   if (access.isLoading) return <div className="rd-page rd-dashboard"><LoadingState /></div>;
   if (!access.hasAccess) return <MembershipGate />;
 
+  const limit = access.openGoalLimit === null
+    ? null
+    : { max: access.openGoalLimit, openCount: countOpenGoals(items.map(item => item.goal), now) };
+  const limitReached = limit !== null && limit.openCount >= limit.max;
+
   let content;
   if (isLoading) content = <LoadingState />;
   else if (error) content = <ErrorState onRetry={refetch} />;
@@ -191,8 +225,8 @@ export default function Goals() {
     content = (
       <GoalsErrorBoundary resetKey={location.pathname}>
       <Routes>
-        <Route index element={<GoalsOverview items={items} />} />
-        <Route path="nuevo" element={<NewGoal matches={matches} />} />
+        <Route index element={<GoalsOverview items={items} limit={limit} />} />
+        <Route path="nuevo" element={<NewGoal matches={matches} limitReached={limitReached} />} />
         <Route path=":goalId" element={<GoalRoute items={items} matches={matches} now={now} />} />
         <Route path=":goalId/editar" element={<GoalRoute items={items} matches={matches} now={now} editing />} />
         <Route path="*" element={<NotFound />} />

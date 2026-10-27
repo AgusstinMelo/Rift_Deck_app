@@ -1,38 +1,53 @@
 import { supabase } from '@/lib/supabaseClient';
 
+export const TRIAL_DAYS = 45;
+
+const NO_MEMBERSHIP = Object.freeze({
+  hasAccess: false,
+  status: 'inactive',
+  membership: null,
+  accessUntil: null,
+  trialAvailable: false,
+  trialEndsAt: null,
+});
+
+const toDate = (value) => (value ? new Date(value) : null);
+
+// El acceso se calcula en la base (get_my_membership), considerando todas las
+// filas del usuario: prueba gratis, suscripción paga y cancelaciones con período vigente.
 export async function getMyMembership(userId) {
-  if (!userId) {
-    return {
-      hasAccess: false,
-      status: 'inactive',
-      membership: null,
-    };
-  }
+  if (!userId) return NO_MEMBERSHIP;
 
-  const { data, error } = await supabase
-    .from('memberships')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
+  const { data, error } = await supabase.rpc('get_my_membership');
   if (error) throw error;
 
-  const membership = data || null;
-  const status = membership?.status || 'inactive';
-  const expiresAt = membership?.expires_at ? new Date(membership.expires_at) : null;
-  const periodEnd = membership?.current_period_end ? new Date(membership.current_period_end) : null;
-  const accessUntil = expiresAt || periodEnd;
-  const hasAccess =
-    ['active', 'authorized'].includes(status) &&
-    Array.isArray(membership?.access_features) &&
-    membership.access_features.includes('stats') &&
-    (!accessUntil || accessUntil > new Date());
-
   return {
-    hasAccess,
-    status,
-    membership,
+    hasAccess: data?.has_access === true,
+    status: data?.status || 'inactive',
+    membership: data?.membership || null,
+    accessUntil: toDate(data?.access_until),
+    trialAvailable: data?.trial_available === true,
+    trialEndsAt: toDate(data?.trial_ends_at),
   };
+}
+
+export async function startMembershipTrial() {
+  const { error } = await supabase.rpc('start_membership_trial');
+  if (error) throw new Error(error.message || 'No pudimos activar la prueba gratis.');
+}
+
+export async function getMembershipPlans() {
+  const { data, error } = await supabase
+    .from('membership_plans')
+    .select('code, name, amount_ars, amount_usd, interval_months, sort_order')
+    .eq('active', true)
+    .order('sort_order');
+
+  if (error) throw error;
+  return data || [];
+}
+
+export function daysUntil(date, now = new Date()) {
+  if (!date) return null;
+  return Math.max(0, Math.ceil((date.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)));
 }

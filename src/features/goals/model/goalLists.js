@@ -19,6 +19,17 @@ export function isFinished(evaluation) {
   return evaluation.periodStatus === PERIOD_STATUS.CLOSED || evaluation.outcome === OUTCOME.ACHIEVED;
 }
 
+/**
+ * Objetivos que cuentan para el límite de la cuenta free: ciclo de vida activo y
+ * período sin cerrar. Es la misma regla que aplica la base al crear un objetivo,
+ * por eso no usa la evaluación (un objetivo alcanzado antes de tiempo sigue contando).
+ * @param {any[]} goals
+ * @param {Date} [now]
+ */
+export function countOpenGoals(goals, now = new Date()) {
+  return goals.filter(goal => goal.lifecycle === LIFECYCLE.ACTIVE && new Date(goal.period_end) > now).length;
+}
+
 /** Activos: ciclo de vida activo y todavía en juego (incluye programados). */
 export function isCurrent(item) {
   return item.goal.lifecycle === LIFECYCLE.ACTIVE && !isFinished(item.evaluation);

@@ -22,9 +22,9 @@ function isValidEmail(value: unknown) {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function addMonth(date: Date) {
+function addMonths(date: Date, months: number) {
   const next = new Date(date);
-  next.setMonth(next.getMonth() + 1);
+  next.setMonth(next.getMonth() + months);
   return next;
 }
 
@@ -82,6 +82,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const mpEmail = typeof body.mp_email === "string" ? body.mp_email.trim() : "";
+    const planCode = typeof body.plan_code === "string" ? body.plan_code : "premium";
 
     if (!isValidEmail(mpEmail)) {
       return jsonResponse({ error: "Invalid mp_email" }, 400);
@@ -90,7 +91,7 @@ Deno.serve(async (req) => {
     const { data: planData, error: planError } = await supabaseAdmin
       .from("membership_plans")
       .select("*")
-      .eq("code", "premium")
+      .eq("code", planCode)
       .eq("active", true)
       .limit(1)
       .maybeSingle();
@@ -102,6 +103,32 @@ Deno.serve(async (req) => {
       }, 500);
     }
 
+    if (!planData || planCode === "trial") {
+      return jsonResponse({ error: "Invalid plan_code" }, 400);
+    }
+
+    // Una suscripción paga vigente no se duplica; la prueba gratis sí puede convivir.
+    const { data: activePaid, error: activePaidError } = await supabaseAdmin
+      .from("memberships")
+      .select("id")
+      .eq("user_id", user.id)
+      .neq("provider", "trial")
+      .in("status", ["active", "authorized"])
+      .gt("expires_at", new Date().toISOString())
+      .limit(1)
+      .maybeSingle();
+
+    if (activePaidError) {
+      return jsonResponse({
+        error: "memberships query failed",
+        details: activePaidError.message,
+      }, 500);
+    }
+
+    if (activePaid?.id) {
+      return jsonResponse({ error: "Membership already active" }, 409);
+    }
+
     const accessFeatures = Array.isArray(planData?.access_features)
       ? planData.access_features
       : planData?.feature_key
@@ -109,19 +136,21 @@ Deno.serve(async (req) => {
       : ["stats"];
 
     const plan = {
-      amount_ars: Number(planData?.amount_ars || 2000),
-      currency: planData?.currency || "ARS",
+      name: String(planData.name || "Premium"),
+      amount_ars: Number(planData.amount_ars),
+      currency: planData.currency || "ARS",
+      interval_months: Number(planData.interval_months) || 1,
       access_features: accessFeatures,
     };
 
-    const externalReference = `${user.id}:premium`;
-    const backUrl = `${publicAppUrl.replace(/\/$/, "")}/stats`;
+    const externalReference = `${user.id}:${planCode}`;
+    const backUrl = `${publicAppUrl.replace(/\/$/, "")}/membresia/resultado`;
     const mpBody = {
-      reason: "Rift Deck Premium",
+      reason: `Rift Deck Premium ${plan.name}`,
       external_reference: externalReference,
       payer_email: mpEmail,
       auto_recurring: {
-        frequency: 1,
+        frequency: plan.interval_months,
         frequency_type: "months",
         transaction_amount: plan.amount_ars,
         currency_id: "ARS",
@@ -170,7 +199,7 @@ Deno.serve(async (req) => {
     const membershipData = {
       user_id: user.id,
       user_email: user.email,
-      plan_code: "premium",
+      plan_code: planCode,
       provider: "mercadopago",
       provider_subscription_id: providerSubscriptionId,
       external_reference: externalReference,
@@ -180,13 +209,16 @@ Deno.serve(async (req) => {
       status: "pending",
       checkout_url: checkoutUrl,
       updated_at: now.toISOString(),
-      expires_at: addMonth(now).toISOString(),
+      expires_at: addMonths(now, plan.interval_months).toISOString(),
     };
 
+    // Solo se reutiliza un checkout abandonado; la prueba y el historial no se pisan.
     const { data: existing, error: existingError } = await supabaseAdmin
       .from("memberships")
       .select("id")
       .eq("user_id", user.id)
+      .eq("provider", "mercadopago")
+      .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();

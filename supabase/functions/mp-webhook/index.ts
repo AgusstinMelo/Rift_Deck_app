@@ -24,10 +24,29 @@ function errorResponse(error: unknown, status = 500) {
   }, status);
 }
 
-function addMonth(date: Date) {
+// Margen sobre la fecha de cobro mientras Mercado Pago reintenta un pago rechazado.
+const RENEWAL_GRACE_DAYS = 3;
+
+function addMonths(date: Date, months: number) {
   const next = new Date(date);
-  next.setMonth(next.getMonth() + 1);
+  next.setMonth(next.getMonth() + months);
   return next;
+}
+
+function addDays(date: Date, days: number) {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+// Fin del período pagado: la próxima fecha de cobro informada por Mercado Pago o,
+// si no viene, la frecuencia de la suscripción contada desde ahora.
+function getPeriodEnd(subscriptionData: Record<string, any> | null, now: Date) {
+  const nextPayment = subscriptionData?.next_payment_date ? new Date(subscriptionData.next_payment_date) : null;
+
+  if (nextPayment && !Number.isNaN(nextPayment.getTime()) && nextPayment > now) {
+    return nextPayment;
+  }
+
+  return addMonths(now, Number(subscriptionData?.auto_recurring?.frequency) || 1);
 }
 
 function mapStatusToMembership(status: unknown) {
@@ -350,7 +369,7 @@ Deno.serve(async (req) => {
 
     if (membership?.id) {
       const now = new Date();
-      const periodEnd = addMonth(now).toISOString();
+      const periodEnd = getPeriodEnd(subscriptionData, now);
       const update: Record<string, any> = {
         status: mappedStatus,
         updated_at: now.toISOString(),
@@ -367,11 +386,17 @@ Deno.serve(async (req) => {
       if (mappedStatus === "active") {
         update.started_at = membership.started_at || now.toISOString();
         update.current_period_start = now.toISOString();
-        update.current_period_end = periodEnd;
-        update.expires_at = periodEnd;
+        update.current_period_end = periodEnd.toISOString();
+        update.next_payment_date = periodEnd.toISOString();
+        update.expires_at = addDays(periodEnd, RENEWAL_GRACE_DAYS).toISOString();
         update.access_features = Array.isArray(membership.access_features) && membership.access_features.length > 0
           ? membership.access_features
           : ["stats"];
+      }
+
+      if (mappedStatus === "cancelled") {
+        update.cancelled_at = membership.cancelled_at || now.toISOString();
+        update.next_payment_date = null;
       }
 
       const { error: membershipUpdateError } = await supabaseAdmin

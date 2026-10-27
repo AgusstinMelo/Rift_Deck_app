@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
@@ -10,14 +11,14 @@ import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { computeInsights } from '@/hooks/useInsights';
 import MembershipGate from '@/components/membership/MembershipGate';
-import { getMyMembership } from '@/api/membershipSupabase';
+import { daysUntil, getMyMembership } from '@/api/membershipSupabase';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda, winratePct } from '@/domain/matchStats';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
-const STATS_MEMBERSHIP_GATE_ENABLED = false;
+const STATS_MEMBERSHIP_GATE_ENABLED = true;
 
 function calcWR(matches) {
   const wins = matches.filter(m => m.result === 'win').length;
@@ -693,8 +694,9 @@ export default function Stats() {
   const patchDefaultApplied = useRef(false);
   const [membershipLoading, setMembershipLoading] = useState(STATS_MEMBERSHIP_GATE_ENABLED);
   const [hasAccess, setHasAccess] = useState(!STATS_MEMBERSHIP_GATE_ENABLED);
+  const [membership, setMembership] = useState(null);
 
-  useEffect(() => {
+  const loadMembership = useCallback(() => {
     if (!STATS_MEMBERSHIP_GATE_ENABLED) {
       setHasAccess(true);
       setMembershipLoading(false);
@@ -707,10 +709,19 @@ export default function Stats() {
       return;
     }
     getMyMembership(user?.id)
-      .then(res => setHasAccess(res.hasAccess === true))
+      .then(res => {
+        setMembership(res);
+        setHasAccess(res.hasAccess === true);
+      })
       .catch(() => setHasAccess(false))
       .finally(() => setMembershipLoading(false));
   }, [user]);
+
+  useEffect(() => {
+    loadMembership();
+  }, [loadMembership]);
+
+  const trialDaysLeft = membership?.status === 'trialing' ? daysUntil(membership.accessUntil) : null;
 
   const { data: allMatches = [], isLoading } = useQuery({
     queryKey: ['matches', user?.email],
@@ -806,7 +817,7 @@ export default function Stats() {
   }
 
   if (!hasAccess) {
-    return <MembershipGate />;
+    return <MembershipGate onAccessGranted={loadMembership} />;
   }
 
   if (allMatches.length === 0) {
@@ -1061,6 +1072,15 @@ export default function Stats() {
           <p className="text-muted-foreground text-sm mt-1">
             Basado en {totalMatches} partidas registradas.
           </p>
+
+          {trialDaysLeft !== null && (
+            <Link
+              to="/membresia"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
+            >
+              Prueba gratis · {trialDaysLeft === 1 ? 'te queda 1 día' : `te quedan ${trialDaysLeft} días`} · Ver planes
+            </Link>
+          )}
         </div>
 
         <div className="rd-stats-filters flex flex-wrap items-end justify-end gap-3">

@@ -21,6 +21,7 @@ const Goals = lazy(() => import('@/pages/Goals'));
 const Suggester = lazy(() => import('@/pages/Suggester'));
 const TierlistConfig = lazy(() => import('@/pages/TierlistConfig'));
 const Profile = lazy(() => import('@/pages/Profile'));
+const Membresia = lazy(() => import('@/pages/Membresia'));
 const MembresiaResultado = lazy(() => import('@/pages/MembresiaResultado'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
           <Route path="/suggester" element={<Suggester />} />
           <Route path="/tierlist/como-se-calcula" element={<TierlistConfig />} />
           <Route path="/admin/tierlist-config" element={<Navigate to="/tierlist/como-se-calcula" replace />} />
+          <Route path="/membresia" element={<Membresia />} />
           <Route path="/membresia/resultado" element={<MembresiaResultado />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<PageNotFound />} />

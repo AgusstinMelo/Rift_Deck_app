@@ -1,10 +1,8 @@
-import { supabase } from '@/lib/supabaseClient';
+import { invokeEdgeFunction } from '@/api/edgeFunctions';
 
-export async function createMercadoPagoSubscription(mpEmail) {
-  const { data, error } = await supabase.functions.invoke('create-mercadopago-subscription', {
-    body: { mp_email: mpEmail },
+export function createMercadoPagoSubscription(mpEmail, planCode = 'premium') {
+  return invokeEdgeFunction('create-mercadopago-subscription', { mp_email: mpEmail, plan_code: planCode }, {
+    messages: { 'Invalid mp_email': 'Ingresá un email de Mercado Pago válido.' },
+    fallback: 'No pudimos iniciar el pago. Intentá de nuevo en unos minutos.',
   });
-
-  if (error) throw error;
-  return data;
 }

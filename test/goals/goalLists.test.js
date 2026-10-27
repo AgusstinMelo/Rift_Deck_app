@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluateGoal } from '../../src/features/goals/engine/evaluateGoal.js';
-import { isFinished, partitionGoals, successRate, summarizeCurrent } from '../../src/features/goals/model/goalLists.js';
+import { countOpenGoals, isFinished, partitionGoals, successRate, summarizeCurrent } from '../../src/features/goals/model/goalLists.js';
 import { MID_PERIOD, makeGoal, matches } from './helpers.js';
 
 const item = (goalOverrides, data = { matches: [] }) => {
@@ -66,4 +66,15 @@ test('un objetivo alcanzado antes del cierre se archiva, no se cancela', async (
   const open = editPermissions(inProgress.goal, MID_PERIOD, inProgress.evaluation);
   assert.equal(open.canCancel, true);
   assert.equal(open.canArchive, false);
+});
+
+test('límite free: cuenta solo activos con el período abierto', () => {
+  const goals = [
+    { ...makeGoal(), id: 'open' },
+    { ...makeGoal({ startDate: '2026-11-01', endDate: '2026-11-30' }), id: 'scheduled' },
+    { ...makeGoal({ startDate: '2026-09-01', endDate: '2026-09-30' }), id: 'closed' },
+    { ...makeGoal({ lifecycle: 'cancelado' }), id: 'cancelled' },
+    { ...makeGoal({ lifecycle: 'archivado' }), id: 'archived' },
+  ];
+  assert.equal(countOpenGoals(goals, MID_PERIOD), 2);
 });
