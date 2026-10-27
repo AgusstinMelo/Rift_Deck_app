@@ -32,6 +32,10 @@ const AVERAGE_HALF_LIFE_DAYS = 3;
 const DAY_PRESENCE_BASE_FACTOR = 0.60;
 const DAY_PRESENCE_FACTOR_WEIGHT = 0.40;
 
+// Un campeón entra al promedio del parche solo si aparece en al menos esta cantidad
+// de tierlists diarias del grupo (el primer día del parche alcanza con estar ese día).
+const MIN_DAYS_PRESENT = 2;
+
 const POSITIONS: Record<string, string> = {
   "1": "mid",
   "2": "top",
@@ -648,16 +652,17 @@ async function rebuildPatchGroupAverages(
   // Promedio ponderado acumulado hasta lastDate (inclusive), ordenado por línea.
   const buildAverageRows = (lastDate: string) => {
     const rowsByLane: Record<string, any[]> = {};
-    const groupWeight = snapshots
-      .filter((snapshot) => snapshot.snapshot_date <= lastDate)
+    const groupSnapshots = snapshots.filter((snapshot) => snapshot.snapshot_date <= lastDate);
+    const groupWeight = groupSnapshots
       .reduce((sum, snapshot) => sum + dayWeight(snapshot.snapshot_date, lastDate), 0);
+    const minDaysPresent = Math.min(MIN_DAYS_PRESENT, groupSnapshots.length);
 
     for (const champ of byChampionLane.values()) {
       const days = [...champ.days.entries()]
         .filter(([date]) => date <= lastDate)
         .map(([date, day]) => ({ ...day, weight: dayWeight(date, lastDate) }));
 
-      if (!days.length) continue;
+      if (!days.length || days.length < minDaysPresent) continue;
 
       const presentWeight = days.reduce((sum, day) => sum + day.weight, 0);
       const weightedMean = (key: string) =>
