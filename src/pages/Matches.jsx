@@ -211,18 +211,18 @@ export default function Matches() {
 
       <div className="rd-matches-header flex items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="rd-page-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
               Registro de Partidas
             </span>
           </div>
 
-          <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
+          <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
             Partidas
           </h1>
 
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">
             {matches.length} partidas registradas en tu historial competitivo.
           </p>
         </div>

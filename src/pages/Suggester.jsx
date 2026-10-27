@@ -847,12 +847,12 @@ Devuelve exactamente 5 recomendaciones.`;
     <div className="rd-v2-build">
       <header className="rd-v2-build-header flex items-start justify-between gap-4">
         <div>
-          <div className="mb-1 flex items-center gap-2">
+          <div className="rd-page-kicker mb-1 flex items-center gap-2">
             <span className="h-px w-8 bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Consigliere</span>
           </div>
-          <h1 className="font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de campeones</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Analizá tu pool, detectá gaps y encontrá picks con sentido competitivo.</p>
+          <h1 className="rd-page-title font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de campeones</h1>
+          <p className="rd-page-subtitle mt-1 text-sm text-muted-foreground">Analizá tu pool, detectá gaps y encontrá picks con sentido competitivo.</p>
           {tabSelector}
         </div>
         <div className="rd-status-pill hidden items-center gap-3 sm:flex">

@@ -254,9 +254,9 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
         <ArrowLeft size={16} /> Volver
       </button>
 
-      <div className="rd-buildcmp-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Build Calculator</span></div>
-      <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Comparar Builds</h1>
-      <p className="rd-buildcmp-desc text-muted-foreground text-sm mb-6">Compará las estadísticas de dos builds, del mismo campeón o de campeones distintos.</p>
+      <div className="rd-page-kicker rd-buildcmp-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Build Calculator</span></div>
+      <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Comparar Builds</h1>
+      <p className="rd-page-subtitle rd-buildcmp-desc text-muted-foreground text-sm mb-6">Compará las estadísticas de dos builds, del mismo campeón o de campeones distintos.</p>
 
       {/* Selectors */}
       <div className="rd-buildcmp-selectors grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">

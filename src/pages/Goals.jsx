@@ -65,12 +65,12 @@ function GoalsHeader({ limit }) {
   return (
     <header className="rd-goals-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="rd-page-kicker flex items-center gap-2 mb-1">
           <span className="w-8 h-px bg-primary/50" />
           <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Metas personales</span>
         </div>
-        <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
-        <p className="text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
+        <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
+        <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
         {limit && <FreePlanHint openCount={limit.openCount} limit={limit.max} />}
       </div>
       <CreateGoalButton />
@@ -195,9 +195,9 @@ function NewGoal({ matches, limitReached }) {
           <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
             <ArrowLeft size={14} /> Objetivos
           </Link>
-          <h1 className="font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">Nuevo objetivo</h1>
+          <h1 className="rd-page-title font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">Nuevo objetivo</h1>
         </div>
-        <p className="text-sm text-muted-foreground">Elegí una meta, configurala y revisá cómo se va a medir.</p>
+        <p className="rd-page-subtitle text-sm text-muted-foreground">Elegí una meta, configurala y revisá cómo se va a medir.</p>
       </header>
       {limitReached ? <GoalLimitReached /> : <GoalWizard matches={matches} />}
     </div>

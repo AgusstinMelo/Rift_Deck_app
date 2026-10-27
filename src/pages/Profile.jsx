@@ -156,11 +156,11 @@ export default function Profile() {
         </div>
 
         <div>
-          <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
+          <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
             Mi Perfil
           </h1>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="rd-page-subtitle text-sm text-muted-foreground">
             {user?.email}
           </p>
         </div>

@@ -27,9 +27,9 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
   return (
     <div className="rd-build-picker w-full max-w-none mx-0 overflow-x-hidden p-5 md:p-6">
       <div className="rd-build-picker-header">
-        <div className="flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Calculadora de Builds</span></div>
-        <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Seleccionar Campeón</h1>
-        <p className="text-muted-foreground text-sm">Elegí el campeón para crear la build</p>
+        <div className="rd-page-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Calculadora de Builds</span></div>
+        <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Seleccionar Campeón</h1>
+        <p className="rd-page-subtitle text-muted-foreground text-sm">Elegí el campeón para crear la build</p>
       </div>
 
       <div className="rd-card rd-build-picker-filters p-3 w-full max-w-full overflow-hidden">

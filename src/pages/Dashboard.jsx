@@ -336,12 +336,12 @@ export default function Dashboard() {
     <div className="rd-page rd-dashboard-tabs">
       <header className="rd-dashboard-header">
         <div>
-          <div className="rd-dashboard-kicker flex items-center gap-2 mb-1">
+          <div className="rd-page-kicker rd-dashboard-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Centro Táctico</span>
           </div>
-          <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{activeHeading.title}</h1>
-          <p className="rd-dashboard-description mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
+          <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{activeHeading.title}</h1>
+          <p className="rd-page-subtitle rd-dashboard-description mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
         </div>
 
         <div className="rd-panel-tabs rd-dashboard-tablist" role="tablist" aria-label="Secciones del Dashboard">
