@@ -184,9 +184,11 @@ function TrialCard({ onStarted }) {
 }
 
 function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [mpEmail, setMpEmail] = useState('');
+  // Mercado Pago exige pagar con la cuenta de este email: se precarga el de Rift Deck.
+  const [mpEmail, setMpEmail] = useState(user?.email || '');
 
   const handleActivate = async () => {
     if (!mpEmail || !mpEmail.includes('@')) {
@@ -249,7 +251,7 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
 
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Puede ser distinto al email con el que te registraste en Rift Deck.
+            Usamos el email de tu cuenta de Rift Deck. Si tu Mercado Pago usa otro, cambialo acá.
           </p>
         </div>
 
@@ -269,7 +271,7 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
           Cómo funciona:
         </p>
 
-        <StepItem index={1}>Ingresá tu email de Mercado Pago.</StepItem>
+        <StepItem index={1}>Revisá que el email sea el de tu cuenta de Mercado Pago.</StepItem>
 
         <StepItem index={2}>
           Tocá “Activar membresía” para ir al checkout seguro.

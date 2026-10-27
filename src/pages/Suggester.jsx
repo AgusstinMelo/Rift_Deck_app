@@ -35,6 +35,8 @@ import LaneBadge from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import V2BuildTab from '@/features/buildV2/V2BuildTab';
 import StepNav from '@/components/suggester/StepNav';
+import SuggesterUsageNotice from '@/components/suggester/SuggesterUsageNotice';
+import { useSuggesterUsage } from '@/hooks/useSuggesterUsage';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
@@ -612,6 +614,7 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
   const [recommendations, setRecommendations] = useState([]);
   const [strategicGaps, setStrategicGaps] = useState([]);
   const [error, setError] = useState('');
+  const usage = useSuggesterUsage('champions');
   const [step, setStep] = useState(0);
   const [view, setView] = useState('recs');
   const [selectedRec, setSelectedRec] = useState(0);
@@ -823,9 +826,10 @@ Devuelve exactamente 5 recomendaciones.`;
       setView('recs');
       setSelectedRec(0);
     } catch (err) {
-      setError('No se pudo generar la recomendación. Probá de nuevo.');
+      setError(err?.kind === 'usage_limit' ? err.message : 'No se pudo generar la recomendación. Probá de nuevo.');
     } finally {
       setGenerating(false);
+      usage.refresh();
     }
   };
 
@@ -927,11 +931,13 @@ Devuelve exactamente 5 recomendaciones.`;
 
           {error && <p className="rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-400">{error}</p>}
 
+          <SuggesterUsageNotice usage={usage} />
+
           <div className="flex gap-2">
             {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
             {viewStep < LEGACY_STEPS.length - 1
               ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!hasPool} title={hasPool ? undefined : 'Agregá al menos un campeón a tu pool'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
-              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? 'Analizando pool…' : onResultStep ? 'Volver a generar' : 'Generar recomendaciones'}</button>}
+              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool || usage.remaining === 0} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? 'Analizando pool…' : onResultStep ? 'Volver a generar' : 'Generar recomendaciones'}</button>}
           </div>
         </aside>
 

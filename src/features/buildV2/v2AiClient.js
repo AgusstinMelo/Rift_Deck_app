@@ -11,6 +11,7 @@ export async function requestV2Build(prompt, snapshot, context = {}) {
     prompt,
     response_json_schema: createV2BuildJsonSchema(snapshot, context),
     provider_attempt: context.attempt || 1,
+    request_id: context.requestId,
   };
   const { data, error } = await supabase.functions.invoke('suggest-build-v2', { body });
   const temporaryFailure = Boolean(error) || (!data?.ok && isTemporaryProviderFailure(data));
@@ -20,6 +21,9 @@ export async function requestV2Build(prompt, snapshot, context = {}) {
       new Error('No se pudo conectar con el generador de builds. Probá nuevamente en unos segundos.'),
       { kind: 'provider_error', retryable: true, details: error.message },
     );
+  }
+  if (data?.kind === 'usage_limit') {
+    throw Object.assign(new Error(data.error), { kind: 'usage_limit', retryable: false });
   }
   if (!data?.ok) {
     const malformed = data?.kind === 'malformed_response';

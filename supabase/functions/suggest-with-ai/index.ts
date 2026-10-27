@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { consumeSuggesterRun, DAILY_LIMIT_MESSAGE, normalizeRequestId, refundSuggesterRun } from '../_shared/suggesterUsage.ts';
 
 // Solo usuarios logueados: evita que terceros usen las claves de Gemini y que
 // se envíen a Google datos fuera del servicio.
@@ -29,13 +30,28 @@ const isRetryableStatus = (status: number) => status === 429 || status >= 500;
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
-  if (!(await getAuthenticatedUser(req))) return jsonResponse({ error: 'Unauthorized' }, 401);
+  const user = await getAuthenticatedUser(req);
+  if (!user) return jsonResponse({ error: 'Unauthorized' }, 401);
+
+  let requestId = '';
+  // Si la IA falla, la ejecución se devuelve antes de responder.
+  const fail = async (body: Record<string, unknown>, status: number) => {
+    if (requestId) await refundSuggesterRun(user.id, 'champions', requestId);
+    return jsonResponse(body, status);
+  };
 
   try {
-    const { prompt, response_json_schema } = await req.json();
+    const { prompt, response_json_schema, request_id } = await req.json();
     if (typeof prompt !== 'string' || !prompt.trim()) {
       return jsonResponse({ error: 'Missing prompt' }, 400);
     }
+
+    const runId = normalizeRequestId(request_id);
+    const run = await consumeSuggesterRun(user.id, 'champions', runId);
+    if (!run.allowed) {
+      return jsonResponse({ error: 'usage_limit', message: DAILY_LIMIT_MESSAGE, usage: run }, 429);
+    }
+    requestId = runId;
 
     const apiKeys = [...new Set([
       Deno.env.get('GEMINI_API_KEY'),
@@ -47,7 +63,7 @@ Deno.serve(async req => {
     const model = Deno.env.get('GEMINI_MODEL') || 'gemini-3.5-flash-lite';
 
     if (!apiKeys.length) {
-      return jsonResponse({ error: 'Missing server-side Gemini configuration' }, 500);
+      return fail({ error: 'Missing server-side Gemini configuration' }, 500);
     }
 
     let lastError = '';
@@ -80,7 +96,7 @@ Deno.serve(async req => {
         lastError = await response.text();
         console.error('suggest-with-ai Gemini error', response.status, `attempt=${attempt + 1}`, lastError.slice(0, 1000));
         if (isRetryableStatus(response.status) && attempt + 1 < attempts) continue;
-        return jsonResponse({ error: `Gemini request failed (${response.status})`, details: lastError.slice(0, 1000) }, 500);
+        return fail({ error: `Gemini request failed (${response.status})`, details: lastError.slice(0, 1000) }, 500);
       }
 
       const completion = await response.json();
@@ -90,7 +106,7 @@ Deno.serve(async req => {
       if (!content) {
         lastError = 'Empty AI response';
         if (attempt + 1 < attempts) continue;
-        return jsonResponse({ error: lastError }, 500);
+        return fail({ error: lastError }, 500);
       }
 
       try {
@@ -103,12 +119,12 @@ Deno.serve(async req => {
       } catch {
         lastError = content;
         if (attempt + 1 < attempts) continue;
-        return jsonResponse({ error: 'Invalid JSON from Gemini', raw: content }, 500);
+        return fail({ error: 'Invalid JSON from Gemini', raw: content }, 500);
       }
     }
 
-    return jsonResponse({ error: 'Gemini did not return a valid response', details: lastError.slice(0, 1000) }, 500);
+    return fail({ error: 'Gemini did not return a valid response', details: lastError.slice(0, 1000) }, 500);
   } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected error' }, 500);
+    return fail({ error: error instanceof Error ? error.message : 'Unexpected error' }, 500);
   }
 });

@@ -11,6 +11,9 @@ import { createEligibleV2Snapshot } from './v2Eligibility';
 import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
 import StepNav from '@/components/suggester/StepNav';
+import SuggesterUsageNotice from '@/components/suggester/SuggesterUsageNotice';
+import { newSuggesterRequestId } from '@/api/suggesterUsageSupabase';
+import { useSuggesterUsage } from '@/hooks/useSuggesterUsage';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 
@@ -124,6 +127,7 @@ const RESULT_STEP = STEPS.length;
 
 export default function V2BuildTab({ tabSelector }) {
   const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
+  const usage = useSuggesterUsage('build');
   const [championId, setChampionId] = useState('');
   const [role, setRole] = useState('');
   const [allies, setAllies] = useState(emptyTeam);
@@ -164,6 +168,7 @@ export default function V2BuildTab({ tabSelector }) {
   };
 
   async function generate() {
+    if (usage.remaining === 0) return;
     if (isPhone) setStep(RESULT_STEP);
     if (!snapshot || !championId || !role) { setState('validation_error'); setError('Seleccioná un campeón y su rol.'); return; }
     if (allies[role] !== championId) { setState('validation_error'); setError('El campeón elegido debe ocupar el rol seleccionado en aliados.'); return; }
@@ -171,6 +176,8 @@ export default function V2BuildTab({ tabSelector }) {
     const selectedEnemies = Object.values(enemies).filter(Boolean);
     if (new Set(selectedAllies).size !== selectedAllies.length || new Set(selectedEnemies).size !== selectedEnemies.length) { setState('validation_error'); setError('No puede repetirse un campeón dentro del mismo equipo.'); return; }
     setState('loading'); setError(''); setResult(null);
+    // Los dos intentos (el segundo corrige al primero) cuentan como una sola ejecución.
+    const requestId = newSuggesterRequestId();
     try {
       const generationSnapshot = createEligibleV2Snapshot(snapshot, championId);
       const requestContext = { snapshot: generationSnapshot, championId, role, allies, enemies, buildPreference };
@@ -187,7 +194,7 @@ export default function V2BuildTab({ tabSelector }) {
         if (import.meta.env.DEV) console.debug('[Build IA V2] request', { attempt, counts: { champions: generationSnapshot.champions.length, coreItems: generationSnapshot.coreItems.length, movementItems: generationSnapshot.movementItems.length, runes: generationSnapshot.runes.length, spells: generationSnapshot.spells.length }, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
         let response;
         try {
-          response = await requestV2Build(prompt, generationSnapshot, { role, attempt });
+          response = await requestV2Build(prompt, generationSnapshot, { role, attempt, requestId });
         } catch (cause) {
           if (fallbackData) { showResult(fallbackData); return; }
           if (attempt === 1 && cause.retryable) {
@@ -227,6 +234,7 @@ export default function V2BuildTab({ tabSelector }) {
       setState('validation_error');
       setError([...lastValidation.schemaErrors, ...lastValidation.validationErrors].join(' '));
     } catch (cause) { setState(cause.kind === 'malformed_response' ? 'malformed_response' : 'provider_error'); setError(cause.message); if (import.meta.env.DEV) console.debug('[Build IA V2] error', { kind: cause.kind, raw: cause.raw, message: cause.message, details: cause.details }); }
+    finally { usage.refresh(); }
   }
 
   if (isLoading) return <div className="rd-card p-8 text-center text-muted-foreground">Cargando snapshot del parche activo…</div>;
@@ -263,11 +271,12 @@ export default function V2BuildTab({ tabSelector }) {
         {viewStep === 1 && <DraftCard title="Composición aliada" icon={Users} team={allies} setter={setAllies} champions={champions} onMemberChange={setMember} hiddenLane={role} />}
         {viewStep === 2 && <DraftCard title="Composición enemiga" icon={Swords} team={enemies} setter={setEnemies} champions={champions} onMemberChange={setMember} />}
         </div>
+        <SuggesterUsageNotice usage={usage} />
         <div className="flex gap-2">
           {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
           {viewStep < STEPS.length - 1
             ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!pickReady} title={pickReady ? undefined : 'Elegí campeón y rol para continuar'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
-            : <button type="button" onClick={generate} disabled={state === 'loading'} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? 'Analizando draft…' : onResultStep ? 'Volver a generar' : 'Generar build'}</button>}
+            : <button type="button" onClick={generate} disabled={state === 'loading' || usage.remaining === 0} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? 'Analizando draft…' : onResultStep ? 'Volver a generar' : 'Generar build'}</button>}
         </div>
       </aside>
       <div className="rd-v2-build-result">
