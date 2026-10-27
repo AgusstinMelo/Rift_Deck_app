@@ -1,9 +1,9 @@
 const LANE_CONFIG = {
-  top: { label: 'Top', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-  jungler: { label: 'Jungla', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
-  mid: { label: 'Mid', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-  adc: { label: 'ADC', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
-  support: { label: 'Support', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
+  top: { label: 'Top', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', border: 'border-orange-500/80' },
+  jungler: { label: 'Jungla', color: 'bg-green-500/20 text-green-400 border-green-500/30', border: 'border-green-500/80' },
+  mid: { label: 'Mid', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30', border: 'border-purple-500/80' },
+  adc: { label: 'ADC', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30', border: 'border-cyan-500/80' },
+  support: { label: 'Support', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30', border: 'border-rose-500/80' },
 };
 
 export default function LaneBadge({ lane, size = 'sm' }) {

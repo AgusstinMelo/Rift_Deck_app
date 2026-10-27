@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   getTierlistEntries,
@@ -8,9 +8,10 @@ import {
 } from '@/api/tierlistSupabase';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, Trophy, Table2, Layers } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
-import LaneBadge from '@/components/ui/LaneBadge';
+import LaneBadge, { LANE_CONFIG } from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
-import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT_QUERY } from '@/hooks/useMatchMedia';
+import { useTierTileSize } from '@/hooks/useTierTileSize';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
@@ -62,6 +63,7 @@ export default function Tierlist() {
   const [diffFilter, setDiffFilter] = useState('all');
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY);
   // En smartphone el selector de vista va en la línea del parche, no en los filtros.
   const toggleInHeader = isPhoneLandscape || isPhonePortrait;
   // En smartphone horizontal se entra directo a la tabla (se lee mejor a lo ancho);
@@ -155,6 +157,16 @@ export default function Tierlist() {
     () => sortTiers(new Set(tierlist.filter(t => t.snapshot_key === activeSnapshotKey).map(t => t.tier).filter(Boolean))),
     [tierlist, activeSnapshotKey]
   );
+
+  // "Por Tier" en escritorio: las imágenes se agrandan hasta llenar el alto disponible.
+  const scrollRef = useRef(null);
+  const tierGroupsRef = useRef(null);
+  useTierTileSize({
+    scrollRef,
+    groupsRef: tierGroupsRef,
+    enabled: isDesktopFit && viewMode === 'tier',
+    layoutKey: `${isLoading}|${availableTiers.map(tier => filtered.filter(t => t.tier === tier).length).join(',')}`,
+  });
 
   const renderVariation = (entry) => {
     const variation = getPositionVariation(entry);
@@ -392,7 +404,7 @@ export default function Tierlist() {
         </div>
       </div>
 
-      <div className="rd-tierlist-scroll">
+      <div ref={scrollRef} className="rd-tierlist-scroll">
       {isLoading ? (
         <div className="space-y-4">
           {Array(5).fill(0).map((_, i) => (
@@ -408,7 +420,7 @@ export default function Tierlist() {
           />
         </div>
       ) : viewMode === 'tier' ? (
-        <div className="rd-tier-groups space-y-6">
+        <div ref={tierGroupsRef} className="rd-tier-groups space-y-6">
           {availableTiers.map(tier => {
             const championsInTier = filtered.filter(t => t.tier === tier);
             if (championsInTier.length === 0) return null;
@@ -433,90 +445,46 @@ export default function Tierlist() {
                   </div>
 
                   {/* Promedios del tier: solo escritorio (ver index.css). */}
-                  <dl className="rd-tier-group-stats hidden">
+                  <dl className="rd-tier-group-stats hidden" title="Promedios del tier">
                     {avgWinrate !== null && (
                       <div>
-                        <dt>WR prom.</dt>
+                        <dt>WR</dt>
                         <dd>{avgWinrate.toFixed(1)}%</dd>
                       </div>
                     )}
                     {avgPickrate !== null && (
                       <div>
-                        <dt>PR prom.</dt>
+                        <dt>PR</dt>
                         <dd>{avgPickrate.toFixed(1)}%</dd>
                       </div>
                     )}
                   </dl>
                 </div>
 
-                <div className="rd-tier-group-grid p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+                {/* Solo la imagen de cada campeón; nombre y rol quedan en el tooltip. */}
+                <div className="rd-tier-group-grid p-3 grid grid-cols-[repeat(auto-fill,3rem)] gap-1.5">
                   {championsInTier.map(entry => (
                     <div
                       key={entry.id}
-                      className="
-                        rd-tier-tile group relative overflow-hidden rounded-xl
-                        border border-border/60
-                        bg-secondary/25
-                        hover:bg-secondary/45
-                        hover:border-primary/25
-                        transition-all duration-200
-                        px-3 py-2.5
-                      "
+                      title={[entry.champion_name, LANE_CONFIG[entry.lane]?.label || entry.lane].filter(Boolean).join(' - ')}
+                      className={`
+                        rd-tier-tile relative w-12 h-12 overflow-hidden rounded-lg
+                        bg-muted border-2 ${LANE_CONFIG[entry.lane]?.border || 'border-border/60'}
+                        hover:brightness-125
+                        transition-[filter] duration-200
+                      `}
                     >
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.10),transparent_42%)]" />
-
-                      <div className="relative flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-muted border border-primary/15 shrink-0">
-                          {entry.image_url ? (
-                            <img
-                              src={entry.image_url}
-                              alt={entry.champion_name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-primary">
-                              {entry.champion_name?.[0]}
-                            </div>
-                          )}
+                      {entry.image_url ? (
+                        <img
+                          src={entry.image_url}
+                          alt={entry.champion_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs font-bold text-primary">
+                          {entry.champion_name?.[0]}
                         </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-semibold text-foreground truncate">
-                              {entry.champion_name}
-                            </p>
-
-                            <div className="shrink-0">
-                              {renderVariation(entry)}
-                            </div>
-                          </div>
-
-                          <div className="mt-1 flex items-center gap-2">
-                            <LaneBadge lane={entry.lane} />
-
-                            <span className="text-[11px] text-muted-foreground">
-                              {entry.winrate?.toFixed(1)}%<span className="rd-tier-tile-wr"> WR</span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Pick / ban rate, posición en la línea y score: solo escritorio (ver index.css). */}
-                      <div className="rd-tier-tile-extra hidden" style={{ '--rd-fill': `${Math.max(0, Math.min(100, Number(entry.ranking_final) || 0))}%` }}>
-                        <div className="rd-tier-tile-rates">
-                          <span><b>PR</b> {entry.pickrate != null ? `${Number(entry.pickrate).toFixed(1)}%` : '—'}</span>
-                          <span><b>BR</b> {entry.banrate != null ? `${Number(entry.banrate).toFixed(1)}%` : '—'}</span>
-                          {entry.position_in_lane != null && (
-                            <span className="rd-tier-tile-rank">#{entry.position_in_lane}</span>
-                          )}
-                        </div>
-                        <div className="rd-tier-tile-score">
-                          <span className="rd-tier-tile-score-bar" />
-                          <span className="rd-tier-tile-score-value">
-                            {entry.ranking_final != null ? Number(entry.ranking_final).toFixed(1) : '—'}
-                          </span>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>

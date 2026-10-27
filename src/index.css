@@ -6762,50 +6762,16 @@
   }
 
   .rd-tierlist-layout .rd-tier-group-grid {
-    grid-template-columns: repeat(auto-fill, minmax(9.25rem, 1fr));
+    grid-template-columns: repeat(auto-fill, 2.5rem);
     align-content: start;
-    gap: 0.35rem;
+    gap: 0.3rem;
     padding: 0.45rem;
   }
 
   .rd-tierlist-layout .rd-tier-tile {
-    padding: 0.3rem 0.4rem;
-    border-radius: 0.6rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile > .relative {
-    gap: 0.45rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile > .relative > :first-child {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.5rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .text-sm {
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 {
-    gap: 0.35rem;
-    margin-top: 0.15rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 > :first-child {
-    padding: 0 0.3rem;
-    border-radius: 0.3rem;
-    font-size: 9px;
-    line-height: 1.5;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 > span:last-child {
-    font-size: 10px;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .text-xs {
-    font-size: 10px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.45rem;
   }
 
   /* Tabla: anchos fijos para que las 9 columnas entren en el ancho de la tarjeta.
@@ -7050,53 +7016,16 @@
   }
 
   .rd-tierlist-layout .rd-tier-group-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, 2.5rem);
     align-content: start;
     gap: 0.3rem;
     padding: 0.4rem;
   }
 
   .rd-tierlist-layout .rd-tier-tile {
-    padding: 0.3rem 0.35rem;
-    border-radius: 0.6rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile > .relative {
-    gap: 0.4rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile > .relative > :first-child {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.5rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .text-sm {
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 {
-    gap: 0.25rem;
-    margin-top: 0.15rem;
-    white-space: nowrap;
-  }
-
-  /* "48.0%" sin el sufijo " WR": entra junto al badge de línea en media pantalla. */
-  .rd-tierlist-layout .rd-tier-tile-wr {
-    display: none;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 > :first-child {
-    padding: 0 0.25rem;
-    border-radius: 0.3rem;
-    font-size: 8.5px;
-    line-height: 1.5;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 > span:last-child,
-  .rd-tierlist-layout .rd-tier-tile .text-xs {
-    font-size: 9.5px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.45rem;
   }
 
   /* Tabla (tarjetas en móvil): filas bajas. Nombre, tier y línea arriba;
@@ -12573,160 +12502,91 @@
   }
 }
 
-/* Tierlist "Por Tier" en escritorio: cada tier es una fila con un riel a la
-   izquierda (badge, cantidad y promedios de WR / PR, teñido con el color del
-   tier: --rd-tier-color viene del JSX) y a la derecha una grilla fluida de
-   fichas. Cada ficha suma pick / ban rate, posición en la línea y una barra con
-   el score (--rd-fill viene del JSX). En smartphone esos datos quedan ocultos. */
+/* Tierlist "Por Tier" en escritorio: cada tier es una fila con un riel compacto
+   a la izquierda (badge a un lado; título, cantidad y promedios de WR / PR al
+   otro, teñido con el color del tier: --rd-tier-color viene del JSX) que mide
+   lo mismo que una fila de fichas, y a la derecha una grilla de imágenes de
+   campeón con borde del color del rol. --rd-tile (useTierTileSize) agranda las
+   imágenes hasta que la tierlist completa llena el alto disponible. */
 @media (min-width: 1024px) and (min-height: 501px) {
   .rd-tierlist-layout .rd-tier-groups > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
   }
 
   .rd-tierlist-layout .rd-tier-group {
     display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr);
+    grid-template-columns: 11.5rem minmax(0, 1fr);
     box-shadow: inset 3px 0 0 hsl(var(--rd-tier-color, var(--primary)) / 0.75);
   }
 
   .rd-tierlist-layout .rd-tier-group-head {
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.55rem;
-    padding: 1rem 0.85rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    column-gap: 0.65rem;
+    row-gap: 0.15rem;
+    padding: 0.5rem 0.75rem;
     border-bottom: 0;
     border-right: 1px solid hsl(var(--border) / 0.7);
     background:
-      linear-gradient(180deg, hsl(var(--rd-tier-color, var(--primary)) / 0.14), transparent 75%),
+      linear-gradient(90deg, hsl(var(--rd-tier-color, var(--primary)) / 0.14), transparent 85%),
       hsl(var(--secondary) / 0.2);
-    text-align: center;
   }
 
   .rd-tierlist-layout .rd-tier-group-head > :first-child {
-    box-shadow: 0 0 22px hsl(var(--rd-tier-color, var(--primary)) / 0.35);
+    grid-row: span 2;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 15px;
+    box-shadow: 0 0 18px hsl(var(--rd-tier-color, var(--primary)) / 0.35);
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head .rd-card-title {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head .text-xs {
+    font-size: 10.5px;
+    line-height: 1.3;
   }
 
   .rd-tierlist-layout .rd-tier-group-stats {
     display: flex;
-    width: 100%;
-    flex-direction: column;
-    gap: 0.3rem;
-    margin-top: 0.15rem;
-    padding-top: 0.6rem;
-    border-top: 1px solid hsl(var(--border) / 0.6);
+    gap: 0.6rem;
   }
 
   .rd-tierlist-layout .rd-tier-group-stats > div {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.2rem;
   }
 
   .rd-tierlist-layout .rd-tier-group-stats dt {
     color: hsl(var(--muted-foreground));
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .rd-tierlist-layout .rd-tier-group-stats dd {
     color: hsl(var(--foreground));
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
 
   .rd-tierlist-layout .rd-tier-group-grid {
-    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-    align-content: start;
-    gap: 0.5rem;
-    padding: 0.7rem;
+    grid-template-columns: repeat(auto-fill, var(--rd-tile, 3rem));
+    align-content: center;
+    gap: 0.35rem;
+    padding: 0.45rem;
   }
 
   .rd-tierlist-layout .rd-tier-tile {
-    padding: 0.5rem 0.6rem 0.5rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile > .relative {
-    gap: 0.6rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile > .relative > :first-child {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.6rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .text-sm {
-    font-size: 13px;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile .mt-1 {
-    margin-top: 0.15rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile:hover {
-    border-color: hsl(var(--rd-tier-color, var(--primary)) / 0.4);
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-extra {
-    position: relative;
-    display: block;
-    margin-top: 0.4rem;
-    padding-top: 0.35rem;
-    border-top: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-rates {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    color: hsl(var(--muted-foreground));
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-rates b {
-    margin-right: 0.15rem;
-    color: hsl(var(--foreground) / 0.6);
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-rank {
-    margin-left: auto;
-    color: hsl(var(--primary));
-    font-weight: 600;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-score {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.3rem;
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-score-bar {
-    height: 4px;
-    flex: 1 1 auto;
-    border-radius: 999px;
-    background: linear-gradient(
-      90deg,
-      hsl(var(--rd-tier-color, var(--primary))) 0 var(--rd-fill, 0%),
-      rgba(255, 255, 255, 0.07) var(--rd-fill, 0%) 100%
-    );
-  }
-
-  .rd-tierlist-layout .rd-tier-tile-score-value {
-    min-width: 2.25rem;
-    color: hsl(var(--foreground));
-    font-size: 11px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
+    width: var(--rd-tile, 3rem);
+    height: var(--rd-tile, 3rem);
+    border-radius: calc(var(--rd-tile, 3rem) * 0.16);
   }
 }
 
