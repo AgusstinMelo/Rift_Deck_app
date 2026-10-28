@@ -1,3 +1,6 @@
+import { tr } from '../../i18n/uiI18n.js';
+import { runeBranchLabel } from '../../utils/runeBranches.js';
+
 const normalizeText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const STOP_WORDS = new Set(['para', 'como', 'esta', 'este', 'build', 'runa', 'objeto', 'daño', 'dano', 'enemigo', 'aliado', 'desde', 'entre']);
 
@@ -37,8 +40,8 @@ function bestCandidate(candidates, result, usedIds = new Set()) {
 const fallbackReason = (entity, purpose, result) => {
   const plan = result?.build_plan?.primary_archetype || result?.build_theme;
   return plan
-    ? `${purpose} Es la opción disponible que mejor encaja con el plan ${plan}.`
-    : `${purpose} Es la opción disponible que mejor encaja con el plan de la build.`;
+    ? `${purpose} ${tr('buildV2.stabilizer.bestFitPlan', { plan })}`
+    : `${purpose} ${tr('buildV2.stabilizer.bestFitBuild')}`;
 };
 
 const MAX_ITEM_EXPLANATION_LENGTH = 220;
@@ -59,14 +62,17 @@ function cleanCatalogText(value, entityName = '') {
 }
 
 // Para encadenar la razón dentro de una frase ("... porque aporta"), sin tocar siglas como "AP".
-const lowerFirst = text => /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(text) ? text[0].toLowerCase() + text.slice(1) : text;
+const lowerFirst = text => /^\p{Lu}\p{Ll}/u.test(text) ? text[0].toLowerCase() + text.slice(1) : text;
+
+// Nombre visible de la pieza en el idioma activo; el snapshot trae los nombres en español.
+const defaultNameOf = entity => entity?.name || '';
 
 const selectionReason =(selection, entity, result) => cleanCatalogText(
   selection?.reason,
   entity?.name,
-) || fallbackReason(entity, 'Complementa el plan de la build.', result);
+) || fallbackReason(entity, tr('buildV2.stabilizer.complementsPlan'), result);
 
-function synchronizeItemExplanations(buildPlan, coreItems, snapshot, result) {
+function synchronizeItemExplanations(buildPlan, coreItems, snapshot, result, nameOf) {
   const itemMap = new Map(snapshot.coreItems.map(item => [String(item.id), item]));
   const selected = coreItems
     .map(selection => ({ selection, entity: itemMap.get(String(selection.id)) }))
@@ -74,16 +80,16 @@ function synchronizeItemExplanations(buildPlan, coreItems, snapshot, result) {
   const firstItem = selected[0];
   const infinitySlot = selected.findIndex(({ entity }) => normalizeText(entity.name) === 'filo del infinito');
   const orderingNote = infinitySlot >= 2
-    ? ` Filo del Infinito se reserva para el slot ${infinitySlot + 1}, después de acumular una base de crítico.`
+    ? ` ${tr('buildV2.stabilizer.infinityReserved', { item: nameOf(selected[infinitySlot].entity), slot: infinitySlot + 1 })}`
     : '';
   return {
     ...buildPlan,
     first_item_rationale: firstItem
-      ? `${firstItem.entity.name} se compra primero porque ${lowerFirst(selectionReason(firstItem.selection, firstItem.entity, result))}${orderingNote}`
+      ? `${tr('buildV2.stabilizer.boughtFirst', { item: nameOf(firstItem.entity), reason: lowerFirst(selectionReason(firstItem.selection, firstItem.entity, result)) })}${orderingNote}`
       : buildPlan?.first_item_rationale,
     // Generate this copy after stabilization. Text written for replaced IDs is stale.
     item_relationships: selected.map(({ selection, entity }) =>
-      `${entity.name}: ${selectionReason(selection, entity, result)}`
+      `${nameOf(entity)}: ${selectionReason(selection, entity, result)}`
     ),
   };
 }
@@ -103,7 +109,7 @@ function stabilizeCoreItems(result, snapshot) {
     if (!item) break;
     const id = String(item.id);
     used.add(id);
-    selected.push({ id, reason: fallbackReason(item, 'Completa el núcleo sin repetir objetos.', result) });
+    selected.push({ id, reason: fallbackReason(item, tr('buildV2.stabilizer.completesCore'), result) });
   }
   const ordered = selected.slice(0, 5);
   const deferred = itemMap.size
@@ -123,7 +129,7 @@ function stabilizeCoreItems(result, snapshot) {
     const [infinityEdge] = stabilized.splice(infinityIndex, 1);
     stabilized.splice(Math.min(2, stabilized.length), 0, {
       ...infinityEdge,
-      reason: 'Se reserva para el tercer objeto, cuando la build ya acumuló una base de crítico que permite aprovechar su multiplicador.',
+      reason: tr('buildV2.stabilizer.infinityThirdReason'),
     });
   }
   return stabilized;
@@ -168,7 +174,7 @@ function stabilizeRunes(result, snapshot) {
     used.add(String(rune.id));
     return {
       id: String(rune.id),
-      reason: fallbackReason(rune, `Completa el grupo ${group} de ${preferredBranch}.`, result),
+      reason: fallbackReason(rune, tr('buildV2.stabilizer.completesRuneGroup', { group, branch: runeBranchLabel(preferredBranch) }), result),
     };
   }).filter(Boolean);
 
@@ -185,7 +191,7 @@ function stabilizeRunes(result, snapshot) {
     ? result.secondary_rune
     : alternateOriginal?.selection || (() => {
         const rune = bestCandidate(regular.filter(candidate => candidate.branch !== preferredBranch), result, used);
-        return rune ? { id: String(rune.id), reason: fallbackReason(rune, 'Aporta una rama secundaria diferente.', result) } : result.secondary_rune;
+        return rune ? { id: String(rune.id), reason: fallbackReason(rune, tr('buildV2.stabilizer.secondaryBranch'), result) } : result.secondary_rune;
       })();
 
   const currentKeystone = runeMap.get(String(result.keystone?.id));
@@ -193,7 +199,7 @@ function stabilizeRunes(result, snapshot) {
     ? result.keystone
     : (() => {
         const rune = bestCandidate(keystones, result);
-        return rune ? { id: String(rune.id), reason: fallbackReason(rune, 'Define la runa clave del plan.', result) } : result.keystone;
+        return rune ? { id: String(rune.id), reason: fallbackReason(rune, tr('buildV2.stabilizer.definesKeystone'), result) } : result.keystone;
       })();
 
   return { keystone, primaryRunes, secondaryRune };
@@ -215,7 +221,7 @@ function stabilizeSpells(result, snapshot, role) {
   }
   if (isJungler && smite && !used.has(String(smite.id))) {
     used.add(String(smite.id));
-    selected.unshift({ id: String(smite.id), reason: fallbackReason(smite, 'Es obligatorio para la posición de jungla.', result) });
+    selected.unshift({ id: String(smite.id), reason: fallbackReason(smite, tr('buildV2.stabilizer.smiteRequired'), result) });
   }
   while (selected.length < 2) {
     const spell = bestCandidate(
@@ -225,7 +231,7 @@ function stabilizeSpells(result, snapshot, role) {
     );
     if (!spell) break;
     used.add(String(spell.id));
-    selected.push({ id: String(spell.id), reason: fallbackReason(spell, 'Complementa los hechizos de la build.', result) });
+    selected.push({ id: String(spell.id), reason: fallbackReason(spell, tr('buildV2.stabilizer.complementsSpells'), result) });
   }
   return selected.slice(0, 2);
 }
@@ -242,17 +248,22 @@ export function stabilizeV2Result(value, snapshot, context = {}) {
   const coreItems = stabilizeCoreItems(result, snapshot);
   const itemMap = new Map(snapshot.coreItems.map(item => [String(item.id), item]));
   const firstItem = itemMap.get(String(coreItems[0]?.id));
+  const nameOf = context.nameOf || defaultNameOf;
   const infinitySlot = coreItems.findIndex(selection =>
     normalizeText(itemMap.get(String(selection.id))?.name) === 'filo del infinito'
   );
   const buildPlan = infinitySlot >= 2
     ? {
         ...result.build_plan,
-        first_item_rationale: `${firstItem?.name || 'El primer objeto'} abre la curva por su valor inmediato; Filo del Infinito se reserva para el slot ${infinitySlot + 1}, después de acumular una base de crítico.`,
+        first_item_rationale: tr('buildV2.stabilizer.opensCurve', {
+          item: firstItem ? nameOf(firstItem) : tr('buildV2.stabilizer.firstItem'),
+          infinity: nameOf(itemMap.get(String(coreItems[infinitySlot].id))),
+          slot: infinitySlot + 1,
+        }),
       }
     : result.build_plan;
 
-  const synchronizedBuildPlan = synchronizeItemExplanations(buildPlan, coreItems, snapshot, result);
+  const synchronizedBuildPlan = synchronizeItemExplanations(buildPlan, coreItems, snapshot, result, nameOf);
 
   return {
     ...result,

@@ -14,7 +14,7 @@
       "source": "943f66cd"
     },
     "123685c1-f458-46c7-bcda-a01c1366819b": {
-      "name": "Maldição Sanguessuga",
+      "name": "Maldição Sanguinária",
       "description": "Decadência Vil: Quando habilidades ou passivas causam dano mágico a campeões, a Resistência Mágica deles é reduzida em 7,5% por 6s (acumula até 30%).",
       "source": "37967c6e"
     },
@@ -48,7 +48,7 @@
       "name": "Machado Termestre"
     },
     "5e258e25-76b0-4dfc-8669-ff5dfbc57e4f": {
-      "name": "Botas Quebra-Armadura",
+      "name": "Botas Esmaga-armaduras",
       "description": "Caminhante das Nuvens: Concede 20 de Velocidade de Movimento fora de combate.",
       "source": "271f46cc"
     },
@@ -214,7 +214,7 @@
       "source": "f44e8a6b"
     },
     "6a04bc1334f787bb5bb2e050": {
-      "name": "O Cutelo Negro",
+      "name": "Cutelo Negro",
       "description": "Rasgar: Causar dano físico a um campeão reduz a Armadura dele em 6% por 6s, acumulando até 5 vezes para uma redução de 30%.\nPerseguição: Concede 20 de Velocidade de Movimento ao causar dano físico. Concede 40 de Velocidade de Movimento ao se mover em direção a campeões inimigos com 5 acúmulos de Rasgar. Campeões de longo alcance recebem metade desses bônus.",
       "source": "95893ab2"
     },
@@ -229,7 +229,7 @@
       "source": "26d64964"
     },
     "6a04bc1334f787bb5bb2e053": {
-      "name": "Adagas Oscilantes Navori",
+      "name": "Adagas Rápidas Navori",
       "description": "Golpes Certeiros: Os ataques reduzem a recarga restante das suas habilidades básicas em 15%.",
       "source": "422ba962"
     },
@@ -618,7 +618,7 @@
       "source": "4fa12eac"
     },
     "6a04bc1334f787bb5bb2e0a8": {
-      "name": "Manto da Décima Segunda Hora",
+      "name": "Manto da Meia-noite",
       "description": "Salva-vidas: Ao cair abaixo de 30% da Vida Máxima, recebe imediatamente de 200 a 300 de Vida adicional por 5s e cura ao longo de 5s de 200 a 400 + 120% da Armadura adicional + 120% da Resistência Mágica adicional + 15% da Vida adicional. Durante esse tempo, seu tamanho aumenta em 10% e você recebe 10% de Velocidade de Movimento e 20% de Tenacidade adicionais.",
       "source": "94f6c1ab"
     },
@@ -714,7 +714,7 @@
       "name": "Proteção Glacial"
     },
     "6a04bc1334f787bb5bb2e0bc": {
-      "name": "Guarda Dupla de Amaranto",
+      "name": "Duplaguarda de Amaranto",
       "description": "Resistência: Enquanto estiver em combate contra campeões inimigos, recebe um acúmulo de Resistência a cada segundo, até um máximo de 5. Com o máximo de acúmulos, seu tamanho aumenta em 20% e você recebe 20% de Tenacidade, 30% de Armadura adicional e 30% de Resistência Mágica adicional até sair de combate.",
       "source": "d075b4a6"
     },
@@ -864,7 +864,7 @@
       "source": "9212dbe2"
     },
     "c634158a-8548-4e64-bc09-7cb4c2ca11f1": {
-      "name": "Botas Imortais",
+      "name": "Passos Imortais",
       "description": "Equilíbrio de Poder: Concede 12 de Dano de Ataque ou 20 de Poder de Habilidade.\n\nConversão: Concede 5% de Onivampirismo + 0,5% de Onivampirismo por participação em abates (até 5% adicional, com máximo de 10% de Onivampirismo).\n\nAgora e Sempre: Com mais de 50% de Vida, você causa 50% de dano adicional. Com menos de 50% de Vida, recebe 12% de aumento em curas e escudos.",
       "source": "25b5dcaf"
     },
@@ -1167,6 +1167,576 @@
       "name": "Caça Incansável",
       "description": "Concede 10 de Velocidade de Movimento fora de combate. Cada abate de campeão ou monstro épico concede mais 2 de Velocidade de Movimento fora de combate. O bônus acumula até 5 vezes.",
       "source": "24d53f88"
+    }
+  },
+  "champions": {
+    "6a07b2cd79d7ef15722f5bca": {
+      "strategic_notes": "Busque lutas longas em que você consiga acertar as bordas do Q; sem esses pontos ideais ele perde muita pressão.",
+      "source": "ef2bac2f"
+    },
+    "6a07b2cd79d7ef15722f5bd5": {
+      "strategic_notes": "Jogue em torno do Encanto: se errar, guarde a ultimate para se reposicionar e não force o all-in.",
+      "source": "a3fbe30f"
+    },
+    "6a07b2cd79d7ef15722f5bc3": {
+      "strategic_notes": "Ela precisa da névoa e de energia para encadear dano; entre depois do CC inimigo, não como iniciadora na linha de frente.",
+      "source": "fa2e52cd"
+    },
+    "6a07b2cd79d7ef15722f5bcc": {
+      "strategic_notes": "Puna as rotas laterais com o gancho e priorize abates seguros para ativar as ressurreições em lutas longas.",
+      "source": "edc513fa"
+    },
+    "6a07b2cd79d7ef15722f5bc7": {
+      "strategic_notes": "Não gaste Cabeçada e Pulverizar separadamente, a não ser para fazer peel; o valor real dele está em iniciar em alvos-chave.",
+      "source": "3f47a875"
+    },
+    "6a07b2cd79d7ef15722f5bcb": {
+      "strategic_notes": "Encadeie avanços curtos para desviar de habilidades antes de se comprometer; se ela entrar sem cargas, fica muito punível.",
+      "source": "c50b22b7"
+    },
+    "6a07b2cd79d7ef15722f5bd1": {
+      "strategic_notes": "A ultimate dele ganha partidas perto do Dragão ou do Barão; force lutas em corredores onde o inimigo não consiga se espalhar.",
+      "source": "0b0a23e3"
+    },
+    "6a07b2cd79d7ef15722f5bc6": {
+      "strategic_notes": "Carregue o atordoamento antes de andar sem visão; o Tibbers serve tanto para apagar carries quanto para zonear entradas.",
+      "source": "64e066cc"
+    },
+    "6a07b2cd79d7ef15722f5bbe": {
+      "strategic_notes": "Aproveite a visão do falcão para jogar com as ondas avançadas; a flecha dela deve iniciar picks, não só finalizar.",
+      "source": "257534e6"
+    },
+    "6a07b2cd79d7ef15722f5bb9": {
+      "strategic_notes": "Evite trocas curtas no início e priorize acumular poder; no late ele decide lutas se canalizar de uma distância segura.",
+      "source": "eea6dd39"
+    },
+    "6a07b2cd79d7ef15722f5bcd": {
+      "strategic_notes": "A ultimate dela pune equipes agrupadas; entre por ângulos laterais para isolar carries dentro da zona.",
+      "source": "eb4ffac1"
+    },
+    "6a07b2cd79d7ef15722f5bd6": {
+      "strategic_notes": "Crie vantagem movendo-se antes do suporte inimigo; os portais dele são melhores para acelerar jogadas do que para fugir tarde.",
+      "source": "ed423c61"
+    },
+    "6a07b2cd79d7ef15722f5bce": {
+      "strategic_notes": "Ameace com o gancho mesmo sem lançá-lo; a pressão de posicionamento vale tanto quanto acertar a habilidade.",
+      "source": "14e04e97"
+    },
+    "6a07b2cd79d7ef15722f5bbf": {
+      "strategic_notes": "Espere o inimigo se agrupar antes de soltar a ultimate; o dano dele escala com os ricochetes e a queimadura prolongada.",
+      "source": "05cf51bb"
+    },
+    "6a07b2cd79d7ef15722f5ba2": {
+      "strategic_notes": "Fique entre o seu atirador e a ameaça principal; o escudo dele perde valor se você usá-lo de costas para o dano inimigo.",
+      "source": "01e4a82e"
+    },
+    "6a07b2cd79d7ef15722f5bd2": {
+      "strategic_notes": "Ela vence pelo controle de onda e pelas armadilhas sob a torre; se não pegar placas, o meio de jogo dela fica mais fraco.",
+      "source": "223405a2"
+    },
+    "6a07b2cd79d7ef15722f5bbb": {
+      "strategic_notes": "Jogue nas janelas do Q2 e do gancho; a ultimate dela deve isolar carries ou cortar fugas, não iniciar contra tanques.",
+      "source": "05df5b3c"
+    },
+    "9fefc766-01c4-45f1-8d9b-ab1cae848fcd": {
+      "strategic_notes": "Pense mais em controlar espaços do que em perseguir abates. Cho'Gath vence quando obriga o inimigo a vir até ele e perde quando precisa correr atrás do inimigo.",
+      "source": "4a7d1d77"
+    },
+    "6a07b2cd79d7ef15722f5bc4": {
+      "strategic_notes": "Guarde o pacote para os objetivos neutros; com ele dá para forçar uma luta vencedora antes mesmo de ela começar.",
+      "source": "af472403"
+    },
+    "6a07b2cd79d7ef15722f5bcf": {
+      "strategic_notes": "Não persiga sem cinco acúmulos; quando ativar o Poder Noxiano, troque de alvo para encadear execuções.",
+      "source": "db7b5f82"
+    },
+    "6a07b2cd79d7ef15722f5bba": {
+      "strategic_notes": "Marque primeiro com o Q e entre quando vários inimigos estiverem perto; a ultimate dela pune composições muito agrupadas.",
+      "source": "025cac18"
+    },
+    "6a07b2cd79d7ef15722f5bc2": {
+      "strategic_notes": "Absorva a pressão lateral e obrigue o inimigo a comprar antecura; ele não precisa iniciar se puder desgastar com os cutelos.",
+      "source": "ce47294d"
+    },
+    "6a07b2cd79d7ef15722f5bc0": {
+      "strategic_notes": "A partida dele gira em torno de aproveitar a passiva; evite mortes desnecessárias mesmo com vantagem de dano.",
+      "source": "99f9d5e6"
+    },
+    "6a07b2cd79d7ef15722f5bbd": {
+      "strategic_notes": "Entre com uma rota de saída pensada; a ultimate permite jogadas agressivas só se você não for controlado antes.",
+      "source": "c7aa144a"
+    },
+    "6a07b2cd79d7ef15722f5bd3": {
+      "strategic_notes": "Ao chegar à camuflagem, ela muda o ritmo do mapa: contorne a visão comum e ameace carries sem limpar ondas.",
+      "source": "25475f57"
+    },
+    "6a07b2cd79d7ef15722f5bc1": {
+      "strategic_notes": "Mantenha distância com o Q antes de entrar; o Deslocamento Arcano é o seu seguro, não uma ferramenta inicial de dano.",
+      "source": "15b9b26c"
+    },
+    "6a07b2cd79d7ef15722f5bc8": {
+      "strategic_notes": "Limpe a visão antes de canalizar a ultimate; saindo da névoa de guerra ele transforma uma luta equilibrada em uma emboscada total.",
+      "source": "bf455c16"
+    },
+    "6a07b2cd79d7ef15722f5b8f": {
+      "strategic_notes": "Jogue em torno dos pontos vitais e guarde o W para o CC principal; em lutas de equipe frontais ela perde parte da identidade.",
+      "source": "2a1aeaf0"
+    },
+    "6a07b2cd79d7ef15722f5b8a": {
+      "strategic_notes": "Use o salto para desviar da resposta inimiga, não só para dar dano; o tubarão dele abre picks a média distância.",
+      "source": "c22eb623"
+    },
+    "6a07b2cd79d7ef15722f5bb6": {
+      "strategic_notes": "Empurre e responda às lutas laterais com a ultimate; o maior valor dele é transformar escaramuças em superioridade numérica.",
+      "source": "0c64a6e7"
+    },
+    "6a07b2cd79d7ef15722f5b84": {
+      "strategic_notes": "Aproveite trocas curtas com Q e E; depois recue para regenerar antes de voltar a pressionar.",
+      "source": "1dd6adad"
+    },
+    "6a07b2cd79d7ef15722f5bac": {
+      "strategic_notes": "Gerencie a fúria antes dos objetivos; o Mega Gnar sem uma parede por perto perde boa parte da ameaça.",
+      "source": "4a52ba33"
+    },
+    "6a07b2cd79d7ef15722f5b92": {
+      "strategic_notes": "A ultimate dele deve separar carries ou expulsar o caçador inimigo do objetivo, não ser jogada só pelo dano.",
+      "source": "eaa91d29"
+    },
+    "6a07b2cd79d7ef15722f5bb2": {
+      "strategic_notes": "Invada quando tiver prioridade nas rotas; a espingarda dele vence duelos curtos se lutar perto de paredes ou acampamentos.",
+      "source": "b40b05cc"
+    },
+    "6a07b2cd79d7ef15722f5bb7": {
+      "strategic_notes": "Ela precisa de tempo para cortar com o Q carregado; use a névoa para negar dano antes de perseguir.",
+      "source": "a02e211f"
+    },
+    "6a07b2cd79d7ef15722f5bb3": {
+      "strategic_notes": "Busque entradas longas de fora da visão; quanto mais limpa for a rota, mais confiável será o medo da ultimate.",
+      "source": "ad7cc709"
+    },
+    "6a07b2cd79d7ef15722f5bad": {
+      "strategic_notes": "Coloque as torretas antes de a luta começar; improvisá-las tarde reduz muito a zona de controle dele.",
+      "source": "aa39656a"
+    },
+    "354db545-88ba-4521-ba5b-5005febd0bef": {
+      "strategic_notes": "Jogue da segunda linha e adapte cada lançamento à situação. Use o alcance dele para desgastar e controlar zonas antes de uma luta, reserve as ferramentas de controle para frear engages ou garantir picks e aproveite alvos imobilizados para encadear burst. Ele é especialmente forte quando pode preparar o terreno e lançar habilidades de uma posição segura, mas perde muito valor se campeões móveis conseguirem chegar diretamente nele.",
+      "source": "9e867f36"
+    },
+    "6a07b2cd79d7ef15722f5bae": {
+      "strategic_notes": "Prepare tropas com pouca vida para encadear o Q; sem acúmulos da passiva não vale a pena forçar o all-in.",
+      "source": "8085417c"
+    },
+    "6a07b2cd79d7ef15722f5baf": {
+      "strategic_notes": "Jogue de forma reativa contra engages: o tornado e a ultimate valem mais cancelando entradas do que buscando iniciações fracas.",
+      "source": "8ef0ef75"
+    },
+    "6a07b2cd79d7ef15722f5ba4": {
+      "strategic_notes": "Faça gank nas rotas com CC aliado e guarde a ultimate para prender alvos sem Flash ou cortar as rotas do caçador.",
+      "source": "12fedc13"
+    },
+    "6a07b2cd79d7ef15722f5b89": {
+      "strategic_notes": "Não gaste o Contra-ataque em dano pequeno; use-o para negar a principal fonte de ataques básicos e vencer o duelo longo.",
+      "source": "48651152"
+    },
+    "6a07b2cd79d7ef15722f5bb4": {
+      "strategic_notes": "Ele precisa converter a vantagem de alcance em placas ou rotações; se o inimigo escalar de graça, o impacto dele cai.",
+      "source": "d2e37b5b"
+    },
+    "6a07b2cd79d7ef15722f5b8b": {
+      "strategic_notes": "Coordene enraizamentos e lentidões para garantir o quarto disparo; ele não vence lutas longas como um hipercarry clássico.",
+      "source": "ec0c6e1b"
+    },
+    "6a07b2cd79d7ef15722f5bb5": {
+      "strategic_notes": "Jogue com segurança até conseguir um reset; com o Empolgada ativo ela pode limpar a luta lá de trás.",
+      "source": "f165d9b0"
+    },
+    "6a07b2cd79d7ef15722f5b7c": {
+      "strategic_notes": "Absorva a pressão até encontrar uma parede; com a ultimate ele pode tirar um carry da zona segura.",
+      "source": "2890c9dd"
+    },
+    "6a07b2cd79d7ef15722f5bc9": {
+      "strategic_notes": "As habilidades evoluem apenas ao completar itens da categoria Aprimorado: o primeiro item Aprimorado permite evoluir uma habilidade à escolha, o segundo permite evoluir uma segunda e o terceiro a habilidade restante. Não é preciso atingir atributos específicos e a ordem de evolução é livre. Entre com a ultimate só quando o alvo já estiver marcado e isolado.",
+      "source": "0a88dd2a"
+    },
+    "6a07b2cd79d7ef15722f5ba7": {
+      "strategic_notes": "Ela domina com saltos e lanças acumuladas; o dano real aparece quando ela consegue bater sem quebrar o ritmo dos ataques básicos.",
+      "source": "b83ce716"
+    },
+    "6a07b2cd79d7ef15722f5b96": {
+      "strategic_notes": "Abuse do Mantra na rota para ganhar prioridade; nas lutas, alterne dano e escudos conforme quem tiver a iniciativa.",
+      "source": "a23eb8ff"
+    },
+    "6a07b2cd79d7ef15722f5bd4": {
+      "strategic_notes": "Evite trocas longas antes de ter a ultimate; cada nível reduz a dependência da rota e aumenta a ameaça lateral dele.",
+      "source": "eaac1967"
+    },
+    "6a07b2cd79d7ef15722f5ba8": {
+      "strategic_notes": "Não entre primeiro: espere os controles serem gastos e as adagas bem posicionadas para encadear resets sem ficar presa.",
+      "source": "10c17a54"
+    },
+    "6a07b2cd79d7ef15722f5b86": {
+      "strategic_notes": "Aceite perder pressão no início e farme experiência; ao ganhar alcance ela passa de campeã defensiva a ameaça central.",
+      "source": "10c9bc01"
+    },
+    "6a07b2cd79d7ef15722f5b8c": {
+      "strategic_notes": "Escolha a forma conforme a composição inimiga; atravesse paredes para entrar por ângulos que a visão comum não cobre.",
+      "source": "bf895de2"
+    },
+    "6a07b2cd79d7ef15722f5ba5": {
+      "strategic_notes": "Esconda o flanco antes da ultimate; entrar de frente permite que o inimigo se espalhe e reduz o atordoamento múltiplo.",
+      "source": "b824992a"
+    },
+    "6a07b2cd79d7ef15722f5ba9": {
+      "strategic_notes": "Não force contra grupos fechados; busque alvos isolados e use a evolução para se adaptar a caça, poke ou reposicionamento.",
+      "source": "df11ce10"
+    },
+    "6a07b2cd79d7ef15722f5b93": {
+      "strategic_notes": "Planeje as marcas com prioridade nas rotas; a ultimate pode salvar aliados, mas também negar as próprias execuções se for usada tarde.",
+      "source": "178a1328"
+    },
+    "6a07b2cd79d7ef15722f5b97": {
+      "strategic_notes": "Ele precisa de peel constante e espaço para ativar o W; se for protegido, derrete tanques melhor que quase qualquer atirador.",
+      "source": "dda89740"
+    },
+    "6a07b2cd79d7ef15722f5b90": {
+      "strategic_notes": "Converta a prioridade inicial em invasões e objetivos; se não acelerar a partida, a margem de erro dele cai muito.",
+      "source": "6e4f2652"
+    },
+    "6a07b2cd79d7ef15722f5b81": {
+      "strategic_notes": "Puna cada erro de posicionamento inimigo; depois que ela entra, precisa que a equipe siga a cadeia de controle.",
+      "source": "73c0b474"
+    },
+    "6a07b2cd79d7ef15722f5baa": {
+      "strategic_notes": "Mantenha os acúmulos de velocidade antes de lutar; a ultimate dela é melhor depois de aplicar a marca em vários alvos.",
+      "source": "95a4881b"
+    },
+    "6a07b2cd79d7ef15722f5bb8": {
+      "strategic_notes": "O valor dela está em prender assassinos ou iniciar com a garra; a ultimate em si mesma ganha tempo para a equipe chegar.",
+      "source": "e8c50bae"
+    },
+    "6a07b2cd79d7ef15722f5b98": {
+      "strategic_notes": "Ele precisa vencer trocas curtas com a passiva dupla; se não pressionar a rota, outros atiradores escalam melhor.",
+      "source": "3a00b004"
+    },
+    "6a07b2cd79d7ef15722f5b7e": {
+      "strategic_notes": "Identifique o carry da partida e jogue em torno dele; guarde o Polimorfia para a ameaça que entrar.",
+      "source": "1c876b0f"
+    },
+    "6a07b2cd79d7ef15722f5bbc": {
+      "strategic_notes": "Não lance o Q sem visão do caçador inimigo; acertá-lo transforma o combo dela em pick ou controle de objetivo.",
+      "source": "ccbbed5b"
+    },
+    "6a07b2cd79d7ef15722f5b94": {
+      "strategic_notes": "Espere os controles inimigos antes de entrar; se ele iniciar primeiro, morre antes de ativar os resets.",
+      "source": "bbf8419e"
+    },
+    "6a07b2cd79d7ef15722f5b8d": {
+      "strategic_notes": "A ultimate deve ameaçar o carry ou vários alvos; enquanto estiver disponível, o inimigo joga mais separado.",
+      "source": "690c986a"
+    },
+    "6a07b2cd79d7ef15722f5b7d": {
+      "strategic_notes": "Controle os arbustos com as mudas e force lutas lentas; a ultimate dele é excelente para fechar zonas de objetivo.",
+      "source": "adb112c0"
+    },
+    "6a07b2cd79d7ef15722f5b7b": {
+      "strategic_notes": "Aproveite o reflexo dela contra habilidades decisivas; se gastá-lo cedo, jogue mais atrás até recuperar a ameaça defensiva.",
+      "source": "1b554411"
+    },
+    "6a07b2cd79d7ef15722f5b7a": {
+      "strategic_notes": "Fortaleça o atirador certo com alcance extra e guarde a limpeza para quebrar a cadeia de CC inimiga.",
+      "source": "a79df804"
+    },
+    "6a07b2cd79d7ef15722f5b6e": {
+      "strategic_notes": "Busque ângulos em que a ultimate não possa ser cancelada; com CC aliado ela transforma objetivos em lutas fechadas.",
+      "source": "469e2f0b"
+    },
+    "6a07b2cd79d7ef15722f5b68": {
+      "strategic_notes": "Use a ultimate para tirar o caçador de um objetivo ou isolar o carry sem peel.",
+      "source": "b16557d3"
+    },
+    "6a07b2cd79d7ef15722f5b82": {
+      "strategic_notes": "O Escudo Negro deve antecipar o controle principal, não curar dano; um Q certeiro decide rotações e objetivos.",
+      "source": "756272b5"
+    },
+    "6a07b2cd79d7ef15722f5b66": {
+      "strategic_notes": "Pressione com o E no aliado que puder trocar imediatamente; a bolha é mais confiável depois de uma lentidão.",
+      "source": "bad2266f"
+    },
+    "6a07b2cd79d7ef15722f5b6f": {
+      "strategic_notes": "Priorize acúmulos seguros e evite lutas inúteis no início; com acúmulos suficientes ele obriga respostas na lateral.",
+      "source": "ac6be292"
+    },
+    "6a07b2cd79d7ef15722f5b74": {
+      "strategic_notes": "A cadeia de controle dele é muito longa; marque o alvo certo antes de lançar a ultimate para não desperdiçá-la em tanques.",
+      "source": "14f50686"
+    },
+    "6a07b2cd79d7ef15722f5b6b": {
+      "strategic_notes": "Ela precisa invadir e acertar as lanças com visão; se não acelerar, a utilidade dela cai contra caçadores de engage.",
+      "source": "a1920f02"
+    },
+    "6a07b2cd79d7ef15722f5b71": {
+      "strategic_notes": "Jogue perto de suportes que potencializem curas ou escudos; entre quando puder bater em vários sem sofrer kite.",
+      "source": "580644dd"
+    },
+    "6a07b2cd79d7ef15722f5b72": {
+      "strategic_notes": "Ative a ultimate quando as rotas inimigas estiverem separadas; negue visão e puna o alvo sem peel por perto.",
+      "source": "0eaa00de"
+    },
+    "6a07b2cd79d7ef15722f5b75": {
+      "strategic_notes": "Jogue controlando a distância e acompanhando o carry; o impacto dela cresce quando pode desgastar sem se expor a engage direto.",
+      "source": "408e9811"
+    },
+    "6a07b2cd79d7ef15722f5b6c": {
+      "strategic_notes": "Garanta Dragões e Arautos com Q mais Golpear; as bolas de neve dele obrigam o inimigo a respeitar rotas pouco convencionais.",
+      "source": "c0e8fb39"
+    },
+    "6a07b2cd79d7ef15722f5b67": {
+      "strategic_notes": "Force lutas antes de o inimigo ter dano suficiente; com a ultimate ele ignora CC, mas não burst concentrado.",
+      "source": "5458e666"
+    },
+    "6a07b2cd79d7ef15722f5b69": {
+      "strategic_notes": "Mantenha a bola no iniciador ou em zonas estreitas; uma Onda de Choque bem preparada vale mais que poke isolado.",
+      "source": "7777a992"
+    },
+    "6a07b2cd79d7ef15722f5b73": {
+      "strategic_notes": "O valor dele aumenta com itens aprimorados e lutas frontais; prepare o terreno para garantir o segundo golpe da ultimate.",
+      "source": "9860317a"
+    },
+    "6a07b2cd79d7ef15722f5b76": {
+      "strategic_notes": "Use a ultimate para converter pressão de rota em vantagem global; se escalar de forma equilibrada, deve jogar mais como finalizador.",
+      "source": "2dfd5e41"
+    },
+    "6a07b2cd79d7ef15722f5b77": {
+      "strategic_notes": "Guarde o W contra campeões com mobilidade; negar um avanço importante vale mais do que usá-lo pela velocidade.",
+      "source": "78242abb"
+    },
+    "6a07b2cd79d7ef15722f5b6d": {
+      "strategic_notes": "Saia da rota para criar superioridade quando o atirador conseguir se manter; a execução dele pune lutas desorganizadas.",
+      "source": "ab53e4fc"
+    },
+    "6a07b2cd79d7ef15722f5b70": {
+      "strategic_notes": "Entre e saia usando os aliados como âncora; sem rota de retirada, o engage dele fica comprometido demais.",
+      "source": "011b7b18"
+    },
+    "6a07b2cd79d7ef15722f5b78": {
+      "strategic_notes": "Ele pune composições de ataques básicos e rotas avançadas; a provocação deve ir no atirador ou duelista principal.",
+      "source": "a9e6dbc4"
+    },
+    "6a07b2cd79d7ef15722f5b79": {
+      "strategic_notes": "Busque agrupamentos inimigos antes de desmontar; se a entrada falhar, a mobilidade defensiva dela é limitada.",
+      "source": "e858730e"
+    },
+    "6a07b2cd79d7ef15722f5b6a": {
+      "strategic_notes": "Domine com a fúria vermelha em janelas curtas; se não conseguir vantagem cedo, deve facilitar dives e objetivos.",
+      "source": "80448b75"
+    },
+    "6a07b2cd79d7ef15722f5b64": {
+      "strategic_notes": "Controle arbustos e visão para saltar com ferocidade; sem preparação do mapa ele perde a ameaça sobre os carries.",
+      "source": "65e1e441"
+    },
+    "6a07b2cd79d7ef15722f5bc5": {
+      "strategic_notes": "Aproveite o pico de poder da Riven no nível 5 para buscar duelos e exercer pressão constante nas rotas laterais com split push.",
+      "source": "30adb70c"
+    },
+    "6a07b2cd79d7ef15722f5b65": {
+      "strategic_notes": "Gerencie o calor antes de lutar; a ultimate nos corredores de objetivo corta retiradas e força erros.",
+      "source": "d6f409f2"
+    },
+    "6a07b2cd79d7ef15722f5b60": {
+      "strategic_notes": "Ele precisa de mana e níveis para decolar; use a ultimate para mover ondas ou surpreender as laterais, não para lutas forçadas.",
+      "source": "556f238f"
+    },
+    "6a07b2cd79d7ef15722f5b9e": {
+      "strategic_notes": "Acumule estilo com segurança antes de se jogar; ela depende de CC aliado para entrar sem ser explodida.",
+      "source": "3af29ab5"
+    },
+    "6a07b2cd79d7ef15722f5b5d": {
+      "strategic_notes": "Jogue pelas almas e pelo alcance crescente; a ultimate dela pode decidir lutas distantes sem abandonar a posição segura.",
+      "source": "41fd8021"
+    },
+    "6a07b2cd79d7ef15722f5b9f": {
+      "strategic_notes": "Lute em linhas retas e perto dos aliados; a ultimate encadeada sobre campeões pode decidir objetivos inteiros.",
+      "source": "b60b1ba2"
+    },
+    "6a07b2cd79d7ef15722f5b50": {
+      "strategic_notes": "Guarde o W para a fúria máxima e mire no centro; usá-lo cedo reduz a ameaça de contra-ataque dele.",
+      "source": "b9cbcd94"
+    },
+    "6a07b2cd79d7ef15722f5b9b": {
+      "strategic_notes": "Pressione a lateral com a ultimate disponível; o impacto real dele é transformar uma luta perdida em superioridade numérica.",
+      "source": "1aa87af0"
+    },
+    "6a07b2cd79d7ef15722f5b9c": {
+      "strategic_notes": "Priorize Dragões e entre na forma da ultimate; sem fúria disponível ela deve evitar lutas decisivas.",
+      "source": "c233f897"
+    },
+    "6a07b2cd79d7ef15722f5b61": {
+      "strategic_notes": "Ele vence obrigando perseguições ruins; não busca matar rápido, e sim quebrar a formação e absorver recursos.",
+      "source": "4326eea0"
+    },
+    "6a07b2cd79d7ef15722f5bd0": {
+      "strategic_notes": "Ele pode pressionar a lateral mesmo morrendo se a onda estiver preparada; a ultimate exige rotas longas e visão prévia.",
+      "source": "b607ffa3"
+    },
+    "6a07b2cd79d7ef15722f5b52": {
+      "strategic_notes": "Ela limpa rápido e acelera a equipe com a ultimate; o escudo deve ser reservado para CC ou burst decisivo.",
+      "source": "df23f092"
+    },
+    "f224c84b-1244-4f76-aadb-33948b5ca831": {
+      "strategic_notes": "Aproveite o mapa para iniciar a investida com o E de dentro das paredes direto para a rota, garantindo um gank surpresa letal.",
+      "source": "e06588fb"
+    },
+    "6a07b2cd79d7ef15722f5b87": {
+      "strategic_notes": "A prioridade é acumular o Q sem morrer; quando ele libera a execução, lutas longas favorecem muito o dano dele.",
+      "source": "1437058d"
+    },
+    "6a07b2cd79d7ef15722f5b5e": {
+      "strategic_notes": "Sobreviva à rota e agrupe cedo; as auras dela ganham valor quando a equipe luta junta.",
+      "source": "cf283df7"
+    },
+    "6a07b2cd79d7ef15722f5b5f": {
+      "strategic_notes": "Mantenha distância e use o silêncio em engages ou canalizações; se ela cair primeiro, a equipe perde a principal fonte de sustain.",
+      "source": "91465961"
+    },
+    "6a07b2cd79d7ef15722f5b99": {
+      "strategic_notes": "Ele quer lutas longas em que a ultimate permaneça ativa; puxe alvos imobilizados para garantir fragmentos.",
+      "source": "ed0a0805"
+    },
+    "6a07b2cd79d7ef15722f5b56": {
+      "strategic_notes": "Prepare as esferas antes do all-in; o combo dela ameaça carries, mas ela fica exposta se gastar o empurrão e o atordoamento.",
+      "source": "782336f0"
+    },
+    "6a07b2cd79d7ef15722f5b4d": {
+      "strategic_notes": "Controle corredores com o terreno trabalhado e a muralha; rotacione antes do inimigo para transformar prioridade em picks laterais.",
+      "source": "2bc1845b"
+    },
+    "6a07b2cd79d7ef15722f5b51": {
+      "strategic_notes": "Empurre e suma do mapa; a ameaça dele vem de flanquear pelas paredes, não de lutar de frente.",
+      "source": "ca595b2a"
+    },
+    "6a07b2cd79d7ef15722f5b57": {
+      "strategic_notes": "Jogue com cogumelos nas rotas de objetivo e negue ataques básicos com a cegueira; se não preparar visão, perde o controle real.",
+      "source": "e804279a"
+    },
+    "6a07b2cd79d7ef15722f5b5a": {
+      "strategic_notes": "Ameace com o gancho e a lanterna ao mesmo tempo; uma boa lanterna salva mais partidas que um engage forçado.",
+      "source": "d313fe21"
+    },
+    "6a07b2cd79d7ef15722f5b62": {
+      "strategic_notes": "Use o salto para se reposicionar após um reset, não sempre para iniciar; com alcance alto ela derruba torres muito rápido.",
+      "source": "37ef1532"
+    },
+    "6a07b2cd79d7ef15722f5b53": {
+      "strategic_notes": "Pressione a lateral e force respostas; a ultimate deve ser usada para finalizar ou fugir, não ao primeiro dano recebido.",
+      "source": "80eb15e8"
+    },
+    "6a07b2cd79d7ef15722f5b5b": {
+      "strategic_notes": "A vantagem dele está em se mover primeiro; a Carta Dourada mais a ultimate pune as laterais sem precisar vencer a rota.",
+      "source": "4779c7df"
+    },
+    "6a07b2cd79d7ef15722f5ba0": {
+      "strategic_notes": "Busque ângulos invisíveis sobre a retaguarda; se aparecer de frente, ele perde o fator surpresa que habilita o dano.",
+      "source": "676816fc"
+    },
+    "6a07b2cd79d7ef15722f5b55": {
+      "strategic_notes": "Jogue em torno das espingardas das pernas; a ultimate dele pune inimigos com pouca vida mesmo quando tentam recuar.",
+      "source": "b5075ec9"
+    },
+    "6a07b2cd79d7ef15722f5b4f": {
+      "strategic_notes": "Alterne poke e detonação das marcas; a ultimate é melhor para iniciar um pick do que como último recurso.",
+      "source": "3aabf0ba"
+    },
+    "6a07b2cd79d7ef15722f5b58": {
+      "strategic_notes": "Sobreviva até ter itens e lute com espaço; a Condenação contra a parede transforma duelos difíceis em abates.",
+      "source": "486e9327"
+    },
+    "6a07b2cd79d7ef15722f5b59": {
+      "strategic_notes": "Acumule poder com paciência e coloque a jaula para cortar rotas, não só para tentar atordoar.",
+      "source": "f6a32310"
+    },
+    "6a07b2cd79d7ef15722f5b9d": {
+      "strategic_notes": "Jogue por ângulos diagonais com o Q; se te alcançarem, o dano canalizado some rapidamente.",
+      "source": "59dbc35c"
+    },
+    "6a07b2cd79d7ef15722f5b54": {
+      "strategic_notes": "Guarde o medo para campeões com mobilidade; a ultimate permite finalizar, mas entrar sem a passiva defensiva é arriscado.",
+      "source": "8b253406"
+    },
+    "6a07b2cd79d7ef15722f5ba1": {
+      "strategic_notes": "Marque o carry com a ultimate quando a equipe puder acompanhar; se ela entrar isolada, fica presa depois do combo.",
+      "source": "adca7c9b"
+    },
+    "6a07b2cd79d7ef15722f5b4e": {
+      "strategic_notes": "Ele não precisa iniciar: espere a primeira baixa para encadear possessões e virar a luta a seu favor.",
+      "source": "e546ae5c"
+    },
+    "6a07b2cd79d7ef15722f5b5c": {
+      "strategic_notes": "Priorize ondas e aprimoramentos; quando ele controla zonas com o Campo Gravitacional, obriga o inimigo a lutar no terreno dele.",
+      "source": "7b58e1aa"
+    },
+    "6a07b2cd79d7ef15722f5b9a": {
+      "strategic_notes": "Farme até os picos de poder e entre com a Poça Sanguínea disponível; sem ela, qualquer CC pune demais.",
+      "source": "32444eb8"
+    },
+    "6a07b2cd79d7ef15722f5b63": {
+      "strategic_notes": "A ultimate dele permite dives e desativar torres; use-a quando a onda já estiver acompanhando a jogada.",
+      "source": "1dd99812"
+    },
+    "6a07b2cd79d7ef15722f5b7f": {
+      "strategic_notes": "Persiga alvos com pouca vida e converta escaramuças iniciais; a ultimate exige paciência para não errar contra mobilidade.",
+      "source": "04b48e69"
+    },
+    "6a07b2cd79d7ef15722f5b83": {
+      "strategic_notes": "Use o clone para desviar da resposta e buscar o arremesso duplo; os flancos dele são melhores do que iniciar de frente.",
+      "source": "c0992ecc"
+    },
+    "6a07b2cd79d7ef15722f5b85": {
+      "strategic_notes": "Prepare as penas antes de recuar; a ultimate dela deve negar o engage e habilitar um enraizamento na volta.",
+      "source": "79399c06"
+    },
+    "6a07b2cd79d7ef15722f5b88": {
+      "strategic_notes": "Invada com prioridade e force 2v2 cedo; a ultimate dele separa o dano externo para finalizar alvos isolados.",
+      "source": "9ed05f40"
+    },
+    "6a07b2cd79d7ef15722f5b80": {
+      "strategic_notes": "Ele precisa de ondas ou aliados com arremesso ao ar; sem rota para avançar, a entrada dele fica previsível.",
+      "source": "d7f4a5e2"
+    },
+    "6a07b2cd79d7ef15722f5bb0": {
+      "strategic_notes": "Troque com o E para voltar em segurança e guarde a ultimate para cadeias de CC ou carries sem mobilidade.",
+      "source": "a62682da"
+    },
+    "0f90cee7-5896-42cc-8936-e2899ac32e79": {
+      "strategic_notes": "Busque trocas quando tiver os acúmulos do Q prontos; sem preparação ela perde muito dano. O dano misto dela pune composições que só fazem armadura contra atiradores.",
+      "source": "39682d83"
+    },
+    "6a07b2cd79d7ef15722f5b91": {
+      "strategic_notes": "Escolha bem quem acompanhar: fortalecer o carry certo vale mais do que ficar grudada no atirador por costume.",
+      "source": "ef835982"
+    },
+    "6a07b2cd79d7ef15722f5b95": {
+      "strategic_notes": "Desgaste a rota com o poke das sombras antes do all-in; entrar sem uma sombra de saída facilita que ele seja punido.",
+      "source": "2e6326f4"
+    },
+    "6a07b2cd79d7ef15722f5bb1": {
+      "strategic_notes": "Ela precisa de espaço e de lutas longas; com a ultimate ativa deve se reposicionar o tempo todo para manter as cargas.",
+      "source": "1936cda6"
+    },
+    "6a07b2cd79d7ef15722f5b8e": {
+      "strategic_notes": "Derrube torres com segurança e controle objetivos de longe; evite andar sem visão porque ele não tem fuga confiável.",
+      "source": "69934e1c"
+    },
+    "6a07b2cd79d7ef15722f5ba3": {
+      "strategic_notes": "Guarde a ultimate para o carry que realmente vai receber o foco; usá-la cedo reduz muito o valor dela.",
+      "source": "49f25f91"
+    },
+    "6a07b2cd79d7ef15722f5ba6": {
+      "strategic_notes": "Busque bolhas saindo da névoa e por cima das paredes; o combo dela vence pelo ângulo, não lutando de frente.",
+      "source": "feab3827"
+    },
+    "6a07b2cd79d7ef15722f5bab": {
+      "strategic_notes": "Prepare as sementes antes de trocar; as plantas dela obrigam o inimigo a gastar tempo ou vida antes do objetivo.",
+      "source": "b60cc8bd"
     }
   }
 }

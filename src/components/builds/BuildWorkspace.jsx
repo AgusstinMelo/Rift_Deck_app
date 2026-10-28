@@ -19,7 +19,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
   const t = useT();
   const isEditing = !!existingBuild;
   const { user } = useAuth();
-  const { entityName } = useCatalogText();
+  const { entityName, championNotes } = useCatalogText();
   const { data: spells = [] } = useSpells();
 
   // When editing, resolve item names back to item objects
@@ -317,7 +317,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
                   <ChevronDown size={13} className="transition-transform group-open:rotate-180" />
                 </span>
               </summary>
-              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{champion.strategic_notes}</p>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{championNotes(champion)}</p>
             </details>
           )}
 

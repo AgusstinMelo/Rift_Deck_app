@@ -448,7 +448,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="w-6 h-px bg-primary/50 shrink-0" />
 
-                        <h2 className="font-rajdhani font-bold text-2xl text-foreground tracking-[-0.06em] uppercase truncate">
+                        <h2 className="font-rajdhani font-bold text-2xl leading-none text-foreground tracking-[-0.06em] uppercase break-words">
                           {runeBranchLabel(branch)}
                         </h2>
 

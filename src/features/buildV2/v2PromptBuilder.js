@@ -188,7 +188,7 @@ CONTENIDO DE LA RESPUESTA
 - Cada entrada de enemy_priority_threats, required_responses, allied_damage_profile y target_damage_profile: máximo 120 caracteres.
 - build_plan: arquetipo, daño final, razón del primer objeto y auditoría breve de conversiones.
 - matchup_read en 2-4 frases; win_condition en 1-3 frases.
-${language ? `- Idioma: escribí todos los textos de la respuesta en ${language}. Los IDs y los nombres de campeones, objetos, runas y hechizos se copian tal cual.
+${language ? `- Idioma: escribí todos los textos de la respuesta en ${language}. Los IDs se copian tal cual. Si mencionás un objeto, runa o hechizo dentro de un texto, usá su nombre oficial en ese idioma, nunca el nombre en español del catálogo.
 ` : ''}${correctionBlock}
 MATCH_CONTEXT
 ${JSON.stringify(context)}

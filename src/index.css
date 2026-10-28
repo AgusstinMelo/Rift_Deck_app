@@ -12805,3 +12805,15 @@
     font-size: 1.45rem !important;
   }
 }
+
+/* Con letter-spacing negativo la caja del texto termina antes que la última letra.
+   Si además el texto se recorta (truncate, ellipsis, line-clamp), esa letra queda
+   cortada. El padding final le devuelve ese espacio. */
+.truncate[class*="tracking-[-"],
+.truncate[class*="tracking-tight"],
+[class*="line-clamp"][class*="tracking-[-"],
+[class*="line-clamp"][class*="tracking-tight"],
+.rd-library-layout .rd-champ-hero h1,
+.rd-v2-build-page .rd-v2-build-header h1 {
+  padding-inline-end: 0.15em;
+}

@@ -974,7 +974,7 @@
       "source": "c84ea650"
     },
     "6a04bc5f681bf773dac12a90": {
-      "name": "Press the Attack",
+      "name": "Empowerment",
       "description": "Hitting an enemy champion with 3 consecutive attacks deals bonus adaptive damage and grants 8% damage amplification until you leave combat with champions. Adaptive damage: 40-165.\nCooldown: 4s.\nThe damage amplification only applies against champions.",
       "source": "3196817d"
     },
@@ -989,7 +989,7 @@
       "source": "28511d03"
     },
     "6a04bc5f681bf773dac12a93": {
-      "name": "Ice Sovereign",
+      "name": "Ice Overlord",
       "description": "Immobilizing an enemy champion forms 3 rays around them, creating ice beneath them for 3s that slows enemies inside. The slow lingers on enemies for 1.5s after they leave the ice. You gain a protective layer of ice around you that increases your defenses. After a short delay, the ice explodes, dealing a burst of magic damage around you.\nSlow: (1% of your bonus Health + 15)%\nDefenses: 35 + 75% bonus Armor and Magic Resistance. Lasts 2.5s.\nMagic damage: 15-100 + 5% of your bonus Health\nCooldown: 20s",
       "source": "eb00a52d"
     },
@@ -999,12 +999,12 @@
       "source": "eeeea0cd"
     },
     "6a04bc5f681bf773dac12a95": {
-      "name": "Chain Attack",
+      "name": "Chain Assault",
       "description": "Damaging an enemy champion with an active ability marks them. Your next 2 attacks or active ability casts against them deal bonus adaptive damage equal to 12-38 + 3% bonus Attack Damage + 1.5% Ability Power (15s cooldown).",
       "source": "cd8ebb4b"
     },
     "6a04bc5f681bf773dac12a96": {
-      "name": "Arrogance",
+      "name": "Hubris",
       "description": "Taking down an enemy champion within 3s of damaging them grants (5 + 1 per champion kill you have scored) adaptive force for 30s.",
       "source": "6db65a86"
     },
@@ -1019,7 +1019,7 @@
       "source": "43176d3b"
     },
     "6a04bc5f681bf773dac12a99": {
-      "name": "Summon Aery",
+      "name": "Aery",
       "description": "Your attacks and abilities send Aery to a target, damaging enemies or shielding allies.\nDamage: 15-70 + 10% bonus Attack Damage + 5% Ability Power\nShield: 20-100 + 10% bonus Attack Damage + 5% Ability Power\nAery can't be sent out again until she returns to you.",
       "source": "4485c803"
     },
@@ -1134,7 +1134,7 @@
       "source": "777fae9e"
     },
     "6a04bc5f681bf773dac12ab0": {
-      "name": "Battle Fervor",
+      "name": "Battle Zeal",
       "description": "While in combat with a champion, gain 1.4% stacking damage amplification for your basic abilities every second. Stacks up to 3 times and only applies against enemy champions.",
       "source": "92c00274"
     },
@@ -1167,6 +1167,576 @@
       "name": "Relentless Hunter",
       "description": "Gain 10 Movement Speed while out of combat. Each champion or epic monster takedown grants 2 more out-of-combat Movement Speed. The bonus stacks up to 5 times.",
       "source": "24d53f88"
+    }
+  },
+  "champions": {
+    "6a07b2cd79d7ef15722f5bca": {
+      "strategic_notes": "Look for extended fights where you can land the edges of your Q; without those sweet spots he loses a lot of pressure.",
+      "source": "ef2bac2f"
+    },
+    "6a07b2cd79d7ef15722f5bd5": {
+      "strategic_notes": "Play around Charm: if you miss it, keep your ultimate to reposition and don't force the all-in.",
+      "source": "a3fbe30f"
+    },
+    "6a07b2cd79d7ef15722f5bc3": {
+      "strategic_notes": "She needs shroud and energy to chain damage; go in after the enemy CC is used, not as a frontline initiator.",
+      "source": "fa2e52cd"
+    },
+    "6a07b2cd79d7ef15722f5bcc": {
+      "strategic_notes": "Punish side lanes with the grapple and prioritize safe last hits to trigger revives in long fights.",
+      "source": "edc513fa"
+    },
+    "6a07b2cd79d7ef15722f5bc7": {
+      "strategic_notes": "Don't spend Headbutt and Pulverize separately except to peel; his real value is initiating on key targets.",
+      "source": "3f47a875"
+    },
+    "6a07b2cd79d7ef15722f5bcb": {
+      "strategic_notes": "Chain short dashes to dodge abilities before committing; if she goes in without charges she's very punishable.",
+      "source": "c50b22b7"
+    },
+    "6a07b2cd79d7ef15722f5bd1": {
+      "strategic_notes": "His ultimate wins games near Dragon or Baron; force fights in corridors where the enemy can't spread out.",
+      "source": "0b0a23e3"
+    },
+    "6a07b2cd79d7ef15722f5bc6": {
+      "strategic_notes": "Charge your stun before moving without vision; Tibbers works both to delete carries and to zone engages.",
+      "source": "64e066cc"
+    },
+    "6a07b2cd79d7ef15722f5bbe": {
+      "strategic_notes": "Use the hawk's vision to play pushed waves; her arrow should start picks, not just finish kills.",
+      "source": "257534e6"
+    },
+    "6a07b2cd79d7ef15722f5bb9": {
+      "strategic_notes": "Avoid short early trades and prioritize stacking power; in the late game he decides fights if he channels from a safe distance.",
+      "source": "eea6dd39"
+    },
+    "6a07b2cd79d7ef15722f5bcd": {
+      "strategic_notes": "Her ultimate punishes grouped teams; go in from side angles to isolate carries inside the zone.",
+      "source": "eb4ffac1"
+    },
+    "6a07b2cd79d7ef15722f5bd6": {
+      "strategic_notes": "Build leads by moving before the enemy support; his portals are better for speeding up plays than for late escapes.",
+      "source": "ed423c61"
+    },
+    "6a07b2cd79d7ef15722f5bce": {
+      "strategic_notes": "Threaten with the hook even if you don't throw it; positional pressure is worth as much as landing the ability.",
+      "source": "14e04e97"
+    },
+    "6a07b2cd79d7ef15722f5bbf": {
+      "strategic_notes": "Wait for the enemy to group up before using your ultimate; his damage scales with bounces and lasting burns.",
+      "source": "05cf51bb"
+    },
+    "6a07b2cd79d7ef15722f5ba2": {
+      "strategic_notes": "Stand between your marksman and the main threat; his shield loses value if you use it with your back to the enemy damage.",
+      "source": "01e4a82e"
+    },
+    "6a07b2cd79d7ef15722f5bd2": {
+      "strategic_notes": "She wins through wave control and traps under tower; if she doesn't take plates, her mid game flattens out.",
+      "source": "223405a2"
+    },
+    "6a07b2cd79d7ef15722f5bbb": {
+      "strategic_notes": "Play around Q2 and hookshot windows; her ultimate should isolate carries or cut escapes, not initiate on tanks.",
+      "source": "05df5b3c"
+    },
+    "9fefc766-01c4-45f1-8d9b-ab1cae848fcd": {
+      "strategic_notes": "Think more about controlling space than chasing kills. Cho'Gath wins when he forces the enemy to come to him and loses when he has to run after them.",
+      "source": "4a7d1d77"
+    },
+    "6a07b2cd79d7ef15722f5bc4": {
+      "strategic_notes": "Save the package for neutral objectives; with it he can force a winning fight before it even starts.",
+      "source": "af472403"
+    },
+    "6a07b2cd79d7ef15722f5bcf": {
+      "strategic_notes": "Don't chase without five stacks; when Noxian Might is active, switch targets to chain executions.",
+      "source": "db7b5f82"
+    },
+    "6a07b2cd79d7ef15722f5bba": {
+      "strategic_notes": "Mark with Q first and go in when several enemies are close; her ultimate punishes tightly grouped comps.",
+      "source": "025cac18"
+    },
+    "6a07b2cd79d7ef15722f5bc2": {
+      "strategic_notes": "Soak side-lane pressure and force the enemy to buy anti-heal; he doesn't need to initiate if he can wear them down with cleavers.",
+      "source": "ce47294d"
+    },
+    "6a07b2cd79d7ef15722f5bc0": {
+      "strategic_notes": "His game revolves around cashing in his passive; avoid unnecessary deaths even when you have a damage lead.",
+      "source": "99f9d5e6"
+    },
+    "6a07b2cd79d7ef15722f5bbd": {
+      "strategic_notes": "Go in with an exit route planned; his ultimate allows aggressive plays only if you don't get crowd-controlled first.",
+      "source": "c7aa144a"
+    },
+    "6a07b2cd79d7ef15722f5bd3": {
+      "strategic_notes": "Once she reaches camouflage, she changes the map's tempo: go around common vision and threaten carries without clearing waves.",
+      "source": "25475f57"
+    },
+    "6a07b2cd79d7ef15722f5bc1": {
+      "strategic_notes": "Keep your distance with Q before going in; Arcane Shift is your insurance, not an opening damage tool.",
+      "source": "15b9b26c"
+    },
+    "6a07b2cd79d7ef15722f5bc8": {
+      "strategic_notes": "Sweep vision before channeling your ultimate; from fog of war he turns an even fight into a full ambush.",
+      "source": "bf455c16"
+    },
+    "6a07b2cd79d7ef15722f5b8f": {
+      "strategic_notes": "Play around vitals and save W for the key CC; in front-to-back teamfights she loses part of her identity.",
+      "source": "2a1aeaf0"
+    },
+    "6a07b2cd79d7ef15722f5b8a": {
+      "strategic_notes": "Use the hop to dodge the enemy's response, not just for damage; his shark starts picks from mid range.",
+      "source": "c22eb623"
+    },
+    "6a07b2cd79d7ef15722f5bb6": {
+      "strategic_notes": "Push and answer side fights with your ultimate; his greatest value is turning skirmishes into numbers advantages.",
+      "source": "0c64a6e7"
+    },
+    "6a07b2cd79d7ef15722f5b84": {
+      "strategic_notes": "Take advantage of short trades with Q and E; then back off to regenerate before pressuring again.",
+      "source": "1dd6adad"
+    },
+    "6a07b2cd79d7ef15722f5bac": {
+      "strategic_notes": "Manage rage before objectives; Mega Gnar without a nearby wall loses much of his threat.",
+      "source": "4a52ba33"
+    },
+    "6a07b2cd79d7ef15722f5b92": {
+      "strategic_notes": "His ultimate should split off carries or knock the enemy jungler away from the objective, not be thrown in just for damage.",
+      "source": "eaa91d29"
+    },
+    "6a07b2cd79d7ef15722f5bb2": {
+      "strategic_notes": "Invade when you have lane priority; his shotgun wins short duels if he fights near walls or camps.",
+      "source": "b40b05cc"
+    },
+    "6a07b2cd79d7ef15722f5bb7": {
+      "strategic_notes": "She needs time to snip with a charged Q; use the mist to deny damage before chasing.",
+      "source": "a02e211f"
+    },
+    "6a07b2cd79d7ef15722f5bb3": {
+      "strategic_notes": "Look for long engages from outside vision; the cleaner the path, the more reliable his ultimate's fear will be.",
+      "source": "ad7cc709"
+    },
+    "6a07b2cd79d7ef15722f5bad": {
+      "strategic_notes": "Place turrets before the fight starts; setting them up late greatly reduces his zone control.",
+      "source": "aa39656a"
+    },
+    "354db545-88ba-4521-ba5b-5005febd0bef": {
+      "strategic_notes": "Play from the second line and adapt each cast to the situation. Use his range to poke and control areas before a fight, save his crowd-control tools to stop engages or secure picks, and take advantage of immobilized targets to chain burst. He's especially strong when he can set up the terrain and cast from a safe position, but he loses a lot of value if mobile champions manage to dive straight onto him.",
+      "source": "9e867f36"
+    },
+    "6a07b2cd79d7ef15722f5bae": {
+      "strategic_notes": "Set up low-health minions to chain Q; without passive stacks it's not worth forcing the all-in.",
+      "source": "8085417c"
+    },
+    "6a07b2cd79d7ef15722f5baf": {
+      "strategic_notes": "Play reactively against engages: tornado and ultimate are worth more canceling engages than looking for weak initiations.",
+      "source": "8ef0ef75"
+    },
+    "6a07b2cd79d7ef15722f5ba4": {
+      "strategic_notes": "Gank lanes with allied CC and save your ultimate to trap targets without Flash or to cut off the jungler's routes.",
+      "source": "12fedc13"
+    },
+    "6a07b2cd79d7ef15722f5b89": {
+      "strategic_notes": "Don't waste Counter Strike on minor damage; use it to negate the main source of basic attacks and win the extended duel.",
+      "source": "48651152"
+    },
+    "6a07b2cd79d7ef15722f5bb4": {
+      "strategic_notes": "He must turn his range advantage into plates or rotations; if the enemy scales for free, his impact drops.",
+      "source": "d2e37b5b"
+    },
+    "6a07b2cd79d7ef15722f5b8b": {
+      "strategic_notes": "Coordinate roots and slows to secure the fourth shot; he doesn't win long fights like a classic hypercarry.",
+      "source": "ec0c6e1b"
+    },
+    "6a07b2cd79d7ef15722f5bb5": {
+      "strategic_notes": "Play safe until you get a reset; with Get Excited! active she can clean up the fight from the back.",
+      "source": "f165d9b0"
+    },
+    "6a07b2cd79d7ef15722f5b7c": {
+      "strategic_notes": "Soak pressure until you find a wall; with his ultimate he can pull a carry out of their safe zone.",
+      "source": "2890c9dd"
+    },
+    "6a07b2cd79d7ef15722f5bc9": {
+      "strategic_notes": "Her abilities evolve only by completing Upgraded-tier items: the first Upgraded item lets you evolve one ability of your choice, the second lets you evolve a second one, and the third evolves the remaining ability. No specific stat thresholds are required and the evolution order is free. Go in with your ultimate only when the target is already marked and isolated.",
+      "source": "0a88dd2a"
+    },
+    "6a07b2cd79d7ef15722f5ba7": {
+      "strategic_notes": "She dominates with hops and stacked spears; her real damage shows up when she can hit without breaking her basic-attack rhythm.",
+      "source": "b83ce716"
+    },
+    "6a07b2cd79d7ef15722f5b96": {
+      "strategic_notes": "Abuse Mantra in lane to gain priority; in fights, alternate damage and shields depending on who has the initiative.",
+      "source": "a23eb8ff"
+    },
+    "6a07b2cd79d7ef15722f5bd4": {
+      "strategic_notes": "Avoid long trades before you have your ultimate; each level reduces his reliance on the lane and increases his side-lane threat.",
+      "source": "eaac1967"
+    },
+    "6a07b2cd79d7ef15722f5ba8": {
+      "strategic_notes": "Don't go in first: wait for crowd control to be used and daggers to be well placed so you can chain resets without getting locked down.",
+      "source": "10c17a54"
+    },
+    "6a07b2cd79d7ef15722f5b86": {
+      "strategic_notes": "Accept losing early pressure and farm experience; once she gains range she shifts from a defensive champion to a central threat.",
+      "source": "10c9bc01"
+    },
+    "6a07b2cd79d7ef15722f5b8c": {
+      "strategic_notes": "Choose the form based on the enemy comp; go through walls to enter from angles common vision doesn't cover.",
+      "source": "bf895de2"
+    },
+    "6a07b2cd79d7ef15722f5ba5": {
+      "strategic_notes": "Hide the flank before your ultimate; going in head-on lets the enemy spread out and reduces the multi-stun.",
+      "source": "b824992a"
+    },
+    "6a07b2cd79d7ef15722f5ba9": {
+      "strategic_notes": "Don't force against tight groups; look for isolated targets and use evolutions to adapt for hunting, poke or repositioning.",
+      "source": "df11ce10"
+    },
+    "6a07b2cd79d7ef15722f5b93": {
+      "strategic_notes": "Plan marks with lane priority; her ultimate can save allies, but it can also deny your own executions if used late.",
+      "source": "178a1328"
+    },
+    "6a07b2cd79d7ef15722f5b97": {
+      "strategic_notes": "He needs constant peel and space to activate W; if he's protected, he melts tanks better than almost any other marksman.",
+      "source": "dda89740"
+    },
+    "6a07b2cd79d7ef15722f5b90": {
+      "strategic_notes": "Turn early priority into invades and objectives; if he doesn't speed up the game, his margin for error shrinks a lot.",
+      "source": "6e4f2652"
+    },
+    "6a07b2cd79d7ef15722f5b81": {
+      "strategic_notes": "Punish every enemy positioning mistake; once she goes in, she needs her team to follow the chain of crowd control.",
+      "source": "73c0b474"
+    },
+    "6a07b2cd79d7ef15722f5baa": {
+      "strategic_notes": "Keep your speed stacks up before fighting; her ultimate is best after applying her mark to several targets.",
+      "source": "95a4881b"
+    },
+    "6a07b2cd79d7ef15722f5bb8": {
+      "strategic_notes": "Her value lies in locking down assassins or initiating with the claw; her self-ultimate buys time for the team to arrive.",
+      "source": "e8c50bae"
+    },
+    "6a07b2cd79d7ef15722f5b98": {
+      "strategic_notes": "He must win short trades with his double passive; if he doesn't pressure the lane, other marksmen scale better.",
+      "source": "3a00b004"
+    },
+    "6a07b2cd79d7ef15722f5b7e": {
+      "strategic_notes": "Identify the game's carry and play around them; save Polymorph for the threat that dives in.",
+      "source": "1c876b0f"
+    },
+    "6a07b2cd79d7ef15722f5bbc": {
+      "strategic_notes": "Don't throw Q without vision of the enemy jungler; landing it turns her combo into a pick or objective control.",
+      "source": "ccbbed5b"
+    },
+    "6a07b2cd79d7ef15722f5b94": {
+      "strategic_notes": "Wait for enemy crowd control before going in; if he initiates first, he dies before activating resets.",
+      "source": "bbf8419e"
+    },
+    "6a07b2cd79d7ef15722f5b8d": {
+      "strategic_notes": "His ultimate should threaten the carry or several targets; while it's available, the enemy plays more spread out.",
+      "source": "690c986a"
+    },
+    "6a07b2cd79d7ef15722f5b7d": {
+      "strategic_notes": "Control brushes with saplings and force slow fights; his ultimate is excellent for closing off objective areas.",
+      "source": "adb112c0"
+    },
+    "6a07b2cd79d7ef15722f5b7b": {
+      "strategic_notes": "Use her reflect against decisive abilities; if you spend it early, play further back until you recover the defensive threat.",
+      "source": "1b554411"
+    },
+    "6a07b2cd79d7ef15722f5b7a": {
+      "strategic_notes": "Empower the right marksman with extra range and save the cleanse to break the enemy CC chain.",
+      "source": "a79df804"
+    },
+    "6a07b2cd79d7ef15722f5b6e": {
+      "strategic_notes": "Look for angles where her ultimate can't be interrupted; with allied CC she turns objectives into one-sided fights.",
+      "source": "469e2f0b"
+    },
+    "6a07b2cd79d7ef15722f5b68": {
+      "strategic_notes": "Use his ultimate to pull the jungler away from an objective or isolate a carry without peel.",
+      "source": "b16557d3"
+    },
+    "6a07b2cd79d7ef15722f5b82": {
+      "strategic_notes": "Black Shield should anticipate the key crowd control, not heal damage; a landed Q decides rotations and objectives.",
+      "source": "756272b5"
+    },
+    "6a07b2cd79d7ef15722f5b66": {
+      "strategic_notes": "Pressure with E on the ally who can trade immediately; her bubble is more reliable after a slow.",
+      "source": "bad2266f"
+    },
+    "6a07b2cd79d7ef15722f5b6f": {
+      "strategic_notes": "Prioritize safe stacks and avoid pointless early fights; with enough stacks he forces answers in the side lane.",
+      "source": "ac6be292"
+    },
+    "6a07b2cd79d7ef15722f5b74": {
+      "strategic_notes": "His crowd-control chain is very long; mark the right target before using his ultimate so you don't waste it on tanks.",
+      "source": "14f50686"
+    },
+    "6a07b2cd79d7ef15722f5b6b": {
+      "strategic_notes": "She needs to invade and land spears with vision; if she doesn't speed up the game, her utility drops against engage junglers.",
+      "source": "a1920f02"
+    },
+    "6a07b2cd79d7ef15722f5b71": {
+      "strategic_notes": "Play next to supports that boost healing or shields; go in when she can hit several targets without being kited.",
+      "source": "580644dd"
+    },
+    "6a07b2cd79d7ef15722f5b72": {
+      "strategic_notes": "Activate his ultimate when the enemy lanes are split up; deny vision and punish the target with no peel nearby.",
+      "source": "0eaa00de"
+    },
+    "6a07b2cd79d7ef15722f5b75": {
+      "strategic_notes": "Play to control distance and support the carry; her impact grows when she can harass without exposing herself to direct engage.",
+      "source": "408e9811"
+    },
+    "6a07b2cd79d7ef15722f5b6c": {
+      "strategic_notes": "Secure Dragons and Heralds with Q plus Smite; his snowballs force the enemy to respect unconventional routes.",
+      "source": "c0e8fb39"
+    },
+    "6a07b2cd79d7ef15722f5b67": {
+      "strategic_notes": "Force fights before the enemy has enough damage; with his ultimate he ignores CC, but not focused burst.",
+      "source": "5458e666"
+    },
+    "6a07b2cd79d7ef15722f5b69": {
+      "strategic_notes": "Keep the ball on the initiator or in narrow areas; a well-prepared Shockwave is worth more than isolated poke.",
+      "source": "7777a992"
+    },
+    "6a07b2cd79d7ef15722f5b73": {
+      "strategic_notes": "His value grows with upgraded items and front-to-back fights; set up the terrain to secure his ultimate's second hit.",
+      "source": "9860317a"
+    },
+    "6a07b2cd79d7ef15722f5b76": {
+      "strategic_notes": "Use his ultimate to turn lane pressure into a global advantage; if he scales evenly, he should play more as a finisher.",
+      "source": "2dfd5e41"
+    },
+    "6a07b2cd79d7ef15722f5b77": {
+      "strategic_notes": "Save W against mobile champions; denying an important dash is worth more than using it for speed.",
+      "source": "78242abb"
+    },
+    "6a07b2cd79d7ef15722f5b6d": {
+      "strategic_notes": "Leave lane to create numbers advantages when the ADC can hold on alone; his execute punishes messy fights.",
+      "source": "ab53e4fc"
+    },
+    "6a07b2cd79d7ef15722f5b70": {
+      "strategic_notes": "Go in and out using allies as anchors; without a retreat route, his engage becomes too committed.",
+      "source": "011b7b18"
+    },
+    "6a07b2cd79d7ef15722f5b78": {
+      "strategic_notes": "He punishes basic-attack comps and pushed lanes; his taunt should go to the main marksman or duelist.",
+      "source": "a9e6dbc4"
+    },
+    "6a07b2cd79d7ef15722f5b79": {
+      "strategic_notes": "Look for enemy groups before dismounting; if her engage fails, her defensive mobility is limited.",
+      "source": "e858730e"
+    },
+    "6a07b2cd79d7ef15722f5b6a": {
+      "strategic_notes": "Dominate with red fury in short windows; if he doesn't get an early lead, he should enable dives and objectives.",
+      "source": "80448b75"
+    },
+    "6a07b2cd79d7ef15722f5b64": {
+      "strategic_notes": "Control brushes and vision to leap with ferocity; without map setup he loses his threat on carries.",
+      "source": "65e1e441"
+    },
+    "6a07b2cd79d7ef15722f5bc5": {
+      "strategic_notes": "Take advantage of Riven's level 5 power spike to look for duels and apply constant pressure in the side lanes through split pushing.",
+      "source": "30adb70c"
+    },
+    "6a07b2cd79d7ef15722f5b65": {
+      "strategic_notes": "Manage heat before fighting; his ultimate over objective corridors cuts off retreats and forces mistakes.",
+      "source": "d6f409f2"
+    },
+    "6a07b2cd79d7ef15722f5b60": {
+      "strategic_notes": "He needs mana and levels to take off; use his ultimate to move waves or surprise side lanes, not for forced fights.",
+      "source": "556f238f"
+    },
+    "6a07b2cd79d7ef15722f5b9e": {
+      "strategic_notes": "Build up style safely before diving in; she depends on allied CC to go in without getting blown up.",
+      "source": "3af29ab5"
+    },
+    "6a07b2cd79d7ef15722f5b5d": {
+      "strategic_notes": "Play for souls and growing range; her ultimate can swing distant fights without leaving her safe position.",
+      "source": "41fd8021"
+    },
+    "6a07b2cd79d7ef15722f5b9f": {
+      "strategic_notes": "Fight along straight lines and around allies; her ultimate chained through champions can decide entire objectives.",
+      "source": "b60b1ba2"
+    },
+    "6a07b2cd79d7ef15722f5b50": {
+      "strategic_notes": "Save W for maximum grit and aim the center; using it early reduces his counterattack threat.",
+      "source": "b9cbcd94"
+    },
+    "6a07b2cd79d7ef15722f5b9b": {
+      "strategic_notes": "Pressure the side lane while his ultimate is up; his real impact is turning a losing fight into a numbers advantage.",
+      "source": "1aa87af0"
+    },
+    "6a07b2cd79d7ef15722f5b9c": {
+      "strategic_notes": "Prioritize Dragons and go in with his ultimate form; without fury available he should avoid decisive fights.",
+      "source": "c233f897"
+    },
+    "6a07b2cd79d7ef15722f5b61": {
+      "strategic_notes": "He wins by forcing bad chases; he doesn't look to kill fast, but to break formations and soak up resources.",
+      "source": "4326eea0"
+    },
+    "6a07b2cd79d7ef15722f5bd0": {
+      "strategic_notes": "He can pressure the side lane even while dying if the wave is set up; his ultimate requires long routes and prior vision.",
+      "source": "b607ffa3"
+    },
+    "6a07b2cd79d7ef15722f5b52": {
+      "strategic_notes": "She clears fast and speeds up the team with her ultimate; save her shield for CC or decisive burst.",
+      "source": "df23f092"
+    },
+    "f224c84b-1244-4f76-aadb-33948b5ca831": {
+      "strategic_notes": "Use the map to start your E charge from deep inside the walls straight into the lane, guaranteeing a deadly surprise gank.",
+      "source": "e06588fb"
+    },
+    "6a07b2cd79d7ef15722f5b87": {
+      "strategic_notes": "The priority is stacking Q without dying; once he unlocks the execute, long fights strongly favor his damage.",
+      "source": "1437058d"
+    },
+    "6a07b2cd79d7ef15722f5b5e": {
+      "strategic_notes": "Survive the lane and group early; her auras gain value when the team fights together.",
+      "source": "cf283df7"
+    },
+    "6a07b2cd79d7ef15722f5b5f": {
+      "strategic_notes": "Keep your distance and use silence on engages or channels; if she falls first, the team loses its main source of sustain.",
+      "source": "91465961"
+    },
+    "6a07b2cd79d7ef15722f5b99": {
+      "strategic_notes": "He wants extended fights where his ultimate stays active; pull in immobilized targets to secure soul fragments.",
+      "source": "ed0a0805"
+    },
+    "6a07b2cd79d7ef15722f5b56": {
+      "strategic_notes": "Prepare spheres before the all-in; her combo threatens carries, but she's exposed if she spends her push and stun.",
+      "source": "782336f0"
+    },
+    "6a07b2cd79d7ef15722f5b4d": {
+      "strategic_notes": "Control corridors with worked ground and her wall; rotate before the enemy to turn priority into side-lane picks.",
+      "source": "2bc1845b"
+    },
+    "6a07b2cd79d7ef15722f5b51": {
+      "strategic_notes": "Push and disappear from the map; his threat comes from flanking through walls, not from fighting head-on.",
+      "source": "ca595b2a"
+    },
+    "6a07b2cd79d7ef15722f5b57": {
+      "strategic_notes": "Play with mushrooms on objective routes and deny basic attacks with blind; if he doesn't set up vision, he loses real control.",
+      "source": "e804279a"
+    },
+    "6a07b2cd79d7ef15722f5b5a": {
+      "strategic_notes": "Threaten with hook and lantern at the same time; a good lantern saves more games than a forced engage.",
+      "source": "d313fe21"
+    },
+    "6a07b2cd79d7ef15722f5b62": {
+      "strategic_notes": "Use the jump to reposition after a reset, not always to initiate; with high range she takes down towers very quickly.",
+      "source": "37ef1532"
+    },
+    "6a07b2cd79d7ef15722f5b53": {
+      "strategic_notes": "Pressure the side lane and force answers; his ultimate should be used to finish or escape, not at the first damage taken.",
+      "source": "80eb15e8"
+    },
+    "6a07b2cd79d7ef15722f5b5b": {
+      "strategic_notes": "His advantage lies in moving first; Gold Card plus his ultimate punishes side lanes without needing to win lane.",
+      "source": "4779c7df"
+    },
+    "6a07b2cd79d7ef15722f5ba0": {
+      "strategic_notes": "Look for invisible angles on the backline; if he shows up head-on, he loses the surprise factor that enables his damage.",
+      "source": "676816fc"
+    },
+    "6a07b2cd79d7ef15722f5b55": {
+      "strategic_notes": "Play around his leg shotguns; his ultimate punishes low-health enemies even when they try to retreat.",
+      "source": "b5075ec9"
+    },
+    "6a07b2cd79d7ef15722f5b4f": {
+      "strategic_notes": "Alternate poke and blight detonation; his ultimate is better as a pick starter than as a last resort.",
+      "source": "3aabf0ba"
+    },
+    "6a07b2cd79d7ef15722f5b58": {
+      "strategic_notes": "Survive until you have items and fight with space; Condemn against a wall turns hard duels into kills.",
+      "source": "486e9327"
+    },
+    "6a07b2cd79d7ef15722f5b59": {
+      "strategic_notes": "Stack power patiently and place the cage to cut off routes, not just to try to stun.",
+      "source": "f6a32310"
+    },
+    "6a07b2cd79d7ef15722f5b9d": {
+      "strategic_notes": "Play from diagonal angles with Q; if you get caught, your channeled damage disappears quickly.",
+      "source": "59dbc35c"
+    },
+    "6a07b2cd79d7ef15722f5b54": {
+      "strategic_notes": "Save fear for mobile champions; her ultimate enables finishes, but going in without her defensive passive is risky.",
+      "source": "8b253406"
+    },
+    "6a07b2cd79d7ef15722f5ba1": {
+      "strategic_notes": "Mark the carry with her ultimate when her team can follow up; if she goes in alone, she gets trapped after the combo.",
+      "source": "adca7c9b"
+    },
+    "6a07b2cd79d7ef15722f5b4e": {
+      "strategic_notes": "He doesn't need to initiate: wait for the first kill to chain possessions and turn the fight in his favor.",
+      "source": "e546ae5c"
+    },
+    "6a07b2cd79d7ef15722f5b5c": {
+      "strategic_notes": "Prioritize waves and upgrades; when he controls areas with Gravity Field, he forces the enemy to fight on his terms.",
+      "source": "7b58e1aa"
+    },
+    "6a07b2cd79d7ef15722f5b9a": {
+      "strategic_notes": "Farm until your power spikes and go in with Sanguine Pool available; without it, any CC punishes him too hard.",
+      "source": "32444eb8"
+    },
+    "6a07b2cd79d7ef15722f5b63": {
+      "strategic_notes": "His ultimate enables dives and disabling towers; use it when the wave is already backing the play.",
+      "source": "1dd99812"
+    },
+    "6a07b2cd79d7ef15722f5b7f": {
+      "strategic_notes": "Chase low-health targets and convert early skirmishes; his ultimate takes patience so it doesn't miss against mobility.",
+      "source": "04b48e69"
+    },
+    "6a07b2cd79d7ef15722f5b83": {
+      "strategic_notes": "Use the clone to dodge the response and look for a double knock-up; his flanks are better than initiating head-on.",
+      "source": "c0992ecc"
+    },
+    "6a07b2cd79d7ef15722f5b85": {
+      "strategic_notes": "Prepare feathers before backing off; her ultimate should deny engage and set up a root on the way back.",
+      "source": "79399c06"
+    },
+    "6a07b2cd79d7ef15722f5b88": {
+      "strategic_notes": "Invade with priority and force early 2v2s; his ultimate blocks outside damage to finish isolated targets.",
+      "source": "9ed05f40"
+    },
+    "6a07b2cd79d7ef15722f5b80": {
+      "strategic_notes": "He needs waves or allies with knock-ups; without a dash route, his engage becomes predictable.",
+      "source": "d7f4a5e2"
+    },
+    "6a07b2cd79d7ef15722f5bb0": {
+      "strategic_notes": "Trade with E to return safely and save his ultimate for CC chains or carries without mobility.",
+      "source": "a62682da"
+    },
+    "0f90cee7-5896-42cc-8936-e2899ac32e79": {
+      "strategic_notes": "Look for trades when you have your Q stacks ready; without that setup she loses a lot of damage. Her mixed damage punishes comps that only build armor against marksmen.",
+      "source": "39682d83"
+    },
+    "6a07b2cd79d7ef15722f5b91": {
+      "strategic_notes": "Choose carefully who to attach to: empowering the right carry is worth more than sticking to the marksman out of habit.",
+      "source": "ef835982"
+    },
+    "6a07b2cd79d7ef15722f5b95": {
+      "strategic_notes": "Soak the lane with shadow poke before the all-in; going in without an exit shadow makes him easy to punish.",
+      "source": "2e6326f4"
+    },
+    "6a07b2cd79d7ef15722f5bb1": {
+      "strategic_notes": "She needs space and extended fights; with her ultimate active she must constantly reposition to keep her charges.",
+      "source": "1936cda6"
+    },
+    "6a07b2cd79d7ef15722f5b8e": {
+      "strategic_notes": "Take down towers safely and control objectives from afar; avoid walking without vision because he has no reliable escape.",
+      "source": "69934e1c"
+    },
+    "6a07b2cd79d7ef15722f5ba3": {
+      "strategic_notes": "Save his ultimate for the carry who will actually get focused; using it early greatly reduces its value.",
+      "source": "49f25f91"
+    },
+    "6a07b2cd79d7ef15722f5ba6": {
+      "strategic_notes": "Look for bubbles from fog of war and over walls; her combo wins through angles, not head-on fights.",
+      "source": "feab3827"
+    },
+    "6a07b2cd79d7ef15722f5bab": {
+      "strategic_notes": "Prepare seeds before trading; her plants force the enemy to spend time or health before the objective.",
+      "source": "b60cc8bd"
     }
   }
 }

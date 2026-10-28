@@ -16,7 +16,7 @@ import { newSuggesterRequestId } from '@/api/suggesterUsageSupabase';
 import { useSuggesterUsage } from '@/hooks/useSuggesterUsage';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
-import { useT } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { labels, responseLanguage } from '@/i18n/uiI18n';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
@@ -131,6 +131,7 @@ const RESULT_STEP = STEPS.length;
 
 export default function V2BuildTab({ tabSelector }) {
   const t = useT();
+  const { entityName } = useCatalogText();
   const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
   const usage = useSuggesterUsage('build');
   const [championId, setChampionId] = useState('');
@@ -213,7 +214,7 @@ export default function V2BuildTab({ tabSelector }) {
         // Se valida la respuesta cruda: si la IA eligió piezas inválidas, el estabilizador las
         // reemplazaría con razones genéricas. Primero se le pide a la IA que las corrija.
         const rawValidation = validateV2Result(response.parsed, generationSnapshot, { role });
-        const stabilized = stabilizeV2Result(response.parsed, generationSnapshot, { role });
+        const stabilized = stabilizeV2Result(response.parsed, generationSnapshot, { role, nameOf: entityName });
         const validation = validateV2Result(stabilized, generationSnapshot, { role });
         const isLastAttempt = attempt === 2;
         if (validation.ok && (rawValidation.ok || isLastAttempt)) {
@@ -237,7 +238,7 @@ export default function V2BuildTab({ tabSelector }) {
 
       if (fallbackData) { showResult(fallbackData); return; }
       setState('validation_error');
-      setError([...lastValidation.schemaErrors, ...lastValidation.validationErrors].join(' '));
+      setError(t('buildV2.invalidBuild'));
     } catch (cause) { setState(cause.kind === 'malformed_response' ? 'malformed_response' : 'provider_error'); setError(cause.message); if (import.meta.env.DEV) console.debug('[Build IA V2] error', { kind: cause.kind, raw: cause.raw, message: cause.message, details: cause.details }); }
     finally { usage.refresh(); }
   }

@@ -147,6 +147,15 @@ export function useCatalogText() {
       return entry.source === cachedHash(original) ? entry.description : original;
     };
 
+    // Notas estratégicas del campeón; igual que las descripciones, si el texto en
+    // español cambió desde que se tradujo se muestra el original.
+    const championNotes = champion => {
+      const original = normalizeCatalogText(champion?.strategic_notes);
+      const entry = catalog && champion?.id != null ? catalog.champions?.[String(champion.id)] : null;
+      if (!original || !entry?.strategic_notes) return original;
+      return entry.source === cachedHash(original) ? entry.strategic_notes : original;
+    };
+
     // Búsqueda: acepta tanto el nombre traducido como el original.
     const matchesName = (entity, query, normalize = value => String(value || '').toLowerCase()) => {
       const needle = normalize(query);
@@ -159,6 +168,6 @@ export function useCatalogText() {
       numeric: true,
     });
 
-    return { locale, entityName, entityDescription, matchesName, compareNames };
+    return { locale, entityName, entityDescription, championNotes, matchesName, compareNames };
   }, [catalog, locale]);
 }

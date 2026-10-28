@@ -168,7 +168,7 @@ function BuildSelector({ slot, allBuilds, allChampions, selected, onSelect }) {
                   : <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-primary shrink-0">{build.champion_name?.[0]}</div>}
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{build.name}</p>
-                  <p className="text-xs text-muted-foreground">{build.champion_name}{build.lane && ` · ${build.lane}`}</p>
+                  <p className="text-xs text-muted-foreground">{build.champion_name}{build.lane && ` · ${t(`lanes.${build.lane}`)}`}</p>
                 </div>
               </button>
             );

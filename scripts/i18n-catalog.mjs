@@ -1,4 +1,5 @@
-// Revisa las traducciones de objetos y runas contra el catálogo del parche activo.
+// Revisa las traducciones de objetos, runas y notas estratégicas de campeones contra
+// el catálogo del parche activo.
 //
 //   npm run i18n:catalog            -> lista lo que falta o quedó desactualizado
 //   npm run i18n:catalog -- --out pendientes.json
@@ -28,8 +29,8 @@ function readEnv() {
   return env;
 }
 
-async function fetchTable(env, table) {
-  const url = `${env.VITE_SUPABASE_URL}/rest/v1/${table}?select=id,name,description`;
+async function fetchTable(env, table, select = 'id,name,description') {
+  const url = `${env.VITE_SUPABASE_URL}/rest/v1/${table}?select=${select}`;
   const key = env.VITE_SUPABASE_ANON_KEY;
   const response = await fetch(url, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
   if (!response.ok) throw new Error(`${table}: ${response.status} ${await response.text()}`);
@@ -47,9 +48,33 @@ const catalog = {
   runes: await fetchTable(env, 'current_runes'),
 };
 
+// Las notas originales ya están en español neutro (tú), así que es-ES usa el original.
+const champions = await fetchTable(env, 'current_champions', 'id,name,strategic_notes');
+const NOTES_LOCALES = TRANSLATED_LOCALES.filter(locale => locale !== 'es-ES');
+
 const pending = [];
 for (const locale of TRANSLATED_LOCALES) {
   const translations = JSON.parse(fs.readFileSync(path.join(catalogDir, `${locale}.json`), 'utf8'));
+  if (NOTES_LOCALES.includes(locale)) {
+    for (const champion of champions) {
+      const notes = normalizeCatalogText(champion.strategic_notes);
+      if (!notes) continue;
+      const entry = translations.champions?.[String(champion.id)];
+      const problem = !entry?.strategic_notes
+        ? 'notas estratégicas'
+        : entry.source !== catalogTextHash(notes) ? 'notas estratégicas desactualizadas' : null;
+      if (!problem) continue;
+      pending.push({
+        locale,
+        kind: 'champions',
+        id: String(champion.id),
+        name: champion.name.trim(),
+        strategic_notes: notes,
+        source: catalogTextHash(notes),
+        problems: [problem],
+      });
+    }
+  }
   for (const [kind, entities] of Object.entries(catalog)) {
     for (const entity of entities) {
       const entry = translations[kind]?.[String(entity.id)];
@@ -74,7 +99,7 @@ for (const locale of TRANSLATED_LOCALES) {
 }
 
 if (pending.length === 0) {
-  console.log('Traducciones de objetos y runas al día.');
+  console.log('Traducciones de objetos, runas y notas de campeones al día.');
 } else {
   for (const item of pending) {
     console.log(`[${item.locale}] ${item.kind}/${item.id} ${item.name}: ${item.problems.join(', ')}`);

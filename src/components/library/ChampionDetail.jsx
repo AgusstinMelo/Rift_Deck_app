@@ -20,8 +20,9 @@ import LaneBadge from '@/components/ui/LaneBadge';
 import { championSlug } from '@/utils/championSlug';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT_QUERY } from '@/hooks/useMatchMedia';
-import { useT } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { labels, tr } from '@/i18n/uiI18n';
+import { championTagLabel } from '@/utils/itemLabels';
 
 const SCALING_LABEL = labels({
   earlygame: 'champion.scalingShort.earlygame',
@@ -436,6 +437,7 @@ export default function ChampionDetail({
   relatedChampions = [],
 }) {
   const t = useT();
+  const { championNotes } = useCatalogText();
   const { user } = useAuth();
   // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, { ssrSafe: publicMode });
@@ -822,8 +824,8 @@ export default function ChampionDetail({
               <div className="mt-5">
                 <p className="rd-label mb-2">{t('library.tags')}</p>
                 <div className="flex flex-wrap gap-2">
-                  {champion.tags.map(t => (
-                    <span key={t} className="rd-status-pill">{t}</span>
+                  {champion.tags.map(tag => (
+                    <span key={tag} className="rd-status-pill">{championTagLabel(tag)}</span>
                   ))}
                 </div>
               </div>
@@ -834,7 +836,7 @@ export default function ChampionDetail({
               <div className="rd-champ-profile-notes mt-5 rd-mini-action">
                 <p className="rd-label mb-2">{t('builds.notasEstrategicas')}</p>
                 <p className="text-sm text-foreground leading-relaxed">
-                  {champion.strategic_notes}
+                  {championNotes(champion)}
                 </p>
               </div>
             )}

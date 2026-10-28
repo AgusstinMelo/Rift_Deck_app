@@ -322,6 +322,9 @@ export default function Layout() {
         </div>
 
         <nav className="rd-sidebar-nav flex-1 py-5 overflow-y-auto px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {/* Con el sidebar colapsado no hay lugar para el selector; se cambia desde el sidebar abierto. */}
+          {!collapsed && <LanguageSelect />}
+
           <SidebarSearch
             collapsed={collapsed}
             onNavigate={() => setMobileOpen(false)}
@@ -361,7 +364,6 @@ export default function Layout() {
         </nav>
 
         <div className="rd-sidebar-footer space-y-3">
-          {!collapsed && <LanguageSelect />}
           {user && (
             <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">

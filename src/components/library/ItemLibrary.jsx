@@ -16,6 +16,7 @@ const CATEGORY_LABELS = {
   get 'Básico'() { return itemCategoryLabel('Básico'); },
   get 'Nivel Medio'() { return itemCategoryLabel('Nivel Medio'); },
   get 'Mejorado'() { return itemCategoryLabel('Mejorado'); },
+  get 'Sin categoría'() { return itemCategoryLabel('Sin categoría'); },
 };
 
 const CATEGORY_COLORS = {
@@ -692,7 +693,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-6 h-px bg-primary/50 shrink-0" />
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground tracking-[-0.06em] uppercase truncate">
+            <h2 className="font-rajdhani font-bold text-2xl leading-none text-foreground tracking-[-0.06em] uppercase break-words">
               {itemTypeLabel(type)}
             </h2>
           </div>

@@ -19,7 +19,7 @@ export async function requestV2Build(prompt, snapshot, context = {}) {
 
   if (error) {
     throw Object.assign(
-      new Error('No se pudo conectar con el generador de builds. Probá nuevamente en unos segundos.'),
+      new Error(tr('buildV2.providerUnreachable')),
       { kind: 'provider_error', retryable: true, details: error.message },
     );
   }
