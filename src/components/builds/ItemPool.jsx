@@ -1,5 +1,5 @@
 import { X, Plus, Footprints } from 'lucide-react';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 
 const NORMAL_SLOTS = 5;
 
@@ -37,6 +37,7 @@ function buildDisplaySlots(selectedItems) {
 }
 
 export default function ItemPool({ selectedItems, onRemove }) {
+  const t = useT();
   const { normalItems, movementItem, enchantItem } = buildDisplaySlots(selectedItems);
   const { entityName } = useCatalogText();
   const emptyNormalCount = Math.max(0, NORMAL_SLOTS - normalItems.length);
@@ -92,9 +93,9 @@ export default function ItemPool({ selectedItems, onRemove }) {
     // Empty reserved slot for movement/enchantment
     return (
       <div className="relative w-16 h-16 rounded-xl border-2 border-dashed border-blue-400/30 bg-blue-400/5 opacity-60 flex flex-col items-center justify-center gap-0.5"
-           title="Slot reservado para botas/encantamiento">
+           title={t('builds.slotReservadoParaBotas')}>
         <Footprints size={14} className="text-blue-400/60" />
-        <span className="text-[9px] text-blue-400/50 font-medium leading-tight text-center">Botas</span>
+        <span className="text-[9px] text-blue-400/50 font-medium leading-tight text-center">{t('builds.botas')}</span>
       </div>
     );
   };

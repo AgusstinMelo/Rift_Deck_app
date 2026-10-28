@@ -8,8 +8,10 @@ import BuildCompare from '@/components/builds/BuildCompare';
 import { getCurrentTierlistEntries } from '@/utils/tierlist';
 import { patchMatchesSelection } from '@/utils/patches';
 import { getGamePatchCatalog, getPublishedGamePatches } from '@/api/gameCatalogSupabase';
+import { useT } from '@/lib/LocaleContext';
 
 export default function BuildCalculator() {
+  const t = useT();
   const [selectedChampion, setSelectedChampion] = useState(null);
   const [view, setView] = useState('builds'); // 'builds' | 'workspace' | 'compare'
   const [editingBuild, setEditingBuild] = useState(null);
@@ -79,7 +81,7 @@ export default function BuildCalculator() {
     return (
       <div className="p-6">
         <div className="rd-card border-red-500/30 p-5 text-sm text-red-300">
-          {catalogError?.message || 'No se pudo cargar el catálogo del parche seleccionado.'}
+          {catalogError?.message || t('builds.noSePudoCargar')}
         </div>
       </div>
     );
@@ -98,7 +100,7 @@ export default function BuildCalculator() {
 
   if (selectedChampion && view === 'workspace') {
     if (catalog?.patchVersion !== selectedPatch) {
-      return <div className="p-6 text-sm text-muted-foreground">Cargando catálogo del parche {selectedPatch}...</div>;
+      return <div className="p-6 text-sm text-muted-foreground">{t('builds.cargandoCatalogoDelParche')} {selectedPatch}...</div>;
     }
     return (
       <BuildWorkspace

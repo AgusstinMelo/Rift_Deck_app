@@ -3,13 +3,15 @@ import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
+import { tr } from '@/i18n/uiI18n';
+import { itemCategoryLabel, itemTypeLabel } from '@/utils/itemLabels';
 
 const CATEGORIES = [
-  { key: 'all', label: 'Todos' },
-  { key: 'Básico', label: 'Básico' },
-  { key: 'Nivel Medio', label: 'Nivel Medio' },
-  { key: 'Mejorado', label: 'Mejorado' },
+  { key: 'all', get label() { return tr('builds.todos'); } },
+  { key: 'Básico', get label() { return itemCategoryLabel('Básico'); } },
+  { key: 'Nivel Medio', get label() { return itemCategoryLabel('Nivel Medio'); } },
+  { key: 'Mejorado', get label() { return itemCategoryLabel('Mejorado'); } },
 ];
 
 const TYPE_ORDER = [
@@ -26,34 +28,34 @@ const TYPE_ORDER = [
 
 const UNIQUE_ITEMS = ['escudo reliquia', 'hoz espectral', 'guadaña de niebla oscura', 'baluarte de la montaña'];
 const ITEM_STATS = [
-  { key: 'life', label: 'Vida', color: 'text-green-400' },
-  { key: 'life_reg', label: 'Reg. de vida', color: 'text-green-400' },
-  { key: 'mana', label: 'Maná', color: 'text-sky-300' },
-  { key: 'mana_reg', label: 'Reg. de maná', color: 'text-sky-300' },
-  { key: 'attack_damage', label: 'Daño de ataque', color: 'text-orange-400' },
-  { key: 'physical_damage', label: 'Daño físico', color: 'text-orange-700' },
-  { key: 'magic_damage', label: 'Daño mágico', color: 'text-cyan-400' },
-  { key: 'true_damage', label: 'Daño verdadero', color: 'text-white' },
-  { key: 'attack_speed', label: 'Vel. de ataque', unit: '%', color: 'text-yellow-200' },
-  { key: 'ability_power', label: 'Poder de habilidad', color: 'text-violet-400' },
-  { key: 'armor', label: 'Armadura', color: 'text-yellow-400' },
-  { key: 'magic_res', label: 'Resist. mágica' },
-  { key: 'flat_movement', label: 'Vel. de movimiento', color: 'text-white' },
-  { key: 'percentage_movement', label: 'Vel. de movimiento', unit: '%', color: 'text-white' },
-  { key: 'critical_impact', label: 'Prob. de crítico', unit: '%', color: 'text-red-400' },
-  { key: 'critical_damage', label: 'Daño crítico', unit: '%', color: 'text-red-400' },
-  { key: 'lifesteal', label: 'Robo de vida', unit: '%', color: 'text-green-300' },
-  { key: 'physic_vamp', label: 'Vamp. físico', unit: '%', color: 'text-green-300' },
-  { key: 'magic_vamp', label: 'Vamp. mágico', unit: '%', color: 'text-green-300' },
-  { key: 'flat_armor_penetration', label: 'Pen. de armadura', color: 'text-red-300' },
-  { key: 'percentage_armor_penetration', label: 'Pen. de armadura', unit: '%', color: 'text-red-300' },
-  { key: 'flat_magic_penetration', label: 'Pen. mágica' },
-  { key: 'percentage_magic_penetration', label: 'Pen. mágica', unit: '%' },
-  { key: 'ability_haste', label: 'Aceleración de habilidad', color: 'text-white' },
-  { key: 'tenacity', label: 'Tenacidad', unit: '%', color: 'text-violet-700' },
-  { key: 'healing_and_shield', label: 'Curación y escudo', unit: '%', color: 'text-green-300' },
-  { key: 'adaptable_ad', label: 'Daño adaptable', color: 'text-orange-400' },
-  { key: 'adaptable_ap', label: 'Poder adaptable', color: 'text-violet-400' },
+  { key: 'life', get label() { return tr('itemStats.life'); }, color: 'text-green-400' },
+  { key: 'life_reg', get label() { return tr('itemStats.life_reg'); }, color: 'text-green-400' },
+  { key: 'mana', get label() { return tr('itemStats.mana'); }, color: 'text-sky-300' },
+  { key: 'mana_reg', get label() { return tr('itemStats.mana_reg'); }, color: 'text-sky-300' },
+  { key: 'attack_damage', get label() { return tr('itemStats.attack_damage'); }, color: 'text-orange-400' },
+  { key: 'physical_damage', get label() { return tr('itemStats.physical_damage'); }, color: 'text-orange-700' },
+  { key: 'magic_damage', get label() { return tr('itemStats.magic_damage'); }, color: 'text-cyan-400' },
+  { key: 'true_damage', get label() { return tr('itemStats.true_damage'); }, color: 'text-white' },
+  { key: 'attack_speed', get label() { return tr('itemStats.attack_speed'); }, unit: '%', color: 'text-yellow-200' },
+  { key: 'ability_power', get label() { return tr('itemStats.ability_power'); }, color: 'text-violet-400' },
+  { key: 'armor', get label() { return tr('itemStats.armor'); }, color: 'text-yellow-400' },
+  { key: 'magic_res', get label() { return tr('itemStats.magic_res'); } },
+  { key: 'flat_movement', get label() { return tr('itemStats.flat_movement'); }, color: 'text-white' },
+  { key: 'percentage_movement', get label() { return tr('itemStats.percentage_movement'); }, unit: '%', color: 'text-white' },
+  { key: 'critical_impact', get label() { return tr('itemStats.critical_impact'); }, unit: '%', color: 'text-red-400' },
+  { key: 'critical_damage', get label() { return tr('itemStats.critical_damage'); }, unit: '%', color: 'text-red-400' },
+  { key: 'lifesteal', get label() { return tr('itemStats.lifesteal'); }, unit: '%', color: 'text-green-300' },
+  { key: 'physic_vamp', get label() { return tr('itemStats.physic_vamp'); }, unit: '%', color: 'text-green-300' },
+  { key: 'magic_vamp', get label() { return tr('itemStats.magic_vamp'); }, unit: '%', color: 'text-green-300' },
+  { key: 'flat_armor_penetration', get label() { return tr('itemStats.flat_armor_penetration'); }, color: 'text-red-300' },
+  { key: 'percentage_armor_penetration', get label() { return tr('itemStats.percentage_armor_penetration'); }, unit: '%', color: 'text-red-300' },
+  { key: 'flat_magic_penetration', get label() { return tr('itemStats.flat_magic_penetration'); } },
+  { key: 'percentage_magic_penetration', get label() { return tr('itemStats.percentage_magic_penetration'); }, unit: '%' },
+  { key: 'ability_haste', get label() { return tr('itemStats.ability_haste'); }, color: 'text-white' },
+  { key: 'tenacity', get label() { return tr('itemStats.tenacity'); }, unit: '%', color: 'text-violet-700' },
+  { key: 'healing_and_shield', get label() { return tr('itemStats.healing_and_shield'); }, unit: '%', color: 'text-green-300' },
+  { key: 'adaptable_ad', get label() { return tr('itemStats.adaptable_ad'); }, color: 'text-orange-400' },
+  { key: 'adaptable_ap', get label() { return tr('itemStats.adaptable_ap'); }, color: 'text-violet-400' },
 ];
 
 const getActiveStats = (item) => ITEM_STATS.filter(({ key }) => {
@@ -104,24 +106,24 @@ function getLockReason(item, selectedItems) {
   const hasMovement = selectedItems.some(isMovement);
 
   if (enchant) {
-    if (!selectedItems.some(isMobilityBoots)) return 'Requiere botas de Movimiento primero';
-    if (selectedItems.some(isEnchant)) return 'Ya tienes un encantamiento';
+    if (!selectedItems.some(isMobilityBoots)) return tr('builds.requiereBotasDeMovimiento');
+    if (selectedItems.some(isEnchant)) return tr('builds.yaTienesUnEncantamiento');
     return null;
   }
 
   if (movement) {
-    if (hasMovement) return 'Solo 1 item de movimiento por build';
+    if (hasMovement) return tr('builds.solo1ItemDe');
     return null;
   }
 
-  if (normalCount >= 5) return 'Máximo 5 objetos normales (el 6° slot es para botas)';
+  if (normalCount >= 5) return tr('builds.maximo5ObjetosNormales');
 
   if (UNIQUE_ITEMS.includes(item?.name?.toLowerCase()) &&
       selectedItems.some(i => UNIQUE_ITEMS.includes(i?.name?.toLowerCase())))
-    return 'Solo puedes llevar 1 de estos 4 items';
+    return tr('builds.soloPuedesLlevar1');
 
   if (item.category === 'Mejorado' && selectedItems.some(i => i?.id === item.id))
-    return 'Los items Mejorados no se pueden repetir';
+    return tr('builds.losItemsMejoradosNo');
 
   return null;
 }
@@ -154,6 +156,7 @@ function canAddItem(item, selectedItems) {
 }
 
 export default function ItemBrowser({ items, selectedItems, onSelect }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -212,13 +215,13 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
     <div className="rd-card rd-item-browser p-4">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-5 h-px bg-primary/50" />
-        <h3 className="rd-card-title">Items</h3>
+        <h3 className="rd-card-title">{t('builds.items3')}</h3>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3">
         <div className="relative flex-1 min-w-36">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar item..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('builds.buscarItem')}
             className="w-full bg-secondary/70 border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-foreground outline-none focus:border-primary/40 transition-all" />
         </div>
         <div className="flex gap-1 flex-wrap">
@@ -234,9 +237,9 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
           onChange={e => setTypeFilter(e.target.value)}
           className="bg-secondary/70 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground outline-none focus:border-primary/40 transition-all"
         >
-          <option value="all">Todos los tipos</option>
+          <option value="all">{t('matches.todosLosTipos')}</option>
           {itemTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
+            <option key={type} value={type}>{itemTypeLabel(type)}</option>
           ))}
         </select>
       </div>
@@ -300,7 +303,7 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
                   <p className="font-semibold text-foreground text-sm leading-tight">{entityName(tooltip.item)}</p>
                   <div className="flex flex-wrap items-center gap-x-2 mt-1">
                     {tooltip.item.category && <span className="text-[11px] text-muted-foreground">{tooltip.item.category}</span>}
-                    {tooltip.item.price != null && <span className="text-[11px] text-primary font-semibold">{tooltip.item.price} oro</span>}
+                    {tooltip.item.price != null && <span className="text-[11px] text-primary font-semibold">{tooltip.item.price} {t('builds.oro')}</span>}
                   </div>
                 </div>
               </div>
@@ -328,7 +331,7 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
       </div>
 
       {filtered.length === 0 && (
-        <p className="text-muted-foreground text-xs text-center py-6">No se encontraron items</p>
+        <p className="text-muted-foreground text-xs text-center py-6">{t('builds.noSeEncontraronItems')}</p>
       )}
     </div>
   );

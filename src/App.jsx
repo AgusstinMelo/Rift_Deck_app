@@ -72,6 +72,7 @@ const AuthenticatedApp = () => {
       {isAuthenticated ? (
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
           <Route path="/library" element={<Library />} />
           <Route path="/tierlist" element={<Tierlist />} />
           <Route path="/build-calculator" element={<BuildCalculator />} />

@@ -13,9 +13,10 @@ import TierBadge from '@/components/ui/TierBadge';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import PatchSelect from '@/components/patches/PatchSelect';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 
 export default function BuildWorkspace({ champion, tierEntries, items, runes, patches, patchVersion, onPatchChange, existingBuild, onBack }) {
+  const t = useT();
   const isEditing = !!existingBuild;
   const { user } = useAuth();
   const { entityName } = useCatalogText();
@@ -31,7 +32,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
   const [selectedRunes, setSelectedRunes] = useState([]);
   const initialRuneNames = isEditing ? (existingBuild.additional_runes || []) : [];
   const [selectedSpells, setSelectedSpells] = useState(isEditing ? (existingBuild.spells || []) : []);
-  const [buildName, setBuildName] = useState(isEditing ? existingBuild.name : `Build de ${champion.name}`);
+  const [buildName, setBuildName] = useState(isEditing ? existingBuild.name : t('builds.buildDe', { name: champion.name }));
   const [lane, setLane] = useState(isEditing ? existingBuild.lane || '' : champion.lane?.[0] || '');
   const [saved, setSaved] = useState(false);
   // Smartphone: "tu build" (objetos y hechizos) fija (a la izquierda en horizontal,
@@ -142,8 +143,8 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             onClick={onBack}
-            title="Cambiar campeón"
-            aria-label="Cambiar campeón"
+            title={t('builds.cambiarCampeon')}
+            aria-label={t('builds.cambiarCampeon')}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             <ArrowLeft size={16} />
@@ -165,11 +166,11 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             </div>
             {tierEntry && (
               <p className="text-xs text-muted-foreground mt-1">
-                WR: <span className="text-foreground">{tierEntry.winrate?.toFixed(1)}%</span>
+               {t('builds.wr')} <span className="text-foreground">{tierEntry.winrate?.toFixed(1)}%</span>
                 <span className="mx-2">·</span>
-                PR: <span className="text-foreground">{tierEntry.pickrate?.toFixed(1)}%</span>
+               {t('builds.pr')} <span className="text-foreground">{tierEntry.pickrate?.toFixed(1)}%</span>
                 <span className="mx-2">·</span>
-                BR: <span className="text-foreground">{tierEntry.banrate?.toFixed(1)}%</span>
+               {t('builds.br')} <span className="text-foreground">{tierEntry.banrate?.toFixed(1)}%</span>
               </p>
             )}
           </div>
@@ -185,34 +186,34 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
           <input
             value={buildName}
             onChange={e => setBuildName(e.target.value)}
-            placeholder="Nombre de la build"
-            aria-label="Nombre de la build"
+            placeholder={t('builds.nombreDeLaBuild2')}
+            aria-label={t('builds.nombreDeLaBuild2')}
             className="bg-secondary/70 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 transition-all w-full sm:w-48"
           />
           <select
             value={lane}
             onChange={e => setLane(e.target.value)}
-            aria-label="Línea"
+            aria-label={t('goals.filterLabels.lanes')}
             className="bg-secondary/70 border border-border rounded-xl px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 transition-all w-full sm:w-32"
           >
-            <option value="">Línea</option>
-            <option value="top">Top</option>
-            <option value="jungler">Jungler</option>
-            <option value="mid">Mid</option>
-            <option value="adc">ADC</option>
-            <option value="support">Support</option>
+            <option value="">{t('goals.filterLabels.lanes')}</option>
+            <option value="top">{t('lanes.top')}</option>
+            <option value="jungler">{t('builds.jungler')}</option>
+            <option value="mid">{t('lanes.mid')}</option>
+            <option value="adc">{t('lanes.adc')}</option>
+            <option value="support">{t('lanes.support')}</option>
           </select>
           {selectedItems.length > 0 && (
             <button onClick={() => setSelectedItems([])}
               className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-500/10">
-              <Trash2 size={12} /> Limpiar
+              <Trash2 size={12} /> {t('builds.limpiar')}
             </button>
           )}
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !buildName}
             className="flex shrink-0 items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">
-            <Save size={14} /> {saved ? '¡Guardado!' : isPhonePortrait ? 'Guardar' : 'Guardar Build'}
+            <Save size={14} /> {saved ? t('builds.guardado') : isPhonePortrait ? t('common.save') : t('builds.guardarBuild')}
           </button>
         </div>
       </div>
@@ -220,8 +221,8 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
       {/* Espacio de trabajo: objetos · runas y hechizos · stats. */}
       <div data-panel={panel} className="rd-buildws-body grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.75fr)]">
         {(isPhoneLandscape || isPhonePortrait) && (
-          <div className="rd-panel-tabs rd-buildws-tabs" role="tablist" aria-label="Paneles de la build">
-            {[['items', 'Objetos'], ['runes', 'Runas'], ['stats', 'Stats']].map(([id, label]) => (
+          <div className="rd-panel-tabs rd-buildws-tabs" role="tablist" aria-label={t('builds.panelesDeLaBuild')}>
+            {[['items', t('common.items')], ['runes', t('common.runes')], ['stats', t('builds.stats')]].map(([id, label]) => (
               <button
                 key={id}
                 type="button"
@@ -238,11 +239,11 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
 
         <div className="rd-buildws-items flex min-w-0 flex-col gap-4">
           <div className="rd-buildws-pool rd-card p-4">
-            <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Objetos ({normalItemCount}/5 + botas)</h3></div>
+            <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">{t('builds.objetos')}{normalItemCount}/5 + botas)</h3></div>
             <ItemPool selectedItems={selectedItems} onRemove={removeItem} />
             {recommendedItems.length > 0 && (
               <div className="rd-buildws-recommended mt-3 flex items-center gap-2 border-t border-border/60 pt-3">
-                <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recomendados</span>
+                <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('builds.recomendados')}</span>
                 <div className="flex min-w-0 flex-wrap gap-1.5">
                   {recommendedItems.map(({ itemName, item }, i) => (
                     <button key={i} onClick={() => item && selectedItems.length < 6 && addItem(item)}
@@ -271,14 +272,14 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
 
           <div className="rd-buildws-spells rd-card p-4">
             <p className="text-sm font-semibold text-foreground mb-3">
-              Hechizos ({selectedSpells.length}/2)
+             {t('builds.hechizos')}{selectedSpells.length}/2)
             </p>
             <div className="grid w-full grid-cols-5 justify-items-center gap-2 sm:[grid-template-columns:repeat(var(--spell-count),minmax(0,1fr))]" style={/** @type {any} */ ({ '--spell-count': spells.length })}>
               {spells.map(spell => {
                 const selected = selectedSpells.includes(spell.name);
                 const disabled = selectedSpells.length >= 2 && !selected;
                 return (
-                  <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
+                  <EntityHoverCard key={spell.id} entity={spell} kind={t('builds.hechizo')}>
                     <button
                       type="button"
                       onClick={() => {
@@ -309,10 +310,10 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             <details className="rd-card group p-4">
               <summary className="flex cursor-pointer list-none items-center gap-2">
                 <span className="w-5 h-px bg-primary/50" />
-                <h3 className="rd-card-title">Notas Estratégicas</h3>
+                <h3 className="rd-card-title">{t('builds.notasEstrategicas')}</h3>
                 <span className="ml-auto flex items-center gap-1 rounded-lg border border-border px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
-                  <span className="group-open:hidden">Ver</span>
-                  <span className="hidden group-open:inline">Ocultar</span>
+                  <span className="group-open:hidden">{t('builds.ver')}</span>
+                  <span className="hidden group-open:inline">{t('builds.ocultar')}</span>
                   <ChevronDown size={13} className="transition-transform group-open:rotate-180" />
                 </span>
               </summary>
@@ -322,10 +323,10 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
 
           <p
             className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground/70"
-            title="Las estadísticas presentadas corresponden a cálculos teóricos realizados fuera de combate y bajo condiciones base del campeón a nivel 1. Esta calculadora no contempla determinadas interacciones dinámicas, efectos situacionales, escalados en combate ni modificaciones específicas derivadas de pasivas, acumulaciones o efectos únicos de campeones, objetos y runas."
+            title={t('builds.lasEstadisticasPresentadasCorresponden')}
           >
             <Info size={12} className="shrink-0" />
-            Cálculo teórico a nivel 1, fuera de combate (pasá el mouse para más detalle).
+           {t('builds.calculoTeoricoANivel')}
           </p>
         </div>
       </div>

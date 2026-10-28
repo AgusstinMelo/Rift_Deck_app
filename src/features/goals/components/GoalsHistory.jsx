@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { History } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import GoalsCarousel from './GoalsCarousel';
+import { useT } from '@/lib/LocaleContext';
 
 /**
  * Panel de historial: objetivos finalizados (período cerrado o cancelados) y archivados.
@@ -9,15 +10,16 @@ import GoalsCarousel from './GoalsCarousel';
  * @param {{ finished: import('../model/goalLists').GoalItem[], archived: import('../model/goalLists').GoalItem[] }} props
  */
 export default function GoalsHistory({ finished, archived }) {
+  const t = useT();
   const [tab, setTab] = useState('finished');
   const rows = tab === 'finished' ? finished : archived;
 
   return (
-    <section className="rd-goals-panel" aria-label="Historial de objetivos">
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrar historial">
+    <section className="rd-goals-panel" aria-label={t('goals.history.aria')}>
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={t('goals.history.filterAria')}>
         {[
-          { id: 'finished', label: `Finalizados (${finished.length})` },
-          { id: 'archived', label: `Archivados (${archived.length})` },
+          { id: 'finished', label: t('goals.history.finished', { count: finished.length }) },
+          { id: 'archived', label: t('goals.history.archived', { count: archived.length }) },
         ].map(option => (
           <button
             key={option.id}
@@ -38,13 +40,13 @@ export default function GoalsHistory({ finished, archived }) {
         <div className="rd-card p-4">
           <EmptyState
             icon={History}
-            title={tab === 'finished' ? 'Sin objetivos finalizados' : 'Sin objetivos archivados'}
-            description={tab === 'finished' ? 'Acá vas a ver los objetivos que alcanzaste, los que cerraron su período y los que cancelaste.' : 'Archivá objetivos finalizados para ordenar tu historial.'}
+            title={t(tab === 'finished' ? 'goals.history.noFinished' : 'goals.history.noArchived')}
+            description={t(tab === 'finished' ? 'goals.history.noFinishedDescription' : 'goals.history.noArchivedDescription')}
             action={null}
           />
         </div>
       ) : (
-        <GoalsCarousel key={tab} items={rows} label={tab === 'finished' ? 'Objetivos finalizados' : 'Objetivos archivados'} />
+        <GoalsCarousel key={tab} items={rows} label={t(tab === 'finished' ? 'goals.history.finishedList' : 'goals.history.archivedList')} />
       )}
     </section>
   );

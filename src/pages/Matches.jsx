@@ -13,6 +13,7 @@ import { MATCH_TYPES } from '@/constants/matchTypes';
 import { toast } from '@/components/ui/use-toast';
 import { getPublishedGamePatches } from '@/api/gameCatalogSupabase';
 import { PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { useT } from '@/lib/LocaleContext';
 
 const showTemporaryToast = (options) => {
   const notification = toast(options);
@@ -48,6 +49,7 @@ function MatchMetric({ label, value, sub, icon: Icon, tone = 'primary' }) {
 }
 
 export default function Matches() {
+  const t = useT();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
@@ -214,16 +216,16 @@ export default function Matches() {
           <div className="rd-page-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
-              Registro de Partidas
+             {t('matches.registroDePartidas')}
             </span>
           </div>
 
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Partidas
+           {t('nav.matches')}
           </h1>
 
           <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">
-            {matches.length} partidas registradas en tu historial competitivo.
+            {matches.length} {t('matches.partidasRegistradasEnTu')}
           </p>
         </div>
 
@@ -238,10 +240,10 @@ export default function Matches() {
               </div>
               <div className="hidden sm:block text-left">
                 <p className="font-semibold text-sm text-foreground group-hover:text-red-400">
-                  Eliminar todas las partidas
+                 {t('matches.eliminarTodasLasPartidas')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Borrar historial completo
+                 {t('matches.borrarHistorialCompleto')}
                 </p>
               </div>
             </button>
@@ -256,10 +258,10 @@ export default function Matches() {
             </div>
             <div className="hidden sm:block text-left">
               <p className="font-semibold text-sm text-foreground group-hover:text-primary">
-                Nueva Partida
+               {t('matches.nuevaPartida')}
               </p>
               <p className="text-xs text-muted-foreground">
-                Registrar resultado
+               {t('matches.registrarResultado')}
               </p>
             </div>
           </button>
@@ -274,19 +276,19 @@ export default function Matches() {
                   <Trash2 size={20} className="text-red-400" />
                 </div>
                 <div>
-                  <p className="font-rajdhani font-bold text-lg text-foreground">¿Eliminar todo?</p>
-                  <p className="text-xs text-muted-foreground">Esta acción no se puede deshacer.</p>
+                  <p className="font-rajdhani font-bold text-lg text-foreground">{t('matches.eliminarTodo')}</p>
+                  <p className="text-xs text-muted-foreground">{t('builds.estaAccionNoSe')}</p>
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Se eliminarán <span className="text-foreground font-semibold">{matches.length} partidas</span> permanentemente. Para confirmar, escribí <span className="text-red-400 font-semibold">Eliminar Todas</span> abajo.
+               {t('matches.seEliminaran')} <span className="text-foreground font-semibold">{matches.length} {t('goals.unit.partidas')}</span> {t('matches.permanentementeParaConfirmarEscribi')} <span className="text-red-400 font-semibold">{t('matches.eliminarTodas')}</span> {t('matches.abajo')}
               </p>
 
               <input
                 value={deleteConfirmText}
                 onChange={e => setDeleteConfirmText(e.target.value)}
-                placeholder="Eliminar Todas"
+                placeholder={t('matches.eliminarTodas')}
                 className="w-full bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-red-500/50 transition-all"
               />
 
@@ -295,14 +297,14 @@ export default function Matches() {
                   onClick={() => { setConfirmDeleteAll(false); setDeleteConfirmText(''); }}
                   className="flex-1 px-4 py-2 rounded-lg bg-secondary border border-border text-sm text-muted-foreground hover:text-foreground transition-all"
                 >
-                  Cancelar
+                 {t('common.cancel')}
                 </button>
                 <button
                   onClick={() => deleteAllMutation.mutate()}
-                  disabled={deleteConfirmText !== 'Eliminar Todas' || deleteAllMutation.isPending}
+                  disabled={deleteConfirmText !== t('matches.eliminarTodas') || deleteAllMutation.isPending}
                   className="flex-1 px-4 py-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {deleteAllMutation.isPending ? 'Eliminando...' : 'Confirmar'}
+                  {deleteAllMutation.isPending ? t('builds.eliminando') : t('matches.confirmar')}
                 </button>
               </div>
             </div>
@@ -317,13 +319,13 @@ export default function Matches() {
                   <Trash2 size={20} className="text-red-400" />
                 </div>
                 <div>
-                  <p className="font-rajdhani font-bold text-lg text-foreground">Eliminar partida</p>
-                  <p className="text-xs text-muted-foreground">Esta acción no se puede deshacer.</p>
+                  <p className="font-rajdhani font-bold text-lg text-foreground">{t('goals.actions.deleteMatch')}</p>
+                  <p className="text-xs text-muted-foreground">{t('builds.estaAccionNoSe')}</p>
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                ¿Querés eliminar la partida de <span className="text-foreground font-semibold">{matchToDelete.own_champion_name || 'este campeón'}</span>?
+               {t('matches.queresEliminarLaPartida')} <span className="text-foreground font-semibold">{matchToDelete.own_champion_name || t('common.thisChampion')}</span>?
               </p>
 
               <div className="flex gap-2">
@@ -332,7 +334,7 @@ export default function Matches() {
                   onClick={() => setMatchToDelete(null)}
                   className="flex-1 px-4 py-2 rounded-lg bg-secondary border border-border text-sm text-muted-foreground hover:text-foreground transition-all"
                 >
-                  Cancelar
+                 {t('common.cancel')}
                 </button>
                 <button
                   type="button"
@@ -340,7 +342,7 @@ export default function Matches() {
                   disabled={deleteMutation.isPending}
                   className="flex-1 px-4 py-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                  {deleteMutation.isPending ? t('builds.eliminando') : t('common.delete')}
                 </button>
               </div>
             </div>
@@ -351,25 +353,25 @@ export default function Matches() {
       {matches.length > 0 && (
         <div className="rd-matches-metrics grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MatchMetric
-            label="Partidas"
+            label={t('nav.matches')}
             value={filtered.length}
-            sub="según filtros activos"
+            sub={t('matches.segunFiltrosActivos')}
             icon={Swords}
             tone="primary"
           />
 
           <MatchMetric
-            label="Winrate"
+            label={t('goals.metric.winrate')}
             value={wr !== null ? `${wr}%` : '—'}
-            sub={wr !== null ? 'rendimiento filtrado' : 'sin muestra'}
+            sub={wr !== null ? t('matches.rendimientoFiltrado') : t('matches.sinMuestra')}
             icon={Trophy}
             tone={wrTone}
           />
 
           <MatchMetric
-            label="Record"
+            label={t('matches.record')}
             value={`${wins}V / ${losses}D`}
-            sub="victorias y derrotas"
+            sub={t('matches.victoriasYDerrotas')}
             icon={Number(wr) >= 50 ? Shield : Skull}
             tone={Number(wr) >= 50 ? 'green' : 'red'}
           />
@@ -387,7 +389,7 @@ export default function Matches() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar por campeón..."
+              placeholder={t('matches.buscarPorCampeon')}
               className="w-full bg-secondary/70 border border-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
@@ -397,12 +399,12 @@ export default function Matches() {
             onChange={e => setLaneFilter(e.target.value)}
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">{compactFilters ? 'Línea' : 'Todas las líneas'}</option>
-            <option value="top">Top</option>
-            <option value="jungler">Jungler</option>
-            <option value="mid">Mid</option>
-            <option value="adc">ADC</option>
-            <option value="support">Support</option>
+            <option value="all">{compactFilters ? t('goals.filterLabels.lanes') : t('library.todasLasLineas')}</option>
+            <option value="top">{t('lanes.top')}</option>
+            <option value="jungler">{t('builds.jungler')}</option>
+            <option value="mid">{t('lanes.mid')}</option>
+            <option value="adc">{t('lanes.adc')}</option>
+            <option value="support">{t('lanes.support')}</option>
           </select>
 
           <select
@@ -410,9 +412,9 @@ export default function Matches() {
             onChange={e => setResultFilter(e.target.value)}
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">{compactFilters ? 'Resultado' : 'Todos los resultados'}</option>
-            <option value="win">Victorias</option>
-            <option value="loss">Derrotas</option>
+            <option value="all">{compactFilters ? t('matches.resultado') : t('matches.todosLosResultados')}</option>
+            <option value="win">{t('goals.stat.victorias')}</option>
+            <option value="loss">{t('matches.derrotas')}</option>
           </select>
 
           <select
@@ -420,7 +422,7 @@ export default function Matches() {
             onChange={e => setMatchTypeFilter(e.target.value)}
             className="bg-secondary/70 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">{compactFilters ? 'Tipo' : 'Todos los tipos'}</option>
+            <option value="all">{compactFilters ? t('matches.tipo') : t('matches.todosLosTipos')}</option>
             {MATCH_TYPES.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
@@ -439,8 +441,8 @@ export default function Matches() {
           <div className="rd-card p-6">
             <EmptyState
               icon={Swords}
-              title="Sin partidas registradas"
-              description="Registrá tu primera partida para comenzar a trackear tu rendimiento."
+              title={t('matches.sinPartidasRegistradas')}
+              description={t('matches.registraTuPrimeraPartida')}
               action={
                 <button
                   onClick={() => setShowForm(true)}
@@ -448,7 +450,7 @@ export default function Matches() {
                 >
                   <Plus size={16} className="text-primary" />
                   <span className="text-sm font-semibold text-foreground group-hover:text-primary">
-                    Registrar Partida
+                   {t('matches.registrarPartida')}
                   </span>
                 </button>
               }

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { GOAL_LIMITS } from '../../model/goalConstants';
 import { INPUT_CLASS } from '../goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 const normalize = value => String(value || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -10,6 +11,7 @@ const normalize = value => String(value || '').normalize('NFD').replace(/[̀-ͯ]
  * @param {{ options: any[], value: { id?: string|null, name: string }[], onChange: (value: { id?: string|null, name: string }[]) => void, disabled?: boolean }} props
  */
 export default function ChampionMultiSelect({ options, value, onChange, disabled = false }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const selectedNames = new Set(value.map(champion => normalize(champion.name)));
   const full = value.length >= GOAL_LIMITS.MAX_CHAMPIONS;
@@ -35,7 +37,7 @@ export default function ChampionMultiSelect({ options, value, onChange, disabled
             <span key={champion.name} className="inline-flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 text-xs text-primary">
               {champion.name}
               {!disabled && (
-                <button type="button" onClick={() => toggle(champion)} aria-label={`Quitar ${champion.name}`} className="hover:text-foreground">
+                <button type="button" onClick={() => toggle(champion)} aria-label={t('common.removeName', { name: champion.name })} className="hover:text-foreground">
                   <X size={12} />
                 </button>
               )}
@@ -51,9 +53,9 @@ export default function ChampionMultiSelect({ options, value, onChange, disabled
             <input
               value={search}
               onChange={event => setSearch(event.target.value)}
-              placeholder="Buscar campeón..."
+              placeholder={t('common.searchChampionPlaceholder')}
               className={`${INPUT_CLASS} pl-9`}
-              aria-label="Buscar campeón"
+              aria-label={t('common.searchChampion')}
             />
           </div>
           <div className="grid max-h-40 grid-cols-6 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-8 md:grid-cols-10 xl:grid-cols-12">

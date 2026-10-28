@@ -1,5 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 import { METRIC_KIND, PERIOD_STATUS } from '../model/goalConstants';
+import { useT } from '@/lib/LocaleContext';
 
 /**
  * Aviso de evidencia insuficiente en objetivos de rendimiento.
@@ -7,13 +8,14 @@ import { METRIC_KIND, PERIOD_STATUS } from '../model/goalConstants';
  * @param {{ evaluation: import('../model/goalConstants').GoalEvaluation, compact?: boolean }} props
  */
 export default function InsufficientSampleNotice({ evaluation, compact = false }) {
+  const t = useT();
   if (evaluation.kind !== METRIC_KIND.PERFORMANCE) return null;
   if (evaluation.periodStatus === PERIOD_STATUS.SCHEDULED) return null;
   const missing = evaluation.minSample - evaluation.sampleSize;
   if (missing <= 0) return null;
 
   const closed = evaluation.periodStatus === PERIOD_STATUS.CLOSED;
-  const partidas = missing === 1 ? 'partida válida' : 'partidas válidas';
+  const one = missing === 1;
 
   if (compact) {
     return (
@@ -21,8 +23,8 @@ export default function InsufficientSampleNotice({ evaluation, compact = false }
         <AlertTriangle size={13} className="shrink-0 text-amber-300" />
         <span className="line-clamp-1">
           {closed
-            ? `Evidencia insuficiente: cerró con ${evaluation.sampleSize}/${evaluation.minSample} partidas.`
-            : `Evidencia insuficiente: faltan ${missing} ${partidas}.`}
+            ? t('goals.sampleNotice.closedShort', { sample: evaluation.sampleSize, min: evaluation.minSample })
+            : t(one ? 'goals.sampleNotice.missingShortOne' : 'goals.sampleNotice.missingShortOther', { count: missing })}
         </span>
       </p>
     );
@@ -33,8 +35,8 @@ export default function InsufficientSampleNotice({ evaluation, compact = false }
       <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-300" />
       <p>
         {closed
-          ? `Evidencia insuficiente: el período cerró con ${evaluation.sampleSize} de ${evaluation.minSample} partidas válidas necesarias, así que el resultado no es concluyente.`
-          : `Evidencia insuficiente: faltan ${missing} ${partidas} para llegar a la muestra mínima de ${evaluation.minSample}.`}
+          ? t('goals.sampleNotice.closed', { sample: evaluation.sampleSize, min: evaluation.minSample })
+          : t(one ? 'goals.sampleNotice.missingOne' : 'goals.sampleNotice.missingOther', { count: missing, min: evaluation.minSample })}
       </p>
     </div>
   );

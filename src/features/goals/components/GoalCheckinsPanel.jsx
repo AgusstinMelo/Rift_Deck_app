@@ -9,6 +9,7 @@ import { validateCheckinInput } from '../validation/checkinSchema';
 import ConfirmDialog from './ConfirmDialog';
 import Field from './form/Field';
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, INPUT_CLASS } from './goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 function defaultDate(goal) {
   const today = todayIn(goal.timezone);
@@ -18,6 +19,7 @@ function defaultDate(goal) {
 }
 
 function CheckinForm({ goal, initial, pending, onSubmit, onCancel }) {
+  const t = useT();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState(/** @type {Record<string, string>} */ ({}));
   const set = (key, value) => setValues(current => ({ ...current, [key]: value }));
@@ -35,21 +37,21 @@ function CheckinForm({ goal, initial, pending, onSubmit, onCancel }) {
 
   return (
     <form onSubmit={submit} className="grid gap-3 sm:grid-cols-[8rem_10rem_minmax(0,1fr)_auto] sm:items-start">
-      <Field label={`Cantidad (${goal.unit})`} error={errors.amount}>
+      <Field label={t('goals.checkins.amountWithUnit', { unit: goal.unit })} error={errors.amount}>
         <input type="number" inputMode="decimal" min="0.01" step="0.01" value={values.amount}
-          onChange={event => set('amount', event.target.value)} className={INPUT_CLASS} aria-label="Cantidad" />
+          onChange={event => set('amount', event.target.value)} className={INPUT_CLASS} aria-label={t('common.amount')} />
       </Field>
-      <Field label="Fecha" error={errors.date}>
-        <input type="date" value={values.date} onChange={event => set('date', event.target.value)} className={INPUT_CLASS} aria-label="Fecha" />
+      <Field label={t('common.date')} error={errors.date}>
+        <input type="date" value={values.date} onChange={event => set('date', event.target.value)} className={INPUT_CLASS} aria-label={t('common.date')} />
       </Field>
-      <Field label="Nota (opcional)" error={errors.note}>
+      <Field label={t('common.noteOptional')} error={errors.note}>
         <input value={values.note} maxLength={GOAL_LIMITS.NOTE_MAX} onChange={event => set('note', event.target.value)}
-          className={INPUT_CLASS} aria-label="Nota" />
+          className={INPUT_CLASS} aria-label={t('common.note')} />
       </Field>
       <div className="flex gap-2 sm:pt-5">
-        {onCancel && <button type="button" onClick={onCancel} className={BUTTON_SECONDARY}>Cancelar</button>}
+        {onCancel && <button type="button" onClick={onCancel} className={BUTTON_SECONDARY}>{t('common.cancel')}</button>}
         <button type="submit" disabled={pending} className={BUTTON_PRIMARY}>
-          <Plus size={15} /> {pending ? 'Guardando...' : initial.id ? 'Guardar' : 'Registrar'}
+          <Plus size={15} /> {pending ? t('common.saving') : t(initial.id ? 'common.save' : 'common.register')}
         </button>
       </div>
     </form>
@@ -61,6 +63,7 @@ function CheckinForm({ goal, initial, pending, onSubmit, onCancel }) {
  * @param {{ goal: any, checkins: any[] }} props
  */
 export default function GoalCheckinsPanel({ goal, checkins }) {
+  const t = useT();
   const mutations = useGoalMutations();
   const [editingId, setEditingId] = useState(/** @type {string|null} */ (null));
   const [toDelete, setToDelete] = useState(/** @type {any} */ (null));
@@ -69,7 +72,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
 
   const onError = setErrors => error => {
     if (error?.errors) setErrors(error.errors);
-    notify({ variant: 'destructive', title: 'No se pudo guardar el check-in', description: error?.message || 'Intentá nuevamente.' });
+    notify({ variant: 'destructive', title: t('goals.checkins.saveError'), description: error?.message || t('common.tryAgain') });
   };
 
   const create = (values, setErrors) => mutations.createCheckin.mutate({ goal, input: values }, {
@@ -84,7 +87,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
 
   return (
     <section className="rd-card rd-goal-panel p-4 space-y-4">
-      <h2 className="rd-card-title">Check-ins</h2>
+      <h2 className="rd-card-title">{t('goals.checkins.title')}</h2>
 
       <CheckinForm
         key={formKey}
@@ -97,7 +100,7 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
 
       <div className="rd-goal-panel-scroll">
       {sorted.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Todavía no registraste check-ins.</p>
+        <p className="text-sm text-muted-foreground">{t('goals.checkins.empty')}</p>
       ) : (
         <ul className="divide-y divide-border/60">
           {sorted.map(checkin => (
@@ -118,10 +121,10 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
                       {formatDate(checkin.checkin_date)}{checkin.note ? ` · ${checkin.note}` : ''}
                     </p>
                   </div>
-                  <button type="button" onClick={() => setEditingId(checkin.id)} className="rounded-lg p-2 text-muted-foreground hover:text-primary" aria-label="Editar check-in">
+                  <button type="button" onClick={() => setEditingId(checkin.id)} className="rounded-lg p-2 text-muted-foreground hover:text-primary" aria-label={t('goals.checkins.edit')}>
                     <Pencil size={15} />
                   </button>
-                  <button type="button" onClick={() => setToDelete(checkin)} className="rounded-lg p-2 text-muted-foreground hover:text-red-400" aria-label="Eliminar check-in">
+                  <button type="button" onClick={() => setToDelete(checkin)} className="rounded-lg p-2 text-muted-foreground hover:text-red-400" aria-label={t('goals.checkins.delete')}>
                     <Trash2 size={15} />
                   </button>
                 </div>
@@ -134,9 +137,9 @@ export default function GoalCheckinsPanel({ goal, checkins }) {
 
       <ConfirmDialog
         open={!!toDelete}
-        title="Eliminar check-in"
-        description="El progreso del objetivo se recalcula al eliminarlo."
-        confirmLabel="Eliminar"
+        title={t('goals.checkins.delete')}
+        description={t('goals.checkins.deleteDescription')}
+        confirmLabel={t('common.delete')}
         tone="danger"
         pending={mutations.deleteCheckin.isPending}
         onCancel={() => setToDelete(null)}

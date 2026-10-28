@@ -13,47 +13,51 @@ import GoalsHistory from '@/features/goals/components/GoalsHistory';
 import GoalsSummary from '@/features/goals/components/GoalsSummary';
 import GoalWizard from '@/features/goals/components/wizard/GoalWizard';
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/features/goals/components/goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 function CreateGoalButton() {
+  const t = useT();
   return (
     <Link to="/objetivos/nuevo" className="rd-action-card group px-4 py-3">
       <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
         <Plus size={18} className="text-primary" />
       </div>
       <div className="text-left">
-        <p className="font-semibold text-sm text-foreground group-hover:text-primary">Nuevo objetivo</p>
-        <p className="hidden sm:block text-xs text-muted-foreground">Elegí una meta y medila</p>
+        <p className="font-semibold text-sm text-foreground group-hover:text-primary">{t('goals.page.newGoal')}</p>
+        <p className="hidden sm:block text-xs text-muted-foreground">{t('goals.page.newGoalHint')}</p>
       </div>
     </Link>
   );
 }
 
 const OVERVIEW_TABS = [
-  { id: 'activos', label: 'Objetivos activos' },
-  { id: 'historial', label: 'Historial' },
+  { id: 'activos', label: 'goals.page.activeTab' },
+  { id: 'historial', label: 'goals.page.historyTab' },
 ];
 
 /** Aviso de la cuenta free: 1 objetivo en curso; Premium, ilimitados. */
 function FreePlanHint({ openCount, limit }) {
+  const t = useT();
   return (
     <p className="text-xs text-muted-foreground mt-1">
-      Cuenta free: {Math.min(openCount, limit)}/{limit} objetivo en curso ·{' '}
-      <Link to="/membresia" className="text-primary hover:underline">Premium: ilimitados</Link>
+      {t('goals.page.freePlan', { open: Math.min(openCount, limit), limit })}
+      <Link to="/membresia" className="text-primary hover:underline">{t('goals.page.premiumUnlimited')}</Link>
     </p>
   );
 }
 
 function GoalLimitReached() {
+  const t = useT();
   return (
     <div className="rd-card p-6">
       <EmptyState
         icon={Crown}
-        title="Llegaste al límite de la cuenta free"
-        description="Con la cuenta free podés tener 1 objetivo en curso. Cuando termine, o si lo cancelás o archivás, podés crear otro. Con Premium creás objetivos ilimitados."
+        title={t('goals.page.limitTitle')}
+        description={t('goals.page.limitDescription')}
         action={(
           <div className="flex flex-wrap justify-center gap-2">
-            <Link to="/membresia" className={BUTTON_PRIMARY}><Crown size={15} /> Ver Premium</Link>
-            <Link to="/objetivos" className={BUTTON_SECONDARY}><ArrowLeft size={15} /> Volver a Objetivos</Link>
+            <Link to="/membresia" className={BUTTON_PRIMARY}><Crown size={15} /> {t('goals.page.seePremium')}</Link>
+            <Link to="/objetivos" className={BUTTON_SECONDARY}><ArrowLeft size={15} /> {t('goals.errorBoundary.back')}</Link>
           </div>
         )}
       />
@@ -62,15 +66,16 @@ function GoalLimitReached() {
 }
 
 function GoalsHeader({ limit }) {
+  const t = useT();
   return (
     <header className="rd-goals-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <div className="rd-page-kicker flex items-center gap-2 mb-1">
           <span className="w-8 h-px bg-primary/50" />
-          <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Metas personales</span>
+          <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('goals.page.kicker')}</span>
         </div>
-        <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">Objetivos</h1>
-        <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">Metas medidas con tus partidas registradas.</p>
+        <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{t('goals.page.title')}</h1>
+        <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">{t('goals.page.subtitle')}</p>
         {limit && <FreePlanHint openCount={limit.openCount} limit={limit.max} />}
       </div>
       <CreateGoalButton />
@@ -80,8 +85,9 @@ function GoalsHeader({ limit }) {
 
 /** Barra de pestañas de ancho completo, igual que en Estadísticas. */
 function GoalsTabs({ activeTab, onTabChange, counts }) {
+  const t = useT();
   return (
-    <div className="rd-goals-header rd-panel-tabs" role="tablist" aria-label="Secciones de Objetivos">
+    <div className="rd-goals-header rd-panel-tabs" role="tablist" aria-label={t('goals.page.sectionsAria')}>
       {OVERVIEW_TABS.map(tab => (
         <button
           key={tab.id}
@@ -91,7 +97,7 @@ function GoalsTabs({ activeTab, onTabChange, counts }) {
           onClick={() => onTabChange(tab.id)}
           className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
         >
-          {tab.label} ({counts[tab.id]})
+          {t(tab.label)} ({counts[tab.id]})
         </button>
       ))}
     </div>
@@ -99,8 +105,9 @@ function GoalsTabs({ activeTab, onTabChange, counts }) {
 }
 
 function LoadingState() {
+  const t = useT();
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Cargando objetivos">
+    <div className="space-y-4" aria-busy="true" aria-label={t('goals.page.loading')}>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         {Array.from({ length: 5 }, (_, i) => <div key={i} className="rd-card h-20 animate-pulse" />)}
       </div>
@@ -112,33 +119,35 @@ function LoadingState() {
 }
 
 function ErrorState({ onRetry }) {
+  const t = useT();
   return (
     <div className="rd-card p-6">
       <EmptyState
         icon={AlertCircle}
-        title="No se pudieron cargar tus objetivos"
-        description="Revisá tu conexión e intentá nuevamente."
-        action={<button type="button" onClick={onRetry} className={BUTTON_SECONDARY}>Reintentar</button>}
+        title={t('goals.page.loadError')}
+        description={t('common.loadError')}
+        action={<button type="button" onClick={onRetry} className={BUTTON_SECONDARY}>{t('common.retry')}</button>}
       />
     </div>
   );
 }
 
 function ActiveGoalsPanel({ current, all }) {
+  const t = useT();
   return (
-    <section className="rd-goals-panel" aria-label="Objetivos activos">
+    <section className="rd-goals-panel" aria-label={t('goals.page.activeTab')}>
       <GoalsSummary current={current} all={all} />
       {current.length === 0 ? (
         <div className="rd-card p-6">
           <EmptyState
             icon={Target}
-            title="Sin objetivos activos"
-            description="Creá un objetivo para seguir tu progreso con tus partidas registradas."
+            title={t('goals.page.noActive')}
+            description={t('goals.page.noActiveDescription')}
             action={<CreateGoalButton />}
           />
         </div>
       ) : (
-        <GoalsCarousel items={current} label="Objetivos activos" />
+        <GoalsCarousel items={current} label={t('goals.page.activeTab')} />
       )}
     </section>
   );
@@ -166,13 +175,14 @@ function GoalsOverview({ items, limit }) {
 }
 
 function NotFound() {
+  const t = useT();
   return (
     <div className="rd-card p-6">
       <EmptyState
         icon={Target}
-        title="Objetivo no encontrado"
-        description="Puede que no exista o que no te pertenezca."
-        action={<Link to="/objetivos" className={BUTTON_SECONDARY}><ArrowLeft size={15} /> Volver a Objetivos</Link>}
+        title={t('goals.page.notFound')}
+        description={t('goals.page.notFoundDescription')}
+        action={<Link to="/objetivos" className={BUTTON_SECONDARY}><ArrowLeft size={15} /> {t('goals.errorBoundary.back')}</Link>}
       />
     </div>
   );
@@ -188,16 +198,17 @@ function GoalRoute({ items, matches, now, editing = false }) {
 }
 
 function NewGoal({ matches, limitReached }) {
+  const t = useT();
   return (
     <div className="rd-goal-flow space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
         <div>
           <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-            <ArrowLeft size={14} /> Objetivos
+            <ArrowLeft size={14} /> {t('goals.goalsLink')}
           </Link>
-          <h1 className="rd-page-title font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">Nuevo objetivo</h1>
+          <h1 className="rd-page-title font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">{t('goals.page.newGoal')}</h1>
         </div>
-        <p className="rd-page-subtitle text-sm text-muted-foreground">Elegí una meta, configurala y revisá cómo se va a medir.</p>
+        <p className="rd-page-subtitle text-sm text-muted-foreground">{t('goals.page.newGoalSubtitle')}</p>
       </header>
       {limitReached ? <GoalLimitReached /> : <GoalWizard matches={matches} />}
     </div>
@@ -205,6 +216,7 @@ function NewGoal({ matches, limitReached }) {
 }
 
 export default function Goals() {
+  const t = useT();
   const location = useLocation();
   const isOverview = Boolean(useMatch('/objetivos'));
   const access = useGoalsAccess();

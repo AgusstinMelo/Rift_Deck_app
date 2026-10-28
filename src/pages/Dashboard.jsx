@@ -19,7 +19,7 @@ import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import TierBadge from '@/components/ui/TierBadge';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
@@ -27,34 +27,41 @@ import { computeInsights } from '@/hooks/useInsights';
 import { filterByPatch, getPatchGroup, patchMatchesSelection } from '@/utils/patches';
 import { matchKda } from '@/domain/matchStats';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
+import { tr } from '@/i18n/uiI18n';
 
 const COACH_IMAGE_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png';
 
 const DASHBOARD_TABS = [
-  { id: 'summary', label: 'Resumen' },
-  { id: 'activity', label: 'Actividad' },
-  { id: 'meta', label: 'Meta' },
+  { id: 'summary', get label() { return tr('dashboard.tabs.summary'); } },
+  { id: 'activity', get label() { return tr('dashboard.tabs.activity'); } },
+  { id: 'meta', get label() { return tr('dashboard.tabs.meta'); } },
 ];
 
 const DASHBOARD_HEADINGS = {
   summary: {
-    title: 'Dashboard',
-    description: 'Analiza tu rendimiento, builds y meta actual.',
+    get title() { return tr('dashboard.headings.summaryTitle'); },
+    get description() { return tr('dashboard.headings.summaryDescription'); },
   },
   activity: {
-    title: 'Actividad',
-    description: 'Repasa tus últimas partidas, builds y matchups.',
+    get title() { return tr('dashboard.headings.activityTitle'); },
+    get description() { return tr('dashboard.headings.activityDescription'); },
   },
   meta: {
-    title: 'Meta',
-    description: 'Compara el parche actual con tus campeones principales.',
+    get title() { return tr('dashboard.headings.metaTitle'); },
+    get description() { return tr('dashboard.headings.metaDescription'); },
   },
 };
 
 // Tarjetas de Actividad; en mobile vertical son un carrusel y estos chips saltan entre ellas.
-const ACTIVITY_SLIDES = ['Partidas', 'Builds', 'Matchups'];
+const ACTIVITY_SLIDES = ['dashboard.slides.matches', 'dashboard.slides.builds', 'dashboard.slides.matchups'];
 
-const LANE_LABELS = { top: 'TOP', jungler: 'JUNGLA', mid: 'MID', adc: 'ADC', support: 'SUPPORT' };
+const LANE_LABELS = {
+  get top() { return tr('lanes.top').toUpperCase(); },
+  get jungler() { return tr('lanes.jungler').toUpperCase(); },
+  get mid() { return tr('lanes.mid').toUpperCase(); },
+  get adc() { return tr('lanes.adc').toUpperCase(); },
+  get support() { return tr('lanes.support').toUpperCase(); },
+};
 const LANE_ICONS = {
   top: 'https://media.base44.com/images/public/6a0005628d71002f05120013/abe747f2d_top.png',
   jungler: 'https://media.base44.com/images/public/6a0005628d71002f05120013/0b50ba53f_jungle.png',
@@ -77,6 +84,7 @@ const formatKdaLine = (match) =>
   [match?.kills, match?.deaths, match?.assists].map(value => value ?? '—').join('/');
 
 export default function Dashboard() {
+  const t = useT();
   const { user } = useAuth();
   const { entityName } = useCatalogText();
   const [patchFilter, setPatchFilter] = useState('');
@@ -200,7 +208,8 @@ export default function Dashboard() {
     spells: spellsData,
     limit: 1,
     minimum: 1,
-  })[0] || null, [sortedMatches, tierlistHistory, wrItems, builds, champions, runes, spellsData]);
+  // `t` cambia con el idioma: los textos del Coach se arman en ese idioma.
+  })[0] || null, [sortedMatches, tierlistHistory, wrItems, builds, champions, runes, spellsData, t]);
 
   const bestRecentMatch = [...recentSevenDayMatches]
     .filter(match => match.result === 'win')
@@ -340,13 +349,13 @@ export default function Dashboard() {
         <div>
           <div className="rd-page-kicker rd-dashboard-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
-            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Centro Táctico</span>
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('dashboard.riftDeckCentroTactico')}</span>
           </div>
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{activeHeading.title}</h1>
           <p className="rd-page-subtitle rd-dashboard-description mt-0.5 text-sm text-muted-foreground">{activeHeading.description}</p>
         </div>
 
-        <div className="rd-panel-tabs rd-dashboard-tablist" role="tablist" aria-label="Secciones del Dashboard">
+        <div className="rd-panel-tabs rd-dashboard-tablist" role="tablist" aria-label={t('dashboard.seccionesDelDashboard')}>
           {DASHBOARD_TABS.map(tab => (
             <button
               key={tab.id}
@@ -364,12 +373,12 @@ export default function Dashboard() {
         <div className="flex flex-col items-end gap-2">
           <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground rd-status-pill">
             <span className={`w-2 h-2 rounded-full shrink-0 ${latestSuccessExec ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,.65)]' : 'bg-red-400'}`} />
-            <span>Datos actualizados</span>
+            <span>{t('dashboard.datosActualizados')}</span>
             <span className="text-border">|</span>
-            <span>{latestSuccessExec?.patch ? `Parche ${latestSuccessExec.patch}` : 'Sin parche'}</span>
+            <span>{latestSuccessExec?.patch ? t('dashboard.parche', { patch: latestSuccessExec.patch }) : t('dashboard.sinParche')}</span>
             {latestSuccessExec?.snapshot_date && <>
               <span className="text-border">|</span>
-              <span>Tierlist {formatDate(latestSuccessExec.snapshot_date)}</span>
+              <span>{t('nav.tierlist')} {formatDate(latestSuccessExec.snapshot_date)}</span>
             </>}
             <Sparkles size={14} className="text-primary" />
           </div>
@@ -388,55 +397,55 @@ export default function Dashboard() {
 
       <main className="rd-dashboard-panel rd-analytics-panel">
         {activeTab === 'summary' && (
-          <section className="rd-dashboard-summary" aria-label="Resumen">
+          <section className="rd-dashboard-summary" aria-label={t('goals.wizard.summary')}>
             <div className="rd-dashboard-stats grid grid-cols-2 lg:grid-cols-4 gap-3 min-h-0">
               <article className="rd-card rd-dashboard-stat">
-                <div className="flex items-center justify-between"><span className="rd-label">Partidas</span><Swords size={17} className="text-primary" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('nav.matches')}</span><Swords size={17} className="text-primary" /></div>
                 <p className="font-rajdhani rd-dashboard-stat-value text-primary">{totalMatches || '—'}</p>
                 <p className="text-xs text-muted-foreground"><span className="text-green-400">{wins}V</span> / <span className="text-red-400">{totalMatches - wins}D</span></p>
               </article>
               <article className="rd-card rd-dashboard-stat">
-                <div className="flex items-center justify-between"><span className="rd-label">Winrate</span><Trophy size={17} className="text-primary" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('goals.metric.winrate')}</span><Trophy size={17} className="text-primary" /></div>
                 <p className={`font-rajdhani rd-dashboard-stat-value ${wrColor}`}>{winrate === null ? '—' : `${winrate.toFixed(1)}%`}</p>
-                <p className="text-xs text-muted-foreground">Rendimiento global filtrado</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.rendimientoGlobalFiltrado')}</p>
               </article>
               <article className="rd-card rd-dashboard-stat rd-dashboard-stat-with-avatar">
-                <div className="flex items-center justify-between"><span className="rd-label">Campeón más usado</span><Target size={17} className="text-accent" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('dashboard.campeonMasUsado')}</span><Target size={17} className="text-accent" /></div>
                 <div className="rd-dashboard-stat-champ flex items-center gap-3 min-h-0">
                   {renderChampionAvatar(mostUsed?.[0], 'w-10 h-10 rd-dashboard-stat-avatar')}
-                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="rd-dashboard-stat-hint text-xs text-muted-foreground">Pick principal del historial</p></div>
+                  <div className="min-w-0"><p className="font-rajdhani font-bold text-lg text-accent truncate">{mostUsed?.[0] || '—'}</p><p className="rd-dashboard-stat-hint text-xs text-muted-foreground">{t('dashboard.pickPrincipalDelHistorial')}</p></div>
                 </div>
                 {mostUsed ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
-                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{mostUsed[1].length} partidas</span>
-                  <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${mostUsedWR >= 50 ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{mostUsedWR.toFixed(0)}% WR</span>
-                </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
+                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{mostUsed[1].length} {t('goals.unit.partidas')}</span>
+                  <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${mostUsedWR >= 50 ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{mostUsedWR.toFixed(0)}{t('dashboard.wr')}</span>
+                </div> : <p className="text-xs text-muted-foreground">{t('dashboard.sinPartidasRegistradas')}</p>}
               </article>
               <article className="rd-card rd-dashboard-stat rd-card-watermark">
-                <div className="flex items-center justify-between"><span className="rd-label">KDA promedio</span><BarChart3 size={17} className="text-primary" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('goals.metric.promedio_kda')}</span><BarChart3 size={17} className="text-primary" /></div>
                 <p className="font-rajdhani rd-dashboard-stat-value text-primary">{averageSevenDayKda === null ? '—' : averageSevenDayKda.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">{recentSevenDayMatches.length} partidas · últimos 7 días</p>
+                <p className="text-xs text-muted-foreground">{recentSevenDayMatches.length} {t('dashboard.partidasUltimos7Dias')}</p>
               </article>
 
               <article className="rd-card rd-dashboard-stat">
-                <div className="flex items-center justify-between"><span className="rd-label">Forma reciente</span><TrendingUp size={17} className="text-primary" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('dashboard.formaReciente')}</span><TrendingUp size={17} className="text-primary" /></div>
                 <p className={`font-rajdhani rd-dashboard-stat-value ${recentFormWr === null ? 'text-muted-foreground' : recentFormWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{recentFormWr === null ? '—' : `${recentFormWr.toFixed(0)}%`}</p>
-                <p className="text-xs text-muted-foreground">WR en las últimas {lastTenMatches.length} partidas</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.wrEnLasUltimas')} {lastTenMatches.length} {t('goals.unit.partidas')}</p>
               </article>
 
               <article className="rd-card rd-dashboard-stat">
-                <div className="flex items-center justify-between"><span className="rd-label">Racha actual</span><Flame size={17} className={streakResult === 'win' ? 'text-green-400' : 'text-red-400'} /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('dashboard.rachaActual')}</span><Flame size={17} className={streakResult === 'win' ? 'text-green-400' : 'text-red-400'} /></div>
                 <p className={`font-rajdhani rd-dashboard-stat-value ${!streakResult ? 'text-muted-foreground' : streakResult === 'win' ? 'text-green-400' : 'text-red-400'}`}>{streakResult ? currentStreakCount : '—'}</p>
-                <p className="text-xs text-muted-foreground">{streakResult ? `${streakResult === 'win' ? 'Victorias' : 'Derrotas'} consecutivas` : 'Sin partidas registradas'}</p>
+                <p className="text-xs text-muted-foreground">{streakResult ? t('dashboard.consecutivas', { value: streakResult === 'win' ? t('goals.stat.victorias') : t('dashboard.derrotas') }) : t('dashboard.sinPartidasRegistradas')}</p>
               </article>
 
               <article className="rd-card rd-dashboard-stat">
-                <div className="flex items-center justify-between"><span className="rd-label">Campeones utilizados</span><Users size={17} className="text-accent" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('dashboard.campeonesUtilizados')}</span><Users size={17} className="text-accent" /></div>
                 <p className="font-rajdhani rd-dashboard-stat-value text-accent">{topChamps.length || '—'}</p>
-                <p className="text-xs text-muted-foreground">Picks diferentes registrados</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.picksDiferentesRegistrados')}</p>
               </article>
 
               <article className={`rd-card rd-dashboard-stat rd-card-watermark ${bestRecentMatch ? 'rd-dashboard-stat-with-avatar' : ''}`}>
-                <div className="flex items-center justify-between"><span className="rd-label">Mejor partida<span className="rd-dashboard-label-extra"> reciente</span></span><Trophy size={17} className="text-green-400" /></div>
+                <div className="flex items-center justify-between"><span className="rd-label">{t('dashboard.mejorPartida')}<span className="rd-dashboard-label-extra"> {t('dashboard.reciente')}</span></span><Trophy size={17} className="text-green-400" /></div>
                 {bestRecentMatch ? <div className="rd-dashboard-stat-champ flex items-center gap-3 min-h-0">
                   {renderChampionAvatar(bestRecentMatch.own_champion_name, 'w-10 h-10 rd-dashboard-stat-avatar')}
                   <div className="min-w-0 flex-1">
@@ -445,19 +454,19 @@ export default function Dashboard() {
                   </div>
                 </div> : <p className="font-rajdhani rd-dashboard-stat-value text-muted-foreground">—</p>}
                 {bestRecentMatch ? <div className="rd-dashboard-stat-tags flex items-center gap-2">
-                  <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${bestRecentMatch.result === 'win' ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{bestRecentMatch.result === 'win' ? 'Victoria' : 'Derrota'}</span>
-                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{formatKdaLine(bestRecentMatch)} · KDA {getKda(bestRecentMatch).toFixed(2)}</span>
-                </div> : <p className="text-xs text-muted-foreground">Sin partidas registradas</p>}
+                  <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${bestRecentMatch.result === 'win' ? 'border-green-400/25 bg-green-500/10 text-green-400' : 'border-red-400/25 bg-red-500/10 text-red-400'}`}>{bestRecentMatch.result === 'win' ? t('matches.victoria') : t('matches.derrota')}</span>
+                  <span className="rounded border border-border bg-secondary/80 px-2 py-0.5 text-[11px] text-muted-foreground">{formatKdaLine(bestRecentMatch)} {t('dashboard.kda')} {getKda(bestRecentMatch).toFixed(2)}</span>
+                </div> : <p className="text-xs text-muted-foreground">{t('dashboard.sinPartidasRegistradas')}</p>}
               </article>
             </div>
 
             <div className="rd-dashboard-side grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3 min-h-0">
               <article className="rd-card rd-card-watermark rd-dashboard-insight p-5 min-h-0 overflow-hidden">
                 <div className="flex items-start gap-4 h-full">
-                  <img src={COACH_IMAGE_URL} alt="Rift Deck Coach" className="rd-dashboard-insight-art w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
+                  <img src={COACH_IMAGE_URL} alt={t('dashboard.riftDeckCoach')} className="rd-dashboard-insight-art w-[88px] self-center object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.35)]" />
                   <div className="min-w-0 self-center">
-                    <p className="rd-section-kicker"><img src={COACH_IMAGE_URL} alt="" className="rd-dashboard-insight-icon" />Insight del día</p>
-                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="rd-dashboard-insight-thesis text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="rd-dashboard-insight-tip text-xs text-primary mt-3 line-clamp-2">Consejo: {topInsight.action}</p><button type="button" className="rd-dashboard-insight-more" onClick={() => setInsightOpen(true)}>Ver consejo <ChevronRight size={12} /></button></> : <p className="text-sm text-muted-foreground mt-2">Registrá más partidas para recibir insights personalizados.</p>}
+                    <p className="rd-section-kicker"><img src={COACH_IMAGE_URL} alt="" className="rd-dashboard-insight-icon" />{t('dashboard.insightDelDia')}</p>
+                    {topInsight ? <><h2 className="font-rajdhani text-xl font-bold text-foreground leading-tight mt-1">{topInsight.title}</h2><p className="rd-dashboard-insight-thesis text-sm text-muted-foreground leading-relaxed mt-2 line-clamp-3">{topInsight.thesis}</p><p className="rd-dashboard-insight-tip text-xs text-primary mt-3 line-clamp-2">{t('coach.consejo')} {topInsight.action}</p><button type="button" className="rd-dashboard-insight-more" onClick={() => setInsightOpen(true)}>{t('dashboard.verConsejo')} <ChevronRight size={12} /></button></> : <p className="text-sm text-muted-foreground mt-2">{t('dashboard.registraMasPartidasPara')}</p>}
                   </div>
                 </div>
               </article>
@@ -465,15 +474,15 @@ export default function Dashboard() {
             </div>
             {/* Solo se abre desde mobile, donde la tarjeta muestra únicamente el título. */}
             {insightOpen && topInsight && (
-              <div className="rd-insight-sheet" role="dialog" aria-modal="true" aria-label="Insight del día" onClick={() => setInsightOpen(false)}>
+              <div className="rd-insight-sheet" role="dialog" aria-modal="true" aria-label={t('dashboard.insightDelDia')} onClick={() => setInsightOpen(false)}>
                 <div className="rd-card rd-insight-sheet-panel" onClick={event => event.stopPropagation()}>
                   <div className="flex items-center justify-between gap-3">
-                    <p className="rd-label flex items-center gap-2"><img src={COACH_IMAGE_URL} alt="" className="h-[15px] w-[15px] object-contain" />Insight del día</p>
-                    <button type="button" onClick={() => setInsightOpen(false)} className="text-muted-foreground transition-colors hover:text-primary" aria-label="Cerrar"><X size={16} /></button>
+                    <p className="rd-label flex items-center gap-2"><img src={COACH_IMAGE_URL} alt="" className="h-[15px] w-[15px] object-contain" />{t('dashboard.insightDelDia')}</p>
+                    <button type="button" onClick={() => setInsightOpen(false)} className="text-muted-foreground transition-colors hover:text-primary" aria-label={t('dashboard.cerrar')}><X size={16} /></button>
                   </div>
                   <h2 className="font-rajdhani text-lg font-bold leading-tight text-foreground mt-2">{topInsight.title}</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed mt-2">{topInsight.thesis}</p>
-                  <p className="text-xs text-primary mt-3">Consejo: {topInsight.action}</p>
+                  <p className="text-xs text-primary mt-3">{t('coach.consejo')} {topInsight.action}</p>
                 </div>
               </div>
             )}
@@ -482,29 +491,29 @@ export default function Dashboard() {
 
         {activeTab === 'activity' && (
           <>
-          <div className="rd-dashboard-pager" aria-label="Tarjetas de actividad">
-            <button type="button" className="rd-arrow rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide - 1)} disabled={activitySlide === 0} aria-label="Tarjeta anterior"><ChevronLeft size={16} /></button>
+          <div className="rd-dashboard-pager" aria-label={t('dashboard.tarjetasDeActividad')}>
+            <button type="button" className="rd-arrow rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide - 1)} disabled={activitySlide === 0} aria-label={t('dashboard.tarjetaAnterior')}><ChevronLeft size={16} /></button>
             <div className="rd-dashboard-pager-chips">
               {ACTIVITY_SLIDES.map((label, index) => (
-                <button key={label} type="button" aria-pressed={activitySlide === index} onClick={() => goToActivitySlide(index)}>{label}</button>
+                <button key={label} type="button" aria-pressed={activitySlide === index} onClick={() => goToActivitySlide(index)}>{t(label)}</button>
               ))}
             </div>
-            <button type="button" className="rd-arrow rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide + 1)} disabled={activitySlide === ACTIVITY_SLIDES.length - 1} aria-label="Tarjeta siguiente"><ChevronRight size={16} /></button>
+            <button type="button" className="rd-arrow rd-dashboard-pager-arrow" onClick={() => goToActivitySlide(activitySlide + 1)} disabled={activitySlide === ACTIVITY_SLIDES.length - 1} aria-label={t('dashboard.tarjetaSiguiente')}><ChevronRight size={16} /></button>
           </div>
-          <section ref={activityRef} onScroll={handleActivityScroll} className="rd-dashboard-activity" aria-label="Actividad">
+          <section ref={activityRef} onScroll={handleActivityScroll} className="rd-dashboard-activity" aria-label={t('dashboard.actividad')}>
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Últimas partidas</h2><Link to="/matches" className="rd-link">Ver todas</Link></div>
+              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.ultimasPartidas')}</h2><Link to="/matches" className="rd-link">{t('dashboard.verTodas')}</Link></div>
               <div className="rd-dashboard-list rd-dashboard-match-list">
                 {latestMatches.length ? latestMatches.map(match => <div key={match.id} className="font-rajdhani rd-dashboard-row">
                   {renderChampionAvatar(match.own_champion_name, 'w-9 h-9')}
                   <div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{match.own_champion_name}</p><p className="text-[11px] text-muted-foreground">{match.lane} · {formatKdaLine(match)}</p></div>
-                  <div className="text-right"><p className={`text-xs font-bold ${match.result === 'win' ? 'text-green-400' : 'text-red-400'}`}>{match.result === 'win' ? 'Victoria' : 'Derrota'}</p><p className="text-[10px] text-muted-foreground">{formatDate(match.date)}</p></div>
-                </div>) : <p className="text-sm text-muted-foreground text-center my-auto">No hay partidas registradas.</p>}
+                  <div className="text-right"><p className={`text-xs font-bold ${match.result === 'win' ? 'text-green-400' : 'text-red-400'}`}>{match.result === 'win' ? t('matches.victoria') : t('matches.derrota')}</p><p className="text-[10px] text-muted-foreground">{formatDate(match.date)}</p></div>
+                </div>) : <p className="text-sm text-muted-foreground text-center my-auto">{t('dashboard.noHayPartidasRegistradas')}</p>}
               </div>
             </article>
 
             <article className="rd-card rd-card-watermark p-4 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Últimas builds</h2><Link to="/build-calculator" className="rd-link">Ver todas</Link></div>
+              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.ultimasBuilds')}</h2><Link to="/build-calculator" className="rd-link">{t('dashboard.verTodas')}</Link></div>
               <div className="rd-dashboard-list">
                 {buildsWithStats.length ? buildsWithStats.slice(0, 5).map(build => {
                   const keystone = runes.find(rune => rune.branch === 'Clave' && (build.additional_runes || []).includes(rune.name));
@@ -520,7 +529,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="rd-build-loadout">
-                      <div className="rd-build-keystone" title={keystone ? entityName(keystone) : 'Sin runa clave'}>
+                      <div className="rd-build-keystone" title={keystone ? entityName(keystone) : t('dashboard.sinRunaClave')}>
                         {keystone?.image_url
                           ? <img src={keystone.image_url} alt={entityName(keystone)} />
                           : <span>R</span>}
@@ -544,52 +553,52 @@ export default function Dashboard() {
 
                     {build.wr !== null && <span className="rd-build-winrate">{build.wr}%</span>}
                   </div>;
-                }) : <p className="text-sm text-muted-foreground text-center my-auto">No hay builds creadas.</p>}
+                }) : <p className="text-sm text-muted-foreground text-center my-auto">{t('dashboard.noHayBuildsCreadas')}</p>}
               </div>
             </article>
 
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">Análisis de matchups</h2><Link to="/stats" className="rd-link">Ampliar</Link></div>
+              <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.analisisDeMatchups')}</h2><Link to="/stats" className="rd-link">{t('dashboard.ampliar')}</Link></div>
               {matchupStats.length ? <div className="rd-dashboard-matchups grid grid-rows-2 gap-3 min-h-0 flex-1">
-                {[{ title: 'Favorables', rows: bestMatchups, positive: true }, { title: 'Problemáticos', rows: worstMatchups, positive: false }].map(group => <div key={group.title} className={`rd-dashboard-matchup-group rounded-xl border p-2 min-h-0 overflow-hidden ${group.positive ? 'bg-green-500/[0.05] border-green-400/15' : 'bg-red-500/[0.05] border-red-400/15'}`}><p className={`rd-mini-label ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{group.title}</p>{group.rows.map(item => <div key={item.champ} className="rd-dashboard-matchup-row flex items-center gap-2 min-h-0">{renderChampionAvatar(item.champ, 'w-6 h-6')}<span className="text-sm flex-1 truncate">{item.champ}</span><span className="text-[10px] text-muted-foreground">{item.total}p</span><span className={`text-xs font-bold ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{item.wr.toFixed(0)}%</span></div>)}</div>)}
-              </div> : <p className="text-sm text-muted-foreground text-center my-auto">Necesitás más partidas para detectar matchups.</p>}
+                {[{ title: t('dashboard.favorables'), rows: bestMatchups, positive: true }, { title: t('dashboard.problematicos'), rows: worstMatchups, positive: false }].map(group => <div key={group.title} className={`rd-dashboard-matchup-group rounded-xl border p-2 min-h-0 overflow-hidden ${group.positive ? 'bg-green-500/[0.05] border-green-400/15' : 'bg-red-500/[0.05] border-red-400/15'}`}><p className={`rd-mini-label ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{group.title}</p>{group.rows.map(item => <div key={item.champ} className="rd-dashboard-matchup-row flex items-center gap-2 min-h-0">{renderChampionAvatar(item.champ, 'w-6 h-6')}<span className="text-sm flex-1 truncate">{item.champ}</span><span className="text-[10px] text-muted-foreground">{item.total}p</span><span className={`text-xs font-bold ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{item.wr.toFixed(0)}%</span></div>)}</div>)}
+              </div> : <p className="text-sm text-muted-foreground text-center my-auto">{t('dashboard.necesitasMasPartidasPara')}</p>}
             </article>
           </section>
           </>
         )}
 
         {activeTab === 'meta' && (
-          <section className="rd-dashboard-meta" aria-label="Meta">
+          <section className="rd-dashboard-meta" aria-label={t('goals.target')}>
             <article className="rd-card p-4 min-h-0 overflow-hidden">
-              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">Meta por línea</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Parche {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">Tierlist<span className="rd-dashboard-label-extra"> completa</span> <ChevronRight size={12} /></Link></div>
-              <div className="rd-meta-lane-picker" role="tablist" aria-label="Línea">
+              <div className="flex items-center justify-between mb-3"><div className="rd-inline-section-heading"><h2 className="rd-card-title">{t('dashboard.metaPorLinea')}</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">{t('goals.filterLabels.patches')} {latestSuccessExec?.patch || 'actual'}</p></div><Link to="/tierlist" className="rd-link flex items-center gap-1">{t('nav.tierlist')}<span className="rd-dashboard-label-extra"> {t('dashboard.completa')}</span> <ChevronRight size={12} /></Link></div>
+              <div className="rd-meta-lane-picker" role="tablist" aria-label={t('goals.filterLabels.lanes')}>
                 {laneHighlights.map(({ lane }) => <button key={lane} type="button" role="tab" aria-selected={metaLane === lane} aria-label={LANE_LABELS[lane]} title={LANE_LABELS[lane]} onClick={() => setMetaLane(lane)} className={`rd-meta-lane-pick ${metaLane === lane ? 'rd-meta-lane-pick-active' : ''}`}><img src={LANE_ICONS[lane]} alt="" /></button>)}
               </div>
               <div className="grid grid-cols-5 gap-2 h-[calc(100%-2.75rem)]">
                 {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className={`rd-meta-lane-card ${metaLane === lane ? 'rd-meta-lane-card-active' : ''} rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden`}>
                   <div className="flex items-center gap-2 mb-1.5"><img src={LANE_ICONS[lane]} alt="" className="w-5 h-5 object-contain" /><span className="text-[11px] font-bold text-muted-foreground">{LANE_LABELS[lane]}</span></div>
                   {laneChampions.length ? laneChampions.map((champion, index) => <div key={champion.id || `${champion.champion_name}-${index}`} className="rd-meta-lane-row font-rajdhani flex items-center gap-2 border-t border-border/50 first:border-0">
-                    <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(1)}% WR</p></div><TierBadge tier={champion.tier} size="sm" />
-                  </div>) : <p className="text-[11px] text-muted-foreground mt-4 text-center">Sin datos</p>}
+                    <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(1)}{t('dashboard.wr')}</p></div><TierBadge tier={champion.tier} size="sm" />
+                  </div>) : <p className="text-[11px] text-muted-foreground mt-4 text-center">{t('dashboard.sinDatos')}</p>}
                 </div>)}
               </div>
             </article>
 
             <article className="rd-card rd-card-watermark rd-main-card p-5 min-h-0 overflow-hidden">
               <div className="rd-main-card-header">
-                <div className="rd-inline-section-heading"><h2 className="rd-card-title">Mis mains en el meta</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">Pool personal</p></div>
-                <div className="rd-main-navigation"><button type="button" onClick={() => changeMain(-1)} disabled={mainChampions.length < 2} className="rd-arrow rd-main-arrow" aria-label="Main anterior"><ChevronLeft size={18} /></button><span className="font-rajdhani text-xs text-muted-foreground tabular-nums">{mainChampions.length ? mainIndex + 1 : 0} / {mainChampions.length}</span><button type="button" onClick={() => changeMain(1)} disabled={mainChampions.length < 2} className="rd-arrow rd-main-arrow" aria-label="Main siguiente"><ChevronRight size={18} /></button></div>
+                <div className="rd-inline-section-heading"><h2 className="rd-card-title">{t('dashboard.misMainsEnEl')}</h2><span aria-hidden="true">·</span><p className="rd-section-kicker">{t('dashboard.poolPersonal')}</p></div>
+                <div className="rd-main-navigation"><button type="button" onClick={() => changeMain(-1)} disabled={mainChampions.length < 2} className="rd-arrow rd-main-arrow" aria-label={t('dashboard.mainAnterior')}><ChevronLeft size={18} /></button><span className="font-rajdhani text-xs text-muted-foreground tabular-nums">{mainChampions.length ? mainIndex + 1 : 0} / {mainChampions.length}</span><button type="button" onClick={() => changeMain(1)} disabled={mainChampions.length < 2} className="rd-arrow rd-main-arrow" aria-label={t('dashboard.mainSiguiente')}><ChevronRight size={18} /></button></div>
               </div>
 
               {selectedMain ? <div className="rd-main-meta-layout">
                 <div className="rd-main-identity">
                   {renderChampionAvatar(selectedMain.name, 'w-20 h-20')}
-                  <div className="min-w-0"><p className="font-rajdhani text-[11px] uppercase tracking-[0.18em] text-muted-foreground">#{selectedMain.position || '—'} en {LANE_LABELS[selectedMain.meta?.lane] || 'sin línea'}</p><h3 className="font-rajdhani text-3xl font-bold tracking-tight truncate">{selectedMain.name}</h3><div className="flex items-center gap-2 mt-1.5"><TierBadge tier={selectedMain.meta?.tier || '—'} /><span className="font-rajdhani text-xs text-muted-foreground">Score {Number(selectedMain.meta?.ranking_final || 0).toFixed(1)}</span></div></div>
+                  <div className="min-w-0"><p className="font-rajdhani text-[11px] uppercase tracking-[0.18em] text-muted-foreground">#{selectedMain.position || '—'} {t('dashboard.en')} {LANE_LABELS[selectedMain.meta?.lane] || t('dashboard.sinLinea')}</p><h3 className="font-rajdhani text-3xl font-bold tracking-tight truncate">{selectedMain.name}</h3><div className="flex items-center gap-2 mt-1.5"><TierBadge tier={selectedMain.meta?.tier || '—'} /><span className="font-rajdhani text-xs text-muted-foreground">{t('dashboard.score')} {Number(selectedMain.meta?.ranking_final || 0).toFixed(1)}</span></div></div>
                 </div>
-                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">Estadísticas del meta</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{Number(selectedMain.meta?.winrate || 0).toFixed(1)}%</strong><span>Winrate</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.pickrate || 0).toFixed(1)}%</strong><span>Pickrate</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.banrate || 0).toFixed(1)}%</strong><span>Banrate</span></div></div></div>
-                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">Tu rendimiento</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{selectedMain.games}</strong><span>Partidas</span></div><div><strong className={`font-rajdhani ${selectedMain.personalWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{selectedMain.personalWr.toFixed(1)}%</strong><span>Winrate</span></div><div><strong className="font-rajdhani text-primary">{selectedMain.personalKda.toFixed(2)}</strong><span>KDA</span></div></div></div>
-                {selectedMain.insight && <div className="rd-main-insight"><p className="rd-mini-label text-primary">Insight con {selectedMain.name}</p><p className="line-clamp-2">{selectedMain.insight}</p></div>}
-              </div> : <p className="text-sm text-muted-foreground text-center mt-10">Registrá partidas para comparar tus mains con el meta.</p>}
+                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">{t('dashboard.estadisticasDelMeta')}</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{Number(selectedMain.meta?.winrate || 0).toFixed(1)}%</strong><span>{t('goals.metric.winrate')}</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.pickrate || 0).toFixed(1)}%</strong><span>{t('dashboard.pickrate')}</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.banrate || 0).toFixed(1)}%</strong><span>{t('dashboard.banrate')}</span></div></div></div>
+                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">{t('dashboard.tuRendimiento')}</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{selectedMain.games}</strong><span>{t('nav.matches')}</span></div><div><strong className={`font-rajdhani ${selectedMain.personalWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{selectedMain.personalWr.toFixed(1)}%</strong><span>{t('goals.metric.winrate')}</span></div><div><strong className="font-rajdhani text-primary">{selectedMain.personalKda.toFixed(2)}</strong><span>{t('goals.stat.kda')}</span></div></div></div>
+                {selectedMain.insight && <div className="rd-main-insight"><p className="rd-mini-label text-primary">{t('dashboard.insightCon')} {selectedMain.name}</p><p className="line-clamp-2">{selectedMain.insight}</p></div>}
+              </div> : <p className="text-sm text-muted-foreground text-center mt-10">{t('dashboard.registraPartidasParaComparar')}</p>}
             </article>
           </section>
         )}

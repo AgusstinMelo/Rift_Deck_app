@@ -11,7 +11,7 @@ import BugReportModal from '@/components/BugReportModal';
 import LegalInfoModal from '@/components/LegalInfoModal';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import LanguageSelect from '@/components/LanguageSelect';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import logoUrl from '@/assets/riftdeck-logo.png';
 import markUrl from '@/assets/riftdeck-mark.png';
@@ -19,26 +19,26 @@ import logoHorizontalUrl from '@/assets/riftdeck-logo-horizontal.png';
 import watermarkUrl from '@/assets/riftdeck-watermark.png';
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/library', label: 'Biblioteca', icon: BookOpen },
-  { path: '/tierlist', label: 'Tierlist', icon: TrendingUp },
-  { path: '/build-calculator', label: 'Builds', icon: Wrench },
-  { path: '/matches', label: 'Partidas', icon: Swords },
-  { path: '/objetivos', label: 'Objetivos', icon: Target },
-  { path: '/stats', label: 'Estadísticas', icon: BarChart3 },
-  { path: '/suggester', label: 'Sugeridor', icon: Sparkles },
+  { path: '/', label: 'nav.dashboard', icon: LayoutDashboard },
+  { path: '/library', label: 'nav.library', icon: BookOpen },
+  { path: '/tierlist', label: 'nav.tierlist', icon: TrendingUp },
+  { path: '/build-calculator', label: 'nav.builds', icon: Wrench },
+  { path: '/matches', label: 'nav.matches', icon: Swords },
+  { path: '/objetivos', label: 'nav.goals', icon: Target },
+  { path: '/stats', label: 'nav.stats', icon: BarChart3 },
+  { path: '/suggester', label: 'nav.suggester', icon: Sparkles },
 ];
 
 const infoItems = [
-  { type: 'about', label: 'Acerca de', icon: Info },
-  { type: 'legal', label: 'Aviso Legal', icon: Scale },
-  { type: 'privacy', label: 'Política de privacidad', icon: ShieldCheck },
+  { type: 'about', label: 'nav.about', icon: Info },
+  { type: 'legal', label: 'nav.legalNotice', icon: Scale },
+  { type: 'privacy', label: 'nav.privacy', icon: ShieldCheck },
 ];
 
 const SEARCH_TYPES = {
-  champion: { tab: 'champions', label: 'Campeón' },
-  item: { tab: 'items', label: 'Item' },
-  rune: { tab: 'runes', label: 'Runa' },
+  champion: { tab: 'champions', label: 'common.champion' },
+  item: { tab: 'items', label: 'common.item' },
+  rune: { tab: 'runes', label: 'common.rune' },
 };
 
 function normalizeSearch(value) {
@@ -53,7 +53,8 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
   const [open, setOpen] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
-  const { entityName, matchesName } = useCatalogText();
+  const { locale, entityName, matchesName } = useCatalogText();
+  const t = useT();
 
   const { data: champions = [] } = useQuery({
     queryKey: ['sidebar-search', 'champions'],
@@ -101,13 +102,13 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
 
         if (startsA !== startsB) return startsA ? -1 : 1;
 
-        return entityName(a.entity).localeCompare(entityName(b.entity), 'es', {
+        return entityName(a.entity).localeCompare(entityName(b.entity), locale, {
           sensitivity: 'base',
           numeric: true,
         });
       })
       .slice(0, 8);
-  }, [champions, entityName, items, matchesName, query, runes]);
+  }, [champions, entityName, items, locale, matchesName, query, runes]);
 
   const goToResult = ({ entity, type }) => {
     const config = SEARCH_TYPES[type];
@@ -123,8 +124,8 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
         type="button"
         onClick={onExpand}
         className="rd-nav-item rd-nav-item-idle justify-center px-2 w-full"
-        title="Buscar"
-        aria-label="Buscar"
+        title={t('common.search')}
+        aria-label={t('common.search')}
       >
         <Search size={18} className="shrink-0" />
       </button>
@@ -145,7 +146,7 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        placeholder="Buscar..."
+        placeholder={t('common.searchPlaceholder')}
         className="
           w-full h-10 rounded-xl border border-primary/10
           bg-secondary/50 pl-9 pr-3 text-sm text-foreground
@@ -187,7 +188,7 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
                         {entityName(entity)}
                       </span>
                       <span className="block text-[11px] text-muted-foreground">
-                        {config.label}
+                        {t(config.label)}
                       </span>
                     </span>
                   </button>
@@ -196,7 +197,7 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
             </div>
           ) : (
             <div className="px-3 py-3 text-xs text-muted-foreground">
-              Sin resultados
+              {t('common.noResults')}
             </div>
           )}
         </div>
@@ -213,7 +214,8 @@ export default function Layout() {
   const mainRef = useRef(null);
   const location = useLocation();
   const { user, logout } = useAuth();
-  const visibleName = user?.visible_name || user?.full_name || user?.email || 'Usuario';
+  const t = useT();
+  const visibleName = user?.visible_name || user?.full_name || user?.email || t('common.user');
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
@@ -256,7 +258,7 @@ export default function Layout() {
               <div className="flex items-center gap-2 opacity-70">
                 <span className="h-px w-4 bg-primary/40" />
                 <span className="text-[8px] uppercase tracking-[0.32em] text-primary">
-                  Juega con Información
+                  {t('nav.tagline')}
                 </span>
                 <span className="h-px w-4 bg-primary/40" />
               </div>
@@ -274,8 +276,8 @@ export default function Layout() {
               type="button"
               onClick={() => setCollapsed(!collapsed)}
               className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
-              title={collapsed ? 'Desplegar barra lateral' : 'Contraer barra lateral'}
-              aria-label={collapsed ? 'Desplegar barra lateral' : 'Contraer barra lateral'}
+              title={t(collapsed ? 'nav.expandSidebar' : 'nav.collapseSidebar')}
+              aria-label={t(collapsed ? 'nav.expandSidebar' : 'nav.collapseSidebar')}
             >
               <Menu size={16} />
             </button>
@@ -286,8 +288,8 @@ export default function Layout() {
                 type="button"
                 onClick={() => setActiveInfoModal(type)}
                 className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
-                title={label}
-                aria-label={label}
+                title={t(label)}
+                aria-label={t(label)}
               >
                 <Icon size={15} />
               </button>
@@ -298,8 +300,8 @@ export default function Layout() {
                 to="/tierlist/como-se-calcula"
                 onClick={() => setMobileOpen(false)}
                 className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
-                title="Cómo calculamos la tierlist"
-                aria-label="Cómo calculamos la tierlist"
+                title={t('nav.tierlistMethod')}
+                aria-label={t('nav.tierlistMethod')}
               >
                 <Calculator size={15} />
               </Link>
@@ -310,8 +312,8 @@ export default function Layout() {
                 type="button"
                 onClick={() => setBugModalOpen(true)}
                 className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
-                title="Reportar bug"
-                aria-label="Reportar bug"
+                title={t('nav.reportBug')}
+                aria-label={t('nav.reportBug')}
               >
                 <Bug size={15} />
               </button>
@@ -345,12 +347,12 @@ export default function Layout() {
                 <Icon size={18} className="shrink-0" />
 
                 {!collapsed && (
-                  <span className="font-medium text-sm">{label}</span>
+                  <span className="font-medium text-sm">{t(label)}</span>
                 )}
 
                 {collapsed && (
                   <span className="absolute left-full ml-3 px-2 py-1 bg-popover border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
-                    {label}
+                    {t(label)}
                   </span>
                 )}
               </Link>
@@ -374,7 +376,7 @@ export default function Layout() {
                 <button
                   onClick={() => logout()}
                   className="text-muted-foreground hover:text-red-400 transition-colors shrink-0"
-                  title="Cerrar sesión"
+                  title={t('common.logout')}
                 >
                   <LogOut size={14} />
                 </button>
@@ -399,7 +401,7 @@ export default function Layout() {
               hover:bg-secondary/70 hover:text-primary
               active:bg-secondary
             "
-            aria-label="Abrir menú"
+            aria-label={t('nav.openMenu')}
           >
             <Menu size={22} className="pointer-events-none" />
           </button>
@@ -422,8 +424,8 @@ export default function Layout() {
               hover:bg-secondary/70 hover:text-red-400
               active:bg-secondary
             "
-            title="Cerrar sesión"
-            aria-label="Cerrar sesión"
+            title={t('common.logout')}
+            aria-label={t('common.logout')}
           >
             <LogOut size={18} className="pointer-events-none" />
           </button>

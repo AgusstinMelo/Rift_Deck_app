@@ -12,25 +12,27 @@ import LaneBadge, { LANE_CONFIG } from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT_QUERY } from '@/hooks/useMatchMedia';
 import { useTierTileSize } from '@/hooks/useTierTileSize';
+import { useT } from '@/lib/LocaleContext';
+import { formatLocale, tr } from '@/i18n/uiI18n';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const TIER_ORDER = ['S+', 'S', 'A', 'B', 'C', 'D', 'E'];
 
 const formatDays = (group) => {
   const days = Number(group?.snapshots_count) || 0;
-  return `${days} ${days === 1 ? 'día' : 'días'}`;
+  return `${days} ${days === 1 ? tr('tierlist.dia') : tr('tierlist.dias')}`;
 };
 
 const formatSnapshotDate = (execution) => {
   const rawDate = execution?.snapshot_date || execution?.executed_at;
-  if (!rawDate) return 'sin fecha';
+  if (!rawDate) return tr('tierlist.sinFecha');
   const datePart = String(rawDate).slice(0, 10);
-  return new Date(`${datePart}T00:00:00`).toLocaleDateString('es-ES');
+  return new Date(`${datePart}T00:00:00`).toLocaleDateString(formatLocale());
 };
 
 const TIERLIST_MODES = [
-  { id: 'average', label: 'Tierlist promediada', shortLabel: 'Promediada' },
-  { id: 'daily', label: 'Tierlist del día', shortLabel: 'Del día' },
+  { id: 'average', get label() { return tr('tierlist.modes.average'); }, get shortLabel() { return tr('tierlist.modes.averageShort'); } },
+  { id: 'daily', get label() { return tr('tierlist.modes.daily'); }, get shortLabel() { return tr('tierlist.modes.dailyShort'); } },
 ];
 
 // Color de acento de cada tier (mismas variables que TierBadge).
@@ -58,6 +60,7 @@ const sortTiers = (tiers) => [...tiers].sort((a, b) => {
 });
 
 export default function Tierlist() {
+  const t = useT();
   const [laneFilter, setLaneFilter] = useState('all');
   const [tierFilter, setTierFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
@@ -198,7 +201,7 @@ export default function Tierlist() {
   const modeToggle = (
     <div
       role="tablist"
-      aria-label="Tipo de tierlist"
+      aria-label={t('tierlist.tipoDeTierlist')}
       className="rd-tierlist-view-toggle flex gap-1 bg-secondary/50 p-1 rounded-xl border border-border/60"
     >
       {TIERLIST_MODES.map(mode => (
@@ -241,7 +244,7 @@ export default function Tierlist() {
         `}
       >
         <Layers size={13} />
-        Por Tier
+       {t('tierlist.porTier')}
       </button>
 
       <button
@@ -255,7 +258,7 @@ export default function Tierlist() {
         `}
       >
         <Table2 size={13} />
-        Tabla
+       {t('tierlist.tabla')}
       </button>
     </div>
   );
@@ -275,12 +278,12 @@ export default function Tierlist() {
           <div className="rd-page-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
-              Rift Deck Meta
+             {t('tierlist.riftDeckMeta')}
             </span>
           </div>
 
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Tierlist
+           {t('nav.tierlist')}
           </h1>
 
           <div className="rd-tierlist-subline mt-1 flex items-center gap-3">
@@ -288,18 +291,18 @@ export default function Tierlist() {
             {isDaily ? (
               activeExec ? (
                 <>
-                  <span className="text-foreground font-medium">Parche {activeExec.patch}</span>
+                  <span className="text-foreground font-medium">{t('goals.filterLabels.patches')} {activeExec.patch}</span>
                   <span> · {formatSnapshotDate(activeExec)}</span>
-                  {comparisonExec && <span> · Δ vs {formatSnapshotDate(comparisonExec)}</span>}
+                  {comparisonExec && <span> {t('tierlist.vs')} {formatSnapshotDate(comparisonExec)}</span>}
                 </>
-              ) : 'Sin datos de actualización'
+              ) : t('tierlist.sinDatosDeActualizacion')
             ) : activeGroup ? (
               <>
-                <span className="text-foreground font-medium">Parche {activeGroup.patch_group}</span>
-                <span> · promedio ponderado de {formatDays(activeGroup)}</span>
-                {hasPreviousDay && <span> · Δ vs día anterior</span>}
+                <span className="text-foreground font-medium">{t('goals.filterLabels.patches')} {activeGroup.patch_group}</span>
+                <span> {t('tierlist.promedioPonderadoDe')} {formatDays(activeGroup)}</span>
+                {hasPreviousDay && <span> {t('tierlist.vsDiaAnterior')}</span>}
               </>
-            ) : 'Sin datos de actualización'}
+            ) : t('tierlist.sinDatosDeActualizacion')}
           </p>
           {toggleInHeader && toggles}
           </div>
@@ -309,8 +312,8 @@ export default function Tierlist() {
           <Trophy size={16} className="text-primary" />
           <span className="text-xs text-muted-foreground">
             {latestGroup
-              ? `Actualizado ${new Date(latestGroup.updated_at).toLocaleDateString('es-ES')}`
-              : 'Sin ejecución reciente'}
+              ? t('tierlist.actualizado', { value: new Date(latestGroup.updated_at).toLocaleDateString(formatLocale()) })
+              : t('tierlist.sinEjecucionReciente')}
           </span>
         </div>
       </div>
@@ -329,7 +332,7 @@ export default function Tierlist() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Todos
+               {t('builds.todos')}
               </button>
 
               {LANES.map(lane => (
@@ -355,9 +358,9 @@ export default function Tierlist() {
             onChange={event => setTierFilter(event.target.value)}
             className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">{isPhonePortrait ? 'Tier' : 'Todos los tiers'}</option>
+            <option value="all">{isPhonePortrait ? t('tierlist.tier') : t('tierlist.todosLosTiers')}</option>
             {availableTiers.map(tier => (
-              <option key={tier} value={tier}>Tier {tier}</option>
+              <option key={tier} value={tier}>{t('tierlist.tier')} {tier}</option>
             ))}
           </select>
 
@@ -366,10 +369,10 @@ export default function Tierlist() {
             onChange={event => setDiffFilter(event.target.value)}
             className="bg-secondary/40 border border-border/50 rounded-xl px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
           >
-            <option value="all">Dificultad</option>
-            <option value="1">Fácil</option>
-            <option value="2">Intermedia</option>
-            <option value="3">Difícil</option>
+            <option value="all">{t('library.dificultad')}</option>
+            <option value="1">{t('library.facil')}</option>
+            <option value="2">{t('tierlist.intermedia')}</option>
+            <option value="3">{t('library.dificil')}</option>
           </select>
 
           {isDaily && successfulExecs.length > 1 && (
@@ -394,7 +397,7 @@ export default function Tierlist() {
             >
               {patchGroups.map(group => (
                 <option key={group.patch_group} value={group.patch_group}>
-                  {isPhonePortrait ? `Parche ${group.patch_group}` : `Parche ${group.patch_group} · ${formatDays(group)}`}
+                  {isPhonePortrait ? t('tierlist.parche', { patch_group: group.patch_group }) : t('tierlist.parche2', { patch_group: group.patch_group, formatDays: formatDays(group) })}
                 </option>
               ))}
             </select>
@@ -415,8 +418,8 @@ export default function Tierlist() {
         <div className="rd-card p-6">
           <EmptyState
             icon={RefreshCw}
-            title="Sin datos de tierlist"
-            description="La tierlist aún no tiene datos. Se calcula automáticamente todos los días."
+            title={t('tierlist.sinDatosDeTierlist')}
+            description={t('tierlist.laTierlistAunNo')}
           />
         </div>
       ) : viewMode === 'tier' ? (
@@ -438,23 +441,23 @@ export default function Tierlist() {
                   <TierBadge tier={tier} size="lg" />
 
                   <div>
-                    <p className="rd-card-title">Tier {tier}</p>
+                    <p className="rd-card-title">{t('tierlist.tier')} {tier}</p>
                     <p className="text-xs text-muted-foreground">
-                      {championsInTier.length} campeones
+                      {championsInTier.length} {t('tierlist.campeones')}
                     </p>
                   </div>
 
                   {/* Promedios del tier: solo escritorio (ver index.css). */}
-                  <dl className="rd-tier-group-stats hidden" title="Promedios del tier">
+                  <dl className="rd-tier-group-stats hidden" title={t('tierlist.promediosDelTier')}>
                     {avgWinrate !== null && (
                       <div>
-                        <dt>WR</dt>
+                        <dt>{t('tierlist.wr')}</dt>
                         <dd>{avgWinrate.toFixed(1)}%</dd>
                       </div>
                     )}
                     {avgPickrate !== null && (
                       <div>
-                        <dt>PR</dt>
+                        <dt>{t('tierlist.pr')}</dt>
                         <dd>{avgPickrate.toFixed(1)}%</dd>
                       </div>
                     )}
@@ -500,13 +503,13 @@ export default function Tierlist() {
               <thead>
                 <tr className="border-b border-border/70 bg-secondary/30">
                   <th className="text-left p-3 rd-label">#</th>
-                  <th className="text-left p-3 rd-label">Campeón</th>
-                  <th className="text-left p-3 rd-label">Línea</th>
-                  <th className="text-left p-3 rd-label">Tier</th>
-                  <th className="text-right p-3 rd-label">WR%</th>
-                  <th className="text-right p-3 rd-label">PR%</th>
-                  <th className="text-right p-3 rd-label">BR%</th>
-                  <th className="text-right p-3 rd-label">Score</th>
+                  <th className="text-left p-3 rd-label">{t('common.champion')}</th>
+                  <th className="text-left p-3 rd-label">{t('goals.filterLabels.lanes')}</th>
+                  <th className="text-left p-3 rd-label">{t('tierlist.tier')}</th>
+                  <th className="text-right p-3 rd-label">{t('tierlist.wr2')}</th>
+                  <th className="text-right p-3 rd-label">{t('tierlist.pr2')}</th>
+                  <th className="text-right p-3 rd-label">{t('tierlist.br')}</th>
+                  <th className="text-right p-3 rd-label">{t('dashboard.score')}</th>
                   <th className="text-right p-3 rd-label">Δ</th>
                 </tr>
               </thead>
@@ -570,17 +573,17 @@ export default function Tierlist() {
 
                   <div className="grid grid-cols-3 gap-2 mt-1 max-w-[10.5rem]">
                     <div className="text-xs leading-tight text-muted-foreground">
-                      <p>WR</p>
+                      <p>{t('tierlist.wr')}</p>
                       <p className="text-blue-300">{entry.winrate?.toFixed(1)}%</p>
                     </div>
 
                     <div className="text-xs leading-tight text-muted-foreground">
-                      <p>PR</p>
+                      <p>{t('tierlist.pr')}</p>
                       <p className="text-blue-300">{entry.pickrate?.toFixed(1)}%</p>
                     </div>
 
                     <div className="text-xs leading-tight text-muted-foreground">
-                      <p>BR</p>
+                      <p>{t('tierlist.br2')}</p>
                       <p className="text-blue-300">{entry.banrate?.toFixed(1)}%</p>
                     </div>
                   </div>

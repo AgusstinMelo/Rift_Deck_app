@@ -21,19 +21,20 @@ import GoalOutcomeBadge from './GoalOutcomeBadge';
 import GoalProgress from './GoalProgress';
 import InsufficientSampleNotice from './InsufficientSampleNotice';
 import { BUTTON_SECONDARY } from './goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 const LIFECYCLE_ACTIONS = {
   [LIFECYCLE.CANCELLED]: {
-    title: 'Cancelar objetivo',
-    description: 'El objetivo deja de seguirse y pasa al historial sin resultado. No se puede reactivar.',
-    confirmLabel: 'Cancelar objetivo',
-    done: 'Objetivo cancelado',
+    title: 'goals.actions.cancelTitle',
+    description: 'goals.actions.cancelDescription',
+    confirmLabel: 'goals.actions.cancelTitle',
+    done: 'goals.actions.cancelled',
   },
   [LIFECYCLE.ARCHIVED]: {
-    title: 'Archivar objetivo',
-    description: 'El objetivo se guarda en Archivados con su resultado.',
-    confirmLabel: 'Archivar',
-    done: 'Objetivo archivado',
+    title: 'goals.actions.archiveTitle',
+    description: 'goals.actions.archiveDescription',
+    confirmLabel: 'common.archive',
+    done: 'goals.actions.archived',
   },
 };
 
@@ -42,6 +43,7 @@ const LIFECYCLE_ACTIONS = {
  * @param {{ item: import('../model/goalLists').GoalItem, matches: any[], now: Date }} props
  */
 export default function GoalDetail({ item, matches, now }) {
+  const t = useT();
   const { goal, evaluation, checkins, truncated } = item;
   const metric = getMetric(goal.metric);
   const permissions = editPermissions(goal, now, evaluation);
@@ -63,10 +65,10 @@ export default function GoalDetail({ item, matches, now }) {
 
   const confirmLifecycle = () => setLifecycle.mutate({ goal, lifecycle: pendingLifecycle }, {
     onSuccess: () => {
-      notify({ title: LIFECYCLE_ACTIONS[pendingLifecycle].done });
+      notify({ title: t(LIFECYCLE_ACTIONS[pendingLifecycle].done) });
       setPendingLifecycle(null);
     },
-    onError: error => notify({ variant: 'destructive', title: 'No se pudo actualizar el objetivo', description: error?.message || 'Intentá nuevamente.' }),
+    onError: error => notify({ variant: 'destructive', title: t('goals.actions.updateError'), description: error?.message || t('common.tryAgain') }),
   });
 
   if (editingMatch) {
@@ -95,7 +97,7 @@ export default function GoalDetail({ item, matches, now }) {
         <div className="min-w-0 space-y-1.5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <Link to={isCurrent(item) ? '/objetivos' : '/objetivos?tab=historial'} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-              <ArrowLeft size={14} /> Objetivos
+              <ArrowLeft size={14} /> {t('goals.goalsLink')}
             </Link>
             <span className="text-border">/</span>
             <span className="rd-label">{metric.label}</span>
@@ -111,12 +113,12 @@ export default function GoalDetail({ item, matches, now }) {
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Link to={`/objetivos/${goal.id}/editar`} className={BUTTON_SECONDARY}><Pencil size={15} /> Editar</Link>
+          <Link to={`/objetivos/${goal.id}/editar`} className={BUTTON_SECONDARY}><Pencil size={15} /> {t('common.edit')}</Link>
           {permissions.canCancel && (
-            <button type="button" onClick={() => setPendingLifecycle(LIFECYCLE.CANCELLED)} className={BUTTON_SECONDARY}><Ban size={15} /> Cancelar</button>
+            <button type="button" onClick={() => setPendingLifecycle(LIFECYCLE.CANCELLED)} className={BUTTON_SECONDARY}><Ban size={15} /> {t('common.cancel')}</button>
           )}
           {permissions.canArchive && (
-            <button type="button" onClick={() => setPendingLifecycle(LIFECYCLE.ARCHIVED)} className={BUTTON_SECONDARY}><Archive size={15} /> Archivar</button>
+            <button type="button" onClick={() => setPendingLifecycle(LIFECYCLE.ARCHIVED)} className={BUTTON_SECONDARY}><Archive size={15} /> {t('common.archive')}</button>
           )}
         </div>
       </header>
@@ -124,18 +126,18 @@ export default function GoalDetail({ item, matches, now }) {
       {/* Franja de tres tarjetas de alto fijo: progreso, evolución y método de cálculo. */}
       <div className="rd-goal-detail-strip grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(0,1fr)]">
         <section className="rd-card rd-card-watermark flex flex-col gap-3 p-4">
-          <p className="rd-label">Progreso</p>
+          <p className="rd-label">{t('goals.progress')}</p>
           <GoalProgress goal={goal} evaluation={evaluation} compact />
           <InsufficientSampleNotice evaluation={evaluation} compact />
         </section>
 
         <section className="rd-card flex min-h-[13rem] flex-col gap-1 p-4">
-          <p className="rd-label">Evolución</p>
+          <p className="rd-label">{t('goals.evolution')}</p>
           <GoalEvolutionChart goal={goal} evaluation={evaluation} compact={false} className="min-h-0 flex-1" />
         </section>
 
         <section className="rd-card rd-goal-detail-explanation flex flex-col gap-2 p-4 md:col-span-2 lg:col-span-1">
-          <p className="rd-label">Cómo se calcula</p>
+          <p className="rd-label">{t('goals.howCalculated')}</p>
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <GoalExplanation goal={goal} period={period} compact />
           </div>
@@ -158,9 +160,9 @@ export default function GoalDetail({ item, matches, now }) {
 
       <ConfirmDialog
         open={!!action}
-        title={action?.title || ''}
-        description={action?.description || ''}
-        confirmLabel={action?.confirmLabel || ''}
+        title={action ? t(action.title) : ''}
+        description={action ? t(action.description) : ''}
+        confirmLabel={action ? t(action.confirmLabel) : ''}
         tone={pendingLifecycle === LIFECYCLE.CANCELLED ? 'danger' : 'primary'}
         pending={setLifecycle.isPending}
         onCancel={() => setPendingLifecycle(null)}
@@ -169,9 +171,9 @@ export default function GoalDetail({ item, matches, now }) {
 
       <ConfirmDialog
         open={!!matchToDelete}
-        title="Eliminar partida"
-        description={`Se eliminará la partida de ${matchToDelete?.own_champion_name || 'este campeón'} de tu historial y se recalcularán tus objetivos.`}
-        confirmLabel="Eliminar"
+        title={t('goals.actions.deleteMatch')}
+        description={t('goals.actions.deleteMatchDescription', { champion: matchToDelete?.own_champion_name || t('common.thisChampion') })}
+        confirmLabel={t('common.delete')}
         tone="danger"
         pending={deleteMatchMutation.isPending}
         onCancel={() => setMatchToDelete(null)}

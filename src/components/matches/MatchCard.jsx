@@ -1,7 +1,8 @@
 import { Edit, Trash2, Clock3 } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { getMatchTypeLabel } from '@/constants/matchTypes';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
+import { matchTagLabel } from '@/components/matches/matchTags';
 
 const isMovement = (item) =>
   item && Array.isArray(item.type) && item.type.includes('Movimiento');
@@ -182,9 +183,10 @@ function TeamRow({ label, labelClass, names, champions, ownName = null }) {
 
 /** Variante compacta (una franja de ~80px): misma información con íconos chicos y la build en una fila. */
 function CompactMatchCard({ match, champions, items, onEdit, onDelete, isWin, myChamp, orderedAllies, enemyNames, slots, movementItem, enchantItem, dateLabel }) {
+  const t = useT();
   const ownName = match.own_champion_name;
   const meta = [
-    `KDA ${match.kills ?? '—'}/${match.deaths ?? '—'}/${match.assists ?? '—'}`,
+    t('matches.kda', { value: match.kills ?? '—', value2: match.deaths ?? '—', value3: match.assists ?? '—' }),
     match.patch,
     dateLabel,
     match.duration_minutes ? `${match.duration_minutes}m` : null,
@@ -200,7 +202,7 @@ function CompactMatchCard({ match, champions, items, onEdit, onDelete, isWin, my
     >
       <div className="relative flex flex-col gap-3 px-4 py-2.5 md:grid md:grid-cols-[minmax(240px,1fr)_auto_auto_auto] md:items-center md:gap-5">
         <div className="flex min-w-0 items-center gap-3">
-          <p className={`w-6 shrink-0 text-center font-rajdhani text-2xl font-bold leading-none ${isWin ? 'text-green-400' : 'text-red-400'}`} title={isWin ? 'Victoria' : 'Derrota'}>
+          <p className={`w-6 shrink-0 text-center font-rajdhani text-2xl font-bold leading-none ${isWin ? 'text-green-400' : 'text-red-400'}`} title={isWin ? t('matches.victoria') : t('matches.derrota')}>
             {isWin ? 'V' : 'D'}
           </p>
           <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-primary/20">
@@ -221,7 +223,7 @@ function CompactMatchCard({ match, champions, items, onEdit, onDelete, isWin, my
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="w-9 text-[8px] font-bold uppercase tracking-[0.14em] text-primary/80">Build</span>
+          <span className="w-9 text-[8px] font-bold uppercase tracking-[0.14em] text-primary/80">{t('matches.build')}</span>
           <div className="flex gap-1">
             {slots.map((name, i) => (name
               ? <ItemIcon key={i} name={name} items={items} size={COMPACT_ICON} />
@@ -231,16 +233,16 @@ function CompactMatchCard({ match, champions, items, onEdit, onDelete, isWin, my
         </div>
 
         <div className="space-y-1">
-          <TeamRow label="Eq" labelClass="text-blue-400" names={orderedAllies} champions={champions} ownName={ownName} />
-          <TeamRow label="En" labelClass="text-red-400" names={enemyNames} champions={champions} />
+          <TeamRow label={t('matches.eq')} labelClass="text-blue-400" names={orderedAllies} champions={champions} ownName={ownName} />
+          <TeamRow label={t('matches.en')} labelClass="text-red-400" names={enemyNames} champions={champions} />
         </div>
 
         <div className="flex justify-end gap-1.5">
-          <button type="button" onClick={() => onEdit(match)} aria-label="Editar partida"
+          <button type="button" onClick={() => onEdit(match)} aria-label={t('matches.editarPartida')}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-secondary/70 text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground">
             <Edit size={14} />
           </button>
-          <button type="button" onClick={() => onDelete(match.id)} aria-label="Eliminar partida"
+          <button type="button" onClick={() => onDelete(match.id)} aria-label={t('goals.actions.deleteMatch')}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-secondary/70 text-muted-foreground transition-all hover:border-red-500/30 hover:text-red-400">
             <Trash2 size={14} />
           </button>
@@ -258,6 +260,7 @@ export default function MatchCard({
   onDelete,
   compact = false,
 }) {
+  const t = useT();
   const isWin = match.result === 'win';
 
   const ownName = match.own_champion_name;
@@ -348,7 +351,7 @@ export default function MatchCard({
             </p>
 
             <p className="text-[9px] uppercase tracking-[0.14em] font-bold mt-1">
-              {isWin ? 'VICTORIA' : 'DERROTA'}
+              {isWin ? t('matches.victoria2') : t('matches.derrota2')}
             </p>
 
             {match.duration_minutes && (
@@ -405,7 +408,7 @@ export default function MatchCard({
                       : 'bg-red-500/10 text-red-400 border-red-500/20'}
                   `}
                 >
-                  {match.side === 'blue' ? 'Blue' : 'Red'}
+                  {match.side === 'blue' ? t('matches.blue') : t('matches.red')}
                 </span>
               )}
 
@@ -420,7 +423,7 @@ export default function MatchCard({
                   key={tag}
                   className="text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded-md border font-semibold bg-primary/10 text-primary border-primary/20"
                 >
-                  {tag}
+                  {matchTagLabel(tag)}
                 </span>
               ))}
               </span>
@@ -428,22 +431,22 @@ export default function MatchCard({
 
             <div className="inline-grid grid-cols-[auto_auto] gap-x-2 gap-y-2 self-start md:grid md:grid-cols-[auto_auto_auto_auto] md:gap-x-3 md:gap-y-2 md:self-auto">
               <InfoStat
-                label="KDA"
+                label={t('goals.stat.kda')}
                 value={`${match.kills ?? '—'}/${match.deaths ?? '—'}/${match.assists ?? '—'}`}
               />
 
               <InfoStat
-                label="ORO"
+                label={t('matches.oro')}
                 value={formatGold(match.gold)}
               />
 
               <InfoStat
-                label="PATCH"
+                label={t('matches.patch')}
                 value={match.patch}
               />
 
               <InfoStat
-                label="FECHA"
+                label={t('matches.fecha')}
                 value={formatDate(match.date)}
               />
             </div>
@@ -457,7 +460,7 @@ export default function MatchCard({
         <div className="rd-match-card-build flex flex-col justify-center gap-[14px] w-full rounded-2xl bg-secondary/20 border border-border/30 p-3 md:w-auto md:rounded-none md:bg-transparent md:border-0 md:p-0">
           <div>
             <p className="text-[9px] uppercase tracking-[0.18em] text-primary/80 font-bold mb-2">
-              BUILD
+             {t('matches.build2')}
             </p>
 
             <div className="grid grid-cols-3 gap-2 w-full">
@@ -473,7 +476,7 @@ export default function MatchCard({
 
           <div>
             <p className="text-[9px] uppercase tracking-[0.18em] font-bold mb-2 invisible">
-              BUILD
+             {t('matches.build2')}
             </p>
 
             <div className="grid grid-cols-3 gap-2 w-full">
@@ -500,7 +503,7 @@ export default function MatchCard({
           {/* allies */}
           <div>
             <p className="text-[9px] uppercase tracking-[0.18em] text-blue-400 font-bold mb-2">
-              TU EQUIPO
+             {t('matches.tuEquipo')}
             </p>
 
             <div className="grid grid-cols-5 gap-2 w-full">
@@ -524,8 +527,8 @@ export default function MatchCard({
           {/* enemies */}
           <div>
             <p className="text-[9px] uppercase tracking-[0.18em] text-red-400 font-bold mb-2">
-              <span className="rd-match-card-label-wide">ENEMIGOS</span>
-              <span className="rd-match-card-label-compact">Equipo enemigo</span>
+              <span className="rd-match-card-label-wide">{t('matches.enemigos')}</span>
+              <span className="rd-match-card-label-compact">{t('matches.equipoEnemigo')}</span>
             </p>
 
             <div className="grid grid-cols-5 gap-2 w-full">

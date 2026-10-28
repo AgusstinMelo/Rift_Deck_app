@@ -5,6 +5,8 @@ import { getComparableBuilds } from '@/api/buildsSupabase';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { isPatchAtLeast, usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { useT } from '@/lib/LocaleContext';
+import { tr } from '@/i18n/uiI18n';
 
 // ── stat calculation ──────────────────────────────────────────────────────────
 const NO_RESOURCE = ['Aatrox', 'Dr. Mundo', 'Garen', 'Katarina', 'Mordekaiser', 'Rengar', 'Riven', 'Rumble', 'Sett', 'Viego', 'Yasuo', 'Yone'];
@@ -12,10 +14,10 @@ const ENERGY_CHAMPS = ['Akali', 'Ambessa', 'Kennen', 'Lee Sin', 'Shen', 'Zed'];
 const FURY_CHAMPS = ['Gnar', 'Renekton', 'Shyvana', 'Tryndamere'];
 
 function getManaLabel(n) {
-  if (ENERGY_CHAMPS.includes(n)) return { resource: 'Energía', resourceReg: 'Reg. Energía' };
-  if (FURY_CHAMPS.includes(n)) return { resource: 'Furia', resourceReg: null };
+  if (ENERGY_CHAMPS.includes(n)) return { resource: tr('builds.energia'), resourceReg: tr('builds.regEnergia') };
+  if (FURY_CHAMPS.includes(n)) return { resource: tr('builds.furia'), resourceReg: null };
   if (NO_RESOURCE.includes(n)) return { resource: null, resourceReg: null };
-  return { resource: 'Maná', resourceReg: 'Reg. Maná' };
+  return { resource: tr('builds.mana'), resourceReg: tr('builds.regMana') };
 }
 
 function buildBaseStats(c) {
@@ -91,55 +93,56 @@ function getAllRows(champion, computed) {
   const ml = getManaLabel(champion?.name || '');
   const unifiedLifesteal = usesUnifiedLifesteal(champion?.patch_version);
   return [
-    { label: 'Vida', key: 'life', value: stats.life },
-    { label: 'Reg. Vida', key: 'life_reg', value: stats.life_reg },
+    { label: tr('builds.vida'), key: 'life', value: stats.life },
+    { label: tr('builds.regVida'), key: 'life_reg', value: stats.life_reg },
     ...(ml.resource ? [{ label: ml.resource, key: 'mana', value: stats.mana }] : []),
     ...(ml.resourceReg ? [{ label: ml.resourceReg, key: 'mana_reg', value: stats.mana_reg }] : []),
-    { label: 'Mov.', key: 'movement', value: movement },
-    { label: 'Armadura', key: 'armor', value: stats.armor },
-    { label: 'Res. mágica', key: 'magic_res', value: stats.magic_res },
-    { label: 'Daño ataque', key: 'attack_damage', value: stats.attack_damage },
-    { label: 'Vel. ataque', key: 'attack_speed', value: attack_speed },
-    { label: 'Poder hab.', key: 'ability_power', value: stats.ability_power },
-    { label: 'Vel. hab.', key: 'ability_haste', value: stats.ability_haste },
-    { label: 'Crítico %', key: 'critical_impact', value: stats.critical_impact, unit: '%' },
-    { label: 'Daño crítico', key: 'critical_damage', value: stats.critical_damage, unit: '%' },
+    { label: tr('builds.mov'), key: 'movement', value: movement },
+    { label: tr('builds.armadura'), key: 'armor', value: stats.armor },
+    { label: tr('builds.resMagica'), key: 'magic_res', value: stats.magic_res },
+    { label: tr('builds.danoAtaque'), key: 'attack_damage', value: stats.attack_damage },
+    { label: tr('builds.velAtaque'), key: 'attack_speed', value: attack_speed },
+    { label: tr('builds.poderHab'), key: 'ability_power', value: stats.ability_power },
+    { label: tr('builds.velHab'), key: 'ability_haste', value: stats.ability_haste },
+    { label: tr('builds.critico'), key: 'critical_impact', value: stats.critical_impact, unit: '%' },
+    { label: tr('builds.danoCritico'), key: 'critical_damage', value: stats.critical_damage, unit: '%' },
     ...(unifiedLifesteal
-      ? [{ label: 'Robo de vida', key: 'lifesteal', value: stats.lifesteal, unit: '%' }]
+      ? [{ label: tr('builds.roboDeVida'), key: 'lifesteal', value: stats.lifesteal, unit: '%' }]
       : [
-          { label: 'Vamp. físico', key: 'physic_vamp', value: stats.physic_vamp, unit: '%' },
-          { label: 'Vamp. mágico', key: 'magic_vamp', value: stats.magic_vamp, unit: '%' },
+          { label: tr('builds.vampFisico'), key: 'physic_vamp', value: stats.physic_vamp, unit: '%' },
+          { label: tr('builds.vampMagico'), key: 'magic_vamp', value: stats.magic_vamp, unit: '%' },
         ]),
-    { label: 'Pen. armad.', key: 'flat_armor_penetration', value: stats.flat_armor_penetration },
-    { label: 'Pen. armad. %', key: 'percentage_armor_penetration', value: stats.percentage_armor_penetration, unit: '%' },
-    { label: 'Pen. mágica', key: 'flat_magic_penetration', value: stats.flat_magic_penetration },
-    { label: 'Pen. mágica %', key: 'percentage_magic_penetration', value: stats.percentage_magic_penetration, unit: '%' },
-    { label: 'Tenacidad', key: 'tenacity', value: stats.tenacity, unit: '%' },
-    { label: 'Cur. y escudo', key: 'healing_and_shield', value: stats.healing_and_shield, unit: '%' },
+    { label: tr('builds.penArmad'), key: 'flat_armor_penetration', value: stats.flat_armor_penetration },
+    { label: tr('builds.penArmad2'), key: 'percentage_armor_penetration', value: stats.percentage_armor_penetration, unit: '%' },
+    { label: tr('builds.penMagica'), key: 'flat_magic_penetration', value: stats.flat_magic_penetration },
+    { label: tr('builds.penMagica2'), key: 'percentage_magic_penetration', value: stats.percentage_magic_penetration, unit: '%' },
+    { label: tr('builds.tenacidad'), key: 'tenacity', value: stats.tenacity, unit: '%' },
+    { label: tr('builds.curYEscudo'), key: 'healing_and_shield', value: stats.healing_and_shield, unit: '%' },
   ];
 }
 
 function getCategoryWinners(computedA, computedB, buildA, buildB) {
   if (!computedA || !computedB) return [];
   const sA = computedA.stats; const sB = computedB.stats;
-  const nameA = buildA?.name || 'Build A';
-  const nameB = buildB?.name || 'Build B';
+  const nameA = buildA?.name || tr('builds.buildA');
+  const nameB = buildB?.name || tr('builds.buildB');
   const totalDmgA = sA.attack_damage + sA.ability_power;
   const totalDmgB = sB.attack_damage + sB.ability_power;
   const survA = sA.life + sA.armor * 10 + sA.magic_res * 8;
   const survB = sB.life + sB.armor * 10 + sB.magic_res * 8;
   return [
-    { label: 'Mayor daño', icon: '⚔️', winner: totalDmgA >= totalDmgB ? nameA : nameB },
-    { label: 'Más aguante', icon: '🛡️', winner: survA >= survB ? nameA : nameB },
-    { label: 'Más movilidad', icon: '💨', winner: computedA.movement >= computedB.movement ? nameA : nameB },
-    { label: 'Más utilidad', icon: '⚡', winner: (sA.ability_haste + sA.healing_and_shield) >= (sB.ability_haste + sB.healing_and_shield) ? nameA : nameB },
+    { label: tr('builds.mayorDano'), icon: '⚔️', winner: totalDmgA >= totalDmgB ? nameA : nameB },
+    { label: tr('builds.masAguante'), icon: '🛡️', winner: survA >= survB ? nameA : nameB },
+    { label: tr('builds.masMovilidad'), icon: '💨', winner: computedA.movement >= computedB.movement ? nameA : nameB },
+    { label: tr('builds.masUtilidad'), icon: '⚡', winner: (sA.ability_haste + sA.healing_and_shield) >= (sB.ability_haste + sB.healing_and_shield) ? nameA : nameB },
   ];
 }
 
 // ── Build Selector ────────────────────────────────────────────────────────────
 function BuildSelector({ slot, allBuilds, allChampions, selected, onSelect }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
-  const label = selected ? `${selected.champion_name} — ${selected.name}` : `Elegir build (${slot})`;
+  const label = selected ? `${selected.champion_name} — ${selected.name}` : t('builds.elegirBuild', { slot });
   const champ = selected ? allChampions.find(c => c.name === selected.champion_name) : null;
 
   return (
@@ -154,7 +157,7 @@ function BuildSelector({ slot, allBuilds, allChampions, selected, onSelect }) {
       </button>
       {open && (
         <div className="absolute top-full mt-1 left-0 right-0 bg-popover border border-border rounded-xl shadow-xl z-50 max-h-72 overflow-y-auto">
-          {allBuilds.length === 0 && <p className="text-xs text-muted-foreground p-4 text-center">No hay builds guardadas.</p>}
+          {allBuilds.length === 0 && <p className="text-xs text-muted-foreground p-4 text-center">{t('builds.noHayBuildsGuardadas')}</p>}
           {allBuilds.map(build => {
             const c = allChampions.find(ch => ch.name === build.champion_name);
             return (
@@ -178,10 +181,11 @@ function BuildSelector({ slot, allBuilds, allChampions, selected, onSelect }) {
 
 // ── Champion Header Card ──────────────────────────────────────────────────────
 function ChampionHeader({ build, champion, side, itemCount }) {
+  const t = useT();
   if (!build || !champion) {
     return (
       <div className="flex-1 rounded-2xl border border-dashed border-border bg-secondary/30 p-5 flex items-center justify-center min-h-28">
-        <p className="text-muted-foreground text-sm">Sin build seleccionada</p>
+        <p className="text-muted-foreground text-sm">{t('builds.sinBuildSeleccionada')}</p>
       </div>
     );
   }
@@ -204,8 +208,8 @@ function ChampionHeader({ build, champion, side, itemCount }) {
             {build.lane && <LaneBadge lane={build.lane} />}
           </div>
           <div className={`flex items-center gap-3 mt-2 text-xs text-muted-foreground ${isRight ? 'justify-end' : ''}`}>
-            <span>🗡️ {itemCount} ítems</span>
-            {build.patch && <span>Parche {build.patch}</span>}
+            <span>🗡️ {itemCount} {t('builds.items2')}</span>
+            {build.patch && <span>{t('goals.filterLabels.patches')} {build.patch}</span>}
           </div>
         </div>
       </div>
@@ -215,6 +219,7 @@ function ChampionHeader({ build, champion, side, itemCount }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function BuildCompare({ onBack, champions, items, patchVersion }) {
+  const t = useT();
   const { user } = useAuth();
   const [buildA, setBuildA] = useState(null);
   const [buildB, setBuildB] = useState(null);
@@ -251,12 +256,12 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
   return (
     <div className="rd-page rd-buildcmp">
       <button onClick={onBack} className="rd-buildcmp-back flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-6">
-        <ArrowLeft size={16} /> Volver
+        <ArrowLeft size={16} /> {t('common.back')}
       </button>
 
-      <div className="rd-page-kicker rd-buildcmp-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Build Calculator</span></div>
-      <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Comparar Builds</h1>
-      <p className="rd-page-subtitle rd-buildcmp-desc text-muted-foreground text-sm mb-6">Compará las estadísticas de dos builds, del mismo campeón o de campeones distintos.</p>
+      <div className="rd-page-kicker rd-buildcmp-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('builds.buildCalculator')}</span></div>
+      <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">{t('builds.compararBuilds')}</h1>
+      <p className="rd-page-subtitle rd-buildcmp-desc text-muted-foreground text-sm mb-6">{t('builds.comparaLasEstadisticasDe')}</p>
 
       {/* Selectors */}
       <div className="rd-buildcmp-selectors grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -269,7 +274,7 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
         <ChampionHeader build={buildA} champion={champA} side="left" itemCount={itemsA.length} />
         <div className="flex items-center justify-center shrink-0">
           <div className="bg-card border border-border rounded-full w-12 h-12 flex items-center justify-center">
-            <span className="font-rajdhani font-bold text-lg text-primary">VS</span>
+            <span className="font-rajdhani font-bold text-lg text-primary">{t('builds.vs')}</span>
           </div>
         </div>
         <ChampionHeader build={buildB} champion={champB} side="right" itemCount={itemsB.length} />
@@ -283,13 +288,13 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
           <div className="grid grid-cols-[125px_1fr_250px_1fr] gap-0 px-4 py-3 border-b border-border bg-secondary/30">
             <div />
             <div className="text-right pr-10">
-              <span className="text-sm font-semibold text-primary truncate">{buildA?.name || 'Build A'}</span>
+              <span className="text-sm font-semibold text-primary truncate">{buildA?.name || t('builds.buildA')}</span>
             </div>
             <div className="text-center">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Diferencia</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('goals.progressInfo.difference')}</span>
             </div>
             <div className="text-left pl-10">
-              <span className="text-sm font-semibold text-accent truncate">{buildB?.name || 'Build B'}</span>
+              <span className="text-sm font-semibold text-accent truncate">{buildB?.name || t('builds.buildB')}</span>
             </div>
           </div>
 
@@ -342,13 +347,13 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
 
       {!canCompare && (buildA || buildB) && (
         <div className="rd-buildcmp-empty rd-card text-center py-12 text-muted-foreground text-sm">
-          Seleccioná las dos builds para ver la comparación.
+         {t('builds.seleccionaLasDosBuilds')}
         </div>
       )}
 
       {!buildA && !buildB && (
         <div className="rd-buildcmp-empty rd-card text-center py-16 text-muted-foreground text-sm">
-          Seleccioná dos builds para comenzar la comparación.
+         {t('builds.seleccionaDosBuildsPara')}
         </div>
       )}
     </div>

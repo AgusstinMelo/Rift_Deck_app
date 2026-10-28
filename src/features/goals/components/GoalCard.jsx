@@ -8,6 +8,7 @@ import GoalEvolutionChart from './GoalEvolutionChart';
 import GoalOutcomeBadge from './GoalOutcomeBadge';
 import GoalProgress from './GoalProgress';
 import InsufficientSampleNotice from './InsufficientSampleNotice';
+import { useT } from '@/lib/LocaleContext';
 
 /**
  * Tarjeta de progreso de un objetivo. Ocupa todo el alto disponible: el gráfico de evolución
@@ -15,6 +16,7 @@ import InsufficientSampleNotice from './InsufficientSampleNotice';
  * @param {{ item: import('../model/goalLists').GoalItem }} props
  */
 export default function GoalCard({ item }) {
+  const t = useT();
   const { goal, evaluation } = item;
   const metric = getMetric(goal.metric);
   const objective = describeGoal(goal, { ...evaluation.period, timezone: goal.timezone }).objective;
@@ -46,11 +48,11 @@ export default function GoalCard({ item }) {
 
       {hasEvolution ? (
         <div className="rd-goal-card-chart flex min-h-[8rem] flex-1 flex-col gap-1 overflow-hidden border-t border-border/60 pt-3">
-          <p className="rd-label">Evolución</p>
+          <p className="rd-label">{t('goals.evolution')}</p>
           <GoalEvolutionChart goal={goal} evaluation={evaluation} compact className="min-h-0 flex-1" />
         </div>
       ) : (
-        <p className="text-[11px] text-muted-foreground">La evolución aparece con datos en al menos dos días distintos.</p>
+        <p className="text-[11px] text-muted-foreground">{t('goals.evolutionEmpty')}</p>
       )}
 
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">

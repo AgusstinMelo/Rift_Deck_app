@@ -6,9 +6,11 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import TierBadge from '@/components/ui/TierBadge';
+import { useT } from '@/lib/LocaleContext';
+import { formatLocale, tr } from '@/i18n/uiI18n';
 
 const formatDate = (value) => (
-  value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString('es-ES') : '—'
+  value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString(formatLocale()) : '—'
 );
 
 const getLocalDateInput = () => {
@@ -40,21 +42,22 @@ const TIER_THRESHOLDS = [
 ];
 
 const WEIGHT_FIELDS = [
-  { key: 'winrate_weight', label: 'Winrate', desc: 'Cuánto gana', tone: 'bg-primary' },
-  { key: 'pickrate_weight', label: 'Pickrate', desc: 'Popularidad', tone: 'bg-primary/70' },
-  { key: 'banrate_weight', label: 'Banrate', desc: 'Presión en el meta', tone: 'bg-primary/45' },
-  { key: 'facilidad_weight', label: 'Facilidad', desc: 'Bonus si es fácil', tone: 'bg-primary/25' },
+  { key: 'winrate_weight', get label() { return tr('tierlist.weights.winrate'); }, get desc() { return tr('tierlist.weights.winrateDesc'); }, tone: 'bg-primary' },
+  { key: 'pickrate_weight', get label() { return tr('tierlist.weights.pickrate'); }, get desc() { return tr('tierlist.weights.pickrateDesc'); }, tone: 'bg-primary/70' },
+  { key: 'banrate_weight', get label() { return tr('tierlist.weights.banrate'); }, get desc() { return tr('tierlist.weights.banrateDesc'); }, tone: 'bg-primary/45' },
+  { key: 'facilidad_weight', get label() { return tr('tierlist.weights.facilidad'); }, get desc() { return tr('tierlist.weights.facilidadDesc'); }, tone: 'bg-primary/25' },
 ];
 
 const SOURCE_FIELDS = [
-  { key: 'active_data_source', label: 'Fuente', icon: Database },
-  { key: 'active_region', label: 'Región', icon: Globe2 },
-  { key: 'active_elo', label: 'Elo', icon: Layers },
+  { key: 'active_data_source', get label() { return tr('tierlist.sources.source'); }, icon: Database },
+  { key: 'active_region', get label() { return tr('tierlist.sources.region'); }, icon: Globe2 },
+  { key: 'active_elo', get label() { return tr('tierlist.sources.elo'); }, icon: Layers },
 ];
 
 const isSuccessfulRun = run => run.status === 'success' || run.status === 'partial';
 
 export default function TierlistConfig() {
+  const t = useT();
   const { data: config = null } = useQuery({
     queryKey: ['tierlist-config'],
     queryFn: () => getTierlistConfig(),
@@ -83,18 +86,18 @@ export default function TierlistConfig() {
     <div className="rd-page">
       <div className="rd-tierlist-method">
         <PageHeader
-          title="Cómo calculamos la Tierlist"
-          subtitle="Los pesos, las fuentes y las reglas que usamos para armar la tierlist del día y el promedio por parche."
+          title={t('tierlist.comoCalculamosLaTierlist')}
+          subtitle={t('tierlist.losPesosLasFuentes')}
         />
 
         <div className="rd-tierlist-method-grid grid grid-cols-1 lg:grid-cols-12 gap-3">
           {/* Columna izquierda: cómo se calcula el score del día */}
           <div className="lg:col-span-7 flex flex-col gap-3 min-h-0">
             <section className="bg-card border border-border rounded-xl p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">Paso 1 · Score del día</p>
-              <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">Pesos del algoritmo</h2>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">{t('tierlist.paso1ScoreDel')}</p>
+              <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">{t('tierlist.pesosDelAlgoritmo')}</h2>
               <p className="text-xs leading-relaxed text-muted-foreground mt-1">
-                Cada métrica pasa a percentil (0–100) dentro de su línea, con más peso en los elos altos, y se combina con estos pesos:
+                {t('tierlist.cadaMetricaPasaA')}
               </p>
 
               {/* Composición del score: cada segmento es el peso de una métrica */}
@@ -122,16 +125,16 @@ export default function TierlistConfig() {
               </div>
 
               <p className="mt-2.5 rounded-lg bg-secondary/40 border border-border/60 px-3 py-1.5 text-xs text-muted-foreground">
-                Score = Winrate × {Number(values.winrate_weight).toFixed(2)}
-                {' '}+ Pickrate × {Number(values.pickrate_weight).toFixed(2)}
-                {' '}+ Banrate × {Number(values.banrate_weight).toFixed(2)}
-                {' '}+ Facilidad × {Number(values.facilidad_weight).toFixed(2)}
+                {t('tierlist.scoreWinrate')} {Number(values.winrate_weight).toFixed(2)}
+                {' '}{t('tierlist.pickrate')} {Number(values.pickrate_weight).toFixed(2)}
+                {' '}{t('tierlist.banrate')} {Number(values.banrate_weight).toFixed(2)}
+                {' '}{t('tierlist.facilidad')} {Number(values.facilidad_weight).toFixed(2)}
               </p>
             </section>
 
             <section className="bg-card border border-border rounded-xl p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">Paso 3 · Tiers</p>
-              <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">Del score al tier</h2>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">{t('tierlist.paso3Tiers')}</p>
+              <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">{t('tierlist.delScoreAlTier')}</h2>
               <div className="mt-3 grid grid-cols-5 gap-2">
                 {TIER_THRESHOLDS.map(({ tier, range }) => (
                   <div key={tier} className="flex items-center justify-center gap-2 rounded-lg border border-border/60 bg-secondary/30 py-2">
@@ -143,7 +146,7 @@ export default function TierlistConfig() {
             </section>
 
             <section className="bg-card border border-border rounded-xl p-4">
-              <h2 className="font-rajdhani font-bold text-lg text-foreground">Fuente de datos</h2>
+              <h2 className="font-rajdhani font-bold text-lg text-foreground">{t('tierlist.fuenteDeDatos')}</h2>
               <dl className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {SOURCE_FIELDS.map(({ key, label, icon: Icon }) => (
                   <div key={key} className="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/30 px-3.5 py-2.5 min-w-0">
@@ -163,30 +166,29 @@ export default function TierlistConfig() {
           {/* Columna derecha: ajustes, promedio y actualización automática */}
           <div className="lg:col-span-5 flex flex-col gap-3 min-h-0">
             <section className="bg-card border border-border rounded-xl p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">Paso 2 · Ajustes</p>
-              <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">Penalizaciones y promedio</h2>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-primary/80">{t('tierlist.paso2Ajustes')}</p>
+              <h2 className="font-rajdhani font-bold text-lg text-foreground mt-0.5">{t('tierlist.penalizacionesYPromedio')}</h2>
 
               <ul className="mt-3 space-y-2.5">
                 <li className="flex gap-3 rounded-lg border border-border/60 bg-secondary/30 px-3.5 py-3">
                   <ShieldAlert size={16} className="mt-0.5 shrink-0 text-primary" />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                      <p className="text-sm font-medium text-foreground">Ausencia en elos</p>
+                      <p className="text-sm font-medium text-foreground">{t('tierlist.ausenciaEnElos')}</p>
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
                         penaltyActive
                           ? 'bg-green-500/10 text-green-400 border border-green-500/20'
                           : 'bg-secondary text-muted-foreground border border-border/60'
                       }`}>
                         {!penaltyStartsOn
-                          ? 'Sin fecha'
+                          ? t('tierlist.sinFecha2')
                           : penaltyActive
-                            ? `Activa desde el ${formatDate(penaltyStartsOn)}`
-                            : `Desde el ${formatDate(penaltyStartsOn)}`}
+                            ? t('tierlist.activaDesdeEl', { formatDate: formatDate(penaltyStartsOn) })
+                            : t('tierlist.desdeEl', { formatDate: formatDate(penaltyStartsOn) })}
                       </span>
                     </div>
                     <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                      Baja el score de los campeones que no aparecen en todos los elos. Se activa {ELO_PENALTY_GRACE_DAYS / 7} semanas
-                      después de un parche de número nuevo (las letras no la reinician).
+                      {t('tierlist.bajaElScoreDe')} {ELO_PENALTY_GRACE_DAYS / 7} {t('tierlist.semanasDespuesDeUn')}
                     </p>
                   </div>
                 </li>
@@ -194,10 +196,9 @@ export default function TierlistConfig() {
                 <li className="flex gap-3 rounded-lg border border-border/60 bg-secondary/30 px-3.5 py-3">
                   <Scale size={16} className="mt-0.5 shrink-0 text-primary" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">Promedio ponderado por parche</p>
+                    <p className="text-sm font-medium text-foreground">{t('tierlist.promedioPonderadoPorParche')}</p>
                     <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                      La tierlist promediada junta todos los días del parche (7.3, 7.3a, 7.3b… cuentan como 7.3).
-                      Un día de hace {AVERAGE_HALF_LIFE_DAYS} días vale la mitad que el de hoy.
+                      {t('tierlist.laTierlistPromediadaJunta')} {AVERAGE_HALF_LIFE_DAYS} {t('tierlist.diasValeLaMitad')}
                     </p>
                   </div>
                 </li>
@@ -205,9 +206,9 @@ export default function TierlistConfig() {
                 <li className="flex gap-3 rounded-lg border border-border/60 bg-secondary/30 px-3.5 py-3">
                   <TrendingDown size={16} className="mt-0.5 shrink-0 text-primary" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">Días ausentes</p>
+                    <p className="text-sm font-medium text-foreground">{t('tierlist.diasAusentes')}</p>
                     <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                      Si un campeón falta algunos días del parche en su línea, su promedio baja (más si faltó hace poco).
+                      {t('tierlist.siUnCampeonFalta')}
                     </p>
                   </div>
                 </li>
@@ -217,25 +218,25 @@ export default function TierlistConfig() {
             <section className="rd-tierlist-method-runs bg-card border border-border rounded-xl p-4 flex flex-col min-h-0">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-rajdhani font-bold text-lg text-foreground">Actualización automática</h2>
+                  <h2 className="font-rajdhani font-bold text-lg text-foreground">{t('tierlist.actualizacionAutomatica')}</h2>
                   <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <CalendarClock size={13} className="text-primary" />
-                    Todos los días a las 06:00 (hora de España)
+                    {t('tierlist.todosLosDiasA')}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Parche en curso</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('tierlist.parcheEnCurso')}</p>
                   <p className="text-sm font-medium text-foreground">
                     {currentGroup
-                      ? `${currentGroup.patch_group} · ${currentGroup.snapshots_count} ${currentGroup.snapshots_count === 1 ? 'día' : 'días'}`
+                      ? `${currentGroup.patch_group} · ${currentGroup.snapshots_count} ${currentGroup.snapshots_count === 1 ? t('tierlist.dia') : t('tierlist.dias')}`
                       : '—'}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-4 mb-2 text-[10px] uppercase tracking-wide text-muted-foreground">Últimas ejecuciones</p>
+              <p className="mt-4 mb-2 text-[10px] uppercase tracking-wide text-muted-foreground">{t('tierlist.ultimasEjecuciones')}</p>
               {recentRuns.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Todavía no hay ejecuciones registradas.</p>
+                <p className="text-sm text-muted-foreground">{t('tierlist.todaviaNoHayEjecuciones')}</p>
               ) : (
                 <ul className="rd-tierlist-method-runlist -mx-1 space-y-0.5 overflow-y-auto px-1">
                   {recentRuns.map(run => (
@@ -250,15 +251,15 @@ export default function TierlistConfig() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-baseline justify-between gap-3">
                           <p className="text-foreground">
-                            {formatDate(run.snapshot_date)} · Parche {run.patch}
+                            {formatDate(run.snapshot_date)} {t('tierlist.parche3')} {run.patch}
                           </p>
                           {run.champions_processed != null && (
-                            <span className="shrink-0 text-xs text-muted-foreground">{run.champions_processed} entradas</span>
+                            <span className="shrink-0 text-xs text-muted-foreground">{run.champions_processed} {t('tierlist.entradas')}</span>
                           )}
                         </div>
                         {run.weights_used?.apply_elo_presence_penalty != null && (
                           <p className="text-xs text-muted-foreground">
-                            Penalización por elos {run.weights_used.apply_elo_presence_penalty ? 'activa' : 'desactivada'}
+                            {t('tierlist.penalizacionPorElos')} {run.weights_used.apply_elo_presence_penalty ? 'activa' : 'desactivada'}
                           </p>
                         )}
                         {run.error_message && (

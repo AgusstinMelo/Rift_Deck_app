@@ -16,6 +16,7 @@ import {
   getCurrentTierlistEntries,
   getTierEntriesForChampion,
 } from '@/utils/tierlist';
+import { useT } from '@/lib/LocaleContext';
 
 const DAMAGE_COLORS = {
   AD: 'text-orange-400 bg-orange-500/10',
@@ -48,6 +49,7 @@ export default function ChampionLibrary({
   initialTierlist,
   publicBasePath,
 }) {
+  const t = useT();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
@@ -154,8 +156,8 @@ export default function ChampionLibrary({
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder={compactFilters ? 'Buscar' : 'Buscar campeón...'}
-              aria-label="Buscar campeón"
+              placeholder={compactFilters ? t('common.search') : t('common.searchChampionPlaceholder')}
+              aria-label={t('common.searchChampion')}
               className="
                 w-full bg-secondary/60 border border-border rounded-xl
                 pl-10 pr-4 py-2.5 text-sm text-foreground
@@ -171,12 +173,12 @@ export default function ChampionLibrary({
             onChange={e => setLaneFilter(e.target.value)}
             className="bg-secondary/60 border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40"
           >
-            <option value="all">{compactFilters ? 'Línea' : 'Todas las líneas'}</option>
-            <option value="top">Top</option>
-            <option value="jungle">Jungle</option>
-            <option value="mid">Mid</option>
-            <option value="adc">ADC</option>
-            <option value="support">Support</option>
+            <option value="all">{compactFilters ? t('goals.filterLabels.lanes') : t('library.todasLasLineas')}</option>
+            <option value="top">{t('lanes.top')}</option>
+            <option value="jungle">{t('library.jungle')}</option>
+            <option value="mid">{t('lanes.mid')}</option>
+            <option value="adc">{t('lanes.adc')}</option>
+            <option value="support">{t('lanes.support')}</option>
           </select>
 
           <select
@@ -184,13 +186,13 @@ export default function ChampionLibrary({
             onChange={e => setRoleFilter(e.target.value)}
             className="bg-secondary/60 border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40"
           >
-            <option value="all">{compactFilters ? 'Rol' : 'Todos los roles'}</option>
-            <option value="Luchador">Luchador</option>
-            <option value="Tanque">Tanque</option>
-            <option value="Mago">Mago</option>
-            <option value="Asesino">Asesino</option>
-            <option value="Tirador">Tirador</option>
-            <option value="Soporte">Soporte</option>
+            <option value="all">{compactFilters ? t('library.rol') : t('library.todosLosRoles')}</option>
+            <option value="Luchador">{t('library.luchador')}</option>
+            <option value="Tanque">{t('library.tanque')}</option>
+            <option value="Mago">{t('library.mago')}</option>
+            <option value="Asesino">{t('library.asesino')}</option>
+            <option value="Tirador">{t('library.tirador')}</option>
+            <option value="Soporte">{t('library.soporte')}</option>
           </select>
 
           <select
@@ -198,10 +200,10 @@ export default function ChampionLibrary({
             onChange={e => setDiffFilter(e.target.value)}
             className="bg-secondary/60 border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40"
           >
-            <option value="all">Dificultad</option>
-            <option value="1">Fácil</option>
-            <option value="2">Media</option>
-            <option value="3">Difícil</option>
+            <option value="all">{t('library.dificultad')}</option>
+            <option value="1">{t('library.facil')}</option>
+            <option value="2">{t('library.media')}</option>
+            <option value="3">{t('library.dificil')}</option>
           </select>
         </div>
       </div>
@@ -213,7 +215,7 @@ export default function ChampionLibrary({
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Search} title="Sin resultados" description="Probá con otros filtros o buscá otro campeón." />
+        <EmptyState icon={Search} title={t('common.noResults')} description={t('library.probaConOtrosFiltros')} />
       ) : (
         <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-12 xl:grid-cols-14 gap-1.5">
           {filtered.map((champ, index) => {
@@ -233,7 +235,7 @@ export default function ChampionLibrary({
                 {champ.image_url
                   ? <img
                       src={champ.image_url}
-                      alt={publicBasePath ? `${champ.name} en Wild Rift` : champ.name}
+                      alt={publicBasePath ? t('library.enWildRift', { name: champ.name }) : champ.name}
                       width="160"
                       height="160"
                       loading={index < 14 ? 'eager' : 'lazy'}
@@ -252,7 +254,7 @@ export default function ChampionLibrary({
         </div>
       )}
 
-      <p className="text-muted-foreground text-xs mt-4">{filtered.length} campeones encontrados</p>
+      <p className="text-muted-foreground text-xs mt-4">{filtered.length} {t('library.campeonesEncontrados')}</p>
     </div>
   );
 }

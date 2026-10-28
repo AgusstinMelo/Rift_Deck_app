@@ -1,7 +1,7 @@
 import { cloneElement, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 
 const uniqueText = (...values) => [...new Set(
   values
@@ -10,6 +10,7 @@ const uniqueText = (...values) => [...new Set(
 )];
 
 export default function EntityHoverCard({ entity, kind, children }) {
+  const t = useT();
   const [position, setPosition] = useState(null);
   const pressPreview = usePressPreview();
   const { entityName, entityDescription } = useCatalogText();
@@ -66,7 +67,7 @@ export default function EntityHoverCard({ entity, kind, children }) {
                 ))}
               </div>
             ) : (
-              <p className="mt-3 border-t border-border/70 pt-2.5 text-xs text-muted-foreground">Sin descripción disponible.</p>
+              <p className="mt-3 border-t border-border/70 pt-2.5 text-xs text-muted-foreground">{t('library.sinDescripcionDisponible')}</p>
             )}
           </div>
         </div>,

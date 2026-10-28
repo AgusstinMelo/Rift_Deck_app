@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { MATCH_TYPES } from '../../../constants/matchTypes.js';
 import { patchMatchesSelection } from '../../../utils/patches.js';
 import { GOAL_LIMITS, LANES } from '../model/goalConstants.js';
+import { tr } from '../../../i18n/uiI18n.js';
 import { championMatchesAny, championOf, laneOf, matchTypeOf, patchOf } from '../engine/matchFacts.js';
 
 /** Resultado de evaluar un filtro sobre una partida. */
@@ -31,17 +32,20 @@ const championSchema = z.object({
 const FILTERS = {
   types: {
     key: 'types',
-    label: 'Tipo de partida',
-    schema: z.array(z.enum(/** @type {[string, ...string[]]} */ (MATCH_TYPES.map(type => type.value))))
-      .min(1, 'Elegí al menos un tipo de partida.'),
+    get label() { return tr('goals.filterLabels.types'); },
+    get schema() {
+      return z.array(z.enum(/** @type {[string, ...string[]]} */ (MATCH_TYPES.map(type => type.value))))
+        .min(1, tr('goals.validation.chooseType'));
+    },
     evaluate: (match, value) =>
       value.includes(matchTypeOf(match)) ? FILTER_RESULT.MATCH : FILTER_RESULT.MISMATCH,
   },
   lanes: {
     key: 'lanes',
-    label: 'Línea',
-    schema: z.array(z.enum(/** @type {[string, ...string[]]} */ ([...LANES])))
-      .min(1, 'Elegí al menos una línea.'),
+    get label() { return tr('goals.filterLabels.lanes'); },
+    get schema() {
+      return z.array(z.enum(/** @type {[string, ...string[]]} */ ([...LANES]))).min(1, tr('goals.validation.chooseLane'));
+    },
     evaluate: (match, value) => {
       const lane = laneOf(match);
       if (!lane) return FILTER_RESULT.MISSING;
@@ -50,10 +54,12 @@ const FILTERS = {
   },
   champions: {
     key: 'champions',
-    label: 'Campeones',
-    schema: z.array(championSchema)
-      .min(1, 'Elegí al menos un campeón.')
-      .max(GOAL_LIMITS.MAX_CHAMPIONS, `Podés elegir hasta ${GOAL_LIMITS.MAX_CHAMPIONS} campeones.`),
+    get label() { return tr('goals.filterLabels.champions'); },
+    get schema() {
+      return z.array(championSchema)
+        .min(1, tr('goals.validation.chooseChampion'))
+        .max(GOAL_LIMITS.MAX_CHAMPIONS, tr('goals.validation.championsMax', { max: GOAL_LIMITS.MAX_CHAMPIONS }));
+    },
     evaluate: (match, value) => {
       const champion = championOf(match);
       if (!champion) return FILTER_RESULT.MISSING;
@@ -62,8 +68,10 @@ const FILTERS = {
   },
   patches: {
     key: 'patches',
-    label: 'Parche',
-    schema: z.array(z.string().trim().min(1).max(20)).min(1, 'Elegí al menos un parche.'),
+    get label() { return tr('goals.filterLabels.patches'); },
+    get schema() {
+      return z.array(z.string().trim().min(1).max(20)).min(1, tr('goals.validation.choosePatch'));
+    },
     evaluate: (match, value) => {
       const patch = patchOf(match);
       if (!patch) return FILTER_RESULT.MISSING;

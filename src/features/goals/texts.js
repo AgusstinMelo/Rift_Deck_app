@@ -1,55 +1,64 @@
-// Textos de la sección Objetivos. El proyecto no tiene i18n: se centralizan acá.
+// Textos de la sección Objetivos, armados a partir de src/i18n/ui (sección "goals").
 import { MATCH_TYPES } from '../../constants/matchTypes.js';
+import { formatLocale, labels, tr } from '../../i18n/uiI18n.js';
 import { AGGREGATION, EXCLUSION_REASON, LIFECYCLE, METRIC_FAMILY, METRIC_KIND, OPERATOR, OUTCOME } from './model/goalConstants.js';
 import { getMetric, operatorOf } from './metrics/index.js';
 
-export const OUTCOME_LABELS = {
-  [OUTCOME.SCHEDULED]: 'Programado',
-  [OUTCOME.IN_PROGRESS]: 'En curso',
-  [OUTCOME.ACHIEVED]: 'Alcanzado',
-  [OUTCOME.NOT_ACHIEVED]: 'No alcanzado',
-  [OUTCOME.INCONCLUSIVE]: 'No concluyente',
-};
+export const OUTCOME_LABELS = labels({
+  [OUTCOME.SCHEDULED]: 'goals.outcome.scheduled',
+  [OUTCOME.IN_PROGRESS]: 'goals.outcome.inProgress',
+  [OUTCOME.ACHIEVED]: 'goals.outcome.achieved',
+  [OUTCOME.NOT_ACHIEVED]: 'goals.outcome.notAchieved',
+  [OUTCOME.INCONCLUSIVE]: 'goals.outcome.inconclusive',
+});
 
 /** Estado derivado: el período cerró o el objetivo ya se alcanzó. */
-export const FINISHED_LABEL = 'Finalizado';
+export const finishedLabel = () => tr('goals.outcome.finished');
 
-export const LIFECYCLE_LABELS = {
-  [LIFECYCLE.ACTIVE]: 'Activo',
-  [LIFECYCLE.CANCELLED]: 'Cancelado',
-  [LIFECYCLE.ARCHIVED]: 'Archivado',
-};
+export const LIFECYCLE_LABELS = labels({
+  [LIFECYCLE.ACTIVE]: 'goals.lifecycle.active',
+  [LIFECYCLE.CANCELLED]: 'goals.lifecycle.cancelled',
+  [LIFECYCLE.ARCHIVED]: 'goals.lifecycle.archived',
+});
 
-export const LANE_LABELS = { top: 'Top', jungler: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
+export const LANE_LABELS = labels({
+  top: 'lanes.top', jungler: 'lanes.jungler', mid: 'lanes.mid', adc: 'lanes.adc', support: 'lanes.support',
+});
 
-export const FILTER_LABELS = { types: 'tipo de partida', lanes: 'línea', champions: 'campeón', patches: 'parche' };
+export const FILTER_LABELS = labels({
+  types: 'goals.filterNames.types',
+  lanes: 'goals.filterNames.lanes',
+  champions: 'goals.filterNames.champions',
+  patches: 'goals.filterNames.patches',
+});
 
-const REASON_LABELS = {
-  [EXCLUSION_REASON.NO_DATE]: 'No tiene fecha de juego ni de registro',
-  [EXCLUSION_REASON.MISSING_RESULT]: 'No tiene resultado registrado',
-  [EXCLUSION_REASON.MISSING_DEATHS]: 'No tiene muertes registradas',
-  [EXCLUSION_REASON.MISSING_CHAMPION]: 'No tiene campeón registrado',
-  [EXCLUSION_REASON.MISSING_KDA]: 'No tiene asesinatos, muertes y asistencias registrados',
-  [EXCLUSION_REASON.MISSING_KILLS]: 'No tiene asesinatos registrados',
-  [EXCLUSION_REASON.MISSING_ASSISTS]: 'No tiene asistencias registradas',
-  [EXCLUSION_REASON.MISSING_GOLD]: 'No tiene oro registrado',
-  [EXCLUSION_REASON.MISSING_DURATION]: 'No tiene duración registrada',
-  [EXCLUSION_REASON.NOT_A_WIN]: 'Es una derrota: solo cuentan las victorias',
-};
+const REASON_LABELS = labels({
+  [EXCLUSION_REASON.NO_DATE]: 'goals.exclusion.noDate',
+  [EXCLUSION_REASON.MISSING_RESULT]: 'goals.exclusion.missingResult',
+  [EXCLUSION_REASON.MISSING_DEATHS]: 'goals.exclusion.missingDeaths',
+  [EXCLUSION_REASON.MISSING_CHAMPION]: 'goals.exclusion.missingChampion',
+  [EXCLUSION_REASON.MISSING_KDA]: 'goals.exclusion.missingKda',
+  [EXCLUSION_REASON.MISSING_KILLS]: 'goals.exclusion.missingKills',
+  [EXCLUSION_REASON.MISSING_ASSISTS]: 'goals.exclusion.missingAssists',
+  [EXCLUSION_REASON.MISSING_GOLD]: 'goals.exclusion.missingGold',
+  [EXCLUSION_REASON.MISSING_DURATION]: 'goals.exclusion.missingDuration',
+  [EXCLUSION_REASON.NOT_A_WIN]: 'goals.exclusion.notAWin',
+});
 
 /** @param {{ reason: string, field?: string }} exclusion */
 export function exclusionLabel({ reason, field }) {
-  if (reason === EXCLUSION_REASON.FILTER_MISMATCH) return `No cumple el filtro de ${FILTER_LABELS[field] || field}`;
-  if (reason === EXCLUSION_REASON.MISSING_FILTER_DATA) return `Falta el dato de ${FILTER_LABELS[field] || field}`;
-  return REASON_LABELS[reason] || 'Excluida';
+  if (reason === EXCLUSION_REASON.FILTER_MISMATCH) return tr('goals.exclusion.filterMismatch', { filter: FILTER_LABELS[field] || field });
+  if (reason === EXCLUSION_REASON.MISSING_FILTER_DATA) return tr('goals.exclusion.missingFilterData', { filter: FILTER_LABELS[field] || field });
+  return REASON_LABELS[reason] || tr('goals.exclusion.excluded');
 }
 
 const numberFormatters = new Map();
 function formatNumber(value, decimals) {
-  if (!numberFormatters.has(decimals)) {
-    numberFormatters.set(decimals, new Intl.NumberFormat('es-AR', { maximumFractionDigits: decimals }));
+  const key = `${formatLocale()}:${decimals}`;
+  if (!numberFormatters.has(key)) {
+    numberFormatters.set(key, new Intl.NumberFormat(formatLocale(), { maximumFractionDigits: decimals }));
   }
-  return numberFormatters.get(decimals).format(value);
+  return numberFormatters.get(key).format(value);
 }
 
 /** Unidad visible de un objetivo (la del usuario en los manuales). */
@@ -77,31 +86,31 @@ export function formatDifference(goal, difference) {
 export function formatDate(isoDate) {
   if (!isoDate) return '';
   const [year, month, day] = isoDate.split('-');
-  return `${day}/${month}/${year}`;
+  return formatLocale() === 'en' ? `${month}/${day}/${year}` : `${day}/${month}/${year}`;
 }
 
 export function formatPeriod({ startDate, endDate }) {
   return startDate === endDate ? formatDate(startDate) : `${formatDate(startDate)} – ${formatDate(endDate)}`;
 }
 
-export const OPERATOR_LABELS = { [OPERATOR.GTE]: 'Al menos', [OPERATOR.LTE]: 'Como máximo' };
+export const OPERATOR_LABELS = labels({ [OPERATOR.GTE]: 'goals.operator.gte', [OPERATOR.LTE]: 'goals.operator.lte' });
 
-export const FAMILY_LABELS = {
-  [METRIC_FAMILY.CUMULATIVE]: 'Acumulativos',
-  [METRIC_FAMILY.AVERAGE]: 'Promedios',
-  [METRIC_FAMILY.PERCENTAGE]: 'Porcentajes',
-  [METRIC_FAMILY.RECORD]: 'Únicos',
-  [METRIC_FAMILY.MANUAL]: 'Manuales',
-};
+export const FAMILY_LABELS = labels({
+  [METRIC_FAMILY.CUMULATIVE]: 'goals.family.cumulative',
+  [METRIC_FAMILY.AVERAGE]: 'goals.family.average',
+  [METRIC_FAMILY.PERCENTAGE]: 'goals.family.percentage',
+  [METRIC_FAMILY.RECORD]: 'goals.family.record',
+  [METRIC_FAMILY.MANUAL]: 'goals.family.manual',
+});
 
 /** "al menos" / "como máximo" según la dirección del objetivo. */
 export function operatorPhrase(goal) {
-  return operatorOf(goal) === OPERATOR.LTE ? 'como máximo' : 'al menos';
+  return tr(operatorOf(goal) === OPERATOR.LTE ? 'goals.operator.ltePhrase' : 'goals.operator.gtePhrase');
 }
 
 function listPhrase(values) {
   if (values.length <= 1) return values[0] || '';
-  return `${values.slice(0, -1).join(', ')} y ${values[values.length - 1]}`;
+  return `${values.slice(0, -1).join(', ')}${tr('goals.list.and')}${values[values.length - 1]}`;
 }
 
 /** Describe los filtros activos en una frase; los consumidos por la métrica se omiten. */
@@ -110,13 +119,16 @@ export function describeFilters(goal) {
   const filters = goal.filters || {};
   const parts = [];
   if (filters.types?.length) {
-    parts.push(`de tipo ${listPhrase(filters.types.map(type => MATCH_TYPES.find(t => t.value === type)?.label || type))}`);
+    const list = listPhrase(filters.types.map(type => MATCH_TYPES.find(t => t.value === type)?.label || type));
+    parts.push(tr('goals.filterPhrase.types', { list }));
   }
-  if (filters.lanes?.length) parts.push(`en ${listPhrase(filters.lanes.map(lane => LANE_LABELS[lane] || lane))}`);
+  if (filters.lanes?.length) {
+    parts.push(tr('goals.filterPhrase.lanes', { list: listPhrase(filters.lanes.map(lane => LANE_LABELS[lane] || lane)) }));
+  }
   if (filters.champions?.length && !metric.consumedFilters.includes('champions')) {
-    parts.push(`con ${listPhrase(filters.champions.map(champion => champion.name))}`);
+    parts.push(tr('goals.filterPhrase.champions', { list: listPhrase(filters.champions.map(champion => champion.name)) }));
   }
-  if (filters.patches?.length) parts.push(`del parche ${listPhrase(filters.patches)}`);
+  if (filters.patches?.length) parts.push(tr('goals.filterPhrase.patches', { list: listPhrase(filters.patches) }));
   return parts.join(', ');
 }
 
@@ -124,44 +136,37 @@ function objectivePhrase(goal) {
   const target = formatMetricValue(goal, Number(goal.target));
   const filters = describeFilters(goal);
   const withFilters = filters ? ` ${filters}` : '';
-  const op = operatorPhrase(goal);
+  const vars = { target, filters: withFilters, op: operatorPhrase(goal) };
   switch (goal.metric) {
-    case 'partidas_registradas':
-      return `Registrar al menos ${target}${withFilters}.`;
-    case 'victorias':
-      return `Ganar al menos ${target}${withFilters}.`;
-    case 'winrate':
-      return `Tener un winrate de ${op} ${target} en tus partidas${withFilters}.`;
     case 'porcentaje_campeones':
-      return `Que ${op} el ${target} de tus partidas${withFilters} sean con ${listPhrase((goal.filters?.champions || []).map(c => c.name))}.`;
-    case 'promedio_kda':
-      return `Tener un KDA promedio de ${op} ${target}${withFilters}.`;
-    case 'promedio_duracion':
-      return `Que tus partidas duren en promedio ${op} ${target}${withFilters}.`;
-    case 'manual':
-      return `Sumar al menos ${target} con check-ins manuales.`;
-    case 'suma_duracion':
-      return `Jugar al menos ${target} en total${withFilters}.`;
-    case 'max_kda':
-      return `Lograr una partida con KDA de al menos ${target}${withFilters}.`;
+      return tr('goals.objective.porcentaje_campeones', {
+        ...vars,
+        champions: listPhrase((goal.filters?.champions || []).map(c => c.name)),
+      });
     case 'min_muertes':
-      return Number(goal.target) === 0
-        ? `Lograr una partida sin morir${withFilters}.`
-        : `Lograr una partida con ${target} o menos${withFilters}.`;
+      return tr(Number(goal.target) === 0 ? 'goals.objective.noDeaths' : 'goals.objective.min_muertes', vars);
+    case 'partidas_registradas':
+    case 'victorias':
+    case 'winrate':
+    case 'promedio_kda':
+    case 'promedio_duracion':
+    case 'manual':
+    case 'suma_duracion':
+    case 'max_kda':
     case 'min_duracion':
-      return `Ganar una partida en ${target} o menos${withFilters}.`;
+      return tr(`goals.objective.${goal.metric}`, vars);
     default:
       break;
   }
   switch (getMetric(goal.metric).aggregation) {
     case AGGREGATION.AVERAGE:
-      return `Promediar ${op} ${target} por partida${withFilters}.`;
+      return tr('goals.objective.average', vars);
     case AGGREGATION.TOTAL:
-      return `Sumar al menos ${target} en total${withFilters}.`;
+      return tr('goals.objective.total', vars);
     case AGGREGATION.BEST:
-      return `Lograr una partida con al menos ${target}${withFilters}.`;
+      return tr('goals.objective.best', vars);
     default:
-      return `Llegar a ${op} ${target}${withFilters}.`;
+      return tr('goals.objective.default', vars);
   }
 }
 
@@ -173,44 +178,49 @@ function objectivePhrase(goal) {
 export function describeGoal(goal, period) {
   const metric = getMetric(goal.metric);
   const minSample = goal.min_sample ?? goal.minSample;
-  const range = `entre el ${formatDate(period.startDate)} y el ${formatDate(period.endDate)} (ambos incluidos, zona ${period.timezone})`;
+  const range = tr('goals.calc.range', {
+    start: formatDate(period.startDate),
+    end: formatDate(period.endDate),
+    timezone: period.timezone,
+  });
   const calculation = [];
 
   if (metric.source === 'matches') {
-    calculation.push(`Cuentan las partidas cuya fecha de juego cae ${range}${describeFilters(goal) ? ` y que son ${describeFilters(goal)}` : ''}.`);
+    const filters = describeFilters(goal);
+    calculation.push(filters
+      ? tr('goals.calc.matchesFiltered', { range, filters })
+      : tr('goals.calc.matches', { range }));
   } else {
-    calculation.push(`Cuentan los check-ins con fecha ${range}.`);
+    calculation.push(tr('goals.calc.checkins', { range }));
   }
 
   if (goal.metric === 'winrate') {
-    calculation.push('Se dividen las victorias por las partidas con resultado registrado.');
-    calculation.push('El winrate registrado depende de las partidas que cargues: no equivale a tu rango real.');
+    calculation.push(tr('goals.calc.winrateDivide'));
+    calculation.push(tr('goals.calc.winrateNote'));
   }
   if (goal.metric === 'promedio_kda') {
-    calculation.push('El KDA de cada partida es (asesinatos + asistencias) / muertes; con 0 muertes vale asesinatos + asistencias.');
+    calculation.push(tr('goals.calc.kda'));
   }
   if (metric.aggregation === AGGREGATION.TOTAL && metric.stat !== 'partidas' && metric.source === 'matches') {
-    calculation.push('Se suma el valor de cada partida.');
+    calculation.push(tr('goals.calc.sum'));
   }
   if (metric.aggregation === AGGREGATION.BEST) {
-    calculation.push(operatorOf(goal) === OPERATOR.LTE
-      ? 'Es un objetivo único: alcanza con que una sola partida quede en la meta o por debajo.'
-      : 'Es un objetivo único: alcanza con que una sola partida llegue a la meta.');
+    calculation.push(tr(operatorOf(goal) === OPERATOR.LTE ? 'goals.calc.bestLte' : 'goals.calc.best'));
   }
   if (goal.metric === 'min_duracion') {
-    calculation.push('Solo cuentan las victorias: las derrotas se excluyen.');
+    calculation.push(tr('goals.calc.winsOnly'));
   }
   if (/** @type {string[]} */ ([AGGREGATION.AVERAGE, AGGREGATION.TOTAL, AGGREGATION.BEST]).includes(metric.aggregation)
     && !['partidas', 'victorias', 'manual'].includes(metric.stat)) {
-    calculation.push('Las partidas sin ese dato registrado no cuentan: no se toman como cero.');
+    calculation.push(tr('goals.calc.noZero'));
   }
   if (goal.metric === 'porcentaje_campeones') {
-    calculation.push('El total son todas las partidas válidas del período que cumplen los demás filtros, juegues el campeón que juegues.');
+    calculation.push(tr('goals.calc.poolTotal'));
   }
 
   const definitive = metric.kind === METRIC_KIND.CUMULATIVE
-    ? 'Se marca como alcanzado apenas llegues a la meta, aunque el período siga abierto. Si después eliminás datos y quedás por debajo, vuelve a estar en curso.'
-    : `Mientras el período esté abierto el resultado es provisional. Se define al cierre del ${formatDate(period.endDate)}: si hay menos de ${minSample} partidas válidas queda no concluyente.`;
+    ? tr('goals.calc.definitiveCumulative')
+    : tr('goals.calc.definitivePerformance', { end: formatDate(period.endDate), minSample });
 
   return { objective: objectivePhrase(goal), calculation, definitive };
 }

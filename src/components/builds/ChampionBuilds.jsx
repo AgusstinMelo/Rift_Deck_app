@@ -4,9 +4,10 @@ import { useAuth } from '@/lib/AuthContext';
 import { getBuildsForChampion, deleteBuild } from '@/api/buildsSupabase';
 import { Plus, Trash2, Wrench, ChevronRight, GitCompare, ArrowLeft } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 
 export default function ChampionBuilds({ champion, items = [], onNewBuild, onEditBuild, onBack, onCompare }) {
+  const t = useT();
   const qc = useQueryClient();
   const { entityName } = useCatalogText();
   // Las builds guardan el nombre en español; se muestra en el idioma elegido.
@@ -41,7 +42,7 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
   return (
     <div className="rd-page rd-saved-builds-layout">
       <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-5">
-        <ArrowLeft size={15} /> Cambiar campeón
+        <ArrowLeft size={15} /> {t('builds.cambiarCampeon')}
       </button>
 
       <div className="rd-card p-5 mb-5">
@@ -53,21 +54,21 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
           </div>
           <div className="flex-1">
             <h1 className="font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">{champion.name}</h1>
-            <p className="text-muted-foreground text-sm">Builds guardadas</p>
+            <p className="text-muted-foreground text-sm">{t('builds.buildsGuardadas')}</p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
             <button
               onClick={onCompare}
               className="flex items-center justify-center gap-2 bg-secondary/70 border border-border text-foreground px-4 py-2 rounded-xl font-medium text-sm hover:border-primary/40 transition-all w-full sm:w-auto"
             >
-              <GitCompare size={16} /> Comparar
+              <GitCompare size={16} /> {t('builds.comparar')}
             </button>
 
             <button
               onClick={onNewBuild}
               className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-primary/90 transition-colors w-full sm:w-auto"
             >
-              <Plus size={16} /> Nueva Build
+              <Plus size={16} /> {t('builds.nuevaBuild')}
             </button>
           </div>
         </div>
@@ -84,10 +85,10 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
             <Wrench size={28} className="text-muted-foreground" />
           </div>
-          <h3 className="font-rajdhani font-bold text-lg text-foreground mb-1">Sin builds guardadas</h3>
-          <p className="text-muted-foreground text-sm mb-4">No hay builds para {champion.name} todavía.</p>
+          <h3 className="font-rajdhani font-bold text-lg text-foreground mb-1">{t('builds.sinBuildsGuardadas')}</h3>
+          <p className="text-muted-foreground text-sm mb-4">{t('builds.noHayBuildsPara')} {champion.name} {t('builds.todavia')}</p>
           <button onClick={onNewBuild} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-primary/90 transition-colors">
-            <Plus size={16} /> Crear primera build
+            <Plus size={16} /> {t('builds.crearPrimeraBuild')}
           </button>
         </div>
       ) : (
@@ -99,7 +100,7 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{build.name}</p>
                   {build.lane && <LaneBadge lane={build.lane} />}
-                  {build.patch && <span className="text-xs text-muted-foreground bg-secondary/60 border border-border/50 px-2 py-0.5 rounded-md">Parche {build.patch}</span>}
+                  {build.patch && <span className="text-xs text-muted-foreground bg-secondary/60 border border-border/50 px-2 py-0.5 rounded-md">{t('goals.filterLabels.patches')} {build.patch}</span>}
                 </div>
                 {build.items?.length > 0 && (
                   <p className="text-xs text-muted-foreground truncate">{build.items.map(itemLabel).join(' · ')}</p>
@@ -125,13 +126,13 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
                 <Trash2 size={20} className="text-red-400" />
               </div>
               <div>
-                <p className="font-rajdhani font-bold text-lg text-foreground">Eliminar build</p>
-                <p className="text-xs text-muted-foreground">Esta acción no se puede deshacer.</p>
+                <p className="font-rajdhani font-bold text-lg text-foreground">{t('builds.eliminarBuild')}</p>
+                <p className="text-xs text-muted-foreground">{t('builds.estaAccionNoSe')}</p>
               </div>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              ¿Querés eliminar <span className="text-foreground font-semibold">{buildToDelete.name || 'esta build'}</span>?
+             {t('builds.queresEliminar')} <span className="text-foreground font-semibold">{buildToDelete.name || t('builds.estaBuild')}</span>?
             </p>
 
             <div className="flex gap-2">
@@ -140,7 +141,7 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
                 onClick={() => setBuildToDelete(null)}
                 className="flex-1 px-4 py-2 rounded-lg bg-secondary border border-border text-sm text-muted-foreground hover:text-foreground transition-all"
               >
-                Cancelar
+               {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -148,7 +149,7 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
                 disabled={deleteMutation.isPending}
                 className="flex-1 px-4 py-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                {deleteMutation.isPending ? t('builds.eliminando') : t('common.delete')}
               </button>
             </div>
           </div>

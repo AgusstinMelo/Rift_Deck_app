@@ -6,6 +6,7 @@ import {
   isSupportedLocale,
   normalizeCatalogText,
 } from '@/i18n/catalogI18n';
+import { baseMessages, formatLocale, setActiveMessages, translate } from '@/i18n/uiI18n';
 
 const STORAGE_KEY = 'riftdeck.locale';
 
@@ -16,10 +17,19 @@ const CATALOG_LOADERS = {
   en: () => import('@/i18n/catalog/en.json'),
 };
 
+// Textos de la interfaz (src/i18n/ui). El español latino va en el bundle porque
+// es el del HTML prerenderizado y el respaldo de cualquier clave faltante.
+const UI_LOADERS = {
+  'es-ES': () => import('@/i18n/ui/es-ES.json'),
+  'pt-BR': () => import('@/i18n/ui/pt-BR.json'),
+  en: () => import('@/i18n/ui/en.json'),
+};
+
 const LocaleContext = createContext({
   locale: DEFAULT_LOCALE,
   setLocale: () => {},
   catalog: null,
+  messages: null,
 });
 
 function readStoredLocale() {
@@ -37,10 +47,15 @@ export function LocaleProvider({ children }) {
   // guardado se aplica al montar.
   const [locale, setLocaleState] = useState(DEFAULT_LOCALE);
   const [catalog, setCatalog] = useState(null);
+  const [messages, setMessages] = useState(null);
 
   useEffect(() => {
     setLocaleState(readStoredLocale());
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = formatLocale(locale);
+  }, [locale]);
 
   useEffect(() => {
     const load = CATALOG_LOADERS[locale];
@@ -56,6 +71,20 @@ export function LocaleProvider({ children }) {
     return () => { cancelled = true; };
   }, [locale]);
 
+  useEffect(() => {
+    const load = UI_LOADERS[locale];
+    if (!load) {
+      setMessages(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    load()
+      .then(module => { if (!cancelled) setMessages(module.default); })
+      .catch(() => { if (!cancelled) setMessages(null); });
+    return () => { cancelled = true; };
+  }, [locale]);
+
   const setLocale = useCallback(next => {
     if (!isSupportedLocale(next)) return;
     setLocaleState(next);
@@ -66,11 +95,27 @@ export function LocaleProvider({ children }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ locale, setLocale, catalog }), [locale, setLocale, catalog]);
+  // Antes de renderizar a los hijos, para que tr() ya devuelva el idioma nuevo.
+  setActiveMessages(messages, locale);
+
+  const value = useMemo(
+    () => ({ locale, setLocale, catalog, messages }),
+    [locale, setLocale, catalog, messages],
+  );
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
 export const useLocale = () => useContext(LocaleContext);
+
+// Textos de la interfaz: t('nav.library'), t('matches.count', { count: 3 }).
+// Mientras carga el idioma (o si falta la clave) se muestra el español latino.
+export function useT() {
+  const { messages } = useLocale();
+  return useCallback(
+    (key, vars) => translate(messages, baseMessages, key, vars),
+    [messages],
+  );
+}
 
 const hashCache = new Map();
 const cachedHash = text => {

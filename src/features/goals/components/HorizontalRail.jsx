@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useT } from '@/lib/LocaleContext';
 
 const ARROW_CLASS = 'rd-arrow h-9 w-9';
 
@@ -20,7 +21,9 @@ function visibleRange(track) {
  * Las flechas y el contador solo aparecen cuando hay elementos fuera de la vista.
  * @param {{ items: { key: string, node: any }[], label: string, itemClassName: string, itemLabel?: string }} props
  */
-export default function HorizontalRail({ items, label, itemClassName, itemLabel = 'elementos' }) {
+export default function HorizontalRail({ items, label, itemClassName, itemLabel }) {
+  const t = useT();
+  const railItems = itemLabel || t('common.elements');
   const trackRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const [nav, setNav] = useState({ canPrev: false, canNext: false, first: 0, last: 0 });
 
@@ -57,13 +60,13 @@ export default function HorizontalRail({ items, label, itemClassName, itemLabel 
     <div className="rd-goals-carousel">
       <div className={`items-center justify-between gap-3 ${nav.canPrev || nav.canNext ? 'flex' : 'hidden'}`}>
         <p className="text-xs text-muted-foreground" aria-live="polite">
-          {nav.first === nav.last ? `${nav.first}` : `${nav.first}–${nav.last}`} de {items.length}
+          {t('common.ofTotal', { range: nav.first === nav.last ? nav.first : `${nav.first}–${nav.last}`, total: items.length })}
         </p>
         <div className="flex gap-2">
-          <button type="button" onClick={() => scrollPage(-1)} disabled={!nav.canPrev} className={ARROW_CLASS} aria-label={`Ver ${itemLabel} anteriores`}>
+          <button type="button" onClick={() => scrollPage(-1)} disabled={!nav.canPrev} className={ARROW_CLASS} aria-label={t('common.seePrevious', { items: railItems })}>
             <ChevronLeft size={18} />
           </button>
-          <button type="button" onClick={() => scrollPage(1)} disabled={!nav.canNext} className={ARROW_CLASS} aria-label={`Ver ${itemLabel} siguientes`}>
+          <button type="button" onClick={() => scrollPage(1)} disabled={!nav.canNext} className={ARROW_CLASS} aria-label={t('common.seeNext', { items: railItems })}>
             <ChevronRight size={18} />
           </button>
         </div>

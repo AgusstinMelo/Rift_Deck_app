@@ -2,7 +2,8 @@ import { Fragment, useState, useEffect } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
+import { runeBranchLabel } from '@/utils/runeBranches';
 
 const BRANCH_COLORS = {
   'Clave': 'border-yellow-400/70 shadow-yellow-400/40',
@@ -43,6 +44,7 @@ function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9', imageClassName = 
 const PRIMARY_BRANCHES = ['Dominación', 'Precisión', 'Valor', 'Brujería'];
 
 export default function RunePicker({ runes: providedRunes, selectedRunes, onToggleRune, initialRuneNames = [], onRunesInitialized, initialPrimaryBranch, initialSecondaryBranch }) {
+  const t = useT();
   const [primaryBranch, setPrimaryBranch] = useState(initialPrimaryBranch || 'Dominación');
   const [secondaryBranch, setSecondaryBranch] = useState(initialSecondaryBranch || 'Precisión');
   const [initialized, setInitialized] = useState(false);
@@ -79,7 +81,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
   if (isLoading) {
     return (
       <div className="rd-card p-4">
-        <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Runas</h3></div>
+        <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">{t('common.runes')}</h3></div>
         <div className="animate-pulse h-24 bg-secondary/20 rounded-lg" />
       </div>
     );
@@ -149,12 +151,12 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
 
   return (
     <div className="rd-card rd-rune-picker flex flex-col p-4">
-      <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">Runas</h3></div>
+      <div className="flex items-center gap-2 mb-3"><span className="w-5 h-px bg-primary/50" /><h3 className="rd-card-title">{t('common.runes')}</h3></div>
 
       {/* Runas Clave */}
       {claveRunes.length > 0 && (
         <div className="mb-3">
-          <p className="text-xs font-semibold text-muted-foreground mb-2">Clave</p>
+          <p className="text-xs font-semibold text-muted-foreground mb-2">{t('builds.clave')}</p>
           {/* Una columna por runa clave: siempre una sola línea que ocupa todo el ancho. */}
           <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
             {claveRunes.map(rune => (
@@ -171,7 +173,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
       <div className="grid flex-1 grid-cols-2 gap-4">
         {/* Rama Principal */}
         <div className="flex min-w-0 flex-col">
-          <label className="text-xs font-semibold text-muted-foreground mb-2 block">Rama Principal</label>
+          <label className="text-xs font-semibold text-muted-foreground mb-2 block">{t('builds.ramaPrincipal')}</label>
           <select
             value={primaryBranch}
             onChange={e => {
@@ -206,7 +208,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
             className="w-full bg-secondary/70 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
           >
             {PRIMARY_BRANCHES.map(b => (
-              <option key={b} value={b}>{b}</option>
+              <option key={b} value={b}>{runeBranchLabel(b)}</option>
             ))}
           </select>
           <div className="flex flex-1 flex-col justify-evenly gap-2">
@@ -225,7 +227,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
 
         {/* Rama Secundaria */}
         <div className="flex min-w-0 flex-col">
-          <label className="text-xs font-semibold text-muted-foreground mb-2 block">Rama Secundaria</label>
+          <label className="text-xs font-semibold text-muted-foreground mb-2 block">{t('builds.ramaSecundaria')}</label>
           <select
             value={secondaryBranch}
             onChange={e => {
@@ -260,7 +262,7 @@ export default function RunePicker({ runes: providedRunes, selectedRunes, onTogg
             className="w-full bg-secondary/70 border border-border rounded-lg px-2 py-1.5 text-xs text-foreground mb-2 outline-none focus:border-primary/40 transition-all"
           >
             {PRIMARY_BRANCHES.map(b => (
-              <option key={b} value={b}>{b}</option>
+              <option key={b} value={b}>{runeBranchLabel(b)}</option>
             ))}
           </select>
           <div className="flex flex-1 flex-col justify-evenly gap-2">

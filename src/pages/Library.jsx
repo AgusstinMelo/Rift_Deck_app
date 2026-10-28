@@ -3,14 +3,16 @@ import { BookOpen, Sword, Gem, Library as LibraryIcon } from 'lucide-react';
 import ChampionLibrary from '@/components/library/ChampionLibrary';
 import ItemLibrary from '@/components/library/ItemLibrary';
 import RuneLibrary from '@/components/library/RuneLibrary';
+import { useT } from '@/lib/LocaleContext';
 
 const tabs = [
-  { id: 'champions', label: 'Campeones', icon: Sword, desc: 'Pool completo' },
-  { id: 'items', label: 'Objetos', icon: BookOpen, desc: 'Build assets' },
-  { id: 'runes', label: 'Runas', icon: Gem, desc: 'Setup táctico' },
+  { id: 'champions', label: 'common.champions', icon: Sword, desc: 'library.tabs.championsDesc' },
+  { id: 'items', label: 'common.items', icon: BookOpen, desc: 'library.tabs.itemsDesc' },
+  { id: 'runes', label: 'common.runes', icon: Gem, desc: 'library.tabs.runesDesc' },
 ];
 
 export default function Library() {
+  const t = useT();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const activeTab = tabs.some(tab => tab.id === urlTab) ? urlTab : 'champions';
@@ -35,23 +37,23 @@ export default function Library() {
           <div className="rd-page-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
-              Rift Deck Codex
+              {t('library.riftDeckCodex')}
             </span>
           </div>
 
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Biblioteca
+            {t('nav.library')}
           </h1>
 
           <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">
-            Archivo táctico de campeones, objetos y runas.
+            {t('library.archivoTacticoDeCampeones2')}
           </p>
         </div>
 
         <div className="hidden sm:flex items-center gap-3 rd-status-pill">
           <LibraryIcon size={16} className="text-primary" />
           <span className="text-xs text-muted-foreground">
-            Base de conocimiento
+            {t('library.baseDeConocimiento')}
           </span>
         </div>
       </div>
@@ -84,9 +86,9 @@ export default function Library() {
                 </div>
 
                 <div className="text-left">
-                  <p className="font-semibold leading-tight">{label}</p>
+                  <p className="font-semibold leading-tight">{t(label)}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">
-                    {desc}
+                    {t(desc)}
                   </p>
                 </div>
               </button>

@@ -6,31 +6,33 @@ import { compactFilters, filtersSchemaFor, getFilter } from '../filters/filterRe
 import {
   inclusiveDayCount, isIsoDate, isValidTimeZone, periodBounds, periodDates, periodStatus, todayIn,
 } from '../engine/period.js';
+import { tr } from '../../../i18n/uiI18n.js';
 
 const emptyToNull = value => (value === '' || value === undefined ? null : value);
-const optionalNumber = z.preprocess(
+const optionalNumber = () => z.preprocess(
   value => (value === '' || value === null || value === undefined ? null : Number(value)),
-  z.number({ invalid_type_error: 'Ingresá un número.' }).finite('Ingresá un número.').nullable(),
+  z.number({ invalid_type_error: tr('goals.validation.enterNumber') }).finite(tr('goals.validation.enterNumber')).nullable(),
 );
 
 const hasAtMostTwoDecimals = value => Math.abs(Math.round(value * 100) - value * 100) < 1e-6;
 
-const goalInputBase = z.object({
-  name: z.string({ required_error: 'El nombre es obligatorio.' }).trim()
-    .min(1, 'El nombre es obligatorio.')
-    .max(GOAL_LIMITS.NAME_MAX, `El nombre admite hasta ${GOAL_LIMITS.NAME_MAX} caracteres.`),
+// Se arma en cada validación para que los mensajes salgan en el idioma activo.
+const goalInputBase = () => z.object({
+  name: z.string({ required_error: tr('goals.validation.nameRequired') }).trim()
+    .min(1, tr('goals.validation.nameRequired'))
+    .max(GOAL_LIMITS.NAME_MAX, tr('goals.validation.nameMax', { max: GOAL_LIMITS.NAME_MAX })),
   description: z.preprocess(emptyToNull, z.string().trim()
-    .max(GOAL_LIMITS.DESCRIPTION_MAX, `La descripción admite hasta ${GOAL_LIMITS.DESCRIPTION_MAX} caracteres.`)
+    .max(GOAL_LIMITS.DESCRIPTION_MAX, tr('goals.validation.descriptionMax', { max: GOAL_LIMITS.DESCRIPTION_MAX }))
     .nullable()),
-  metric: z.string({ required_error: 'Elegí una métrica.' }).refine(hasMetric, 'La métrica no existe.'),
+  metric: z.string({ required_error: tr('goals.validation.chooseMetric') }).refine(hasMetric, tr('goals.validation.unknownMetric')),
   operator: z.preprocess(emptyToNull, z.string().nullable()).default(null),
-  target: optionalNumber,
-  minSample: optionalNumber,
+  target: optionalNumber(),
+  minSample: optionalNumber(),
   unit: z.preprocess(emptyToNull, z.string().trim().nullable()),
   filters: z.record(z.any()).default({}),
-  startDate: z.string({ required_error: 'Elegí la fecha inicial.' }),
-  endDate: z.string({ required_error: 'Elegí la fecha final.' }),
-  timezone: z.string({ required_error: 'Falta la zona horaria.' }),
+  startDate: z.string({ required_error: tr('goals.validation.chooseStart') }),
+  endDate: z.string({ required_error: tr('goals.validation.chooseEnd') }),
+  timezone: z.string({ required_error: tr('goals.validation.missingTimezone') }),
 });
 
 function issue(ctx, path, message) {
@@ -40,33 +42,36 @@ function issue(ctx, path, message) {
 function refineTarget(input, metric, ctx) {
   const { target } = input;
   const range = metric.target;
-  if (target === null) return issue(ctx, ['target'], 'Ingresá el valor objetivo.');
+  if (target === null) return issue(ctx, ['target'], tr('goals.validation.enterTarget'));
   if (target < range.min || target > range.max) {
-    return issue(ctx, ['target'], `El valor objetivo debe estar entre ${range.min} y ${range.max}.`);
+    return issue(ctx, ['target'], tr('goals.validation.targetRange', { min: range.min, max: range.max }));
   }
-  if (range.integer && !Number.isInteger(target)) return issue(ctx, ['target'], 'El valor objetivo debe ser un número entero.');
-  if (!hasAtMostTwoDecimals(target)) issue(ctx, ['target'], 'El valor objetivo admite hasta dos decimales.');
+  if (range.integer && !Number.isInteger(target)) return issue(ctx, ['target'], tr('goals.validation.targetInteger'));
+  if (!hasAtMostTwoDecimals(target)) issue(ctx, ['target'], tr('goals.validation.targetDecimals'));
 }
 
 function refineOperator(input, metric, ctx) {
   if (input.operator !== null && !metric.operators.includes(input.operator)) {
-    issue(ctx, ['operator'], `La métrica ${metric.label} solo admite la meta "${metric.operator === 'lte' ? 'como máximo' : 'al menos'}".`);
+    issue(ctx, ['operator'], tr('goals.validation.operatorOnly', {
+      metric: metric.label,
+      operator: tr(metric.operator === 'lte' ? 'goals.operator.ltePhrase' : 'goals.operator.gtePhrase'),
+    }));
   }
 }
 
 function refineMinSample(input, metric, ctx) {
   if (metric.kind !== METRIC_KIND.PERFORMANCE) return;
   const { minSample } = input;
-  if (minSample === null) return issue(ctx, ['minSample'], 'Ingresá la muestra mínima.');
+  if (minSample === null) return issue(ctx, ['minSample'], tr('goals.validation.enterMinSample'));
   if (!Number.isInteger(minSample) || minSample < 1 || minSample > GOAL_LIMITS.MIN_SAMPLE_MAX) {
-    issue(ctx, ['minSample'], `La muestra mínima debe ser un entero entre 1 y ${GOAL_LIMITS.MIN_SAMPLE_MAX}.`);
+    issue(ctx, ['minSample'], tr('goals.validation.minSampleRange', { max: GOAL_LIMITS.MIN_SAMPLE_MAX }));
   }
 }
 
 function refineUnit(input, metric, ctx) {
   if (metric.source !== 'checkins') return;
-  if (!input.unit) return issue(ctx, ['unit'], 'Indicá la unidad (por ejemplo, "horas de práctica").');
-  if (input.unit.length > GOAL_LIMITS.UNIT_MAX) issue(ctx, ['unit'], `La unidad admite hasta ${GOAL_LIMITS.UNIT_MAX} caracteres.`);
+  if (!input.unit) return issue(ctx, ['unit'], tr('goals.validation.unitRequired'));
+  if (input.unit.length > GOAL_LIMITS.UNIT_MAX) issue(ctx, ['unit'], tr('goals.validation.unitMax', { max: GOAL_LIMITS.UNIT_MAX }));
 }
 
 function refineFilters(input, metric, ctx) {
@@ -78,7 +83,7 @@ function refineFilters(input, metric, ctx) {
     if (zodIssue.code === z.ZodIssueCode.unrecognized_keys) {
       zodIssue.keys.forEach(key => {
         const label = (() => { try { return getFilter(key).label; } catch { return key; } })();
-        issue(ctx, ['filters', key], `El filtro "${label}" no es compatible con la métrica ${metric.label}.`);
+        issue(ctx, ['filters', key], tr('goals.validation.filterIncompatible', { filter: label, metric: metric.label }));
       });
     } else {
       issue(ctx, ['filters', ...zodIssue.path], zodIssue.message);
@@ -88,15 +93,15 @@ function refineFilters(input, metric, ctx) {
 
 function refinePeriod(input, ctx, { today, requireOpenEnd }) {
   const { startDate, endDate } = input;
-  if (!isIsoDate(startDate)) issue(ctx, ['startDate'], 'La fecha inicial no es válida.');
-  if (!isIsoDate(endDate)) issue(ctx, ['endDate'], 'La fecha final no es válida.');
+  if (!isIsoDate(startDate)) issue(ctx, ['startDate'], tr('goals.validation.invalidStart'));
+  if (!isIsoDate(endDate)) issue(ctx, ['endDate'], tr('goals.validation.invalidEnd'));
   if (!isIsoDate(startDate) || !isIsoDate(endDate)) return;
 
-  if (endDate < startDate) return issue(ctx, ['endDate'], 'La fecha final debe ser igual o posterior a la inicial.');
+  if (endDate < startDate) return issue(ctx, ['endDate'], tr('goals.validation.endBeforeStart'));
   if (inclusiveDayCount(startDate, endDate) > GOAL_LIMITS.MAX_PERIOD_DAYS) {
-    issue(ctx, ['endDate'], `El período puede durar como máximo ${GOAL_LIMITS.MAX_PERIOD_DAYS} días.`);
+    issue(ctx, ['endDate'], tr('goals.validation.periodMax', { max: GOAL_LIMITS.MAX_PERIOD_DAYS }));
   }
-  if (requireOpenEnd && today && endDate < today) issue(ctx, ['endDate'], 'La fecha final no puede estar en el pasado.');
+  if (requireOpenEnd && today && endDate < today) issue(ctx, ['endDate'], tr('goals.validation.endInPast'));
 }
 
 /**
@@ -104,8 +109,8 @@ function refinePeriod(input, ctx, { today, requireOpenEnd }) {
  * @param {{ now?: Date, requireOpenEnd?: boolean }} [options]
  */
 export function goalInputSchema({ now = new Date(), requireOpenEnd = true } = {}) {
-  return goalInputBase.superRefine((input, ctx) => {
-    if (!isValidTimeZone(input.timezone)) issue(ctx, ['timezone'], 'La zona horaria no es válida.');
+  return goalInputBase().superRefine((input, ctx) => {
+    if (!isValidTimeZone(input.timezone)) issue(ctx, ['timezone'], tr('goals.validation.invalidTimezone'));
     if (!hasMetric(input.metric)) return;
 
     const metric = getMetric(input.metric);
@@ -219,7 +224,7 @@ function sameValue(a, b) {
 export function validateGoalUpdate(goal, input, { now = new Date() } = {}) {
   const permissions = editPermissions(goal, now);
   if (input.metric !== undefined && input.metric !== goal.metric) {
-    return { success: false, errors: { metric: 'La métrica no se puede cambiar. Creá un objetivo nuevo.' } };
+    return { success: false, errors: { metric: tr('goals.validation.metricLocked') } };
   }
 
   const current = goalToInput(goal);
@@ -233,7 +238,7 @@ export function validateGoalUpdate(goal, input, { now = new Date() } = {}) {
     if (changed.length) {
       return {
         success: false,
-        errors: Object.fromEntries(changed.map(key => [key, 'Con el período cerrado o el objetivo inactivo solo podés editar el nombre y la descripción.'])),
+        errors: Object.fromEntries(changed.map(key => [key, tr('goals.validation.configLocked')])),
       };
     }
     const result = goalInputSchema({ now, requireOpenEnd: false }).safeParse(merged);

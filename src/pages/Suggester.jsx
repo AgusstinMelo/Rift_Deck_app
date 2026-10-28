@@ -39,6 +39,8 @@ import SuggesterUsageNotice from '@/components/suggester/SuggesterUsageNotice';
 import { useSuggesterUsage } from '@/hooks/useSuggesterUsage';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useT } from '@/lib/LocaleContext';
+import { labels, responseLanguage, tr } from '@/i18n/uiI18n';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
@@ -50,33 +52,33 @@ const LANE_ALIASES = {
   support: ['support', 'soporte'],
 };
 
-const LANE_LABELS = {
-  top: 'Top',
-  jungler: 'Jungla',
-  mid: 'Mid',
-  adc: 'ADC',
-  support: 'Support',
-};
+const LANE_LABELS = labels({
+  top: 'lanes.top',
+  jungler: 'lanes.jungler',
+  mid: 'lanes.mid',
+  adc: 'lanes.adc',
+  support: 'lanes.support',
+});
 
 const GOALS = [
-  { id: 'ranked', label: 'Subir ranked', icon: Trophy },
-  { id: 'expand_pool', label: 'Ampliar pool', icon: Layers },
-  { id: 'cover_gaps', label: 'Cubrir debilidades', icon: Shield },
-  { id: 'learn_easy', label: 'Pick más simple', icon: Gauge },
-  { id: 'aggressive', label: 'Jugar agresivo', icon: Flame },
-  { id: 'safe', label: 'Jugar seguro', icon: Compass },
+  { id: 'ranked', get label() { return tr('suggester.goals.ranked'); }, icon: Trophy },
+  { id: 'expand_pool', get label() { return tr('suggester.goals.expand_pool'); }, icon: Layers },
+  { id: 'cover_gaps', get label() { return tr('suggester.goals.cover_gaps'); }, icon: Shield },
+  { id: 'learn_easy', get label() { return tr('suggester.goals.learn_easy'); }, icon: Gauge },
+  { id: 'aggressive', get label() { return tr('suggester.goals.aggressive'); }, icon: Flame },
+  { id: 'safe', get label() { return tr('suggester.goals.safe'); }, icon: Compass },
 ];
 
-const RECOMMENDATION_TYPES = {
-  similar: 'Similar a tu pool',
-  complementary: 'Complementario',
-  meta: 'Meta pick',
-  blind_pick: 'Blind pick',
-  counter_pool: 'Cubre counters',
-  pocket_pick: 'Pocket pick',
-};
+const RECOMMENDATION_TYPES = labels({
+  similar: 'suggester.types.similar',
+  complementary: 'suggester.types.complementary',
+  meta: 'suggester.types.meta',
+  blind_pick: 'suggester.types.blind_pick',
+  counter_pool: 'suggester.types.counter_pool',
+  pocket_pick: 'suggester.types.pocket_pick',
+});
 
-const PRIORITY_LABELS = { high: 'alta', medium: 'media', low: 'baja' };
+const PRIORITY_LABELS = labels({ high: 'suggester.priority.high', medium: 'suggester.priority.medium', low: 'suggester.priority.low' });
 
 const PRIORITY_COLORS = {
   high: 'text-red-400 bg-red-500/10 border-red-500/20',
@@ -84,12 +86,12 @@ const PRIORITY_COLORS = {
   low: 'text-green-400 bg-green-500/10 border-green-500/20',
 };
 
-const FINAL_LABELS = {
-  highly_recommended: 'Muy recomendado',
-  recommended: 'Recomendado',
-  situational: 'Situacional',
-  learn_different: 'Aprendé otro',
-};
+const FINAL_LABELS = labels({
+  highly_recommended: 'suggester.final.highly_recommended',
+  recommended: 'suggester.final.recommended',
+  situational: 'suggester.final.situational',
+  learn_different: 'suggester.final.learn_different',
+});
 
 const FINAL_COLORS = {
   highly_recommended: 'text-green-400 bg-green-500/10 border-green-500/20',
@@ -98,12 +100,12 @@ const FINAL_COLORS = {
   learn_different: 'text-red-400 bg-red-500/10 border-red-500/20',
 };
 
-const DAMAGE_LABELS = {
-  AD: 'Daño AD',
-  AP: 'Daño AP',
-  mixed: 'Mixto',
-  true: 'True Damage',
-};
+const DAMAGE_LABELS = labels({
+  AD: 'suggester.damage.AD',
+  AP: 'suggester.damage.AP',
+  mixed: 'suggester.damage.mixed',
+  true: 'suggester.damage.true',
+});
 
 const ROLE_ICONS = {
   luchador: Swords,
@@ -281,31 +283,31 @@ function buildLocalPoolAnalysis({ pool, champions, matches, tierlist, lane }) {
   const gaps = [];
 
   if (!damageTypes.has('AP')) {
-    gaps.push('Tu pool parece tener poca amenaza AP.');
+    gaps.push(tr('suggester.tuPoolPareceTener'));
   }
 
   if (!damageTypes.has('AD')) {
-    gaps.push('Tu pool parece tener poca amenaza AD.');
+    gaps.push(tr('suggester.tuPoolPareceTener2'));
   }
 
   if (laneNeeds?.wantsFrontline && !roles.has('tanque')) {
-    gaps.push('No aparece un tanque/engage claro en tu pool.');
+    gaps.push(tr('suggester.noApareceUnTanque'));
   }
 
   if (laneNeeds?.wantsUtility && !roles.has('mago') && !roles.has('soporte')) {
-    gaps.push('Podrías sumar más utilidad, control o peel.');
+    gaps.push(tr('suggester.podriasSumarMasUtilidad'));
   }
 
   if (normalizedLane === 'adc' && !roles.has('tirador')) {
-    gaps.push('Tu pool de ADC necesita al menos un tirador confiable.');
+    gaps.push(tr('suggester.tuPoolDeAdc'));
   }
 
   if (!scalings.has('earlygame')) {
-    gaps.push('Te falta un pick fuerte de early game.');
+    gaps.push(tr('suggester.teFaltaUnPick'));
   }
 
   if (!scalings.has('lategame')) {
-    gaps.push('Te falta un pick confiable de late game.');
+    gaps.push(tr('suggester.teFaltaUnPick2'));
   }
 
   const bestPersonal = [...poolData]
@@ -359,7 +361,7 @@ function buildRecommendationCandidates({ champions, tierlist, pool, lane }) {
         vulnerabilities: toArray(champ.vulnerabilities),
         strategic_notes: champ.strategic_notes,
         tags: toArray(champ.tags),
-        tier: tier?.tier || 'sin tier',
+        tier: tier?.tier || tr('suggester.sinTier'),
         meta_lane: tier?.lane || null,
         score: tier?.ranking_final || 0,
       };
@@ -379,6 +381,7 @@ function normalizeRecommendations(recommendations, candidates) {
 }
 
   function PoolChampionSelect({ champions, pool, onToggle }) {
+  const t = useT();
     const [open, setOpen] = useState(false);
     const buttonRef = useRef(null);
     const panelRef = useRef(null);
@@ -404,7 +407,7 @@ function normalizeRecommendations(recommendations, candidates) {
               })}
             </span>}
             <span className={pool.length ? 'truncate font-medium' : 'truncate text-muted-foreground'}>
-              {pool.length ? `${pool.length} ${pool.length === 1 ? 'campeón seleccionado' : 'campeones seleccionados'}` : 'Seleccionar campeones…'}
+              {pool.length ? `${pool.length} ${pool.length === 1 ? t('suggester.campeonSeleccionado') : t('suggester.campeonesSeleccionados')}` : t('suggester.seleccionarCampeones')}
             </span>
           </span>
           <ChevronDown size={16} className={`shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -414,11 +417,11 @@ function normalizeRecommendations(recommendations, candidates) {
           <div className="shrink-0 border-b border-border/70 bg-[#0f1420] p-2">
             <div className="flex items-center gap-2 rounded-lg bg-secondary/70 px-2.5">
               <Search size={14} className="text-muted-foreground" />
-              <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar campeón…" className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+              <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder={t('buildV2.buscarCampeon')} className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground" />
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
-            {!filtered.length && <p className="px-3 py-5 text-center text-sm text-muted-foreground">No se encontraron campeones.</p>}
+            {!filtered.length && <p className="px-3 py-5 text-center text-sm text-muted-foreground">{t('buildV2.noSeEncontraronCampeones')}</p>}
             {filtered.map(champion => {
               const active = pool.includes(champion.name);
               const roles = getChampionRoles(champion);
@@ -440,6 +443,7 @@ function normalizeRecommendations(recommendations, candidates) {
   }
 
   function PoolChampionChip({ name, champions, matches, tierlist, onRemove }) {
+  const t = useT();
     const champ = getChampionData(champions, name);
     const imageUrl = getChampionImage(champions, name);
     const stats = getChampMatchStats(matches, name);
@@ -461,12 +465,12 @@ function normalizeRecommendations(recommendations, candidates) {
             {tier && <TierBadge tier={tier.tier} size="sm" />}
           </div>
           <p className="truncate text-[11px] text-muted-foreground">
-            {stats.games > 0 ? `${stats.wr}% WR · ${stats.games} partidas` : 'Sin partidas registradas'}
+            {stats.games > 0 ? t('suggester.wrPartidas', { wr: stats.wr, games: stats.games }) : t('matches.sinPartidasRegistradas')}
           </p>
         </div>
 
         <RoleIcon size={14} className="shrink-0 text-primary/80" />
-        <button type="button" onClick={() => onRemove(name)} aria-label={`Quitar ${name} del pool`} className="shrink-0 text-muted-foreground transition-colors hover:text-red-400">
+        <button type="button" onClick={() => onRemove(name)} aria-label={t('suggester.quitarDelPool', { name })} className="shrink-0 text-muted-foreground transition-colors hover:text-red-400">
           <X size={13} />
         </button>
       </div>
@@ -499,6 +503,7 @@ function normalizeRecommendations(recommendations, candidates) {
   }
 
   function StrategicGaps({ gaps, bare = false }) {
+  const t = useT();
     const frame = bare ? '' : 'rd-card p-4';
     if (!gaps?.length) {
       return (
@@ -507,11 +512,11 @@ function normalizeRecommendations(recommendations, candidates) {
             <CheckCircle2 size={18} className="text-green-400 mt-0.5 shrink-0" />
             <div>
               <p className="rd-card-title mb-1">
-                Pool equilibrado
+               {t('suggester.poolEquilibrado')}
               </p>
 
               <p className="text-sm text-muted-foreground">
-                No se detectan gaps grandes con la información disponible.
+               {t('suggester.noSeDetectanGaps')}
               </p>
             </div>
           </div>
@@ -524,7 +529,7 @@ function normalizeRecommendations(recommendations, candidates) {
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle size={17} className="text-yellow-400" />
           <h3 className="rd-card-title">
-            Gaps detectados
+           {t('suggester.gapsDetectados')}
           </h3>
         </div>
 
@@ -546,6 +551,7 @@ function normalizeRecommendations(recommendations, candidates) {
   }
 
   function RecommendationCard({ rec, champions, tierlist, lane, bare = false }) {
+  const t = useT();
     const champ = getChampionData(champions, rec.champion_name);
     const imageUrl = getChampionImage(champions, rec.champion_name);
     const tierEntry = getTierEntry(tierlist, rec.champion_name, lane);
@@ -574,7 +580,7 @@ function normalizeRecommendations(recommendations, candidates) {
                 <span className={`rounded-md border px-1.5 py-0.5 text-[11px] font-medium ${FINAL_COLORS[rec.final_recommendation] || ''}`}>{FINAL_LABELS[rec.final_recommendation] || rec.final_recommendation}</span>
               )}
               {rec.priority_level && (
-                <span className={`rounded-md border px-1.5 py-0.5 text-[11px] ${PRIORITY_COLORS[rec.priority_level] || ''}`}>Prioridad {PRIORITY_LABELS[rec.priority_level] || rec.priority_level}</span>
+                <span className={`rounded-md border px-1.5 py-0.5 text-[11px] ${PRIORITY_COLORS[rec.priority_level] || ''}`}>{t('suggester.prioridad')} {PRIORITY_LABELS[rec.priority_level] || rec.priority_level}</span>
               )}
               {rec.recommendation_type && (
                 <span className="rounded-md border border-border/60 bg-secondary/40 px-1.5 py-0.5 text-[11px] text-muted-foreground">{RECOMMENDATION_TYPES[rec.recommendation_type] || rec.recommendation_type}</span>
@@ -587,10 +593,10 @@ function normalizeRecommendations(recommendations, candidates) {
 
         <div className="mt-3 grid flex-1 grid-cols-1 gap-2 md:grid-cols-2">
           {[
-            ['Gap cubierto', rec.strategic_gap, 'border-accent/20 bg-accent/5', 'text-accent'],
-            ['Cuándo pickear', rec.when_to_pick, 'border-green-500/20 bg-green-500/5', 'text-green-400'],
-            ['Adaptación', rec.adaptation_difficulty, 'border-primary/20 bg-primary/5', 'text-primary'],
-            ['Primeros pasos', rec.first_steps, 'border-border/60 bg-secondary/40', 'text-muted-foreground'],
+            [t('suggester.gapCubierto'), rec.strategic_gap, 'border-accent/20 bg-accent/5', 'text-accent'],
+            [t('suggester.cuandoPickear'), rec.when_to_pick, 'border-green-500/20 bg-green-500/5', 'text-green-400'],
+            [t('suggester.adaptacion'), rec.adaptation_difficulty, 'border-primary/20 bg-primary/5', 'text-primary'],
+            [t('suggester.primerosPasos'), rec.first_steps, 'border-border/60 bg-secondary/40', 'text-muted-foreground'],
           ].filter(([, text]) => text).map(([title, text, frame, tone]) => (
             <div key={title} className={`rounded-xl border px-3 py-2 ${frame}`}>
               <p className={`mb-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${tone}`}>{title}</p>
@@ -601,11 +607,12 @@ function normalizeRecommendations(recommendations, candidates) {
       </div>
     );
   }
-const LEGACY_STEPS = ['Pool', 'Parámetros'];
+const LEGACY_STEPS = ['suggester.pool', 'suggester.parametros'];
 // En smartphone el asistente ocupa el viewport y las sugerencias son un paso más.
 const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
 
   function LegacySuggester({ tabSelector }) {
+  const t = useT();
   const [pool, setPool] = useState([]);
   const [context, setContext] = useState('');
   const [lane, setLane] = useState('');
@@ -623,7 +630,7 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const isPhone = isPhoneLandscape || isPhonePortrait;
-  const steps = isPhone ? [...LEGACY_STEPS, 'Sugerencias'] : LEGACY_STEPS;
+  const steps = (isPhone ? [...LEGACY_STEPS, 'suggester.sugerencias'] : LEGACY_STEPS).map(step => t(step));
   const viewStep = Math.min(step, steps.length - 1);
   const onResultStep = viewStep === LEGACY_RESULT_STEP;
 
@@ -692,7 +699,7 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
 
   const handleGenerate = async () => {
     if (pool.length === 0) {
-      setError('Agregá al menos un campeón a tu pool.');
+      setError(t('suggester.agregaAlMenosUn'));
       return;
     }
 
@@ -704,7 +711,7 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
 
     if (recommendationCandidates.length === 0) {
       setGenerating(false);
-      setError('No encontrÃ© candidatos compatibles con esa lÃ­nea y tu pool actual.');
+      setError(t('suggester.noEncontraCandidatosCompatibles'));
       return;
     }
 
@@ -722,10 +729,10 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
       vulnerabilities: toArray(p.champion?.vulnerabilities),
       strategic_notes: p.champion?.strategic_notes,
       tags: toArray(p.champion?.tags),
-      tier: p.tier?.tier || 'sin tier',
+      tier: p.tier?.tier || t('suggester.sinTier'),
       meta_lane: p.tier?.lane || null,
       personal_wr:
-        p.stats.wr !== null ? `${p.stats.wr}%` : 'sin datos',
+        p.stats.wr !== null ? `${p.stats.wr}%` : t('suggester.sinDatos'),
       games_played: p.stats.games,
     }));
 
@@ -750,7 +757,7 @@ LÍNEA PRIORITARIA:
 ${lane || 'todas'}
 
 CONTEXTO ADICIONAL:
-${context || 'sin contexto'}
+${context || t('suggester.sinContexto')}
 
 Instrucciones:
 - Recomienda exclusivamente campeones incluidos en CANDIDATOS PERMITIDOS PARA RECOMENDAR.
@@ -767,7 +774,8 @@ Instrucciones:
 - Incluye cuándo pickearlo y primeros pasos de aprendizaje.
 - Sé directo y específico.
 
-Devuelve exactamente 5 recomendaciones.`;
+Devuelve exactamente 5 recomendaciones.${responseLanguage() ? `
+Escribe todos los textos de las recomendaciones en ${responseLanguage()}; los nombres de campeones se copian tal cual.` : ''}`;
 
     try {
       const result = await suggestWithAI({
@@ -826,7 +834,7 @@ Devuelve exactamente 5 recomendaciones.`;
       setView('recs');
       setSelectedRec(0);
     } catch (err) {
-      setError(err?.kind === 'usage_limit' ? err.message : 'No se pudo generar la recomendación. Probá de nuevo.');
+      setError(err?.kind === 'usage_limit' ? err.message : t('suggester.noSePudoGenerar'));
     } finally {
       setGenerating(false);
       usage.refresh();
@@ -838,9 +846,9 @@ Devuelve exactamente 5 recomendaciones.`;
   const currentView = view === 'recs' && !hasRecommendations ? 'gaps' : view;
   const selected = recommendations[selectedRec] || recommendations[0];
   const resultViews = [
-    ...(hasRecommendations ? [{ id: 'recs', label: `Recomendaciones (${recommendations.length})` }] : []),
-    { id: 'gaps', label: 'Gaps estratégicos' },
-    { id: 'pool', label: 'Lectura del pool' },
+    ...(hasRecommendations ? [{ id: 'recs', label: t('suggester.recomendaciones', { length: recommendations.length }) }] : []),
+    { id: 'gaps', label: t('suggester.gapsEstrategicos') },
+    { id: 'pool', label: t('suggester.lecturaDelPool') },
   ];
 
   return (
@@ -849,28 +857,28 @@ Devuelve exactamente 5 recomendaciones.`;
         <div>
           <div className="rd-page-kicker mb-1 flex items-center gap-2">
             <span className="h-px w-8 bg-primary/50" />
-            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck Consigliere</span>
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('suggester.riftDeckConsigliere')}</span>
           </div>
-          <h1 className="rd-page-title font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de campeones</h1>
-          <p className="rd-page-subtitle mt-1 text-sm text-muted-foreground">Analizá tu pool, detectá gaps y encontrá picks con sentido competitivo.</p>
+          <h1 className="rd-page-title font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">{t('suggester.sugeridorDeCampeones')}</h1>
+          <p className="rd-page-subtitle mt-1 text-sm text-muted-foreground">{t('suggester.analizaTuPoolDetecta')}</p>
           {tabSelector}
         </div>
         <div className="rd-status-pill hidden items-center gap-3 sm:flex">
           <Brain size={16} className="text-primary" />
-          <span className="text-xs text-muted-foreground">Champion Intelligence</span>
+          <span className="text-xs text-muted-foreground">{t('suggester.championIntelligence')}</span>
         </div>
       </header>
 
       <div className={`rd-v2-build-body grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)] ${onResultStep ? 'rd-v2-result-step' : ''}`}>
         <aside className="rd-v2-build-aside xl:sticky xl:top-6">
-          <StepNav steps={steps} label="Pasos del análisis" step={viewStep} completed={[hasPool, hasRecommendations, hasRecommendations]} locked={!hasPool} onStep={setStep} />
+          <StepNav steps={steps} label={t('suggester.pasosDelAnalisis')} step={viewStep} completed={[hasPool, hasRecommendations, hasRecommendations]} locked={!hasPool} onStep={setStep} />
 
           <div className="rd-v2-build-aside-scroll">
             {viewStep === 0 && (
               <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Target size={15} className="text-primary" />
-                  <h2 className="rd-card-title">Tu pool actual</h2>
+                  <h2 className="rd-card-title">{t('suggester.tuPoolActual')}</h2>
                 </div>
 
                 <PoolChampionSelect champions={champions} pool={pool} onToggle={togglePoolChampion} />
@@ -884,7 +892,7 @@ Devuelve exactamente 5 recomendaciones.`;
                 ) : (
                   <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-border/60 bg-secondary/30 p-4 text-center">
                     <Sparkles size={22} className="mx-auto mb-2 text-primary" />
-                    <p className="text-sm text-muted-foreground">Agregá los campeones que jugás regularmente para analizar tu pool.</p>
+                    <p className="text-sm text-muted-foreground">{t('suggester.agregaLosCampeonesQue')}</p>
                   </div>
                 )}
               </section>
@@ -894,19 +902,19 @@ Devuelve exactamente 5 recomendaciones.`;
               <section className="rd-card rd-v2-step-card flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
                   <Compass size={15} className="text-primary" />
-                  <h2 className="rd-card-title">Parámetros</h2>
+                  <h2 className="rd-card-title">{t('suggester.parametros')}</h2>
                 </div>
 
                 <div>
-                  <label className="rd-label mb-1.5 block">Línea prioritaria</label>
+                  <label className="rd-label mb-1.5 block">{t('suggester.lineaPrioritaria')}</label>
                   <select value={lane} onChange={e => setLane(e.target.value)} className="w-full rounded-xl border border-border bg-secondary/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/40">
-                    <option value="">Todas las líneas</option>
+                    <option value="">{t('library.todasLasLineas')}</option>
                     {LANES.map(l => <option key={l} value={l}>{LANE_LABELS[l]}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="rd-label mb-1.5 block">Objetivo</label>
+                  <label className="rd-label mb-1.5 block">{t('goals.form.goalSection')}</label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {GOALS.map(item => {
                       const Icon = item.icon;
@@ -922,8 +930,8 @@ Devuelve exactamente 5 recomendaciones.`;
                 </div>
 
                 <div className="flex flex-1 flex-col">
-                  <label className="rd-label mb-1.5 block">Contexto adicional</label>
-                  <textarea value={context} onChange={e => setContext(e.target.value)} rows={3} placeholder="Ej: soy main Kai’Sa y Xayah, quiero subir ranked, me cuesta jugar contra asesinos..." className="min-h-[4.5rem] w-full flex-1 resize-none rounded-xl border border-border bg-secondary/60 px-3 py-2 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/10" />
+                  <label className="rd-label mb-1.5 block">{t('suggester.contextoAdicional')}</label>
+                  <textarea value={context} onChange={e => setContext(e.target.value)} rows={3} placeholder={t('suggester.ejSoyMainKai')} className="min-h-[4.5rem] w-full flex-1 resize-none rounded-xl border border-border bg-secondary/60 px-3 py-2 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/10" />
                 </div>
               </section>
             )}
@@ -934,20 +942,20 @@ Devuelve exactamente 5 recomendaciones.`;
           <SuggesterUsageNotice usage={usage} />
 
           <div className="flex gap-2">
-            {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
+            {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />{t('buildV2.atras')}</button>}
             {viewStep < LEGACY_STEPS.length - 1
-              ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!hasPool} title={hasPool ? undefined : 'Agregá al menos un campeón a tu pool'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
-              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool || usage.remaining === 0} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? 'Analizando pool…' : onResultStep ? 'Volver a generar' : 'Generar recomendaciones'}</button>}
+              ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!hasPool} title={hasPool ? undefined : t('suggester.agregaAlMenosUn2')} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">{t('common.next')}<ChevronRight size={16} /></button>
+              : <button type="button" onClick={handleGenerate} disabled={generating || !hasPool || usage.remaining === 0} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">{generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{generating ? t('suggester.analizandoPool') : onResultStep ? t('buildV2.volverAGenerar') : t('suggester.generarRecomendaciones')}</button>}
           </div>
         </aside>
 
         <div className="rd-v2-build-result">
           <main className="rd-v2-build-success flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <InsightCard icon={Target} title="Pool" value={`${pool.length} picks`} tone="primary" />
-              <InsightCard icon={Zap} title="Meta S/S+" value={`${topTierChamps.length} picks`} tone="accent" />
-              <InsightCard icon={Shield} title="Gaps" value={`${localAnalysis.gaps.length}`} tone={localAnalysis.gaps.length ? 'yellow' : 'green'} />
-              <InsightCard icon={Trophy} title="Meta overlap" value={`${localAnalysis.metaOverlap.length}`} tone="green" />
+              <InsightCard icon={Target} title={t('suggester.pool')} value={`${pool.length} picks`} tone="primary" />
+              <InsightCard icon={Zap} title={t('suggester.metaSS')} value={`${topTierChamps.length} picks`} tone="accent" />
+              <InsightCard icon={Shield} title={t('suggester.gaps')} value={`${localAnalysis.gaps.length}`} tone={localAnalysis.gaps.length ? 'yellow' : 'green'} />
+              <InsightCard icon={Trophy} title={t('suggester.metaOverlap')} value={`${localAnalysis.metaOverlap.length}`} tone="green" />
             </div>
 
             <section className="rd-card rd-v2-build-analysis flex min-h-[360px] flex-col p-4">
@@ -956,12 +964,12 @@ Devuelve exactamente 5 recomendaciones.`;
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
                     <Loader2 size={30} className="animate-spin text-primary" />
                   </div>
-                  <h2 className="font-rajdhani text-3xl font-bold uppercase tracking-[-0.07em] text-foreground">Analizando tu pool</h2>
-                  <p className="max-w-md text-sm text-muted-foreground">Cruzando campeones, gaps estratégicos, meta actual, rendimiento personal y objetivo de juego.</p>
+                  <h2 className="font-rajdhani text-3xl font-bold uppercase tracking-[-0.07em] text-foreground">{t('suggester.analizandoTuPool')}</h2>
+                  <p className="max-w-md text-sm text-muted-foreground">{t('suggester.cruzandoCampeonesGapsEstrategicos')}</p>
                 </div>
               ) : !hasPool && !hasRecommendations ? (
                 <div className="flex flex-1 items-center justify-center">
-                  <EmptyState icon={Sparkles} title="Sin recomendaciones aún" description="Agregá campeones a tu pool, elegí un objetivo y generá sugerencias personalizadas." />
+                  <EmptyState icon={Sparkles} title={t('suggester.sinRecomendacionesAun')} description={t('suggester.agregaCampeonesATu')} />
                 </div>
               ) : (
                 <>
@@ -982,7 +990,7 @@ Devuelve exactamente 5 recomendaciones.`;
                                   {imageUrl ? <img src={imageUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg border border-primary/20 object-cover" /> : <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-xs font-bold text-primary">{rec.champion_name?.[0]}</span>}
                                   <span className="min-w-0 flex-1">
                                     <span className={`block truncate text-sm font-semibold ${active ? 'text-primary' : 'text-foreground'}`}>{rec.champion_name}</span>
-                                    <span className="block truncate text-[11px] text-muted-foreground">{FINAL_LABELS[rec.final_recommendation] || RECOMMENDATION_TYPES[rec.recommendation_type] || 'Recomendado'}</span>
+                                    <span className="block truncate text-[11px] text-muted-foreground">{FINAL_LABELS[rec.final_recommendation] || RECOMMENDATION_TYPES[rec.recommendation_type] || t('suggester.recomendado')}</span>
                                   </span>
                                 </button>
                               </li>
@@ -1001,16 +1009,16 @@ Devuelve exactamente 5 recomendaciones.`;
                       <div className="space-y-3">
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                           {[
-                            ['Daños cubiertos', localAnalysis.damageTypes.map(type => DAMAGE_LABELS[type] || type)],
-                            ['Roles detectados', localAnalysis.roles],
-                            ['Escalado', localAnalysis.scalings],
+                            [t('suggester.danosCubiertos'), localAnalysis.damageTypes.map(type => DAMAGE_LABELS[type] || type)],
+                            [t('suggester.rolesDetectados'), localAnalysis.roles],
+                            [t('library.escalado'), localAnalysis.scalings],
                           ].map(([title, values]) => (
                             <div key={title} className="rd-mini-action text-left">
                               <p className="rd-label mb-2">{title}</p>
                               <div className="flex flex-wrap gap-1.5">
                                 {values.length > 0
                                   ? values.map(value => <span key={value} className="rd-status-pill text-xs">{value}</span>)
-                                  : <span className="text-xs text-muted-foreground">Sin datos</span>}
+                                  : <span className="text-xs text-muted-foreground">{t('dashboard.sinDatos')}</span>}
                               </div>
                             </div>
                           ))}
@@ -1020,20 +1028,20 @@ Devuelve exactamente 5 recomendaciones.`;
                           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                             {localAnalysis.bestPersonal && (
                               <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-3">
-                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-green-400">Mejor rendimiento personal</p>
-                                <p className="text-sm text-foreground">{localAnalysis.bestPersonal.name} · {localAnalysis.bestPersonal.stats.wr}% WR en {localAnalysis.bestPersonal.stats.games} partidas.</p>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-green-400">{t('suggester.mejorRendimientoPersonal')}</p>
+                                <p className="text-sm text-foreground">{localAnalysis.bestPersonal.name} · {localAnalysis.bestPersonal.stats.wr}{t('suggester.wrEn')} {localAnalysis.bestPersonal.stats.games} {t('suggester.partidas')}</p>
                               </div>
                             )}
                             {localAnalysis.weakPersonal && (
                               <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
-                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-400">Pick a revisar</p>
-                                <p className="text-sm text-foreground">{localAnalysis.weakPersonal.name} · {localAnalysis.weakPersonal.stats.wr}% WR en {localAnalysis.weakPersonal.stats.games} partidas.</p>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-400">{t('suggester.pickARevisar')}</p>
+                                <p className="text-sm text-foreground">{localAnalysis.weakPersonal.name} · {localAnalysis.weakPersonal.stats.wr}{t('suggester.wrEn')} {localAnalysis.weakPersonal.stats.games} {t('suggester.partidas')}</p>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
-                    ) : <p>Agregá campeones a tu pool para ver su lectura.</p>)}
+                    ) : <p>{t('suggester.agregaCampeonesATu2')}</p>)}
                   </div>
                 </>
               )}
@@ -1046,11 +1054,12 @@ Devuelve exactamente 5 recomendaciones.`;
 }
 
 export default function Suggester() {
+  const t = useT();
   const [activeTab, setActiveTab] = useState('v2');
   const tabSelector = (
     <div className="mt-4 inline-flex rounded-xl border border-border bg-secondary/40 p-1">
-      <button type="button" onClick={() => setActiveTab('v2')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'v2' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>Builds</button>
-      <button type="button" onClick={() => setActiveTab('legacy')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'legacy' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>Campeones</button>
+      <button type="button" onClick={() => setActiveTab('v2')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'v2' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{t('nav.builds')}</button>
+      <button type="button" onClick={() => setActiveTab('legacy')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'legacy' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{t('common.champions')}</button>
     </div>
   );
 

@@ -17,17 +17,19 @@ import {
   Download,
   ShieldCheck,
 } from 'lucide-react';
+import { useT } from '@/lib/LocaleContext';
 
 const AVATAR_TYPES = [
-  { id: 'all', label: 'Todos' },
-  { id: 'champion', label: 'Campeones' },
-  { id: 'item', label: 'Ítems' },
-  { id: 'rune', label: 'Runas' },
+  { id: 'all', label: 'profile.avatarTypes.all' },
+  { id: 'champion', label: 'profile.avatarTypes.champion' },
+  { id: 'item', label: 'profile.avatarTypes.item' },
+  { id: 'rune', label: 'profile.avatarTypes.rune' },
 ];
 
 const normalize = value => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 export default function Profile() {
+  const t = useT();
   const { user, updateUser, logout } = useAuth();
 
   const [visibleName, setVisibleName] = useState('');
@@ -48,7 +50,7 @@ export default function Profile() {
   const [exportError, setExportError] = useState('');
   const [legalModal, setLegalModal] = useState(null);
 
-  const DELETE_CONFIRM_TEXT = 'ELIMINAR MI CUENTA';
+  const DELETE_CONFIRM_TEXT = t('profile.eliminarMiCuenta');
 
   const { data: champions = [], isLoading: championsLoading } = useQuery({
     queryKey: ['profile-avatars', 'champions'],
@@ -82,7 +84,7 @@ export default function Profile() {
       setAvatarSuccess(true);
       setTimeout(() => setAvatarSuccess(false), 3000);
     } catch (err) {
-      setAvatarError(err?.message || 'Error al actualizar la imagen de perfil.');
+      setAvatarError(err?.message || t('profile.errorAlActualizarLa'));
     } finally {
       setAvatarLoading(false);
     }
@@ -114,7 +116,7 @@ export default function Profile() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err?.message || 'Error al actualizar el nombre.');
+      setError(err?.message || t('profile.errorAlActualizarEl'));
     } finally {
       setLoading(false);
     }
@@ -130,7 +132,7 @@ export default function Profile() {
       await logout?.();
       window.location.href = '/';
     } catch (err) {
-      setDeleteError(err?.message || 'No se pudo eliminar la cuenta. Inténtalo de nuevo.');
+      setDeleteError(err?.message || t('profile.noSePudoEliminar'));
       setDeleting(false);
     }
   };
@@ -142,7 +144,7 @@ export default function Profile() {
       const payload = await exportMyData(user);
       downloadJson(payload, `rift-deck-mis-datos-${new Date().toISOString().slice(0, 10)}.json`);
     } catch (err) {
-      setExportError(err?.message || 'No se pudieron descargar tus datos.');
+      setExportError(err?.message || t('profile.noSePudieronDescargar'));
     } finally {
       setExporting(false);
     }
@@ -152,12 +154,12 @@ export default function Profile() {
     <div className="rd-page space-y-6 rd-dashboard">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
-          <ProfileAvatar src={user?.avatar_url} alt="Imagen de perfil" iconSize={22} />
+          <ProfileAvatar src={user?.avatar_url} alt={t('profile.imagenDePerfil')} iconSize={22} />
         </div>
 
         <div>
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Mi Perfil
+           {t('profile.miPerfil')}
           </h1>
 
           <p className="rd-page-subtitle text-sm text-muted-foreground">
@@ -169,30 +171,30 @@ export default function Profile() {
       <div className="rd-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Pencil size={15} className="text-primary" />
-          <h2 className="rd-card-title">Nombre de usuario</h2>
+          <h2 className="rd-card-title">{t('profile.nombreDeUsuario')}</h2>
         </div>
 
         <p className="text-xs text-muted-foreground mb-4">
-          Este nombre se mostrará en el sidebar y en tu perfil. Podés cambiarlo cuando quieras.
+         {t('profile.esteNombreSeMostrara')}
         </p>
 
         {loadingData ? (
           <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
             <Loader2 size={14} className="animate-spin" />
-            Cargando...
+           {t('profile.cargando')}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="rd-label mb-1.5 block">
-                Nombre de usuario
+               {t('profile.nombreDeUsuario')}
               </label>
 
               <input
                 type="text"
                 value={visibleName}
                 onChange={e => setVisibleName(e.target.value)}
-                placeholder="¿Cómo querés que te llamen?"
+                placeholder={t('profile.comoQueresQueTe')}
                 required
                 className="w-full bg-secondary/70 border border-border rounded-xl px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground"
               />
@@ -207,7 +209,7 @@ export default function Profile() {
             {success && (
               <p className="text-sm text-green-400 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2 flex items-center gap-2">
                 <CheckCircle size={14} />
-                Nombre actualizado correctamente.
+               {t('profile.nombreActualizadoCorrectamente')}
               </p>
             )}
 
@@ -222,7 +224,7 @@ export default function Profile() {
                 <Save size={14} />
               )}
 
-              Guardar nombre
+            {t('profile.guardarNombre')}
             </button>
           </form>
         )}
@@ -231,10 +233,10 @@ export default function Profile() {
       <div className="rd-card p-6">
         <div className="flex items-center gap-2 mb-2">
           <Image size={15} className="text-primary" />
-          <h2 className="rd-card-title">Imagen de perfil</h2>
+          <h2 className="rd-card-title">{t('profile.imagenDePerfil')}</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Elegí cualquier imagen disponible de campeones, ítems o runas.
+         {t('profile.elegiCualquierImagenDisponible')}
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
@@ -243,7 +245,7 @@ export default function Profile() {
             <input
               value={avatarQuery}
               onChange={event => setAvatarQuery(event.target.value)}
-              placeholder="Buscar imagen..."
+              placeholder={t('profile.buscarImagen')}
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground"
             />
           </div>
@@ -255,14 +257,14 @@ export default function Profile() {
                 onClick={() => setAvatarType(type.id)}
                 className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${avatarType === type.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/70 text-muted-foreground hover:text-foreground'}`}
               >
-                {type.label}
+                {t(type.label)}
               </button>
             ))}
           </div>
         </div>
 
         {championsLoading || itemsLoading || runesLoading ? (
-          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" /> Cargando imágenes...</div>
+          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin" /> {t('profile.cargandoImagenes')}</div>
         ) : (
           <div className="grid max-h-80 grid-cols-5 gap-2 overflow-y-auto pr-1 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
             {avatarOptions.map(entity => {
@@ -275,7 +277,7 @@ export default function Profile() {
                   onClick={() => saveAvatar(imageUrl)}
                   disabled={avatarLoading}
                   title={entity.name}
-                  aria-label={`Usar ${entity.name} como imagen de perfil`}
+                  aria-label={t('profile.usarComoImagenDe', { name: entity.name })}
                   className={`aspect-square overflow-hidden rounded-full border-2 bg-secondary/60 transition-all hover:scale-105 hover:border-primary ${selected ? 'border-primary ring-2 ring-primary/30' : 'border-transparent'}`}
                 >
                   <img src={imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -286,10 +288,10 @@ export default function Profile() {
         )}
 
         {!championsLoading && !itemsLoading && !runesLoading && avatarOptions.length === 0 && (
-          <p className="py-6 text-center text-sm text-muted-foreground">No se encontraron imágenes.</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">{t('profile.noSeEncontraronImagenes')}</p>
         )}
         {avatarError && <p className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">{avatarError}</p>}
-        {avatarSuccess && <p className="mt-4 flex items-center gap-2 text-sm text-green-400"><CheckCircle size={14} /> Imagen de perfil actualizada.</p>}
+        {avatarSuccess && <p className="mt-4 flex items-center gap-2 text-sm text-green-400"><CheckCircle size={14} /> {t('profile.imagenDePerfilActualizada')}</p>}
       </div>
 
       <div className="rd-card p-6">
@@ -300,11 +302,11 @@ export default function Profile() {
 
           <div>
             <h2 className="font-rajdhani font-bold text-xl text-foreground uppercase tracking-tight">
-              Tus datos y privacidad
+             {t('profile.tusDatosYPrivacidad')}
             </h2>
 
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Descarga una copia de todos tus datos (perfil, partidas, builds y objetivos) en formato JSON.
+             {t('profile.descargaUnaCopiaDe')}
             </p>
           </div>
         </div>
@@ -316,7 +318,7 @@ export default function Profile() {
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 bg-primary/10 text-primary font-semibold text-sm hover:bg-primary/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-          Descargar mis datos
+         {t('profile.descargarMisDatos')}
         </button>
 
         {exportError && (
@@ -347,13 +349,11 @@ export default function Profile() {
 
           <div>
             <h2 className="font-rajdhani font-bold text-xl text-red-400 uppercase tracking-tight">
-              Eliminar cuenta
+             {t('profile.eliminarCuenta')}
             </h2>
 
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Esta acción eliminará tu cuenta y todos los datos privados asociados:
-              partidas, builds, estadísticas personales y cualquier registro vinculado a tu usuario.
-              No se puede deshacer.
+             {t('profile.estaAccionEliminaraTu')}
             </p>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default function Profile() {
         <div className="space-y-4">
           <div>
             <label className="rd-label mb-1.5 block text-red-400">
-              Para confirmar, escribe: {DELETE_CONFIRM_TEXT}
+             {t('profile.paraConfirmarEscribe')} {DELETE_CONFIRM_TEXT}
             </label>
 
             <input
@@ -387,7 +387,7 @@ export default function Profile() {
           >
             {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
 
-            Eliminar mi cuenta definitivamente
+          {t('profile.eliminarMiCuentaDefinitivamente')}
           </button>
         </div>
       </div>

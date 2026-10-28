@@ -12,22 +12,24 @@ import GoalConfigForm from '../form/GoalConfigForm';
 import GoalExplanation from '../GoalExplanation';
 import GoalPreview from '../GoalPreview';
 import StepSelect from './StepSelect';
+import { useT } from '@/lib/LocaleContext';
 
 const STEPS = [
-  { id: 'select', label: 'Selección' },
-  { id: 'configure', label: 'Configuración' },
-  { id: 'confirm', label: 'Confirmación' },
+  { id: 'select', label: 'goals.wizard.select' },
+  { id: 'configure', label: 'goals.wizard.configure' },
+  { id: 'confirm', label: 'goals.wizard.confirm' },
 ];
 
 function StepIndicator({ current }) {
+  const t = useT();
   const index = STEPS.findIndex(step => step.id === current);
   return (
-    <ol className="flex gap-2" aria-label="Pasos">
+    <ol className="flex gap-2" aria-label={t('goals.wizard.steps')}>
       {STEPS.map((step, i) => (
         <li key={step.id} className="flex-1">
           <div className={`h-1 rounded-full ${i <= index ? 'bg-primary' : 'bg-border'}`} />
           <p className={`mt-1.5 text-[11px] font-semibold uppercase tracking-wide ${i === index ? 'text-primary' : 'text-muted-foreground'}`}>
-            {i + 1}. {step.label}
+            {i + 1}. {t(step.label)}
           </p>
         </li>
       ))}
@@ -49,6 +51,7 @@ function StepFooter({ children }) {
  * @param {{ matches: any[] }} props
  */
 export default function GoalWizard({ matches }) {
+  const t = useT();
   const navigate = useNavigate();
   const timezone = useMemo(() => detectTimeZone(), []);
   const suggestions = useMemo(() => buildSuggestions({ timezone, matches }), [timezone, matches]);
@@ -80,7 +83,7 @@ export default function GoalWizard({ matches }) {
   const submit = () => {
     create.mutate(draft, {
       onSuccess: goal => {
-        notify({ title: 'Objetivo creado', description: 'Ya podés seguir su progreso.' });
+        notify({ title: t('goals.wizard.created'), description: t('goals.wizard.createdDescription') });
         navigate(`/objetivos/${goal.id}`);
       },
       onError: error => {
@@ -88,7 +91,7 @@ export default function GoalWizard({ matches }) {
           setErrors(/** @type {any} */ (error).errors);
           setStep('configure');
         }
-        notify({ variant: 'destructive', title: 'No se pudo crear el objetivo', description: error?.message || 'Intentá nuevamente.' });
+        notify({ variant: 'destructive', title: t('goals.wizard.createError'), description: error?.message || t('common.tryAgain') });
       },
     });
   };
@@ -120,10 +123,10 @@ export default function GoalWizard({ matches }) {
           </div>
           <StepFooter>
             <button type="button" onClick={() => setStep('select')} className={BUTTON_SECONDARY}>
-              <ArrowLeft size={15} /> Volver
+              <ArrowLeft size={15} /> {t('common.back')}
             </button>
             <button type="button" onClick={goToConfirm} className={BUTTON_PRIMARY}>
-              Revisar <ArrowRight size={15} />
+              {t('goals.wizard.review')} <ArrowRight size={15} />
             </button>
           </StepFooter>
         </section>
@@ -134,7 +137,7 @@ export default function GoalWizard({ matches }) {
           <div className="rd-goal-step-content rd-goal-form grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
             <div className="rd-goal-form-pane space-y-4">
               <div>
-                <p className="rd-section-kicker">Resumen</p>
+                <p className="rd-section-kicker">{t('goals.wizard.summary')}</p>
                 <h2 className="mt-1 font-rajdhani text-2xl font-bold text-foreground">{validated.name}</h2>
                 {validated.description && <p className="mt-1 text-sm text-muted-foreground">{validated.description}</p>}
               </div>
@@ -146,10 +149,10 @@ export default function GoalWizard({ matches }) {
           </div>
           <StepFooter>
             <button type="button" onClick={() => setStep('configure')} className={BUTTON_SECONDARY}>
-              <ArrowLeft size={15} /> Editar
+              <ArrowLeft size={15} /> {t('common.edit')}
             </button>
             <button type="button" onClick={submit} disabled={create.isPending} className={BUTTON_PRIMARY}>
-              <Check size={15} /> {create.isPending ? 'Creando...' : 'Crear objetivo'}
+              <Check size={15} /> {create.isPending ? t('goals.wizard.creating') : t('goals.wizard.create')}
             </button>
           </StepFooter>
         </section>

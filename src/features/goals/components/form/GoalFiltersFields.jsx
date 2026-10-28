@@ -5,6 +5,7 @@ import { LANE_LABELS } from '../../texts';
 import { CHIP_BASE, CHIP_OFF, CHIP_ON } from '../goalUi';
 import ChampionMultiSelect from './ChampionMultiSelect';
 import Field from './Field';
+import { useT } from '@/lib/LocaleContext';
 
 function ChipGroup({ options, value = [], onChange, disabled }) {
   const toggle = optionValue => onChange(
@@ -37,6 +38,7 @@ function ChipGroup({ options, value = [], onChange, disabled }) {
  *   errors: Record<string, string>, championOptions: any[], disabled?: boolean }} props
  */
 export default function GoalFiltersFields({ metricId, filters, onChange, errors, championOptions, disabled = false }) {
+  const t = useT();
   const metric = getMetric(metricId);
   if (metric.allowedFilters.length === 0) return null;
 
@@ -48,14 +50,14 @@ export default function GoalFiltersFields({ metricId, filters, onChange, errors,
   return (
     <div className="space-y-3">
       <div>
-        <p className="rd-section-kicker">Filtros</p>
-        <p className="text-xs text-muted-foreground">Sin filtros cuentan todas tus partidas del período.</p>
+        <p className="rd-section-kicker">{t('goals.form.filters')}</p>
+        <p className="text-xs text-muted-foreground">{t('goals.form.noFiltersHint')}</p>
       </div>
 
       {allowed('champions') && (
         <Field
-          label={championsAreTarget ? 'Campeones objetivo (obligatorio)' : 'Campeones'}
-          hint={championsAreTarget ? 'Las partidas con estos campeones forman el porcentaje.' : 'Solo cuentan partidas con estos campeones.'}
+          label={championsAreTarget ? t('goals.form.targetChampions') : t('goals.filterLabels.champions')}
+          hint={t(championsAreTarget ? 'goals.form.targetChampionsHint' : 'goals.form.championsHint')}
           error={errorFor('champions')}
         >
           <ChampionMultiSelect
@@ -68,13 +70,13 @@ export default function GoalFiltersFields({ metricId, filters, onChange, errors,
       )}
 
       {allowed('types') && (
-        <Field label="Tipo de partida" error={errorFor('types')}>
+        <Field label={t('goals.filterLabels.types')} error={errorFor('types')}>
           <ChipGroup options={MATCH_TYPES} value={filters.types} onChange={value => set('types', value)} disabled={disabled} />
         </Field>
       )}
 
       {allowed('lanes') && (
-        <Field label="Línea" error={errorFor('lanes')}>
+        <Field label={t('goals.filterLabels.lanes')} error={errorFor('lanes')}>
           <ChipGroup
             options={LANES.map(lane => ({ value: lane, label: LANE_LABELS[lane] }))}
             value={filters.lanes}

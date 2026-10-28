@@ -20,12 +20,14 @@ import LaneBadge from '@/components/ui/LaneBadge';
 import { championSlug } from '@/utils/championSlug';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT_QUERY } from '@/hooks/useMatchMedia';
+import { useT } from '@/lib/LocaleContext';
+import { labels, tr } from '@/i18n/uiI18n';
 
-const SCALING_LABEL = {
-  earlygame: 'Early Game',
-  midgame: 'Mid Game',
-  lategame: 'Late Game',
-};
+const SCALING_LABEL = labels({
+  earlygame: 'champion.scalingShort.earlygame',
+  midgame: 'champion.scalingShort.midgame',
+  lategame: 'champion.scalingShort.lategame',
+});
 
 const PROJECTION_TONE_CLASS = {
   positive: 'text-green-400',
@@ -148,38 +150,38 @@ const getChampionProjection = ({
     sampleScore * 0.15
   );
 
-  let label = 'Estable';
+  let label = tr('library.estable');
   let tone = 'neutral';
 
   if (totalGames === 0) {
-    label = 'Sin datos';
+    label = tr('dashboard.sinDatos');
     tone = 'muted';
   } else if (totalGames < 5) {
-    label = 'Poca data';
+    label = tr('library.pocaData');
     tone = 'muted';
   } else if (tierScore >= 70 && wr < 48 && totalGames >= 8) {
-    label = 'Meta fuerte, bajo rendimiento';
+    label = tr('library.metaFuerteBajoRendimiento');
     tone = 'warning';
   } else if (tierScore < 45 && wr >= 58 && totalGames >= 10) {
-    label = 'Off-meta efectivo';
+    label = tr('library.offMetaEfectivo');
     tone = 'positive';
   } else if (totalGames >= 25 && wr >= 55 && projectionScore >= 65) {
-    label = 'Consolidado';
+    label = tr('library.consolidado');
     tone = 'positive';
   } else if (totalGames >= 12 && wr >= 55 && tierScore >= 70) {
-    label = 'Pick fuerte';
+    label = tr('library.pickFuerte');
     tone = 'positive';
   } else if (totalGames < 12 && wr >= 55 && projectionScore >= 58) {
-    label = 'Prometedor';
+    label = tr('library.prometedor');
     tone = 'positive';
   } else if (wr < 45 && totalGames >= 8) {
-    label = 'Riesgoso';
+    label = tr('library.riesgoso');
     tone = 'danger';
   } else if (wr < 48 && totalGames >= 12) {
-    label = 'Revisar pick';
+    label = tr('library.revisarPick');
     tone = 'danger';
   } else if (tierScore >= 75 && totalGames < 8) {
-    label = 'Meta fuerte';
+    label = tr('library.metaFuerte');
     tone = 'positive';
   }
 
@@ -213,43 +215,43 @@ export const getChampionInsight = ({
   const wrTrend = recentWrNum - numericWr;
 
   if (totalGames < 5) {
-    return `${totalGames === 1 ? 'Una sola partida' : `Solo ${totalGames} partidas`} con ${championName} — los números son una foto instantánea, no un veredicto. Seguí sumando registros; con 10+ partidas el análisis va a ser mucho más preciso.`;
+    return tr('library.conLosNumerosSon', { value: totalGames === 1 ? tr('library.unaSolaPartida') : tr('library.soloPartidas', { totalGames }), championName });
   }
 
   if (totalGames >= 20 && numericWr >= 58 && kdaNum >= 3.5) {
-    return `Con ${championName} tenés uno de tus perfiles más sólidos: ${numericWr}% de WR en ${totalGames} partidas y un KDA de ${kdaNum.toFixed(1)}. A este nivel de muestra, esos números no son ruido — hay algo que estás haciendo bien sistemáticamente. El siguiente paso no es jugar más cómodo, sino identificar qué hacés en las partidas perdidas que rompe ese patrón.`;
+    return tr('library.conTenesUnoDe', { championName, numericWr, totalGames, value: kdaNum.toFixed(1) });
   }
 
   if (numericWr >= 55 && kdaNum < 2.5 && totalGames >= 10) {
-    return `Ganás con ${championName}, pero tu KDA (${kdaNum.toFixed(1)}) sugiere que no es a través de dominio individual. Probablemente tu valor esté en el macro: objetivos, presión de mapa, presencia en peleas clave. Eso es difícil de ver en los números — y a veces es exactamente lo correcto. Aun así, bajar tus muertes promedio (${deathsAvg} por partida) debería elevar aún más tu winrate.`;
+    return tr('library.ganasConPeroTu', { championName, value: kdaNum.toFixed(1), deathsAvg });
   }
 
   if (numericWr < 50 && kdaNum >= 3 && totalGames >= 10) {
-    return `Hay una contradicción interesante con ${championName}: tu KDA es ${kdaNum.toFixed(1)}, pero el winrate está en ${numericWr}%. Estás jugando bien individualmente, pero esa ventaja no se convierte en victoria. Preguntate si estás cerrando partidas cuando tenés delantera, o si priorizás farm/kills sobre objetivos decisivos como el Baron o el inhibidor.`;
+    return tr('library.hayUnaContradiccionInteresante', { championName, value: kdaNum.toFixed(1), numericWr });
   }
 
   if (assistsAvg >= 8 && participationRatio !== null && participationRatio >= 2.5) {
-    return `Tu rol con ${championName} es claramente de habilitador: ${assistsAvg.toFixed(1)} asistencias promedio contra ${killsAvg.toFixed(1)} kills dice que tu impacto vive en las jugadas de tus compañeros. Eso no es malo — es un estilo. La pregunta clave es si ese impacto se mantiene cuando tu equipo no convierte tus jugadas en kills, porque ahí es donde los campeones utilitarios pierden valor.`;
+    return tr('library.tuRolConEs', { championName, value: assistsAvg.toFixed(1), value2: killsAvg.toFixed(1) });
   }
 
   if (killsAvg >= 7 && participationRatio !== null && participationRatio < 0.8) {
-    return `Con ${championName} jugás para kills: ${killsAvg.toFixed(1)} por partida y relativamente pocas asistencias. Eso puede ser una fortaleza si el daño se traduce en eliminar threats clave, pero también puede significar que estás optando por skirmishes individuales cuando el equipo necesita algo más colectivo. Revisá si tus peleas se alinean con los objetivos del mapa.`;
+    return tr('library.conJugasParaKills', { championName, value: killsAvg.toFixed(1) });
   }
 
   if (cleanRate >= 0.6 && numericWr < 50 && totalGames >= 10) {
-    return `Sos consistente con ${championName} — en ${Math.round(cleanRate * 100)}% de tus partidas terminás con 3 muertes o menos. El problema no está en la sobrevivencia, está en el impacto: no morís, pero tampoco decidís partidas. Buscá ser más agresivo en los momentos clave: tomar peleas de Baron, forzar inhibidores cuando tenés ventaja, hacer llamados de rotación.`;
+    return tr('library.sosConsistenteConEn', { championName, value: Math.round(cleanRate * 100) });
   }
 
   if (wrTrend >= 15 && totalGames >= 12) {
-    return `Hay una tendencia clara de mejora con ${championName}: tu WR global es ${numericWr}%, pero en tus últimas ${recentMatchesCount} partidas subió a ${recentWrNum.toFixed(0)}%. Algo hiciste diferente — ya sea en builds, decisiones de mapa, o matchups que entendiste mejor. Vale la pena analizar qué cambió para no perderlo.`;
+    return tr('library.hayUnaTendenciaClara', { championName, numericWr, recentMatchesCount, value: recentWrNum.toFixed(0) });
   }
 
   if (wrTrend <= -15 && totalGames >= 12) {
-    return `Tu WR histórico con ${championName} es ${numericWr}%, pero en las últimas ${recentMatchesCount} partidas bajó a ${recentWrNum.toFixed(0)}%. Eso puede ser meta shift, haber subido de MMR, o simplemente varianza. Antes de forzar más partidas, revisá si hay algo concreto que cambió — ya sea en el parche, en tus hábitos de juego, o en los matchups que estás enfrentando.`;
+    return tr('library.tuWrHistoricoCon', { championName, numericWr, recentMatchesCount, value: recentWrNum.toFixed(0) });
   }
 
   if (deathsAvg >= 6 && totalGames >= 8) {
-    return `El dato más urgente con ${championName} son las muertes: ${deathsAvg} por partida en promedio es alto para cualquier rol. Cada muerte extra no es solo un respawn — es un rebote de gold, un objetivo perdido y presión de mapa cedida. Un recorte a ${(deathsAvg - 2).toFixed(1)} muertes promedio probablemente tendría impacto directo en tu winrate.`;
+    return tr('library.elDatoMasUrgente', { championName, deathsAvg, value: (deathsAvg - 2).toFixed(1) });
   }
 
   if (
@@ -258,7 +260,7 @@ export const getChampionInsight = ({
     numericWr < 50 &&
     totalGames >= 8
   ) {
-    return `${championName} está en un buen momento de meta (tier score ${toNumber(selectedTierEntry.ranking_final).toFixed(0)}), pero tu winrate personal (${numericWr}%) no lo refleja. Puede que el campeón esté fuerte en manos que lo trabajan en un estilo específico que todavía no es el tuyo. Mirá cómo lo juegan los tops de la ladder — quizás hay algo puntual en builds o patrones de juego que no estés aplicando.`;
+    return tr('library.estaEnUnBuen', { championName, value: toNumber(selectedTierEntry.ranking_final).toFixed(0), numericWr });
   }
 
   if (
@@ -267,14 +269,14 @@ export const getChampionInsight = ({
     numericWr >= 55 &&
     totalGames >= 10
   ) {
-    return `Estás sacando ${numericWr}% de WR con ${championName} pese a que el meta no lo favorece (tier score ${toNumber(selectedTierEntry.ranking_final).toFixed(0)}). Eso habla de dominio real del campeón — sabés cuándo funciona y cuándo no. El riesgo es cuando el meta lo perjudica más activamente; seguí monitoreando si los resultados se sostienen con el parche.`;
+    return tr('library.estasSacandoDeWr', { numericWr, championName, value: toNumber(selectedTierEntry.ranking_final).toFixed(0) });
   }
 
   if (totalGames < 12 && numericWr >= 55) {
-    return `Inicio prometedor con ${championName}: ${numericWr}% en ${totalGames} partidas. Todavía es muestra chica para ser concluyente, pero la dirección es buena. Llegando a las 15–20 partidas vas a tener una imagen mucho más clara de si es un pick que te suma o si fue solo un arranque positivo.`;
+    return tr('library.inicioPrometedorConEn', { championName, numericWr, totalGames });
   }
 
-  return `Tu perfil con ${championName} está equilibrado: ${numericWr}% de WR, KDA ${kdaNum.toFixed(1)}, ${deathsAvg} muertes promedio. No hay una señal de alarma, pero tampoco un dominio claro. El margen de mejora más probable está en reducir muertes en los juegos perdidos y forzar más objetivos cuando tenés delantera.`;
+  return tr('library.tuPerfilConEsta', { championName, numericWr, value: kdaNum.toFixed(1), deathsAvg });
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -349,12 +351,13 @@ function PersonalMetric({ label, value, hint }) {
 // Evolución de una línea en los últimos parches: curva del score y el tier de
 // cada snapshot. `points` va del parche más viejo al actual.
 function MetaEvolution({ points }) {
+  const t = useT();
   if (points.length < 2) {
     return (
       <div className="rd-champ-meta-evolution rd-champ-meta-evolution-empty">
-        <p className="rd-label">Evolución</p>
+        <p className="rd-label">{t('goals.evolution')}</p>
         <p className="text-xs text-muted-foreground">
-          Hace falta al menos un parche anterior registrado para ver la evolución.
+         {t('library.haceFaltaAlMenos')}
         </p>
       </div>
     );
@@ -378,11 +381,11 @@ function MetaEvolution({ points }) {
   return (
     <div className="rd-champ-meta-evolution">
       <div className="rd-champ-meta-evolution-head">
-        <p className="rd-label">Evolución · {points.length} parches</p>
+        <p className="rd-label">{t('library.evolucion')} {points.length} {t('library.parches')}</p>
         <p className="text-xs text-muted-foreground">
           {first.tier !== last.tier && <span>{first.tier} → {last.tier} · </span>}
           <span className={delta > 0 ? 'text-green-400' : delta < 0 ? 'text-red-400' : ''}>
-            {delta > 0 ? '+' : ''}{delta.toFixed(1)} score
+            {delta > 0 ? '+' : ''}{delta.toFixed(1)} {t('library.score')}
           </span>
         </p>
       </div>
@@ -409,7 +412,7 @@ function MetaEvolution({ points }) {
 
       <ol className="rd-champ-meta-evolution-patches" style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}>
         {points.map(point => (
-          <li key={point.key} title={`Score ${point.score.toFixed(1)}${point.date ? ` · snapshot del ${point.date}` : ''}`}>
+          <li key={point.key} title={t('library.score2', { value: point.score.toFixed(1), value2: point.date ? t('library.snapshotDel', { date: point.date }) : '' })}>
             <TierBadge tier={point.tier} size="sm" />
             <span className="font-semibold text-foreground">{point.patch}</span>
             {point.date && (
@@ -432,6 +435,7 @@ export default function ChampionDetail({
   champions: initialChampions,
   relatedChampions = [],
 }) {
+  const t = useT();
   const { user } = useAuth();
   // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, { ssrSafe: publicMode });
@@ -597,12 +601,12 @@ export default function ChampionDetail({
   // Sin dossier, la ficha pública reparte las tarjetas en su propia grilla de dos columnas.
   const publicGrid = publicMode && !useSections;
   const sectionTabs = [
-    ['profile', 'Perfil'],
-    ['stats', 'Estadísticas'],
-    ['matchups', 'Matchups'],
-    ...(publicMode ? [] : [['personal', 'Rendimiento']]),
-    ...(tierData.length > 0 ? [['meta', 'Meta']] : []),
-    ...(publicMode && relatedChampions.length > 0 ? [['related', 'Relacionados']] : []),
+    ['profile', t('bugReport.pages.Perfil')],
+    ['stats', t('nav.stats')],
+    ['matchups', t('dashboard.slides.matchups')],
+    ...(publicMode ? [] : [['personal', t('library.rendimiento')]]),
+    ...(tierData.length > 0 ? [['meta', t('goals.target')]] : []),
+    ...(publicMode && relatedChampions.length > 0 ? [['related', t('library.relacionados')]] : []),
   ];
   const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'profile';
   const show = id => !useSections || activeSection === id;
@@ -656,11 +660,11 @@ export default function ChampionDetail({
         "
       >
         <ArrowLeft size={15} />
-        {publicMode ? 'Todos los campeones' : 'Volver a la biblioteca'}
+        {publicMode ? t('library.todosLosCampeones') : t('library.volverALaBiblioteca')}
       </button>
 
       {useSections && (
-        <div className="rd-panel-tabs rd-champ-tabs" role="tablist" aria-label="Secciones del campeón">
+        <div className="rd-panel-tabs rd-champ-tabs" role="tablist" aria-label={t('library.seccionesDelCampeon')}>
           {sectionTabs.map(([id, label]) => (
             <button
               key={id}
@@ -727,7 +731,7 @@ export default function ChampionDetail({
 
                 {champion.attack_range && (
                   <span className="rd-status-pill">
-                    {champion.attack_range === 'ranged' ? 'Ranged' : 'Melee'}
+                    {champion.attack_range === 'ranged' ? t('library.ranged') : t('library.melee')}
                   </span>
                 )}
               </div>
@@ -744,14 +748,14 @@ export default function ChampionDetail({
               <div className="mt-5 pt-4 border-t border-border/40">
                 <div className={`grid grid-cols-1 gap-x-6 gap-y-4 ${publicMode ? '' : 'md:grid-cols-4'}`}>
                   <div className="min-w-0">
-                    <p className="rd-label mb-1">Escalado</p>
+                    <p className="rd-label mb-1">{t('library.escalado')}</p>
                     <p className="text-base font-semibold text-foreground leading-tight">
                       {SCALING_LABEL[champion.scaling] || champion.scaling || '—'}
                     </p>
                   </div>
 
                   {!publicMode && <div className="min-w-0">
-                    <p className="rd-label mb-1">Proyección</p>
+                    <p className="rd-label mb-1">{t('library.proyeccion')}</p>
                     <p
                       className={`
                         text-base font-semibold leading-tight
@@ -761,19 +765,19 @@ export default function ChampionDetail({
                       {projection.label}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Score {projection.projectionScore}
+                     {t('dashboard.score')} {projection.projectionScore}
                     </p>
                   </div>}
 
                   {!publicMode && <div className="min-w-0">
-                    <p className="rd-label mb-1">WR Personal</p>
+                    <p className="rd-label mb-1">{t('library.wrPersonal')}</p>
                     <p className="text-base font-semibold text-foreground leading-tight">
-                      {wr ? `${wr}%` : 'Sin datos'}
+                      {wr ? `${wr}%` : t('dashboard.sinDatos')}
                     </p>
                   </div>}
 
                   {!publicMode && <div className="min-w-0">
-                    <p className="rd-label mb-1">Partidas</p>
+                    <p className="rd-label mb-1">{t('nav.matches')}</p>
                     <p className="text-base font-semibold text-foreground leading-tight">
                       {champMatches.length}
                     </p>
@@ -796,27 +800,27 @@ export default function ChampionDetail({
             <div className="rd-champ-profile-main">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">Perfil del Campeón</h2>
+              <h2 className="rd-card-title">{t('library.perfilDelCampeon')}</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rd-mini-action">
-                <StatBar label="Daño" value={champion.damage} color="bg-red-400" />
+                <StatBar label={t('library.dano')} value={champion.damage} color="bg-red-400" />
               </div>
               <div className="rd-mini-action">
-                <StatBar label="Supervivencia" value={champion.survive} color="bg-blue-400" />
+                <StatBar label={t('library.supervivencia')} value={champion.survive} color="bg-blue-400" />
               </div>
               <div className="rd-mini-action">
-                <StatBar label="Asistencia" value={champion.assist} color="bg-green-400" />
+                <StatBar label={t('library.asistencia')} value={champion.assist} color="bg-green-400" />
               </div>
               <div className="rd-mini-action">
-                <StatBar label="Dificultad" value={champion.difficulty} color="bg-primary" />
+                <StatBar label={t('library.dificultad')} value={champion.difficulty} color="bg-primary" />
               </div>
             </div>
 
             {(champion.tags || []).length > 0 && (
               <div className="mt-5">
-                <p className="rd-label mb-2">Tags</p>
+                <p className="rd-label mb-2">{t('library.tags')}</p>
                 <div className="flex flex-wrap gap-2">
                   {champion.tags.map(t => (
                     <span key={t} className="rd-status-pill">{t}</span>
@@ -828,7 +832,7 @@ export default function ChampionDetail({
 
             {champion.strategic_notes && (
               <div className="rd-champ-profile-notes mt-5 rd-mini-action">
-                <p className="rd-label mb-2">Notas Estratégicas</p>
+                <p className="rd-label mb-2">{t('builds.notasEstrategicas')}</p>
                 <p className="text-sm text-foreground leading-relaxed">
                   {champion.strategic_notes}
                 </p>
@@ -840,23 +844,23 @@ export default function ChampionDetail({
           {show('stats') && <div className={`rd-champ-stats rd-card p-5 ${publicGrid ? 'xl:col-start-1 xl:row-start-2' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">Estadísticas Base</h2>
+              <h2 className="rd-card-title">{t('library.estadisticasBase')}</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
               <div>
-                <BaseStatRow label="Vida" value={champion.life} />
-                <BaseStatRow label="Reg. Vida" value={champion.life_reg} />
-                <BaseStatRow label="Maná" value={champion.mana} />
-                <BaseStatRow label="Reg. Maná" value={champion.mana_reg} />
-                <BaseStatRow label="Movimiento" value={champion.movement} />
+                <BaseStatRow label={t('builds.vida')} value={champion.life} />
+                <BaseStatRow label={t('builds.regVida')} value={champion.life_reg} />
+                <BaseStatRow label={t('builds.mana')} value={champion.mana} />
+                <BaseStatRow label={t('builds.regMana')} value={champion.mana_reg} />
+                <BaseStatRow label={t('itemTypes.Movimiento')} value={champion.movement} />
               </div>
               <div>
-                <BaseStatRow label="Daño de Ataque" value={champion.attack_damage} />
-                <BaseStatRow label="Vel. de Ataque" value={champion.attack_speed} />
-                <BaseStatRow label="Bonus AS" value={champion.bonus_attack_speed ? `${champion.bonus_attack_speed}%` : null} />
-                <BaseStatRow label="Armadura" value={champion.armor} />
-                <BaseStatRow label="Resist. Mágica" value={champion.magic_res} />
+                <BaseStatRow label={t('library.danoDeAtaque')} value={champion.attack_damage} />
+                <BaseStatRow label={t('library.velDeAtaque')} value={champion.attack_speed} />
+                <BaseStatRow label={t('library.bonusAs')} value={champion.bonus_attack_speed ? `${champion.bonus_attack_speed}%` : null} />
+                <BaseStatRow label={t('builds.armadura')} value={champion.armor} />
+                <BaseStatRow label={t('library.resistMagica')} value={champion.magic_res} />
               </div>
             </div>
           </div>}
@@ -865,7 +869,7 @@ export default function ChampionDetail({
           {show('matchups') && <div className={`rd-champ-matchups rd-card p-5 ${publicGrid ? 'xl:col-span-2 xl:row-start-3' : ''}`}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">Matchups y Sinergias</h2>
+              <h2 className="rd-card-title">{t('library.matchupsYSinergias')}</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -874,7 +878,7 @@ export default function ChampionDetail({
                 <div className="flex items-center gap-2 mb-3">
                   <Sword size={15} className="text-green-400" />
                   <p className="text-xs uppercase tracking-[0.18em] text-green-400 font-semibold">
-                    Fuerte Contra
+                   {t('library.fuerteContra')}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -894,7 +898,7 @@ export default function ChampionDetail({
                       );
                     })
                   ) : (
-                    <p className="text-sm text-muted-foreground">Sin datos.</p>
+                    <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>
                   )}
                 </div>
               </div>
@@ -904,7 +908,7 @@ export default function ChampionDetail({
                 <div className="flex items-center gap-2 mb-3">
                   <Shield size={15} className="text-red-400" />
                   <p className="text-xs uppercase tracking-[0.18em] text-red-400 font-semibold">
-                    Débil Contra
+                   {t('library.debilContra')}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -924,7 +928,7 @@ export default function ChampionDetail({
                       );
                     })
                   ) : (
-                    <p className="text-sm text-muted-foreground">Sin datos.</p>
+                    <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>
                   )}
                 </div>
               </div>
@@ -934,7 +938,7 @@ export default function ChampionDetail({
                 <div className="flex items-center gap-2 mb-3">
                   <Zap size={15} className="text-blue-400" />
                   <p className="text-xs uppercase tracking-[0.18em] text-blue-400 font-semibold">
-                    Mejores Sinergias
+                   {t('library.mejoresSinergias')}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -954,7 +958,7 @@ export default function ChampionDetail({
                       );
                     })
                   ) : (
-                    <p className="text-sm text-muted-foreground">Sin datos.</p>
+                    <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>
                   )}
                 </div>
               </div>
@@ -968,12 +972,12 @@ export default function ChampionDetail({
           {!publicMode && show('personal') && <div className="rd-champ-personal rd-card p-5">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">Rendimiento Personal</h2>
+              <h2 className="rd-card-title">{t('library.rendimientoPersonal')}</h2>
             </div>
 
             {champMatches.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Sin partidas registradas.
+               {t('library.sinPartidasRegistradas')}
               </p>
             ) : (
               <>
@@ -982,27 +986,27 @@ export default function ChampionDetail({
                     {wr}%
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {champMatches.length} partidas · {wins}V / {champMatches.length - wins}D
+                    {champMatches.length} {t('library.partidas')} {wins}V / {champMatches.length - wins}D
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mt-5">
                   <PersonalMetric
-                    label="KDA Personal"
+                    label={t('library.kdaPersonal')}
                     value={personalKdaValue}
-                    hint="Ratio global"
+                    hint={t('library.ratioGlobal')}
                   />
                   <PersonalMetric
                     label="K / D / A"
                     value={avgKdaLine}
-                    hint="Promedio por partida"
+                    hint={t('goals.aggregation.average')}
                   />
                   <PersonalMetric
-                    label="Mejor KDA en partida"
+                    label={t('library.mejorKdaEnPartida')}
                     value={formatMatchKda(bestKdaGame)}
                   />
                   <PersonalMetric
-                    label="Peor KDA en partida"
+                    label={t('library.peorKdaEnPartida')}
                     value={formatMatchKda(riskiestGame)}
                   />
                 </div>
@@ -1010,7 +1014,7 @@ export default function ChampionDetail({
                 {championInsight && (
                   <div className="rd-champ-personal-insight mt-4 rounded-xl border border-primary/20 bg-primary/5 px-3 py-3">
                     <p className="rd-label mb-2 text-primary">
-                      Insight con {champion.name}
+                     {t('dashboard.insightCon')} {champion.name}
                     </p>
                     <p className="text-sm text-foreground leading-relaxed">
                       {championInsight}
@@ -1020,7 +1024,7 @@ export default function ChampionDetail({
 
                 {champMatches.length < 5 && (
                   <div className="rd-champ-personal-warning mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-3 py-2">
-                    <p className="text-xs text-yellow-400">Muestra pequeña.</p>
+                    <p className="text-xs text-yellow-400">{t('library.muestraPequena')}</p>
                   </div>
                 )}
               </>
@@ -1032,14 +1036,14 @@ export default function ChampionDetail({
             <div className="rd-champ-meta rd-card p-5">
               <div className="flex items-center gap-2 mb-5">
                 <span className="w-6 h-px bg-primary/50" />
-                <h2 className="rd-card-title">Posición Meta</h2>
+                <h2 className="rd-card-title">{t('library.posicionMeta')}</h2>
                 {useSections && tierData.length > 1 && (
-                  <div className="rd-champ-meta-nav ml-auto flex items-center gap-1.5" aria-label="Cambiar posición">
+                  <div className="rd-champ-meta-nav ml-auto flex items-center gap-1.5" aria-label={t('library.cambiarPosicion')}>
                     <button
                       type="button"
                       className="rd-arrow"
                       onClick={() => setMetaIndex((activeMetaIndex - 1 + tierData.length) % tierData.length)}
-                      aria-label="Posición anterior"
+                      aria-label={t('library.posicionAnterior')}
                     >
                       <ChevronLeft size={14} />
                     </button>
@@ -1048,7 +1052,7 @@ export default function ChampionDetail({
                       type="button"
                       className="rd-arrow"
                       onClick={() => setMetaIndex((activeMetaIndex + 1) % tierData.length)}
-                      aria-label="Posición siguiente"
+                      aria-label={t('library.posicionSiguiente')}
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -1075,19 +1079,19 @@ export default function ChampionDetail({
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp((toNumber(t.winrate) - 40) * 5)}%` }}>
-                        <p className="rd-label mb-1">WR</p>
+                        <p className="rd-label mb-1">{tr('tierlist.wr')}</p>
                         <p className="font-bold text-foreground">
                           {t.winrate?.toFixed(1)}%
                         </p>
                       </div>
                       <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp(toNumber(t.pickrate) * 4)}%` }}>
-                        <p className="rd-label mb-1">PR</p>
+                        <p className="rd-label mb-1">{tr('tierlist.pr')}</p>
                         <p className="font-bold text-foreground">
                           {t.pickrate?.toFixed(1)}%
                         </p>
                       </div>
                       <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp(toNumber(t.banrate) * 2)}%` }}>
-                        <p className="rd-label mb-1">BR</p>
+                        <p className="rd-label mb-1">{tr('tierlist.br2')}</p>
                         <p className="font-bold text-foreground">
                           {t.banrate?.toFixed(1)}%
                         </p>
@@ -1096,13 +1100,13 @@ export default function ChampionDetail({
 
                     <div className="rd-champ-meta-footer mt-4 pt-4 border-t border-border/40 space-y-1" style={{ '--rd-fill': `${clamp(toNumber(t.ranking_final))}%` }}>
                       <p className="text-xs text-muted-foreground">
-                        Score:
+                       {tr('library.score3')}
                         <span className="text-primary font-semibold ml-1">
                           {t.ranking_final?.toFixed(2)}
                         </span>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        #{t.position_in_lane} en {t.lane}
+                        #{t.position_in_lane} {tr('dashboard.en')} {t.lane}
                       </p>
                     </div>
 
@@ -1116,12 +1120,12 @@ export default function ChampionDetail({
             <div className="rd-champ-related rd-card p-5">
               <div className="flex items-center gap-2 mb-5">
                 <span className="w-6 h-px bg-primary/50" />
-                <h2 className="rd-card-title">Campeones del mismo rol o línea</h2>
+                <h2 className="rd-card-title">{t('library.campeonesDelMismoRol')}</h2>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {relatedChampions.map(related => (
                   <Link key={related.id} to={`/campeones/${championSlug(related.name)}`} className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5">
-                    {related.image_url && <img src={related.image_url} alt={`${related.name} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
+                    {related.image_url && <img src={related.image_url} alt={t('library.enWildRift', { name: related.name })} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
                     <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{related.name}</h3>
                   </Link>
                 ))}
@@ -1135,13 +1139,13 @@ export default function ChampionDetail({
         <section className="rd-card p-5">
           <div className="flex items-center gap-2 mb-5">
             <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">Campeones del mismo rol o línea</h2>
+            <h2 className="rd-card-title">{t('library.campeonesDelMismoRol')}</h2>
           </div>
-          <p className="text-sm text-muted-foreground">Opciones relacionadas por los datos de rol y línea registrados en Rift Deck.</p>
+          <p className="text-sm text-muted-foreground">{t('library.opcionesRelacionadasPorLos')}</p>
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {relatedChampions.map(related => (
               <Link key={related.id} to={`/campeones/${championSlug(related.name)}`} className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5">
-                {related.image_url && <img src={related.image_url} alt={`${related.name} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />}
+                {related.image_url && <img src={related.image_url} alt={t('library.enWildRift', { name: related.name })} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />}
                 <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{related.name}</h3>
               </Link>
             ))}

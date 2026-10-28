@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import TierBadge from '@/components/ui/TierBadge';
 import { getBestTierForChampion } from '@/utils/tierlist';
+import { useT } from '@/lib/LocaleContext';
 
 export default function ChampionPicker({ champions, tierlist, onSelect }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [laneFilter, setLaneFilter] = useState('all');
 
@@ -27,9 +29,9 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
   return (
     <div className="rd-build-picker w-full max-w-none mx-0 overflow-x-hidden p-5 md:p-6">
       <div className="rd-build-picker-header">
-        <div className="rd-page-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Calculadora de Builds</span></div>
-        <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">Seleccionar Campeón</h1>
-        <p className="rd-page-subtitle text-muted-foreground text-sm">Elegí el campeón para crear la build</p>
+        <div className="rd-page-kicker flex items-center gap-2 mb-1"><span className="w-8 h-px bg-primary/50" /><span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('builds.calculadoraDeBuilds')}</span></div>
+        <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase mb-1">{t('builds.seleccionarCampeon')}</h1>
+        <p className="rd-page-subtitle text-muted-foreground text-sm">{t('builds.elegiElCampeonPara')}</p>
       </div>
 
       <div className="rd-card rd-build-picker-filters p-3 w-full max-w-full overflow-hidden">
@@ -43,7 +45,7 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar campeón..."
+              placeholder={t('common.searchChampionPlaceholder')}
               className="w-full min-w-0 bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/40 transition-all"
             />
           </div>
@@ -58,7 +60,7 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Todos
+                {t('builds.todos')}
               </button>
 
               {LANES.map(l => (
@@ -100,7 +102,7 @@ export default function ChampionPicker({ champions, tierlist, onSelect }) {
         </div>
       </div> : (
         <div className="rd-build-picker-list flex flex-col items-center py-16 text-center">
-          <p className="text-muted-foreground">No se encontraron campeones</p>
+          <p className="text-muted-foreground">{t('builds.noSeEncontraronCampeones')}</p>
         </div>
       )}
     </div>

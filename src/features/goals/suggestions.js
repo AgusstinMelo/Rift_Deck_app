@@ -4,29 +4,20 @@ import { addDays, todayIn } from './engine/period.js';
 import { championOf } from './engine/matchFacts.js';
 import { getMetric } from './metrics/index.js';
 import { METRIC_FAMILY, OPERATOR } from './model/goalConstants.js';
+import { tr } from '../../i18n/uiI18n.js';
 
 /** Grupos del paso 1. "A medida" (configuración libre y hábitos manuales) se muestra aparte, en una barra. */
+const group = (id, key) => ({
+  id,
+  get label() { return tr(`goals.family.${key}`); },
+  get description() { return tr(`goals.groupDescription.${key}`); },
+});
+
 export const GOAL_GROUPS = [
-  {
-    id: METRIC_FAMILY.CUMULATIVE,
-    label: 'Acumulativos',
-    description: 'Sumá partidas o victorias. Se cumplen apenas llegás a la meta.',
-  },
-  {
-    id: METRIC_FAMILY.AVERAGE,
-    label: 'Promedios',
-    description: 'Mejorá un dato por partida: muertes, KDA, oro, duración y más.',
-  },
-  {
-    id: METRIC_FAMILY.PERCENTAGE,
-    label: 'Porcentajes',
-    description: 'Winrate o qué parte de tus partidas jugás con ciertos campeones.',
-  },
-  {
-    id: METRIC_FAMILY.RECORD,
-    label: 'Únicos',
-    description: 'Lográ algo en una sola partida: un KDA alto, muchas kills o no morir.',
-  },
+  group(METRIC_FAMILY.CUMULATIVE, 'cumulative'),
+  group(METRIC_FAMILY.AVERAGE, 'average'),
+  group(METRIC_FAMILY.PERCENTAGE, 'percentage'),
+  group(METRIC_FAMILY.RECORD, 'record'),
 ];
 
 /** Campeones más jugados del usuario (por nombre), para precargar sugerencias. */
@@ -67,53 +58,54 @@ export function buildSuggestions({ timezone, now = new Date(), matches = [] }) {
   const today = todayIn(timezone, now);
   const period = days => ({ startDate: today, endDate: addDays(today, days - 1), timezone });
   const pool = topChampions(matches);
-  const suggest = (id, title, metricId, overrides) => ({
+  // Título y nombre sugerido salen de goals.suggestion.<id>.
+  const suggest = (id, metricId, overrides, vars) => ({
     id,
-    title,
+    title: tr(`goals.suggestion.${id}.title`, vars),
     category: getMetric(metricId).family,
-    input: draft(metricId, overrides),
+    input: draft(metricId, { name: tr(`goals.suggestion.${id}.name`), ...overrides }),
   });
 
   const suggestions = [
-    suggest('registrar-20', 'Registrar 20 partidas en 2 semanas', 'partidas_registradas', {
-      name: 'Registrar 20 partidas', target: 20, ...period(14),
+    suggest('registrar-20', 'partidas_registradas', {
+      target: 20, ...period(14),
     }),
-    suggest('ganar-10', 'Ganar 10 clasificatorias este mes', 'victorias', {
-      name: 'Ganar 10 clasificatorias', target: 10, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
+    suggest('ganar-10', 'victorias', {
+      target: 10, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
     }),
-    suggest('muertes-4', 'Promediar 4 muertes o menos', 'promedio_muertes', {
-      name: 'Morir menos', target: 4, minSample: 10, ...period(14),
+    suggest('muertes-4', 'promedio_muertes', {
+      target: 4, minSample: 10, ...period(14),
     }),
-    suggest('kda-3', 'KDA promedio de 3 o más', 'promedio_kda', {
-      name: 'Subir mi KDA', target: 3, minSample: 10, ...period(21),
+    suggest('kda-3', 'promedio_kda', {
+      target: 3, minSample: 10, ...period(21),
     }),
-    suggest('duracion-18', 'Cerrar partidas en 18 minutos o menos en promedio', 'promedio_duracion', {
-      name: 'Cerrar antes las partidas', operator: OPERATOR.LTE, target: 18, minSample: 10, ...period(21),
+    suggest('duracion-18', 'promedio_duracion', {
+      operator: OPERATOR.LTE, target: 18, minSample: 10, ...period(21),
     }),
-    suggest('oro-10k', 'Promediar 10.000 de oro por partida', 'promedio_oro', {
-      name: 'Farmear más', target: 10000, minSample: 10, ...period(21),
+    suggest('oro-10k', 'promedio_oro', {
+      target: 10000, minSample: 10, ...period(21),
     }),
-    suggest('unico-kda-10', 'Una partida con KDA de 10 o más', 'max_kda', {
-      name: 'Partida de KDA 10', target: 10, ...period(30),
+    suggest('unico-kda-10', 'max_kda', {
+      target: 10, ...period(30),
     }),
-    suggest('unico-20-kills', 'Una partida con 20 asesinatos', 'max_asesinatos', {
-      name: 'Partida de 20 asesinatos', target: 20, ...period(30),
+    suggest('unico-20-kills', 'max_asesinatos', {
+      target: 20, ...period(30),
     }),
-    suggest('unico-sin-morir', 'Una partida sin morir', 'min_muertes', {
-      name: 'Partida sin morir', target: 0, ...period(30),
+    suggest('unico-sin-morir', 'min_muertes', {
+      target: 0, ...period(30),
     }),
-    suggest('unico-victoria-rapida', 'Ganar una partida en 15 minutos o menos', 'min_duracion', {
-      name: 'Victoria rápida', target: 15, ...period(30),
+    suggest('unico-victoria-rapida', 'min_duracion', {
+      target: 15, ...period(30),
     }),
-    suggest('winrate-55', 'Winrate de 55% en clasificatorias este mes', 'winrate', {
-      name: 'Winrate 55% en clasificatorias', target: 55, minSample: 15, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
+    suggest('winrate-55', 'winrate', {
+      target: 55, minSample: 15, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
     }),
   ];
 
   if (pool.length > 0) {
-    suggestions.push(suggest('pool-60', `60% de partidas con ${pool.map(c => c.name).join(', ')}`, 'porcentaje_campeones', {
-      name: 'Enfocar mi pool', target: 60, minSample: 10, filters: { champions: pool }, ...period(21),
-    }));
+    suggestions.push(suggest('pool-60', 'porcentaje_campeones', {
+      target: 60, minSample: 10, filters: { champions: pool }, ...period(21),
+    }, { champions: pool.map(c => c.name).join(', ') }));
   }
 
   return suggestions;

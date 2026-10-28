@@ -4,10 +4,12 @@ import MatchCard from '@/components/matches/MatchCard';
 import EmptyState from '@/components/ui/EmptyState';
 import { exclusionLabel } from '../texts';
 import { BUTTON_SECONDARY } from './goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 const PAGE_SIZE = 15;
 
 function MatchList({ rows, champions, items, onEditMatch, onDeleteMatch, renderBadge = null }) {
+  const t = useT();
   const [visible, setVisible] = useState(PAGE_SIZE);
   if (rows.length === 0) return null;
   return (
@@ -20,7 +22,7 @@ function MatchList({ rows, champions, items, onEditMatch, onDeleteMatch, renderB
       ))}
       {rows.length > visible && (
         <button type="button" onClick={() => setVisible(count => count + PAGE_SIZE)} className={`${BUTTON_SECONDARY} w-full`}>
-          Mostrar más ({rows.length - visible} restantes)
+          {t('goals.matchesPanel.showMore', { count: rows.length - visible })}
         </button>
       )}
     </div>
@@ -33,6 +35,7 @@ function MatchList({ rows, champions, items, onEditMatch, onDeleteMatch, renderB
  *   truncated: boolean, onEditMatch: (match: any) => void, onDeleteMatch: (id: string) => void }} props
  */
 export default function GoalMatchesPanel({ evaluation, matches, champions, items, truncated, onEditMatch, onDeleteMatch }) {
+  const t = useT();
   const [tab, setTab] = useState('included');
 
   const { included, excluded } = useMemo(() => {
@@ -54,15 +57,15 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
   return (
     <section className="rd-card rd-goal-panel p-4 space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="rd-card-title">Partidas del objetivo</h2>
-        <div className="rd-panel-tabs" role="tablist" aria-label="Partidas del objetivo">
+        <h2 className="rd-card-title">{t('goals.matchesPanel.title')}</h2>
+        <div className="rd-panel-tabs" role="tablist" aria-label={t('goals.matchesPanel.title')}>
           <button type="button" role="tab" aria-selected={tab === 'included'} onClick={() => setTab('included')}
             className={`rd-panel-tab ${tab === 'included' ? 'rd-panel-tab-active' : ''}`}>
-            Incluidas ({included.length})
+            {t('goals.matchesPanel.included', { count: included.length })}
           </button>
           <button type="button" role="tab" aria-selected={tab === 'excluded'} onClick={() => setTab('excluded')}
             className={`rd-panel-tab ${tab === 'excluded' ? 'rd-panel-tab-active' : ''}`}>
-            Excluidas ({excluded.length})
+            {t('goals.matchesPanel.excluded', { count: excluded.length })}
           </button>
         </div>
       </div>
@@ -71,8 +74,8 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
         <p className="flex items-start gap-2 text-xs text-muted-foreground">
           <Info size={14} className="mt-0.5 shrink-0" />
           <span>
-            {evaluation.outOfPeriodCount > 0 && `${evaluation.outOfPeriodCount} partidas fuera del período no se muestran. `}
-            {truncated && 'Se cargan tus últimas 1000 partidas: puede haber partidas más antiguas del período que no se consideraron.'}
+            {evaluation.outOfPeriodCount > 0 && t('goals.matchesPanel.outOfPeriod', { count: evaluation.outOfPeriodCount })}
+            {truncated && t('goals.matchesPanel.truncated')}
           </span>
         </p>
       )}
@@ -80,13 +83,13 @@ export default function GoalMatchesPanel({ evaluation, matches, champions, items
       <div className="rd-goal-panel-scroll">
       {tab === 'included' && (
         included.length === 0
-          ? <EmptyState icon={Swords} title="Sin partidas que cuenten" description="Ninguna partida del período cumple las condiciones del objetivo." action={null} />
+          ? <EmptyState icon={Swords} title={t('goals.matchesPanel.noIncludedTitle')} description={t('goals.matchesPanel.noIncludedDescription')} action={null} />
           : <MatchList rows={included} champions={champions} items={items} onEditMatch={onEditMatch} onDeleteMatch={handleDelete} />
       )}
 
       {tab === 'excluded' && (
         excluded.length === 0
-          ? <EmptyState icon={Swords} title="Sin partidas excluidas" description="Todas las partidas del período cuentan para este objetivo." action={null} />
+          ? <EmptyState icon={Swords} title={t('goals.matchesPanel.noExcludedTitle')} description={t('goals.matchesPanel.noExcludedDescription')} action={null} />
           : (
             <div className="space-y-3">
               <ul className="flex flex-wrap gap-2">

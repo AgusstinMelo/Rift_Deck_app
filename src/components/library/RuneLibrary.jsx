@@ -16,8 +16,9 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { runeBranchLabel } from '@/utils/runeBranches';
 
 const BRANCH_COLORS = {
   Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
@@ -38,6 +39,7 @@ const BRANCH_ICONS = {
 const BRANCHES = ['Clave', 'Dominación', 'Precisión', 'Valor', 'Brujería'];
 
 export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialRunes, publicBasePath }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [section, setSection] = useState('description');
   const [branchFilter, setBranchFilter] = useState('all');
@@ -175,7 +177,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
   if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit)) {
     const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
     const sectionTabs = relatedRunes.length > 0
-      ? [['description', 'Descripción'], ['related', 'Relacionadas']]
+      ? [['description', t('library.descripcion')], ['related', t('library.relacionadas')]]
       : [];
     const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
 
@@ -184,7 +186,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         {publicBasePath ? (
           <Link to={publicBasePath} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft size={15} />
-            Volver a runas
+           {t('library.volverARunas')}
           </Link>
         ) : (
           <button
@@ -195,7 +197,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
             className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft size={15} />
-            Volver a runas
+           {t('library.volverARunas')}
           </button>
         )}
 
@@ -207,7 +209,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
             {selected.branch && (
               <div className="rd-entity-hero-pills">
                 <span className={`rd-entity-pill border ${BRANCH_COLORS[selected.branch] || 'bg-secondary border-border text-foreground'}`}>
-                  {selected.branch}
+                  {runeBranchLabel(selected.branch)}
                 </span>
               </div>
             )}
@@ -216,7 +218,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         </div>
 
         {sectionTabs.length > 0 && (
-          <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label="Secciones de la runa">
+          <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label={t('library.seccionesDeLaRuna')}>
             {sectionTabs.map(([id, label]) => (
               <button
                 key={id}
@@ -235,7 +237,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         <div className="rd-card rd-entity-section">
           <div className="rd-entity-section-head">
             <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">{activeSection === 'related' ? 'Runas de la misma rama' : 'Descripción'}</h2>
+            <h2 className="rd-card-title">{activeSection === 'related' ? t('library.runasDeLaMisma') : t('library.descripcion')}</h2>
           </div>
           {activeSection === 'related' ? (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -248,7 +250,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                   >
                     {rune.image_url ? (
-                      <img src={rune.image_url} alt={`${entityName(rune)} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                      <img src={rune.image_url} alt={t('library.enWildRift2', { entityName: entityName(rune) })} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
                         <RelatedIcon size={16} className="text-primary" />
@@ -261,7 +263,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
             </div>
           ) : selected.description
             ? <p className="rd-entity-desc whitespace-pre-line text-muted-foreground">{entityDescription(selected)}</p>
-            : <p className="text-sm text-muted-foreground">Sin descripción.</p>}
+            : <p className="text-sm text-muted-foreground">{t('library.sinDescripcion')}</p>}
         </div>
       </div>
     );
@@ -277,7 +279,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={15} />
-          Volver a runas
+         {t('library.volverARunas')}
         </Link> : <button
           onClick={() => {
             setSelected(null);
@@ -286,7 +288,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={15} />
-          Volver a runas
+         {t('library.volverARunas')}
         </button>}
 
         <div className="rd-card overflow-hidden relative">
@@ -317,7 +319,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         'bg-secondary border-border text-foreground'
                       }`}
                     >
-                      {selected.branch}
+                      {runeBranchLabel(selected.branch)}
                     </span>
                   )}
                 </div>
@@ -341,10 +343,10 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
           <section className="rd-card p-5">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">Runas de la misma rama</h2>
+              <h2 className="rd-card-title">{t('library.runasDeLaMisma')}</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Otras runas que comparten la rama registrada de {entityName(selected)}.
+             {t('library.otrasRunasQueComparten')} {entityName(selected)}.
             </p>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {relatedRunes.map(rune => {
@@ -356,7 +358,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                   >
                     {rune.image_url ? (
-                      <img src={rune.image_url} alt={`${entityName(rune)} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                      <img src={rune.image_url} alt={t('library.enWildRift2', { entityName: entityName(rune) })} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary">
                         <RelatedIcon size={18} className="text-primary" />
@@ -386,7 +388,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar runa..."
+              placeholder={t('library.buscarRuna')}
               className="w-full bg-secondary/60 border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
@@ -396,10 +398,10 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
             onChange={e => setBranchFilter(e.target.value)}
             className="bg-secondary/60 border border-border rounded-xl px-4 py-3 text-sm text-foreground outline-none focus:border-primary/40"
           >
-            <option value="all">Todas las ramas</option>
+            <option value="all">{t('library.todasLasRamas')}</option>
             {BRANCHES.map(b => (
               <option key={b} value={b}>
-                {b}
+                {runeBranchLabel(b)}
               </option>
             ))}
           </select>
@@ -418,8 +420,8 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         <div className="rd-card p-6">
           <EmptyState
             icon={Search}
-            title="Sin resultados"
-            description="No se encontraron runas con esos filtros."
+            title={t('common.noResults')}
+            description={t('library.noSeEncontraronRunas')}
           />
         </div>
       ) : (
@@ -447,7 +449,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         <span className="w-6 h-px bg-primary/50 shrink-0" />
 
                         <h2 className="font-rajdhani font-bold text-2xl text-foreground tracking-[-0.06em] uppercase truncate">
-                          {branch}
+                          {runeBranchLabel(branch)}
                         </h2>
 
                         <span
@@ -511,7 +513,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                                             'bg-secondary border-border text-foreground'
                                           }`}
                                         >
-                                          {rune.branch}
+                                          {runeBranchLabel(rune.branch)}
                                         </span>
                                       </div>
                                     )}
@@ -535,7 +537,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
 
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              {filtered.length} runas
+              {filtered.length} {t('library.runas')}
             </p>
           </div>
         </>

@@ -90,7 +90,7 @@ function compactPreviousResult(result) {
   };
 }
 
-export function buildV2Prompt({ snapshot, championId, role, allies, enemies, buildPreference = '', correction = null }) {
+export function buildV2Prompt({ snapshot, championId, role, allies, enemies, buildPreference = '', correction = null, language = null }) {
   const championMap = new Map(snapshot.champions.map(champion => [String(champion.id), champion]));
   const selected = championMap.get(String(championId));
   if (!selected) throw new Error('El campeón seleccionado no existe en el snapshot.');
@@ -188,7 +188,8 @@ CONTENIDO DE LA RESPUESTA
 - Cada entrada de enemy_priority_threats, required_responses, allied_damage_profile y target_damage_profile: máximo 120 caracteres.
 - build_plan: arquetipo, daño final, razón del primer objeto y auditoría breve de conversiones.
 - matchup_read en 2-4 frases; win_condition en 1-3 frases.
-${correctionBlock}
+${language ? `- Idioma: escribí todos los textos de la respuesta en ${language}. Los IDs y los nombres de campeones, objetos, runas y hechizos se copian tal cual.
+` : ''}${correctionBlock}
 MATCH_CONTEXT
 ${JSON.stringify(context)}
 

@@ -10,11 +10,13 @@ import { AGGREGATION } from '../model/goalConstants';
 import { cumulativeProgressPct } from '../engine/evaluateGoal';
 import GoalOutcomeBadge from './GoalOutcomeBadge';
 import { OUTCOME_BAR } from './goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 const ARROW_CLASS = 'rd-arrow h-7 w-7';
 
 /** Un objetivo a la vez: nombre, valor contra meta y estado. */
 function GoalSlide({ item }) {
+  const t = useT();
   const { goal, evaluation } = item;
   // Barra solo en totales; los objetivos únicos y de rendimiento muestran meta en texto.
   const pct = cumulativeProgressPct(evaluation);
@@ -42,13 +44,13 @@ function GoalSlide({ item }) {
           </div>
         ) : isSingleMatch ? (
           <p className="truncate text-xs text-muted-foreground">
-            Objetivo único · Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)} en una partida
+            {t('goals.widget.singleTarget', { op: operatorPhrase(goal), value: formatMetricValue(goal, evaluation.target) })}
           </p>
         ) : (
           <p className="truncate text-xs text-muted-foreground">
-            Meta: {operatorPhrase(goal)} {formatMetricValue(goal, evaluation.target)}
-            {' · '}Diferencia {formatDifference(goal, evaluation.difference)}
-            {' · '}Muestra {evaluation.sampleSize}/{evaluation.minSample}
+            {t('goals.progressInfo.targetValue', { op: operatorPhrase(goal), value: formatMetricValue(goal, evaluation.target) })}
+            {' · '}{t('goals.progressInfo.difference')} {formatDifference(goal, evaluation.difference)}
+            {' · '}{t('goals.progressInfo.sample')} {evaluation.sampleSize}/{evaluation.minSample}
           </p>
         )}
       </div>
@@ -65,6 +67,7 @@ function GoalSlide({ item }) {
 
 /** Resumen compacto de los objetivos activos para el Dashboard, navegable con flechas. */
 export default function GoalsDashboardWidget() {
+  const t = useT();
   const access = useGoalsAccess();
   const { items, isLoading } = useEvaluatedGoals();
   const [index, setIndex] = useState(0);
@@ -77,11 +80,11 @@ export default function GoalsDashboardWidget() {
   const go = delta => setIndex(Math.min(Math.max(safeIndex + delta, 0), current.length - 1));
 
   return (
-    <article className="rd-card rd-goals-widget p-4 min-h-0 overflow-hidden flex flex-col gap-2" aria-label="Objetivos activos">
+    <article className="rd-card rd-goals-widget p-4 min-h-0 overflow-hidden flex flex-col gap-2" aria-label={t('goals.widget.aria')}>
       <div className="rd-goals-widget-head flex items-center justify-between gap-2">
-        <span className="rd-label flex items-center gap-2"><Target size={15} className="text-primary" /> Objetivos<span className="rd-goals-widget-title-extra"> activos</span></span>
+        <span className="rd-label flex items-center gap-2"><Target size={15} className="text-primary" /> {t('goals.widget.title')}<span className="rd-goals-widget-title-extra">{t('goals.widget.titleExtra')}</span></span>
         <Link to="/objetivos" className="rd-goals-widget-all flex items-center gap-1 text-xs text-primary hover:underline">
-          Ver todos <ArrowRight size={13} />
+          {t('common.seeAll')} <ArrowRight size={13} />
         </Link>
       </div>
 
@@ -89,26 +92,26 @@ export default function GoalsDashboardWidget() {
         <div className="h-16 animate-pulse rounded-lg bg-secondary/50" />
       ) : current.length === 0 ? (
         <div className="flex flex-1 flex-col items-start justify-center gap-1">
-          <p className="text-sm text-muted-foreground">No tenés objetivos activos.</p>
-          <Link to="/objetivos/nuevo" className="text-xs font-semibold text-primary hover:underline">Crear un objetivo</Link>
+          <p className="text-sm text-muted-foreground">{t('goals.widget.empty')}</p>
+          <Link to="/objetivos/nuevo" className="text-xs font-semibold text-primary hover:underline">{t('goals.widget.create')}</Link>
         </div>
       ) : (
         <>
           <div className="rd-goals-widget-summary flex items-center justify-between gap-2">
             <p className="rd-goals-widget-count min-w-0 truncate text-xs text-muted-foreground">
-              {summary.total} activos
-              {summary.dueSoon > 0 && <> · <span className="text-amber-300">{summary.dueSoon} por vencer</span></>}
-              {' · '}<span className="text-green-400">{summary.achieved} alcanzados</span>
+              {t('goals.widget.active', { count: summary.total })}
+              {summary.dueSoon > 0 && <> · <span className="text-amber-300">{t('goals.widget.dueSoon', { count: summary.dueSoon })}</span></>}
+              {' · '}<span className="text-green-400">{t('goals.widget.achieved', { count: summary.achieved })}</span>
             </p>
             {current.length > 1 && (
               <div className="rd-goals-widget-nav flex shrink-0 items-center gap-1.5">
-                <button type="button" onClick={() => go(-1)} disabled={safeIndex === 0} className={ARROW_CLASS} aria-label="Objetivo anterior">
+                <button type="button" onClick={() => go(-1)} disabled={safeIndex === 0} className={ARROW_CLASS} aria-label={t('goals.widget.previous')}>
                   <ChevronLeft size={15} />
                 </button>
                 <span className="w-9 text-center text-[11px] text-muted-foreground" aria-live="polite">
                   {safeIndex + 1}/{current.length}
                 </span>
-                <button type="button" onClick={() => go(1)} disabled={safeIndex === current.length - 1} className={ARROW_CLASS} aria-label="Objetivo siguiente">
+                <button type="button" onClick={() => go(1)} disabled={safeIndex === current.length - 1} className={ARROW_CLASS} aria-label={t('goals.widget.next')}>
                   <ChevronRight size={15} />
                 </button>
               </div>

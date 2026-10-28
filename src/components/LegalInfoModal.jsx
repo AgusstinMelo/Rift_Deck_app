@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { X } from 'lucide-react';
+import { tr } from '@/i18n/uiI18n';
+import { useT } from '@/lib/LocaleContext';
 
 // Datos del titular (LSSI-CE art. 10). Actualizar acá si cambian.
 // TODO: completar código postal y ciudad del domicilio.
@@ -21,35 +23,20 @@ const UPDATED = '27 de octubre de 2026';
 
 // Documentos legales, en el orden en que se enlazan desde el footer y el perfil.
 export const LEGAL_DOCUMENTS = [
-  { type: 'legal', label: 'Aviso legal' },
-  { type: 'terms', label: 'Términos' },
-  { type: 'privacy', label: 'Privacidad' },
-  { type: 'cookies', label: 'Cookies' },
+  { type: 'legal', get label() { return tr('legal.docs.legal'); } },
+  { type: 'terms', get label() { return tr('legal.docs.terms'); } },
+  { type: 'privacy', get label() { return tr('legal.docs.privacy'); } },
+  { type: 'cookies', get label() { return tr('legal.docs.cookies'); } },
 ];
 
 const MODAL_CONTENT = {
   about: {
-    title: 'Acerca de',
-    markdown: `
-Rift Deck nació con una idea simple: ayudar a los jugadores a entender mejor el juego que disfrutan.
-
-Creemos que mejorar no depende únicamente de reflejos o mecánicas. Cada partida genera información valiosa: decisiones, patrones, errores, aciertos y oportunidades de aprendizaje. Nuestro objetivo es transformar esos datos en herramientas útiles para que cualquier jugador pueda analizar su rendimiento, optimizar sus elecciones y tomar decisiones más inteligentes dentro de la Grieta.
-
-La plataforma reúne estadísticas, builds, análisis de partidas, seguimiento de rendimiento, información de campeones, objetos, runas y herramientas estratégicas diseñadas para acompañar tanto a jugadores casuales como competitivos.
-
-Rift Deck es un proyecto independiente desarrollado y mantenido por ${OWNER.name}.
-
-## Planes y pagos
-
-Hoy Rift Deck es gratuito y no cobra ninguna suscripción. Si en el futuro se ofrecen planes de pago, sus precios y condiciones se publicarán antes de que puedas contratarlos, tal como se describe en los Términos y condiciones.
-
-## Contacto
-
-Puedes escribirnos a **${OWNER.email}**.`,
+    get title() { return tr('legal.titles.about'); },
+    get markdown() { return tr('legal.about', { owner: OWNER.name, email: OWNER.email }); },
   },
 
   legal: {
-    title: 'Aviso legal',
+    get title() { return tr('legal.titles.legal'); },
     markdown: `
 Última actualización: ${UPDATED}
 
@@ -91,7 +78,7 @@ Este sitio se rige por la legislación española. Si eres consumidor, podrás ac
   },
 
   terms: {
-    title: 'Términos y condiciones',
+    get title() { return tr('legal.titles.terms'); },
     markdown: `
 Última actualización: ${UPDATED}
 
@@ -149,7 +136,7 @@ Estos términos se rigen por la legislación española. Si eres consumidor, podr
   },
 
   privacy: {
-    title: 'Política de privacidad',
+    get title() { return tr('legal.titles.privacy'); },
     markdown: `
 Última actualización: ${UPDATED}
 
@@ -227,7 +214,7 @@ Si cambiamos esta política de forma relevante, te lo comunicaremos antes de que
   },
 
   cookies: {
-    title: 'Política de cookies',
+    get title() { return tr('legal.titles.cookies'); },
     markdown: `
 Última actualización: ${UPDATED}
 
@@ -259,6 +246,7 @@ Si en el futuro incorporamos cookies que no sean técnicas, actualizaremos esta 
 export default function LegalInfoModal({ type, onClose }) {
   // Se puede pasar de un documento legal a otro sin cerrar el modal.
   const [current, setCurrent] = useState(type);
+  const t = useT();
   const content = MODAL_CONTENT[current];
   const isLegalDocument = LEGAL_DOCUMENTS.some(doc => doc.type === current);
 
@@ -292,14 +280,20 @@ export default function LegalInfoModal({ type, onClose }) {
             type="button"
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground transition-colors"
-            title="Cerrar"
-            aria-label="Cerrar"
+            title={t('dashboard.cerrar')}
+            aria-label={t('dashboard.cerrar')}
           >
             <X size={18} />
           </button>
         </div>
 
         <div className="overflow-y-auto p-5">
+          {/* Los documentos legales solo existen en español (versión vinculante). */}
+          {isLegalDocument && t('legal.spanishOnly') && (
+            <p className="mb-4 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+              {t('legal.spanishOnly')}
+            </p>
+          )}
           <ReactMarkdown
             components={{
               h2: ({ children }) => (
@@ -328,7 +322,7 @@ export default function LegalInfoModal({ type, onClose }) {
         </div>
 
         {isLegalDocument && (
-          <nav aria-label="Documentos legales" className="flex flex-wrap gap-2 border-t border-border p-4 shrink-0">
+          <nav aria-label={t('legal.documents')} className="flex flex-wrap gap-2 border-t border-border p-4 shrink-0">
             {LEGAL_DOCUMENTS.map(doc => (
               <button
                 key={doc.type}

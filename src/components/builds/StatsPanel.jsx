@@ -1,5 +1,7 @@
 // Campeones sin maná (sin recurso)
 import { isPatchAtLeast, usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { useT } from '@/lib/LocaleContext';
+import { tr } from '@/i18n/uiI18n';
 
 const NO_RESOURCE = ['Aatrox', 'Dr. Mundo', 'Garen', 'Katarina', 'Mordekaiser', 'Rengar', 'Riven', 'Rumble', 'Sett', 'Viego', 'Yasuo', 'Yone'];
 // Campeones con Energía
@@ -8,10 +10,10 @@ const ENERGY_CHAMPS = ['Akali', 'Ambessa', 'Kennen', 'Lee Sin', 'Shen', 'Zed'];
 const FURY_CHAMPS = ['Gnar', 'Renekton', 'Shyvana', 'Tryndamere'];
 
 function getManaLabel(champName) {
-  if (ENERGY_CHAMPS.includes(champName)) return { resource: 'Energía', resourceReg: 'Regeneración de Energía' };
-  if (FURY_CHAMPS.includes(champName)) return { resource: 'Furia', resourceReg: null };
+  if (ENERGY_CHAMPS.includes(champName)) return { resource: tr('builds.energia'), resourceReg: tr('builds.regeneracionDeEnergia') };
+  if (FURY_CHAMPS.includes(champName)) return { resource: tr('builds.furia'), resourceReg: null };
   if (NO_RESOURCE.includes(champName)) return { resource: null, resourceReg: null };
-  return { resource: 'Maná', resourceReg: 'Regeneración de Maná' };
+  return { resource: tr('builds.mana'), resourceReg: tr('builds.regeneracionDeMana') };
 }
 
 // Interacciones especiales de objetos
@@ -184,6 +186,7 @@ function calcStats(champion, items, runes = []) {
 }
 
 export default function StatsPanel({ champion, items, runes = [] }) {
+  const t = useT();
   const { stats, attack_speed, movement } = calcStats(champion, items, runes);
   const champName = champion?.name || '';
   const manaLabels = getManaLabel(champName);
@@ -191,38 +194,38 @@ export default function StatsPanel({ champion, items, runes = [] }) {
   const hasItems = items.length > 0;
 
   const rows = [
-    { label: 'Vida',                          value: stats.life },
-    { label: 'Regeneración de vida',           value: stats.life_reg },
+    { label: t('builds.vida'),                          value: stats.life },
+    { label: t('builds.regeneracionDeVida'),           value: stats.life_reg },
     ...(manaLabels.resource ? [{ label: manaLabels.resource, value: stats.mana }] : []),
     ...(manaLabels.resourceReg ? [{ label: manaLabels.resourceReg, value: stats.mana_reg }] : []),
-    { label: 'Velocidad de movimiento',        value: movement },
-    { label: 'Armadura',                       value: stats.armor },
-    { label: 'Resistencia mágica',             value: stats.magic_res },
-    { label: 'Daño de ataque',                 value: stats.attack_damage },
-    { label: 'Velocidad de ataque',            value: attack_speed },
-    { label: 'Poder de habilidad',             value: stats.ability_power },
-    { label: 'Aceleración de habilidades',       value: stats.ability_haste },
-    { label: 'Tasa de críticos',                value: stats.critical_impact,               unit: '%' },
-    { label: 'Daño crítico',                   value: stats.critical_damage,               unit: '%' },
+    { label: t('builds.velocidadDeMovimiento'),        value: movement },
+    { label: t('builds.armadura'),                       value: stats.armor },
+    { label: t('builds.resistenciaMagica'),             value: stats.magic_res },
+    { label: t('builds.danoDeAtaque'),                 value: stats.attack_damage },
+    { label: t('builds.velocidadDeAtaque'),            value: attack_speed },
+    { label: t('builds.poderDeHabilidad'),             value: stats.ability_power },
+    { label: t('builds.aceleracionDeHabilidades'),       value: stats.ability_haste },
+    { label: t('builds.tasaDeCriticos'),                value: stats.critical_impact,               unit: '%' },
+    { label: t('builds.danoCritico'),                   value: stats.critical_damage,               unit: '%' },
     ...(unifiedLifesteal
-      ? [{ label: 'Robo de vida', value: stats.lifesteal, unit: '%' }]
+      ? [{ label: t('builds.roboDeVida'), value: stats.lifesteal, unit: '%' }]
       : [
-          { label: 'Vampirismo físico', value: stats.physic_vamp, unit: '%' },
-          { label: 'Vampirismo mágico', value: stats.magic_vamp, unit: '%' },
+          { label: t('builds.vampirismoFisico'), value: stats.physic_vamp, unit: '%' },
+          { label: t('builds.vampirismoMagico'), value: stats.magic_vamp, unit: '%' },
         ]),
-    { label: 'Penetración de armadura',        value: stats.flat_armor_penetration },
-    { label: 'Penetración de armadura %',      value: stats.percentage_armor_penetration,  unit: '%' },
-    { label: 'Penetración mágica',             value: stats.flat_magic_penetration },
-    { label: 'Penetración mágica %',           value: stats.percentage_magic_penetration,  unit: '%' },
-    { label: 'Tenacidad',                      value: stats.tenacity,                      unit: '%' },
-    { label: 'Curación y escudo',              value: stats.healing_and_shield,            unit: '%' },
+    { label: t('builds.penetracionDeArmadura'),        value: stats.flat_armor_penetration },
+    { label: t('builds.penetracionDeArmadura2'),      value: stats.percentage_armor_penetration,  unit: '%' },
+    { label: t('builds.penetracionMagica'),             value: stats.flat_magic_penetration },
+    { label: t('builds.penetracionMagica2'),           value: stats.percentage_magic_penetration,  unit: '%' },
+    { label: t('builds.tenacidad'),                      value: stats.tenacity,                      unit: '%' },
+    { label: t('builds.curacionYEscudo'),              value: stats.healing_and_shield,            unit: '%' },
   ];
 
   return (
     <div className="rd-card rd-stats-panel flex flex-col py-4 pl-4">
       <div className="flex items-center gap-2 mb-2 pr-4">
         <span className="w-5 h-px bg-primary/50" />
-        <h3 className="rd-card-title">Stats de la Build</h3>
+        <h3 className="rd-card-title">{t('builds.statsDeLaBuild')}</h3>
       </div>
       <div className="rd-stats-panel-rows pr-4">
         {rows.map((row, i) => (
@@ -236,7 +239,7 @@ export default function StatsPanel({ champion, items, runes = [] }) {
       </div>
       {(hasItems || runes.length > 0) && (
         <p className="text-xs text-muted-foreground mt-2 mr-4 pt-2 border-t border-border/60">
-          Stats con {items.length} obj.{runes.length > 0 && ` y ${runes.length} runa${runes.length > 1 ? 's' : ''}`}
+         {t('builds.statsCon')} {items.length} {t('builds.obj')}{runes.length > 0 && t('builds.yRuna', { length: runes.length, value: runes.length > 1 ? 's' : '' })}
         </p>
       )}
     </div>

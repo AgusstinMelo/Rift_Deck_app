@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { createV2BuildJsonSchema } from './v2Schema';
+import { tr } from '../../i18n/uiI18n.js';
 
 const isTemporaryProviderFailure = data => {
   const detail = `${data?.error || ''} ${data?.details || ''}`;
@@ -28,8 +29,8 @@ export async function requestV2Build(prompt, snapshot, context = {}) {
   if (!data?.ok) {
     const malformed = data?.kind === 'malformed_response';
     const message = temporaryFailure
-      ? 'Gemini está temporalmente saturado. Probá nuevamente en unos segundos.'
-      : data?.error || 'El proveedor no devolvió una respuesta válida.';
+      ? tr('buildV2.providerBusy')
+      : data?.error || tr('buildV2.providerInvalid');
     throw Object.assign(new Error(message), {
       kind: data?.kind || 'provider_error',
       raw: data?.raw,

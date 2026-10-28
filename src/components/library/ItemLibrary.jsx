@@ -8,13 +8,14 @@ import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { itemCategoryLabel, itemTypeLabel } from '@/utils/itemLabels';
 
 const CATEGORY_LABELS = {
-  'Básico': 'Básico',
-  'Nivel Medio': 'Nivel Medio',
-  'Mejorado': 'Mejorado',
+  get 'Básico'() { return itemCategoryLabel('Básico'); },
+  get 'Nivel Medio'() { return itemCategoryLabel('Nivel Medio'); },
+  get 'Mejorado'() { return itemCategoryLabel('Mejorado'); },
 };
 
 const CATEGORY_COLORS = {
@@ -24,6 +25,7 @@ const CATEGORY_COLORS = {
 };
 
 export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialItems, initialChampions, publicBasePath }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
@@ -181,29 +183,29 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   }, {});
     
   const STAT_CONFIG = [
-    { key: 'life', label: 'Vida', color: 'text-red-400', unit: '' },
-    { key: 'life_reg', label: 'Reg. Vida', color: 'text-red-300', unit: '' },
-    { key: 'mana', label: 'Maná', color: 'text-blue-400', unit: '' },
-    { key: 'mana_reg', label: 'Reg. Maná', color: 'text-blue-300', unit: '' },
-    { key: 'attack_damage', label: 'Daño Físico', color: 'text-orange-400', unit: '' },
-    { key: 'attack_speed', label: 'Vel. Ataque', color: 'text-yellow-400', unit: '%' },
-    { key: 'ability_power', label: 'Poder de Habilidad', color: 'text-purple-400', unit: '' },
-    { key: 'armor', label: 'Armadura', color: 'text-yellow-300', unit: '' },
-    { key: 'magic_res', label: 'Resist. Mágica', color: 'text-indigo-400', unit: '' },
-    { key: 'flat_movement', label: 'Vel. Mov.', color: 'text-teal-400', unit: '' },
-    { key: 'percentage_movement', label: 'Vel. Mov. %', color: 'text-teal-300', unit: '%' },
-    { key: 'critical_impact', label: 'Tasa de Críticos', color: 'text-amber-400', unit: '%' },
-    { key: 'critical_damage', label: 'Daño Crítico', color: 'text-amber-300', unit: '%' },
-    { key: 'lifesteal', label: 'Robo de Vida', color: 'text-pink-400', unit: '%' },
-    { key: 'physic_vamp', label: 'Vamp. Físico', color: 'text-pink-400', unit: '%' },
-    { key: 'magic_vamp', label: 'Vamp. Mágico', color: 'text-pink-300', unit: '%' },
-    { key: 'flat_armor_penetration', label: 'Pen. Armadura', color: 'text-red-300', unit: '' },
-    { key: 'percentage_armor_penetration', label: 'Pen. Armadura %', color: 'text-red-200', unit: '%' },
-    { key: 'flat_magic_penetration', label: 'Pen. Mágica', color: 'text-violet-400', unit: '' },
-    { key: 'percentage_magic_penetration', label: 'Pen. Mágica %', color: 'text-violet-300', unit: '%' },
-    { key: 'ability_haste', label: 'Aceleración de Habilidad', color: 'text-cyan-400', unit: '' },
-    { key: 'tenacity', label: 'Tenacidad', color: 'text-green-400', unit: '%' },
-    { key: 'healing_and_shield', label: 'Curación/Escudo', color: 'text-emerald-400', unit: '%' },
+    { key: 'life', label: t('builds.vida'), color: 'text-red-400', unit: '' },
+    { key: 'life_reg', label: t('builds.regVida'), color: 'text-red-300', unit: '' },
+    { key: 'mana', label: t('builds.mana'), color: 'text-blue-400', unit: '' },
+    { key: 'mana_reg', label: t('builds.regMana'), color: 'text-blue-300', unit: '' },
+    { key: 'attack_damage', label: t('itemTypes.Daño Físico'), color: 'text-orange-400', unit: '' },
+    { key: 'attack_speed', label: t('library.velAtaque'), color: 'text-yellow-400', unit: '%' },
+    { key: 'ability_power', label: t('library.poderDeHabilidad'), color: 'text-purple-400', unit: '' },
+    { key: 'armor', label: t('builds.armadura'), color: 'text-yellow-300', unit: '' },
+    { key: 'magic_res', label: t('library.resistMagica'), color: 'text-indigo-400', unit: '' },
+    { key: 'flat_movement', label: t('library.velMov'), color: 'text-teal-400', unit: '' },
+    { key: 'percentage_movement', label: t('library.velMov2'), color: 'text-teal-300', unit: '%' },
+    { key: 'critical_impact', label: t('library.tasaDeCriticos'), color: 'text-amber-400', unit: '%' },
+    { key: 'critical_damage', label: t('library.danoCritico'), color: 'text-amber-300', unit: '%' },
+    { key: 'lifesteal', label: t('library.roboDeVida'), color: 'text-pink-400', unit: '%' },
+    { key: 'physic_vamp', label: t('library.vampFisico'), color: 'text-pink-400', unit: '%' },
+    { key: 'magic_vamp', label: t('library.vampMagico'), color: 'text-pink-300', unit: '%' },
+    { key: 'flat_armor_penetration', label: t('library.penArmadura'), color: 'text-red-300', unit: '' },
+    { key: 'percentage_armor_penetration', label: t('library.penArmadura2'), color: 'text-red-200', unit: '%' },
+    { key: 'flat_magic_penetration', label: t('library.penMagica'), color: 'text-violet-400', unit: '' },
+    { key: 'percentage_magic_penetration', label: t('library.penMagica2'), color: 'text-violet-300', unit: '%' },
+    { key: 'ability_haste', label: t('library.aceleracionDeHabilidad'), color: 'text-cyan-400', unit: '' },
+    { key: 'tenacity', label: t('builds.tenacidad'), color: 'text-green-400', unit: '%' },
+    { key: 'healing_and_shield', label: t('library.curacionEscudo'), color: 'text-emerald-400', unit: '%' },
   ];
 
   const activeStats = selected
@@ -268,14 +270,14 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit)) {
     const tags = (selected.tags || '').split(',').map(tag => tag.trim()).filter(Boolean);
     const sectionTabs = [
-      ['description', 'Detalle'],
-      ['matchups', 'Enfrentamientos'],
-      ...(relatedItems.length > 0 ? [['related', 'Relacionados']] : []),
+      ['description', t('library.detalle')],
+      ['matchups', t('library.enfrentamientos')],
+      ...(relatedItems.length > 0 ? [['related', t('library.relacionados')]] : []),
     ];
     const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
     const matchupGroups = [
-      { id: 'good', title: 'Recomendado vs', icon: CheckCircle2, champions: recommendedAgainst },
-      { id: 'avoid', title: 'Evitar vs', icon: Ban, champions: avoidAgainst },
+      { id: 'good', title: t('library.recomendadoVs'), icon: CheckCircle2, champions: recommendedAgainst },
+      { id: 'avoid', title: t('library.evitarVs'), icon: Ban, champions: avoidAgainst },
     ];
 
     return (
@@ -283,12 +285,12 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
         {publicBasePath ? (
           <Link to={publicBasePath} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft size={15} />
-            Volver a objetos
+           {t('library.volverAObjetos')}
           </Link>
         ) : (
           <button onClick={clearSelected} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft size={15} />
-            Volver a objetos
+           {t('library.volverAObjetos')}
           </button>
         )}
 
@@ -304,7 +306,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               {selected.price && (
                 <span className="rd-status-pill">
                   <Coins size={12} className="inline mr-1 text-primary" />
-                  {selected.price} oro
+                  {selected.price} {t('builds.oro')}
                 </span>
               )}
             </div>
@@ -312,7 +314,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           </div>
         </div>
 
-        <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label="Secciones del objeto">
+        <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label={t('library.seccionesDelObjeto')}>
           {sectionTabs.map(([id, label]) => (
             <button
               key={id}
@@ -338,7 +340,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               {/* Estadísticas como chips en una sola fila, antes de la descripción
                   (si no entran, la fila se desliza de costado). */}
               {activeStats.length > 0 && (
-                <div className="rd-entity-stats" aria-label="Estadísticas">
+                <div className="rd-entity-stats" aria-label={t('nav.stats')}>
                   {activeStats.map(stat => (
                     <span key={stat.key} className="rd-entity-stat" title={stat.label}>
                       <span className="rd-entity-stat-label">{stat.label}</span>
@@ -349,7 +351,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               )}
               {itemDescription
                 ? <div className="rd-entity-desc text-muted-foreground">{itemDescription}</div>
-                : <p className="text-sm text-muted-foreground">Sin descripción.</p>}
+                : <p className="text-sm text-muted-foreground">{t('library.sinDescripcion')}</p>}
               {tags.length > 0 && (
                 <div className="rd-entity-tags">
                   {tags.map(tag => <span key={tag} className="rd-status-pill">{tag}</span>)}
@@ -374,7 +376,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         </div>
                       ))}
                     </div>
-                  ) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
+                  ) : <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>}
                 </div>
               ))}
             </div>
@@ -389,7 +391,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
                   {item.image_url ? (
-                    <img src={item.image_url} alt={`${entityName(item)} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                    <img src={item.image_url} alt={t('library.enWildRift2', { entityName: entityName(item) })} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
                   ) : (
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
                       <Sword size={16} className="text-primary" />
@@ -413,7 +415,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={15} />
-          Volver a objetos
+         {t('library.volverAObjetos')}
         </Link> : <button
           onClick={() => {
             setSelected(null);
@@ -426,7 +428,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           "
         >
           <ArrowLeft size={15} />
-          Volver a objetos
+         {t('library.volverAObjetos')}
         </button>}
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -475,7 +477,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   {selected.price && (
                     <span className="rd-status-pill">
                       <Coins size={13} className="inline mr-1 text-primary" />
-                      {selected.price} oro
+                      {selected.price} {t('builds.oro')}
                     </span>
                   )}
                 </div>
@@ -510,7 +512,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-6 h-px bg-primary/50" />
-                  <h2 className="rd-card-title">Estadísticas del objeto</h2>
+                  <h2 className="rd-card-title">{t('library.estadisticasDelObjeto')}</h2>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -538,12 +540,12 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
         <aside className="rd-card h-fit p-5">
           <div className="flex items-center gap-2 mb-5">
             <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">Enfrentamientos</h2>
+            <h2 className="rd-card-title">{t('library.enfrentamientos')}</h2>
           </div>
           <div className="space-y-4">
             <div className="rd-mini-action">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-green-400">
-                <CheckCircle2 size={15} /> Recomendado vs
+                <CheckCircle2 size={15} /> {t('library.recomendadoVs')}
               </h3>
               <div className="space-y-2">
                 {recommendedAgainst.length > 0 ? recommendedAgainst.map(champion => (
@@ -551,13 +553,13 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     {champion.image_url && <img src={champion.image_url} alt={champion.name} width="32" height="32" className="h-8 w-8 shrink-0 rounded-lg object-cover border border-green-500/20" />}
                     <span className="truncate text-xs font-medium text-green-300">{champion.name}</span>
                   </div>
-                )) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
+                )) : <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>}
               </div>
             </div>
 
             <div className="rd-mini-action">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
-                <Ban size={15} /> Evitar vs
+                <Ban size={15} /> {t('library.evitarVs')}
               </h3>
               <div className="space-y-2">
                 {avoidAgainst.length > 0 ? avoidAgainst.map(champion => (
@@ -565,7 +567,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     {champion.image_url && <img src={champion.image_url} alt={champion.name} width="32" height="32" className="h-8 w-8 shrink-0 rounded-lg object-cover border border-red-500/20" />}
                     <span className="truncate text-xs font-medium text-red-300">{champion.name}</span>
                   </div>
-                )) : <p className="text-sm text-muted-foreground">Sin datos.</p>}
+                )) : <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>}
               </div>
             </div>
           </div>
@@ -576,10 +578,10 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           <section className="rd-card p-5">
             <div className="flex items-center gap-2 mb-5">
               <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">Objetos del mismo tipo</h2>
+              <h2 className="rd-card-title">{t('library.objetosDelMismoTipo')}</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Otros objetos que comparten la clasificación registrada de {entityName(selected)}.
+             {t('library.otrosObjetosQueComparten')} {entityName(selected)}.
             </p>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {relatedItems.map(item => (
@@ -589,7 +591,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
                   {item.image_url ? (
-                    <img src={item.image_url} alt={`${entityName(item)} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                    <img src={item.image_url} alt={t('library.enWildRift2', { entityName: entityName(item) })} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                   ) : (
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary">
                       <Sword size={18} className="text-primary" />
@@ -618,7 +620,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar objeto..."
+              placeholder={t('library.buscarObjeto')}
               className="
                 w-full bg-secondary/60 border border-border rounded-xl
                 pl-10 pr-4 py-3 text-sm text-foreground
@@ -638,7 +640,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               outline-none focus:border-primary/40
             "
           >
-            <option value="all">Todas las categorías</option>
+            <option value="all">{t('library.todasLasCategorias')}</option>
 
             {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
               <option key={k} value={k}>
@@ -661,8 +663,8 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
         <div className="rd-card p-6">
           <EmptyState
             icon={Search}
-            title="Sin resultados"
-            description="No se encontraron objetos con esos filtros."
+            title={t('common.noResults')}
+            description={t('library.noSeEncontraronObjetos')}
           />
         </div>
       ) : (
@@ -691,12 +693,12 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-6 h-px bg-primary/50 shrink-0" />
             <h2 className="font-rajdhani font-bold text-2xl text-foreground tracking-[-0.06em] uppercase truncate">
-              {type}
+              {itemTypeLabel(type)}
             </h2>
           </div>
 
           <span className="text-xs text-muted-foreground shrink-0">
-            {totalByType} objetos
+            {totalByType} {t('library.objetos')}
           </span>
         </div>
 
@@ -779,7 +781,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
       )}
 
       <p className="text-muted-foreground text-xs">
-        {filtered.length} objetos
+        {filtered.length} {t('library.objetos')}
       </p>
     </div>
   );

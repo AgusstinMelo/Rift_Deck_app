@@ -5,8 +5,10 @@ import { getMyMembership } from '@/api/membershipSupabase';
 import { syncPayPalSubscription } from '@/api/paypalSupabase';
 import { CheckCircle2, Clock, XCircle, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/lib/LocaleContext';
 
 export default function MembresiaResultado() {
+  const t = useT();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [membership, setMembership] = useState(null);
@@ -57,10 +59,10 @@ export default function MembresiaResultado() {
             <Clock size={32} className="text-yellow-400 animate-pulse" />
           </div>
           <h1 className="font-rajdhani font-bold text-2xl text-foreground">
-            Confirmando tu pago
+           {t('membership.confirmandoTuPago')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Estamos confirmando tu pago. Esto puede tardar unos segundos.
+           {t('membership.estamosConfirmandoTuPago')}
           </p>
           <div className="flex justify-center gap-1 pt-2">
             {[0, 1, 2].map(i => (
@@ -84,15 +86,15 @@ export default function MembresiaResultado() {
             <CheckCircle2 size={32} className="text-green-400" />
           </div>
           <h1 className="font-rajdhani font-bold text-2xl text-foreground">
-            ¡Membresía activada!
+           {t('membership.membresiaActivada')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Tu acceso Premium está activo. Ya podés ver tus estadísticas avanzadas.
+           {t('membership.tuAccesoPremiumEsta')}
           </p>
           <Link to="/stats">
             <Button className="w-full gap-2">
               <BarChart3 size={16} />
-              Ir a Estadísticas
+             {t('membership.irAEstadisticas')}
             </Button>
           </Link>
         </div>
@@ -108,13 +110,13 @@ export default function MembresiaResultado() {
             <Clock size={32} className="text-yellow-400" />
           </div>
           <h1 className="font-rajdhani font-bold text-2xl text-foreground">
-            Pago en proceso
+           {t('membership.pagoEnProceso')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Estamos confirmando tu pago. Esto puede tardar unos minutos. Te notificaremos cuando esté listo.
+           {t('membership.estamosConfirmandoTuPago2')}
           </p>
           <Link to="/">
-            <Button variant="outline" className="w-full">Volver al inicio</Button>
+            <Button variant="outline" className="w-full">{t('membership.volverAlInicio')}</Button>
           </Link>
         </div>
       </div>
@@ -128,13 +130,13 @@ export default function MembresiaResultado() {
           <XCircle size={32} className="text-red-400" />
         </div>
         <h1 className="font-rajdhani font-bold text-2xl text-foreground">
-          No pudimos confirmar la membresía
+         {t('membership.noPudimosConfirmarLa')}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Todavía no pudimos confirmar la membresía. Si completaste el pago, puede tardar unos minutos en procesarse.
+         {t('membership.todaviaNoPudimosConfirmar')}
         </p>
         <Link to="/stats">
-          <Button variant="outline" className="w-full">Volver a intentar</Button>
+          <Button variant="outline" className="w-full">{t('membership.volverAIntentar')}</Button>
         </Link>
       </div>
     </div>

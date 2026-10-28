@@ -4,6 +4,7 @@ import { METRIC_FAMILY } from '../../model/goalConstants';
 import { GOAL_GROUPS } from '../../suggestions';
 import { BUTTON_GOLD } from '../goalUi';
 import HorizontalRail from '../HorizontalRail';
+import { useT } from '@/lib/LocaleContext';
 
 /** Sugeridos visibles por categoría; el resto de las métricas queda en el selector. */
 const MAX_SUGGESTIONS = 3;
@@ -29,6 +30,7 @@ function OptionButton({ title, onClick, icon: Icon = Sparkles }) {
  * La métrica concreta (dato y cálculo) se elige en el paso de configuración.
  */
 function ChoiceCard({ icon: Icon, title, description, tone = 'primary', optionsLabel, children, onConfigure }) {
+  const t = useT();
   const toneClass = tone === 'accent' ? 'border-accent/30 bg-accent/10 text-accent' : 'border-primary/20 bg-primary/10 text-primary';
   return (
     <section className="rd-card rd-goal-choice flex h-full flex-col gap-3 p-4">
@@ -48,7 +50,7 @@ function ChoiceCard({ icon: Icon, title, description, tone = 'primary', optionsL
         </div>
         <div className="mt-auto border-t border-border/60 pt-3">
           <button type="button" onClick={onConfigure} className={BUTTON_GOLD}>
-            <Settings2 size={15} /> Configurar objetivo
+            <Settings2 size={15} /> {t('goals.wizard.configureGoal')}
           </button>
         </div>
       </div>
@@ -62,6 +64,7 @@ function ChoiceCard({ icon: Icon, title, description, tone = 'primary', optionsL
  * @param {{ suggestions: any[], onPickSuggestion: (suggestion: any) => void, onPickCustom: (metricId: string) => void }} props
  */
 export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom }) {
+  const t = useT();
   const metrics = listMetrics();
   const firstMatchMetric = metrics.find(metric => metric.source === 'matches');
 
@@ -72,7 +75,7 @@ export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom
         icon={GROUP_ICONS[group.id] || Sparkles}
         title={group.label}
         description={group.description}
-        optionsLabel="Sugeridos"
+        optionsLabel={t('goals.wizard.suggested')}
         onConfigure={() => onPickCustom(metrics.find(metric => metric.family === group.id).id)}
       >
         {suggestions
@@ -89,20 +92,20 @@ export default function StepSelect({ suggestions, onPickSuggestion, onPickCustom
       <ChoiceCard
         icon={SlidersHorizontal}
         tone="accent"
-        title="A medida"
-        description="Combiná dato y cálculo (total, promedio, en una sola partida o porcentaje), meta, filtros y período."
-        optionsLabel="Otras opciones"
+        title={t('goals.wizard.customTitle')}
+        description={t('goals.wizard.customDescription')}
+        optionsLabel={t('goals.wizard.otherOptions')}
         onConfigure={() => onPickCustom(firstMatchMetric.id)}
       >
-        <OptionButton title="Hábito manual con check-ins" icon={PenLine} onClick={() => onPickCustom('manual')} />
+        <OptionButton title={t('goals.wizard.manualHabit')} icon={PenLine} onClick={() => onPickCustom('manual')} />
       </ChoiceCard>
     ),
   };
 
   return (
     <HorizontalRail
-      label="Categorías de objetivos"
-      itemLabel="categorías"
+      label={t('goals.wizard.categories')}
+      itemLabel={t('goals.wizard.categoriesItem')}
       itemClassName="basis-[85%] md:basis-[calc((100%-0.75rem)/2)] xl:basis-[calc((100%-2.25rem)/4)]"
       items={[...groupCards, customCard]}
     />

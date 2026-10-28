@@ -1,10 +1,13 @@
 import { Check } from 'lucide-react';
+import { useT } from '@/lib/LocaleContext';
 
 const COLUMNS = { 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' };
 
 // Barra de pasos del sugeridor. Con `locked`, sólo el primer paso es accesible;
 // `available` (opcional) deshabilita pasos puntuales con `false`.
-export default function StepNav({ steps, step, completed, locked, onStep, available, label = 'Pasos' }) {
+export default function StepNav({ steps, step, completed, locked, onStep, available, label }) {
+  const t = useT();
+  label ??= t('goals.wizard.steps');
   return <nav aria-label={label} className="rd-card p-1.5">
     <ol className={`grid gap-1 ${COLUMNS[steps.length] || 'grid-cols-3'}`}>{steps.map((name, index) => {
       const active = index === step;

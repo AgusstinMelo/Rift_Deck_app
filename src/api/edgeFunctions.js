@@ -1,9 +1,10 @@
 import { supabase } from '@/lib/supabaseClient';
+import { labels } from '@/i18n/uiI18n';
 
-const COMMON_ERROR_MESSAGES = {
-  'Invalid plan_code': 'El plan elegido no está disponible.',
-  'Membership already active': 'Ya tenés una membresía paga activa.',
-};
+const COMMON_ERROR_MESSAGES = labels({
+  'Invalid plan_code': 'payments.invalidPlan',
+  'Membership already active': 'payments.alreadyActive',
+});
 
 async function readErrorCode(error) {
   try {

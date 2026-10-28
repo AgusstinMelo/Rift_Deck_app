@@ -9,6 +9,8 @@ import HomeFooter from '@/components/home/HomeFooter';
 import CoachInsightCard from '@/components/home/CoachInsightCard';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import shotDashboard from '@/assets/landing/dashboard.webp';
+import { useT } from '@/lib/LocaleContext';
+import { tr } from '@/i18n/uiI18n';
 
 // Todas las capturas de src/assets/landing miden 1910×915.
 const SHOT_WIDTH = 1910;
@@ -22,29 +24,29 @@ const PRIMARY_BUTTON = 'inline-flex w-full max-w-xs items-center whitespace-nowr
 const SECONDARY_BUTTON = 'inline-flex w-full max-w-xs items-center whitespace-nowrap justify-center gap-2 rounded-xl border border-border bg-card/40 px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary sm:w-auto land:w-auto land:px-4 land:py-2.5';
 
 const HIGHLIGHTS = [
-  { value: 'módulos', label: 'Dashboard, tierlist, builds, estadísticas y más', icon: Layers },
-  { value: 'Parches', label: 'Tierlist al día y promediada del parche', icon: TrendingUp },
-  { value: 'Datos', label: 'Análisis sobre tus propias partidas', icon: UserRound },
-  { value: 'En español', label: 'Pensado para la comunidad hispana', icon: Globe2 },
+  { get value() { return tr('home.highlights.modules'); }, get label() { return tr('home.dashboardTierlistBuildsEstadisticas'); }, icon: Layers },
+  { get value() { return tr('home.highlights.patches'); }, get label() { return tr('home.tierlistAlDiaY'); }, icon: TrendingUp },
+  { get value() { return tr('home.highlights.data'); }, get label() { return tr('home.analisisSobreTusPropias'); }, icon: UserRound },
+  { get value() { return tr('home.highlights.spanish'); }, get label() { return tr('home.pensadoParaLaComunidad'); }, icon: Globe2 },
 ];
 
 const STEPS = [
   {
     number: '01',
-    title: 'Registra tus partidas',
-    text: 'Carga cada partida en segundos: campeón, línea, resultado, KDA y el draft de ambos equipos.',
+    get title() { return tr('home.registraTusPartidas'); },
+    get text() { return tr('home.cargaCadaPartidaEn'); },
     icon: ClipboardList,
   },
   {
     number: '02',
-    title: 'Rift Deck las lee',
-    text: 'Cruzamos tu historial con la tierlist y el meta del parche para encontrar qué te funciona y qué no.',
+    get title() { return tr('home.riftDeckLasLee'); },
+    get text() { return tr('home.cruzamosTuHistorialCon'); },
     icon: Cpu,
   },
   {
     number: '03',
-    title: 'Decides mejor',
-    text: 'Picks, builds y objetivos concretos para tu próximo bloque de ranked, cada uno con su porqué.',
+    get title() { return tr('home.decidesMejor'); },
+    get text() { return tr('home.picksBuildsYObjetivos'); },
     icon: Target,
     highlighted: true,
   },
@@ -52,42 +54,42 @@ const STEPS = [
 
 const COACH_INSIGHTS = [
   {
-    domain: 'Campeones',
-    confidenceLabel: 'Confianza alta',
+    get domain() { return tr('common.champions'); },
+    get confidenceLabel() { return tr('home.confianzaAlta'); },
     tone: 'positive',
-    title: 'Xayah es tu mejor apuesta este parche',
-    thesis: 'Xayah subió a tier A en la tierlist y en tus últimas 12 partidas con ella ganaste 8 (67%), frente a tu 52% general. El meta y tu rendimiento apuntan en la misma dirección.',
-    evidence: ['Personal: 67%', 'Tier A', '12 partidas'],
-    action: 'Priorízala en tus próximas 5 partidas de ranked y regístralas para confirmar la tendencia.',
+    get title() { return tr('home.xayahEsTuMejor'); },
+    get thesis() { return tr('home.xayahSubioATier'); },
+    get evidence() { return [tr('home.personal67'), tr('home.tierA'), tr('home.12Partidas')]; },
+    get action() { return tr('home.priorizalaEnTusProximas'); },
   },
   {
-    domain: 'Matchups',
-    confidenceLabel: 'Confianza media',
+    get domain() { return tr('dashboard.slides.matchups'); },
+    get confidenceLabel() { return tr('home.confianzaMedia'); },
     tone: 'warning',
-    title: 'Sufres contra magos de largo alcance',
-    thesis: 'Contra Ziggs, Xerath y Lux ganaste 3 de 10 partidas (30%). En esos drafts tus muertes promedio suben de 4,1 a 6,8.',
-    evidence: ['3 de 10 victorias', '6,8 muertes', 'Mid'],
-    action: 'Cuando aparezcan en el draft, suma un objeto de resistencia mágica temprano y juega más cerca de tu jungla.',
+    get title() { return tr('home.sufresContraMagosDe'); },
+    get thesis() { return tr('home.contraZiggsXerathY'); },
+    get evidence() { return [tr('home.3De10Victorias'), tr('home.68Muertes'), tr('lanes.mid')]; },
+    get action() { return tr('home.cuandoAparezcanEnEl'); },
   },
 ];
 
 const FAQS = [
   {
-    question: '¿Es gratis?',
+    get question() { return tr('home.esGratis'); },
     // TODO: precio o plan. Confirmar qué incluye la cuenta gratuita y qué agrega la membresía.
-    answer: 'Sí, crear tu cuenta es gratis y puedes empezar a registrar partidas desde el primer día.',
+    get answer() { return tr('home.siCrearTuCuenta'); },
   },
   {
-    question: '¿Cómo se cargan mis partidas?',
-    answer: 'Las registras manualmente desde la sección Partidas: campeón, línea, resultado, KDA y el draft. Toma menos de un minuto y no necesitas conectar tu cuenta de Riot.',
+    get question() { return tr('home.comoSeCarganMis'); },
+    get answer() { return tr('home.lasRegistrasManualmenteDesde'); },
   },
   {
-    question: '¿Cuántas partidas necesito?',
-    answer: 'Desde la primera partida ya ves tus estadísticas. Los consejos del Coach ganan confianza a medida que sumas partidas, y cada consejo te muestra qué tan respaldado está.',
+    get question() { return tr('home.cuantasPartidasNecesito'); },
+    get answer() { return tr('home.desdeLaPrimeraPartida'); },
   },
   {
-    question: '¿Cada cuánto se actualiza la tierlist?',
-    answer: 'Todos los días, con los datos del meta de Wild Rift. Puedes ver la tierlist del día o el promedio ponderado del parche, donde los días más recientes pesan más.',
+    get question() { return tr('home.cadaCuantoSeActualiza'); },
+    get answer() { return tr('home.todosLosDiasCon'); },
   },
 ];
 
@@ -139,23 +141,24 @@ function ScreenshotFrame({ src, alt, eager = false, className = '' }) {
 // la app: la ficha de campeón deja de ser "muestra pequeña" con 5 partidas y el Coach
 // empieza a comparar tendencias desde 12 (hooks/useInsights.js).
 const MILESTONES = [
-  { games: 1, title: 'Tu dashboard', text: 'Winrate, KDA, racha y forma reciente desde la primera partida.', icon: LayoutDashboard },
-  { games: 1, title: 'Estadísticas por campeón', text: 'Dónde rindes mejor: por campeón, por línea y por partida.', icon: BarChart3 },
-  { games: 5, title: 'Fichas con tu rendimiento', text: 'Tu winrate y KDA con cada campeón dejan de ser una muestra pequeña.', icon: UserRound },
-  { games: 10, title: 'Matchups y sinergias', text: 'Los rivales que te cuestan y los aliados que te suman, cuando se repiten.', icon: Swords },
-  { games: 12, title: 'El Coach detecta tendencias', text: 'Compara tus partidas recientes con las anteriores y te dice qué cambió.', icon: Sparkles },
-  { games: 30, title: 'Consejos con más confianza', text: 'Con más partidas, cada consejo del Coach se apoya en más datos.', icon: ShieldCheck },
+  { games: 1, get title() { return tr('home.tuDashboard'); }, get text() { return tr('home.winrateKdaRachaY'); }, icon: LayoutDashboard },
+  { games: 1, get title() { return tr('home.estadisticasPorCampeon'); }, get text() { return tr('home.dondeRindesMejorPor'); }, icon: BarChart3 },
+  { games: 5, get title() { return tr('home.fichasConTuRendimiento'); }, get text() { return tr('home.tuWinrateYKda'); }, icon: UserRound },
+  { games: 10, get title() { return tr('home.matchupsYSinergias'); }, get text() { return tr('home.losRivalesQueTe'); }, icon: Swords },
+  { games: 12, get title() { return tr('home.elCoachDetectaTendencias'); }, get text() { return tr('home.comparaTusPartidasRecientes'); }, icon: Sparkles },
+  { games: 30, get title() { return tr('home.consejosConMasConfianza'); }, get text() { return tr('home.conMasPartidasCada'); }, icon: ShieldCheck },
 ];
 const MAX_GAMES = 30;
 
 function ProgressSection() {
+  const t = useT();
   const [games, setGames] = useState(5);
   const next = MILESTONES.find(milestone => games < milestone.games);
   const missing = next ? next.games - games : 0;
 
   const cta = (className) => (
     <Link to="/registro" className={`${PRIMARY_BUTTON} ${className}`}>
-      Empezar a registrar partidas
+     {t('home.empezarARegistrarPartidas')}
       <ArrowRight size={16} aria-hidden="true" />
     </Link>
   );
@@ -167,15 +170,15 @@ function ProgressSection() {
           <div>
             <SectionHeading
               id="progreso-title"
-              eyebrow="Tu progreso"
-              title="Cada partida que registras te devuelve algo."
-              lead="Rift Deck se vuelve más preciso con cada partida que cargas. Mueve el control y mira lo que vas desbloqueando."
+              eyebrow={t('home.tuProgreso')}
+              title={t('home.cadaPartidaQueRegistras')}
+              lead={t('home.riftDeckSeVuelve')}
             />
 
             <div className="mt-4 rounded-2xl border border-primary/20 bg-card/70 p-4 shadow-[0_0_60px_-30px_hsl(var(--primary)/0.5)] md:mt-7 md:p-5 land:mt-2 land:p-2.5 short:p-3">
               <div className="flex items-end justify-between gap-4">
                 <label htmlFor="home-progress-games" className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                  Partidas registradas
+                 {t('goals.metric.partidas_registradas')}
                 </label>
                 <output htmlFor="home-progress-games" className="font-rajdhani text-4xl font-bold leading-none text-primary md:text-5xl land:text-3xl">
                   {games >= MAX_GAMES ? `${MAX_GAMES}+` : games}
@@ -189,7 +192,7 @@ function ProgressSection() {
                 step="1"
                 value={games}
                 onChange={event => setGames(Number(event.target.value))}
-                aria-valuetext={`${games} partidas`}
+                aria-valuetext={t('home.partidas', { games })}
                 className="mt-3 w-full cursor-pointer accent-primary md:mt-4 land:mt-2"
               />
               <div className="mt-1 flex justify-between text-[10px] text-muted-foreground land:hidden short:hidden" aria-hidden="true">
@@ -197,8 +200,8 @@ function ProgressSection() {
               </div>
               <p className="mt-2 text-sm text-foreground/85 md:mt-3 land:mt-2 land:text-xs" aria-live="polite">
                 {next
-                  ? <>Con <span className="font-semibold text-primary">{missing} {missing === 1 ? 'partida' : 'partidas'} más</span>: {next.title.toLowerCase()}.</>
-                  : 'Todo tu análisis está activo. Cada partida nueva lo afina un poco más.'}
+                  ? <>{t('home.con')} <span className="font-semibold text-primary">{missing} {missing === 1 ? 'partida' : 'partidas'} {t('home.mas')}</span>: {next.title.toLowerCase()}.</>
+                  : t('home.todoTuAnalisisEsta')}
               </p>
             </div>
 
@@ -206,7 +209,7 @@ function ProgressSection() {
           </div>
 
           <div>
-            <ol className="space-y-1.5 md:space-y-2 land:space-y-1 short:space-y-1" aria-label="Lo que desbloqueas al registrar partidas">
+            <ol className="space-y-1.5 md:space-y-2 land:space-y-1 short:space-y-1" aria-label={t('home.loQueDesbloqueasAl')}>
               {MILESTONES.map(({ games: needed, title, text, icon: Icon }) => {
                 const unlocked = games >= needed;
                 return (
@@ -228,7 +231,7 @@ function ProgressSection() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground land:text-xs">
                         {title}
-                        <span className="sr-only">{unlocked ? ' (desbloqueado)' : ' (bloqueado)'}</span>
+                        <span className="sr-only">{unlocked ? t('home.desbloqueado') : t('home.bloqueado')}</span>
                       </p>
                       <p className="mt-0.5 hidden text-xs text-muted-foreground md:block land:hidden">{text}</p>
                     </div>
@@ -249,6 +252,7 @@ function ProgressSection() {
 }
 
 export default function Home() {
+  const t = useT();
   return (
     <div className="rd-home relative z-10 text-foreground">
       <HomeNav />
@@ -259,52 +263,51 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[70%] bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.16),transparent_65%)]" aria-hidden="true" />
 
           <div className={`${CONTAINER} relative text-center`}>
-            <Eyebrow centered>Juega con información</Eyebrow>
+            <Eyebrow centered>{t('home.juegaConInformacion')}</Eyebrow>
             <h1 id="home-title" className="mx-auto mt-5 max-w-6xl font-rajdhani text-[clamp(2.25rem,min(10vw,11svh),5.5rem)] font-bold uppercase leading-[0.95] tracking-[-0.06em] text-foreground md:mt-7 land:mt-3">
-              Empieza a jugar con <span className="text-primary">criterio</span>
+             {t('home.empiezaAJugarCon')} <span className="text-primary">{t('home.criterio')}</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:mt-7 md:text-xl land:mt-3 land:text-sm">
-              Rift Deck convierte tus partidas de Wild Rift en decisiones: qué campeón te rinde, contra quién sufres,
-              qué build armar contra este draft y qué cambiar en tu próximo bloque de rankeds.
+             {t('home.riftDeckConvierteTus')}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-10 land:mt-5 land:flex-row">
               <Link to="/registro" className={PRIMARY_BUTTON}>
-                Crear mi cuenta gratis
+               {t('home.crearMiCuentaGratis')}
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <a href="/campeones" className={SECONDARY_BUTTON}>
                 <BookOpen size={16} className="text-primary" aria-hidden="true" />
-                Biblioteca pública
+               {t('home.bibliotecaPublica')}
               </a>
             </div>
           </div>
         </section>
 
         {/* Captura del Dashboard: tan grande como permita la pantalla */}
-        <section id="asi-se-ve" aria-label="Así se ve Rift Deck" className={`${SECTION} border-t border-primary/10`}>
+        <section id="asi-se-ve" aria-label={t('home.asiSeVeRift')} className={`${SECTION} border-t border-primary/10`}>
           <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 md:px-6">
-            <Eyebrow centered>Así se ve Rift Deck</Eyebrow>
+            <Eyebrow centered>{t('home.asiSeVeRift')}</Eyebrow>
             <div className="rd-home-hero-shot mt-4 md:mt-6 land:mt-2">
               <div className="rd-home-hero-frame">
-                <ScreenshotFrame src={shotDashboard} alt="Dashboard de Rift Deck con forma reciente, mains y meta por línea" eager />
+                <ScreenshotFrame src={shotDashboard} alt={t('home.dashboardDeRiftDeck')} eager />
 
                 {/* Tarjetas flotantes: solo en pantallas grandes */}
                 <div className="absolute -left-8 top-[30%] hidden w-56 rounded-2xl border border-green-500/25 bg-card/95 p-4 text-left shadow-2xl backdrop-blur lg:block">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Forma reciente</p>
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t('dashboard.formaReciente')}</p>
                   <p className="mt-1 font-rajdhani text-4xl font-bold text-green-400">90%</p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
                     <div className="h-full w-[90%] rounded-full bg-green-400" />
                   </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground">9 de tus últimas 10 partidas</p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">{t('home.9DeTusUltimas')}</p>
                 </div>
 
                 <div className="absolute -right-8 bottom-[10%] hidden w-72 rounded-2xl border border-primary/25 bg-card/95 p-4 text-left shadow-2xl backdrop-blur lg:block">
                   <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
                     <Sparkles size={13} aria-hidden="true" />
-                    Rift Deck Coach
+                   {t('dashboard.riftDeckCoach')}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-foreground/90">
-                    Xayah subió a tier A y tienes 67% con ella. Priorízala 5 partidas.
+                   {t('home.xayahSubioATier2')}
                   </p>
                 </div>
               </div>
@@ -315,7 +318,7 @@ export default function Home() {
         {/* Datos + Cómo funciona */}
         <section id="como-funciona" aria-labelledby="como-funciona-title" className={`${SECTION} border-t border-primary/10`}>
           <div className={CONTAINER}>
-            <ul className="grid grid-cols-2 gap-x-5 gap-y-3 rounded-2xl border border-primary/10 bg-card/40 px-5 py-3.5 md:grid-cols-4 md:gap-y-4 md:py-5 land:grid-cols-4 land:py-2" aria-label="Rift Deck en números">
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-3 rounded-2xl border border-primary/10 bg-card/40 px-5 py-3.5 md:grid-cols-4 md:gap-y-4 md:py-5 land:grid-cols-4 land:py-2" aria-label={t('home.riftDeckEnNumeros')}>
               {HIGHLIGHTS.map(({ value, label, icon: Icon }) => (
                 <li key={value} className="flex items-start gap-2.5">
                   <Icon size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
@@ -330,9 +333,9 @@ export default function Home() {
             <div className="mt-6 md:mt-14 land:mt-4 short:mt-4">
               <SectionHeading
                 id="como-funciona-title"
-                eyebrow="Cómo funciona"
-                title="Pasos simples, carga rápida."
-                lead="Registras lo que jugaste y Rift Deck te devuelve datos claros para que sepas qué hacer en tus próximos juegos."
+                eyebrow={t('home.anchors.comoFunciona')}
+                title={t('home.pasosSimplesCargaRapida')}
+                lead={t('home.registrasLoQueJugaste')}
                 centered
               />
             </div>
@@ -369,9 +372,9 @@ export default function Home() {
           <div className={CONTAINER}>
             <SectionHeading
               id="coach-title"
-              eyebrow="Rift Deck Coach"
-              title="Un coach personal que analiza tus partidas."
-              lead="Hipótesis priorizadas para tu próximo bloque de partidas: qué muestran los datos, qué tan confiables son y qué hacer al respecto."
+              eyebrow={t('dashboard.riftDeckCoach')}
+              title={t('home.unCoachPersonalQue')}
+              lead={t('home.hipotesisPriorizadasParaTu')}
             />
             {/* En smartphone vertical las cartas se deslizan de a una; en el resto, dos columnas. */}
             <div className="-mx-4 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:mt-10 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 md:pb-0 land:mx-0 land:mt-4 land:grid land:grid-cols-2 land:overflow-visible land:px-0 land:pb-0">
@@ -387,8 +390,8 @@ export default function Home() {
             <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground md:mt-4 land:hidden">
               <BarChart3 size={14} className="shrink-0 text-primary" aria-hidden="true" />
               <span>
-                Ejemplos ilustrativos: el Coach se arma con tus propias partidas.
-                <span className="md:hidden land:hidden"> Desliza para ver el siguiente.</span>
+               {t('home.ejemplosIlustrativosElCoach')}
+                <span className="md:hidden land:hidden"> {t('home.deslizaParaVerEl')}</span>
               </span>
             </p>
           </div>
@@ -397,7 +400,7 @@ export default function Home() {
         {/* Preguntas */}
         <section id="preguntas" aria-labelledby="preguntas-title" className={`${SECTION} border-t border-primary/10`}>
           <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
-            <SectionHeading id="preguntas-title" eyebrow="Preguntas" title="Preguntas frecuentes." centered />
+            <SectionHeading id="preguntas-title" eyebrow={t('home.anchors.preguntas')} title={t('home.preguntasFrecuentes')} centered />
             <Accordion type="single" collapsible className="mt-6 rounded-2xl border border-border/70 bg-card/60 px-5 md:mt-10 land:mt-3">
               {FAQS.map(({ question, answer }) => (
                 <AccordionItem key={question} value={question} className="border-border/60 last:border-b-0">
@@ -421,14 +424,14 @@ export default function Home() {
               <div className="relative">
                 <Eyebrow centered>Rift Deck</Eyebrow>
                 <h2 id="cta-title" className="mx-auto mt-4 max-w-3xl font-rajdhani text-[clamp(1.6rem,min(7.5vw,6svh),3rem)] font-bold uppercase leading-[1.02] tracking-[-0.05em] text-foreground land:mt-2">
-                  Tu próxima partida empieza con <span className="text-primary">información.</span>
+                 {t('home.tuProximaPartidaEmpieza')} <span className="text-primary">{t('home.informacion')}</span>
                 </h2>
                 <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-8 land:mt-4 land:flex-row">
                   <Link to="/registro" className={PRIMARY_BUTTON}>
-                    Crear mi cuenta gratis
+                   {t('home.crearMiCuentaGratis')}
                     <ArrowRight size={16} aria-hidden="true" />
                   </Link>
-                  <Link to="/login" className={SECONDARY_BUTTON}>Ya tengo cuenta</Link>
+                  <Link to="/login" className={SECONDARY_BUTTON}>{t('home.yaTengoCuenta')}</Link>
                 </div>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { useT } from '@/lib/LocaleContext';
 
 // Mismo diseño que las cartas de la pantalla Coach (Estadísticas → Coach).
 const insightTone = {
@@ -15,6 +16,7 @@ const insightAccent = {
 };
 
 export default function CoachInsightCard({ index, domain, confidenceLabel, title, thesis, evidence = [], action, tone = 'neutral', className = '' }) {
+  const t = useT();
   return (
     <article className={`relative flex flex-col rounded-2xl border p-5 overflow-hidden land:p-4 ${insightTone[tone] || insightTone.neutral} ${className}`}>
       <div className={`absolute inset-y-0 left-0 w-1 ${insightAccent[tone] || insightAccent.neutral}`} aria-hidden="true" />
@@ -31,7 +33,7 @@ export default function CoachInsightCard({ index, domain, confidenceLabel, title
       </div>
 
       <div className="mt-1">
-        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5 land:hidden">Qué muestran los datos</p>
+        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5 land:hidden">{t('coach.queMuestranLosDatos')}</p>
         <p className="text-sm text-foreground/85 leading-relaxed land:line-clamp-2 land:text-xs short:text-[13px] short:leading-snug">{thesis}</p>
       </div>
 
@@ -47,7 +49,7 @@ export default function CoachInsightCard({ index, domain, confidenceLabel, title
 
       <div className="flex items-start gap-2 pt-4 border-t border-border/50 land:pt-3">
         <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" aria-hidden="true" />
-        <p className="text-xs leading-relaxed text-muted-foreground land:line-clamp-2"><span className="text-foreground font-medium">Consejo:</span> {action}</p>
+        <p className="text-xs leading-relaxed text-muted-foreground land:line-clamp-2"><span className="text-foreground font-medium">{t('coach.consejo')}</span> {action}</p>
       </div>
     </article>
   );

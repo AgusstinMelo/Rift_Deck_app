@@ -6,13 +6,15 @@ import { MembershipOffer } from '@/components/membership/MembershipGate';
 import PageHeader from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
 import { BarChart3, Crown } from 'lucide-react';
+import { useT } from '@/lib/LocaleContext';
+import { formatLocale, labels, tr } from '@/i18n/uiI18n';
 
-const PLAN_NAMES = {
-  premium: 'Mensual',
-  premium_quarterly: 'Trimestral',
-  premium_annual: 'Anual',
-  trial: 'Prueba gratis',
-};
+const PLAN_NAMES = labels({
+  premium: 'membership.plans.premium',
+  premium_quarterly: 'membership.plans.premium_quarterly',
+  premium_annual: 'membership.plans.premium_annual',
+  trial: 'membership.plans.trial',
+});
 
 const PROVIDER_NAMES = {
   mercadopago: 'Mercado Pago',
@@ -20,7 +22,7 @@ const PROVIDER_NAMES = {
 };
 
 function formatDate(date) {
-  return date?.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+  return date?.toLocaleDateString(formatLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function describeMembership(info) {
@@ -28,45 +30,46 @@ function describeMembership(info) {
   const until = info.accessUntil;
 
   if (!info.hasAccess) {
-    return { title: 'No tenés una membresía activa', detail: 'Elegí un plan para acceder a las estadísticas avanzadas.' };
+    return { title: tr('membership.noTenesUnaMembresia'), detail: tr('membership.elegiUnPlanPara') };
   }
 
   if (info.status === 'trialing') {
     const days = daysUntil(until);
     return {
-      title: 'Prueba gratis activa',
-      detail: `Termina el ${formatDate(until)} (${days === 1 ? 'queda 1 día' : `quedan ${days} días`}). Podés suscribirte ahora y no perdés los días que te quedan.`,
+      title: tr('membership.pruebaGratisActiva'),
+      detail: tr('membership.terminaElPodesSuscribirte', { formatDate: formatDate(until), value: days === 1 ? tr('membership.queda1Dia') : tr('membership.quedanDias', { days }) }),
     };
   }
 
-  const plan = PLAN_NAMES[row?.plan_code] || 'Premium';
+  const plan = PLAN_NAMES[row?.plan_code] || tr('membership.premium');
   const provider = PROVIDER_NAMES[row?.provider];
 
   if (info.status === 'cancelled') {
     return {
-      title: `Premium ${plan} cancelado`,
-      detail: until ? `Mantenés el acceso hasta el ${formatDate(until)}.` : 'Tu acceso sigue vigente.',
+      title: tr('membership.premiumCancelado', { plan }),
+      detail: until ? tr('membership.mantenesElAccesoHasta', { formatDate: formatDate(until) }) : tr('membership.tuAccesoSigueVigente'),
     };
   }
 
   // Las membresías de PayPal activadas a mano no tienen suscripción ni se renuevan.
   const isSubscription = Boolean(row?.provider_subscription_id);
   const renewal = isSubscription && row?.current_period_end
-    ? ` Próxima renovación: ${formatDate(new Date(row.current_period_end))}.`
-    : until ? ` Vigente hasta el ${formatDate(until)}.` : '';
+    ? tr('membership.proximaRenovacion', { formatDate: formatDate(new Date(row.current_period_end)) })
+    : until ? tr('membership.vigenteHastaEl', { formatDate: formatDate(until) }) : '';
   const cancelHint = isSubscription ? {
-    mercadopago: ' Podés cancelarla cuando quieras desde Mercado Pago → Suscripciones.',
-    paypal: ' Podés cancelarla cuando quieras desde PayPal → Configuración → Pagos → Pagos automáticos.',
+    mercadopago: tr('membership.podesCancelarlaCuandoQuieras'),
+    paypal: tr('membership.podesCancelarlaCuandoQuieras2'),
   }[row?.provider] || '' : '';
 
   return {
-    title: `Premium ${plan} activo`,
-    detail: `${provider ? `Pagás con ${provider}.` : ''}${renewal}${cancelHint}`.trim(),
+    title: tr('membership.premiumActivo', { plan }),
+    detail: `${provider ? tr('membership.pagasCon', { provider }) : ''}${renewal}${cancelHint}`.trim(),
     paid: true,
   };
 }
 
 export default function Membresia() {
+  const t = useT();
   const { user } = useAuth();
   const [info, setInfo] = useState(null);
   const [error, setError] = useState(false);
@@ -87,9 +90,9 @@ export default function Membresia() {
   if (error) {
     return (
       <div className="rd-page">
-        <PageHeader title="Membresía" />
+        <PageHeader title={t('membership.membresia')} />
         <div className="rd-card p-6 text-sm text-muted-foreground">
-          No pudimos cargar tu membresía. Intentá de nuevo en unos minutos.
+         {t('membership.noPudimosCargarTu')}
         </div>
       </div>);
 
@@ -107,7 +110,7 @@ export default function Membresia() {
 
   return (
     <div className="rd-page space-y-6">
-      <PageHeader title="Membresía" />
+      <PageHeader title={t('membership.membresia')} />
 
       <div className="rd-card p-5 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -125,7 +128,7 @@ export default function Membresia() {
         <Link to="/stats">
             <Button variant="outline" className="gap-2 w-full sm:w-auto">
               <BarChart3 size={16} />
-              Ir a Estadísticas
+             {t('membership.irAEstadisticas')}
             </Button>
           </Link>
         }

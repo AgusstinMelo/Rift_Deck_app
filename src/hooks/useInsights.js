@@ -1,3 +1,4 @@
+import { tr } from '../i18n/uiI18n.js';
 // Rift Deck insight engine
 //
 // The engine deliberately returns editorial cards instead of isolated stats. Every
@@ -160,7 +161,7 @@ function pairedGroups(rows, getLeft, getRight) {
 }
 
 function percent(value) { return `${Math.round(value)}%`; }
-function games(value) { return `${value} ${value === 1 ? 'partida' : 'partidas'}`; }
+function games(value) { return `${value} ${tr(value === 1 ? 'stats.partidaOne' : 'goals.unit.partidas')}`; }
 
 function confidence(sample, effect = 0, corroboration = 0) {
   const volume = Math.min(1, Math.sqrt(sample / 12));
@@ -169,9 +170,9 @@ function confidence(sample, effect = 0, corroboration = 0) {
 }
 
 function confidenceLabel(value) {
-  if (value >= 0.76) return 'Confianza alta';
-  if (value >= 0.48) return 'Confianza media';
-  return 'Señal inicial';
+  if (value >= 0.76) return tr('home.confianzaAlta');
+  if (value >= 0.48) return tr('home.confianzaMedia');
+  return tr('insights.senalInicial');
 }
 
 function catalogMap(rows) {
@@ -199,23 +200,23 @@ function relationNames(entity, fields) {
 }
 
 const itemStatGuidance = [
-  { key: 'armor', label: 'armadura', useful: 'daño físico sostenido', weak: 'una composición mayormente mágica' },
-  { key: 'magic_res', label: 'resistencia mágica', useful: 'daño mágico relevante', weak: 'una composición mayormente física' },
-  { key: 'tenacity', label: 'tenacidad', useful: 'mucho control de masas reducible', weak: 'poco control o levantamientos que la tenacidad no reduce' },
-  { key: 'life', label: 'vida', useful: 'daño mixto o burst', weak: 'daño porcentual de vida y peleas donde necesitás una resistencia específica' },
-  { key: 'attack_damage', label: 'daño de ataque', useful: 'potenciar tu daño físico', weak: 'una partida donde necesitás supervivencia o utilidad defensiva' },
-  { key: 'ability_power', label: 'poder de habilidad', useful: 'potenciar escalados mágicos', weak: 'una partida donde necesitás supervivencia o utilidad defensiva' },
-  { key: 'attack_speed', label: 'velocidad de ataque', useful: 'peleas largas en las que podés atacar con continuidad', weak: 'composiciones que no te permiten pegar de forma sostenida' },
-  { key: 'critical_impact', label: 'probabilidad de crítico', useful: 'una build que ya escala con críticos', weak: 'una build orientada a efectos al impacto o daño de habilidades' },
-  { key: 'percentage_armor_penetration', label: 'penetración de armadura', useful: 'rivales que acumulan armadura', weak: 'equipos frágiles con poca armadura adicional' },
-  { key: 'flat_armor_penetration', label: 'penetración de armadura', useful: 'objetivos frágiles con poca armadura', weak: 'varios rivales que acumulan mucha armadura' },
-  { key: 'percentage_magic_penetration', label: 'penetración mágica', useful: 'rivales que acumulan resistencia mágica', weak: 'equipos con poca resistencia mágica adicional' },
-  { key: 'flat_magic_penetration', label: 'penetración mágica', useful: 'objetivos frágiles con poca resistencia mágica', weak: 'varios rivales que acumulan mucha resistencia mágica' },
-  { key: 'ability_haste', label: 'aceleración de habilidad', useful: 'peleas donde podés lanzar varias rotaciones', weak: 'intercambios que se deciden antes de una segunda rotación' },
-  { key: 'lifesteal', label: 'robo de vida', useful: 'peleas extendidas en las que podés mantenerte haciendo daño', weak: 'burst o control que no te dejan sostenerte atacando' },
-  { key: 'physic_vamp', label: 'vampirismo físico', useful: 'peleas extendidas en las que podés hacer daño físico', weak: 'burst o control que no te dejan sostenerte pegando' },
-  { key: 'magic_vamp', label: 'vampirismo mágico', useful: 'peleas extendidas en las que podés hacer daño mágico', weak: 'burst o control que no te dejan sostenerte usando habilidades' },
-  { key: 'healing_and_shield', label: 'potencia de curaciones y escudos', useful: 'una build con curaciones o escudos frecuentes', weak: 'un kit que casi no aprovecha ese efecto' },
+  { key: 'armor', get label() { return tr('itemStats.armor').toLowerCase(); }, get useful() { return tr('insights.danoFisicoSostenido'); }, get weak() { return tr('insights.unaComposicionMayormenteMagica'); } },
+  { key: 'magic_res', get label() { return tr('insights.resistenciaMagica'); }, get useful() { return tr('insights.danoMagicoRelevante'); }, get weak() { return tr('insights.unaComposicionMayormenteFisica'); } },
+  { key: 'tenacity', get label() { return tr('itemStats.tenacity').toLowerCase(); }, get useful() { return tr('insights.muchoControlDeMasas'); }, get weak() { return tr('insights.pocoControlOLevantamientos'); } },
+  { key: 'life', get label() { return tr('itemStats.life').toLowerCase(); }, get useful() { return tr('insights.danoMixtoOBurst'); }, get weak() { return tr('insights.danoPorcentualDeVida'); } },
+  { key: 'attack_damage', get label() { return tr('insights.danoDeAtaque'); }, get useful() { return tr('insights.potenciarTuDanoFisico'); }, get weak() { return tr('insights.unaPartidaDondeNecesitas'); } },
+  { key: 'ability_power', get label() { return tr('insights.poderDeHabilidad'); }, get useful() { return tr('insights.potenciarEscaladosMagicos'); }, get weak() { return tr('insights.unaPartidaDondeNecesitas'); } },
+  { key: 'attack_speed', get label() { return tr('insights.velocidadDeAtaque'); }, get useful() { return tr('insights.peleasLargasEnLas'); }, get weak() { return tr('insights.composicionesQueNoTe'); } },
+  { key: 'critical_impact', get label() { return tr('insights.probabilidadDeCritico'); }, get useful() { return tr('insights.unaBuildQueYa'); }, get weak() { return tr('insights.unaBuildOrientadaA'); } },
+  { key: 'percentage_armor_penetration', get label() { return tr('insights.penetracionDeArmadura'); }, get useful() { return tr('insights.rivalesQueAcumulanArmadura'); }, get weak() { return tr('insights.equiposFragilesConPoca'); } },
+  { key: 'flat_armor_penetration', get label() { return tr('insights.penetracionDeArmadura'); }, get useful() { return tr('insights.objetivosFragilesConPoca'); }, get weak() { return tr('insights.variosRivalesQueAcumulan'); } },
+  { key: 'percentage_magic_penetration', get label() { return tr('insights.penetracionMagica'); }, get useful() { return tr('insights.rivalesQueAcumulanResistencia'); }, get weak() { return tr('insights.equiposConPocaResistencia'); } },
+  { key: 'flat_magic_penetration', get label() { return tr('insights.penetracionMagica'); }, get useful() { return tr('insights.objetivosFragilesConPoca2'); }, get weak() { return tr('insights.variosRivalesQueAcumulan2'); } },
+  { key: 'ability_haste', get label() { return tr('insights.aceleracionDeHabilidad'); }, get useful() { return tr('insights.peleasDondePodesLanzar'); }, get weak() { return tr('insights.intercambiosQueSeDeciden'); } },
+  { key: 'lifesteal', get label() { return tr('insights.roboDeVida'); }, get useful() { return tr('insights.peleasExtendidasEnLas'); }, get weak() { return tr('insights.burstOControlQue'); } },
+  { key: 'physic_vamp', get label() { return tr('insights.vampirismoFisico'); }, get useful() { return tr('insights.peleasExtendidasEnLas2'); }, get weak() { return tr('insights.burstOControlQue2'); } },
+  { key: 'magic_vamp', get label() { return tr('insights.vampirismoMagico'); }, get useful() { return tr('insights.peleasExtendidasEnLas3'); }, get weak() { return tr('insights.burstOControlQue3'); } },
+  { key: 'healing_and_shield', get label() { return tr('insights.potenciaDeCuracionesY'); }, get useful() { return tr('insights.unaBuildConCuraciones'); }, get weak() { return tr('insights.unKitQueCasi'); } },
 ];
 
 function describeItemStats(item) {
@@ -290,23 +291,23 @@ function detectRecentForm(ctx) {
   let reading;
   let action;
   if (deathDelta >= 1.25) {
-    reading = `En tus últimas ${window} partidas tu winrate fue de ${percent(recent.wr)}, frente al ${percent(previous.wr)} del bloque anterior. En el mismo período, tus muertes promedio subieron de ${previous.avgDeaths.toFixed(1)} a ${recent.avgDeaths.toFixed(1)} por partida. La coincidencia no demuestra una causa, pero señala la supervivencia como la primera variable que conviene revisar.`;
-    action = 'Durante las próximas 5 partidas, registrá el minuto y el motivo de tu primera muerte —pelea, emboscada, objetivo o sobreextensión— para comprobar qué situación está generando la diferencia.';
+    reading = tr('insights.enTusUltimasPartidas', { window, percent: percent(recent.wr), percent2: percent(previous.wr), value: previous.avgDeaths.toFixed(1), value2: recent.avgDeaths.toFixed(1) });
+    action = tr('insights.duranteLasProximas5');
   } else if (deathDelta <= -1.25) {
-    reading = `En tus últimas ${window} partidas tu winrate fue de ${percent(recent.wr)}, frente al ${percent(previous.wr)} del bloque anterior. Al mismo tiempo, tus muertes promedio bajaron de ${previous.avgDeaths.toFixed(1)} a ${recent.avgDeaths.toFixed(1)} por partida. Ambos cambios avanzan juntos, por lo que tu mayor estabilidad es una explicación concreta que vale la pena validar.`;
-    action = 'Mantené el mismo pool y evitá cambiar la build principal durante 5 partidas; así vas a poder comprobar si el menor número de muertes sigue acompañando el resultado.';
+    reading = tr('insights.enTusUltimasPartidas2', { window, percent: percent(recent.wr), percent2: percent(previous.wr), value: previous.avgDeaths.toFixed(1), value2: recent.avgDeaths.toFixed(1) });
+    action = tr('insights.manteneElMismoPool');
   } else {
-    reading = `En tus últimas ${window} partidas tu winrate fue de ${percent(recent.wr)}, frente al ${percent(previous.wr)} del bloque anterior. Sin embargo, tus muertes promedio casi no cambiaron: pasaron de ${previous.avgDeaths.toFixed(1)} a ${recent.avgDeaths.toFixed(1)} por partida. Por eso, esta variación no se explica bien por supervivencia y conviene buscarla en el draft, las builds o el cierre de las partidas.`;
+    reading = tr('insights.enTusUltimasPartidas3', { window, percent: percent(recent.wr), percent2: percent(previous.wr), value: previous.avgDeaths.toFixed(1), value2: recent.avgDeaths.toFixed(1) });
     action = improving
-      ? 'Repetí durante 5 partidas la combinación de campeón y build más usada en el tramo reciente para aislar si esa decisión está sosteniendo la mejora.'
-      : 'Compará las 5 derrotas más recientes por campeón, build y tag; descartá las muertes como explicación principal y buscá qué decisión sí se repite.';
+      ? tr('insights.repetiDurante5Partidas')
+      : tr('insights.comparaLas5Derrotas');
   }
 
   return [makeCard({
     id: 'recent-form', domain: 'forma', tone: improving ? 'positive' : 'warning',
-    title: improving ? 'Tu rendimiento reciente mejoró' : 'Tu rendimiento reciente bajó',
+    title: improving ? tr('insights.tuRendimientoRecienteMejoro') : tr('insights.tuRendimientoRecienteBajo'),
     thesis: reading, action, sample: recent.games + previous.games, effect: delta,
-    evidence: [`Últimas ${window}: ${percent(recent.wr)}`, `Anteriores: ${percent(previous.wr)}`, `${recent.avgDeaths.toFixed(1)} muertes por partida`],
+    evidence: [tr('insights.ultimas', { window, percent: percent(recent.wr) }), tr('insights.anteriores', { percent: percent(previous.wr) }), tr('insights.muertesPorPartida', { value: recent.avgDeaths.toFixed(1) })],
     score: 90, sources: ['partidas'],
   })];
 }
@@ -325,18 +326,18 @@ function detectCloseGamePattern(ctx) {
   return [makeCard({
     id: 'close-game-pattern', domain: 'cierre', tone: longGamesAreWorse ? 'warning' : 'positive',
     title: longGamesAreWorse
-      ? 'Tu rendimiento baja cuando la partida se extiende'
-      : 'Tu rendimiento mejora cuando la partida se extiende',
-    thesis: `En las partidas de menos de 10 minutos registrás ${percent(shortSummary.wr)} de winrate en ${games(shortSummary.games)}; en las de 20 minutos o más, ${percent(longSummary.wr)} en ${games(longSummary.games)}. La diferencia de ${percent(Math.abs(gap))} plantea como hipótesis que la duración y la forma de cerrar están relacionadas con tus resultados, pero no demuestra por sí sola cuál es la causa.`,
+      ? tr('insights.tuRendimientoBajaCuando')
+      : tr('insights.tuRendimientoMejoraCuando'),
+    thesis: tr('insights.enLasPartidasDe', { percent: percent(shortSummary.wr), games: games(shortSummary.games), percent2: percent(longSummary.wr), games2: games(longSummary.games), percent3: percent(Math.abs(gap)) }),
     action: longGamesAreWorse
-      ? 'En las próximas partidas con ventaja antes del minuto 25, marcá cuándo aparece el primer objetivo de leyenda disponible y si lo tomaste.'
-      : 'En las próximas partidas que terminen antes del minuto 10, marcá cuándo apareció el primer objetivo de leyenda disponible y si lo tomaste.',
+      ? tr('insights.enLasProximasPartidas')
+      : tr('insights.enLasProximasPartidas2'),
     sample: shortSummary.games + longSummary.games,
     effect: gap,
     evidence: [
-      `Menos de 10 min: ${percent(shortSummary.wr)} (${shortSummary.games})`,
-      `20 min o más: ${percent(longSummary.wr)} (${longSummary.games})`,
-      `Diferencia: ${percent(Math.abs(gap))}`,
+      tr('insights.menosDe10Min', { percent: percent(shortSummary.wr), games: shortSummary.games }),
+      tr('insights.20MinOMas', { percent: percent(longSummary.wr), games: longSummary.games }),
+      tr('insights.diferencia', { percent: percent(Math.abs(gap)) }),
     ],
     score: 82,
     sources: ['partidas'],
@@ -355,18 +356,18 @@ function detectLossFingerprint(ctx) {
   if (deathGap < 1.2 && !tags) return [];
 
   const hook = tags
-    ? `El tag “${tags.name}” aparece en ${tags.games} de tus ${losses.length} derrotas registradas${deathGap >= 1.2 ? `. Además, promediás ${lossStats.avgDeaths.toFixed(1)} muertes en las derrotas y ${winStats.avgDeaths.toFixed(1)} en las victorias` : ''}. El tag no explica por sí solo la derrota, pero identifica un grupo concreto de partidas que comparte el mismo contexto.`
-    : `En tus victorias promediás ${winStats.avgDeaths.toFixed(1)} muertes por partida; en tus derrotas, ${lossStats.avgDeaths.toFixed(1)}. La diferencia se repite en una muestra suficiente como para tratar las muertes como una señal de riesgo, no como una prueba de causalidad.`;
+    ? tr('insights.elTagApareceEn', { name: tags.name, games: tags.games, length: losses.length, value: deathGap >= 1.2 ? `. Además, promediás ${lossStats.avgDeaths.toFixed(1)} muertes en las derrotas y ${winStats.avgDeaths.toFixed(1)} en las victorias` : '' })
+    : tr('insights.enTusVictoriasPromedias', { value: winStats.avgDeaths.toFixed(1), value2: lossStats.avgDeaths.toFixed(1) });
   return [makeCard({
-    id: `loss-fingerprint-${keyOf(tags?.name || 'deaths')}`, domain: 'diagnóstico', tone: 'critical',
-    title: tags ? `Patrón de derrota: ${tags.name}` : 'Las muertes separan victorias y derrotas', thesis: hook,
+    id: `loss-fingerprint-${keyOf(tags?.name || 'deaths')}`, domain: tr('insights.diagnostico'), tone: 'critical',
+    title: tags ? tr('insights.patronDeDerrota', { name: tags.name }) : tr('insights.lasMuertesSeparanVictorias'), thesis: hook,
     action: tags
-      ? `Revisá las 3 derrotas más recientes con “${tags.name}” y anotá qué evento concreto se repite antes de que la partida se descontrole.`
-      : 'Durante las próximas 5 partidas, fijá como objetivo llegar al juego medio con 2 muertes menos y compará si cambia el resultado.',
+      ? tr('insights.revisaLas3Derrotas', { name: tags.name })
+      : tr('insights.duranteLasProximas52'),
     sample: losses.length, effect: deathGap * 8, evidence: [
-      `Derrotas: ${lossStats.avgDeaths.toFixed(1)} muertes`,
-      `Victorias: ${winStats.avgDeaths.toFixed(1)} muertes`,
-      tags && `${tags.games}/${losses.length} con “${tags.name}”`,
+      tr('insights.derrotasMuertes', { value: lossStats.avgDeaths.toFixed(1) }),
+      tr('insights.victoriasMuertes', { value: winStats.avgDeaths.toFixed(1) }),
+      tags && tr('insights.con', { games: tags.games, length: losses.length, name: tags.name }),
     ], score: 86, sources: ['partidas', tags ? 'tags' : null],
   })];
 }
@@ -384,17 +385,17 @@ function detectChampionIdentity(ctx) {
     const under = mainDelta < 0;
     cards.push(makeCard({
       id: `identity-main-${keyOf(main.name)}`, domain: 'pool', tone: under ? 'warning' : 'positive',
-      title: under ? `${main.name} es tu pick principal, pero rinde por debajo de tu promedio` : `${main.name} combina volumen y buen rendimiento`,
+      title: under ? tr('insights.esTuPickPrincipal', { name: main.name }) : tr('insights.combinaVolumenYBuen', { name: main.name }),
       thesis: under
-        ? `${main.name} es tu campeón más usado, con ${games(main.games)} y ${percent(main.wr)} de winrate. Tu promedio general es ${percent(overall.wr)}, de modo que el pick al que más volumen dedicás está aportando menos resultados que el resto de tu historial.`
-        : `${main.name} es tu campeón más usado, con ${games(main.games)} y ${percent(main.wr)} de winrate, mientras que tu promedio general es ${percent(overall.wr)}.${mainTier?.tier ? ` La tierlist actual también lo ubica en tier ${mainTier.tier}, por lo que tu rendimiento personal y el estado del meta apuntan en la misma dirección.` : ' El volumen y el resultado personal apuntan en la misma dirección.'}`,
+        ? tr('insights.esTuCampeonMas', { name: main.name, games: games(main.games), percent: percent(main.wr), percent2: percent(overall.wr) })
+        : tr('insights.esTuCampeonMas2', { name: main.name, games: games(main.games), percent: percent(main.wr), percent2: percent(overall.wr), value: mainTier?.tier ? tr('insights.laTierlistActualTambien', { tier: mainTier.tier }) : tr('insights.elVolumenYEl') }),
       action: under
-        ? `Jugá 5 partidas con una única build y registrá los matchups; si el winrate continúa debajo de tu promedio, reducí su prioridad en ranked.`
-        : `Mantenelo como pick principal y elegí un segundo campeón específicamente para cubrir los matchups en los que no querés seleccionarlo.`,
+        ? tr('insights.juga5PartidasCon')
+        : tr('insights.manteneloComoPickPrincipal'),
       sample: main.games, effect: mainDelta, evidence: [
         `${games(main.games)} · ${percent(main.wr)}`,
-        `Tu base: ${percent(overall.wr)}`,
-        mainTier?.tier && `Meta: tier ${mainTier.tier}`,
+        tr('insights.tuBase', { percent: percent(overall.wr) }),
+        mainTier?.tier && tr('insights.metaTier', { tier: mainTier.tier }),
       ], entities: [main.name], score: 84, sources: ['partidas', mainTier ? 'tierlist' : null],
     }));
   }
@@ -405,11 +406,11 @@ function detectChampionIdentity(ctx) {
     const tier = tierByChampion.get(keyOf(pocket.name));
     cards.push(makeCard({
       id: `identity-pocket-${keyOf(pocket.name)}`, domain: 'pool', tone: 'opportunity',
-      title: `${pocket.name} muestra potencial para ganar espacio en tu pool`,
-      thesis: `Con ${pocket.name} registrás ${percent(pocket.wr)} de winrate en ${games(pocket.games)}, frente a tu ${percent(overall.wr)} general.${tier?.tier ? ` Actualmente aparece en tier ${tier.tier}.` : ''} La muestra todavía es menor que la de tu pick principal, así que el dato justifica una prueba más amplia, no una promoción automática.`,
-      action: `Jugalo 5 veces más manteniendo una build estable; si continúa por encima de tu promedio, incorporalo como segundo pick.`,
+      title: tr('insights.muestraPotencialParaGanar', { name: pocket.name }),
+      thesis: tr('insights.conRegistrasDeWinrate', { name: pocket.name, percent: percent(pocket.wr), games: games(pocket.games), percent2: percent(overall.wr), value: tier?.tier ? tr('insights.actualmenteApareceEnTier', { tier: tier.tier }) : '' }),
+      action: tr('insights.jugalo5VecesMas'),
       sample: pocket.games, effect: pocket.wr - overall.wr,
-      evidence: [`${games(pocket.games)} · ${percent(pocket.wr)}`, `Promedio general: ${percent(overall.wr)}`, tier?.tier && `Meta: ${tier.tier}`],
+      evidence: [`${games(pocket.games)} · ${percent(pocket.wr)}`, tr('insights.promedioGeneral', { percent: percent(overall.wr) }), tier?.tier && tr('insights.meta', { tier: tier.tier })],
       entities: [pocket.name], score: 78, sources: ['partidas', tier ? 'tierlist' : null],
     }));
   }
@@ -442,20 +443,20 @@ function detectPoolShape(ctx) {
   return [makeCard({
     id: 'pool-shape', domain: 'pool', tone: scattered ? 'warning' : 'neutral',
     title: scattered
-      ? 'Tu pool está repartido entre demasiados campeones'
-      : `Tu pool está concentrado en ${coreNames.length} ${coreNames.length === 1 ? 'campeón' : 'campeones'}`,
+      ? tr('insights.tuPoolEstaRepartido')
+      : tr('insights.tuPoolEstaConcentrado', { length: coreNames.length, value: tr(coreNames.length === 1 ? 'goals.filterNames.champions' : 'insights.words.champions') }),
     thesis: scattered
-      ? `Usaste ${champs.length} campeones en ${games(matches.length)}, y tus 3 picks más frecuentes sólo reúnen el ${percent(topShare * 100)} de la muestra. Esa dispersión reduce la cantidad de repeticiones comparables para cada campeón y hace más difícil separar aprendizaje de variación.`
-      : `${coreNames.join(', ')} ${coreNames.length === 1 ? 'concentra' : 'concentran'} el ${percent(topShare * 100)} de tus ${games(matches.length)}.${damageTypes.length === 1 ? ` Además, ${coreNames.length === 1 ? 'usa' : 'comparten'} daño ${damageTypes[0]}, por lo que el núcleo ofrece respuestas parecidas frente al draft rival.` : ' La concentración favorece la práctica.'}${uncoveredEnemy ? ` ${uncoveredEnemy} figura como debilidad de al menos dos picks del núcleo${coverPick ? `, mientras que ${coverPick.name} aparece como una respuesta favorable` : ''}.` : ''}`,
+      ? tr('insights.usasteCampeonesEnY', { length: champs.length, games: games(matches.length), percent: percent(topShare * 100) })
+      : tr('insights.elDeTus', { value: coreNames.join(', '), value2: tr(coreNames.length === 1 ? 'insights.words.concentraOne' : 'insights.words.concentraOther'), percent: percent(topShare * 100), games: games(matches.length), value3: damageTypes.length === 1 ? tr('insights.ademasDanoPorLo', { value: tr(coreNames.length === 1 ? 'insights.words.usaOne' : 'insights.words.usaOther'), value2: damageTypes[0] }) : tr('insights.laConcentracionFavoreceLa'), value4: uncoveredEnemy ? tr('insights.figuraComoDebilidadDe', { uncoveredEnemy, value: coverPick ? tr('insights.mientrasQueApareceComo', { name: coverPick.name }) : '' }) : '' }),
     action: scattered
-      ? 'Limitá las próximas 10 partidas a 3 campeones: uno principal, uno para cubrir su peor matchup y uno que aporte un tipo de daño o función diferente.'
+      ? tr('insights.limitaLasProximas10')
       : coverPick
-        ? `Usá a ${coverPick.name} como pick de cobertura cuando aparezca ${uncoveredEnemy}; mantené ${champs[0]?.name} como prioridad en los drafts que no expongan esa debilidad.`
+        ? tr('insights.usaAComoPick', { name: coverPick.name, uncoveredEnemy, name2: champs[0]?.name })
         : uncoveredEnemy
-          ? `Tu siguiente pick debe tener un cruce favorable contra ${uncoveredEnemy} y, si ${damageTypes.length === 1}, aportar un tipo de daño distinto al núcleo.`
-          : `Mantené este núcleo para ganar consistencia y sumá sólo un pick que cubra el peor matchup de ${champs[0]?.name} o aporte un tipo de daño diferente.`,
+          ? tr('insights.tuSiguientePickDebe', { uncoveredEnemy, value: damageTypes.length === 1 })
+          : tr('insights.manteneEsteNucleoPara', { name: champs[0]?.name }),
     sample: matches.length, effect: (topShare - 0.6) * 100,
-    evidence: [`Top 3: ${percent(topShare * 100)}`, `Umbral: ${percent(scatteredThreshold * 100)}`, `${champs.length} picks usados`],
+    evidence: [tr('insights.top3', { percent: percent(topShare * 100) }), tr('insights.umbral', { percent: percent(scatteredThreshold * 100) }), tr('insights.picksUsados', { length: champs.length })],
     score: uncoveredEnemy ? 81 : 67, sources: ['partidas', championCatalog.size ? 'campeones' : null],
   })];
 }
@@ -464,7 +465,7 @@ function detectChoiceLeverage(ctx, type) {
   const config = {
     item: { values: row => row.items, label: 'objeto', domain: 'build', min: 4 },
     rune: { values: row => row.runes, label: 'runa', domain: 'runas', min: 4 },
-    spell: { values: row => row.spells.length === 2 ? [row.spells.slice().sort().join(' + ')] : [], label: 'dupla de hechizos', domain: 'hechizos', min: 4 },
+    spell: { values: row => row.spells.length === 2 ? [row.spells.slice().sort().join(' + ')] : [], label: tr('insights.duplaDeHechizos'), domain: 'hechizos', min: 4 },
   }[type];
   const candidates = pairedGroups(ctx.matches, row => row.champion, config.values)
     .filter(group => group.games >= config.min)
@@ -490,46 +491,46 @@ function detectChoiceLeverage(ctx, type) {
   const corroboratedBad = avoidAgainst.find(name => encountered.some(enemy => keyOf(enemy) === keyOf(name)));
   const statProfile = describeItemStats(itemData);
   const context = corroboratedGood
-    ? ` Además, el catálogo lo recomienda contra ${corroboratedGood}, rival presente en esas partidas.`
-    : corroboratedBad ? ` Sin embargo, el catálogo lo desaconseja contra ${corroboratedBad}, rival presente en esas partidas: no lo conviertas en una compra automática en ese cruce.`
-      : recommended ? ` También figura entre los objetos recomendados de ${best.left}.` : '';
+    ? tr('insights.ademasElCatalogoLo', { corroboratedGood })
+    : corroboratedBad ? tr('insights.sinEmbargoElCatalogo', { corroboratedBad })
+      : recommended ? tr('insights.tambienFiguraEntreLos', { left: best.left }) : '';
   const itemContext = type === 'item' && statProfile
-    ? ` El objeto aporta principalmente ${statProfile.summary}: suele ser útil frente a ${statProfile.useful} y pierde valor frente a ${statProfile.weak}.`
+    ? tr('insights.elObjetoAportaPrincipalmente', { summary: statProfile.summary, useful: statProfile.useful, weak: statProfile.weak })
     : '';
   const cautiousItemTitle = positive
-    ? `Revisá cuándo te conviene comprar ${best.right} con ${best.left}`
-    : `Revisá si ${best.right} encaja en tus builds de ${best.left}`;
+    ? tr('insights.revisaCuandoTeConviene', { right: best.right, left: best.left })
+    : tr('insights.revisaSiEncajaEn', { right: best.right, left: best.left });
   const itemAction = corroboratedBad
-    ? `Revisá especialmente su compra contra ${corroboratedBad}. Compará qué aporta el resto de tu build, qué amenaza rival necesitás responder y si las estadísticas de ${best.right} resuelven realmente ese problema.`
+    ? tr('insights.revisaEspecialmenteSuCompra', { corroboratedBad, right: best.right })
     : corroboratedGood
-      ? `Tomá el cruce contra ${corroboratedGood} como un contexto favorable, no como una regla. Antes de comprarlo, comprobá que combine con el resto de tu build y responda a la amenaza principal del equipo rival.`
+      ? tr('insights.tomaElCruceContra', { corroboratedGood })
       : statProfile
-        ? `Antes de comprarlo, comprobá que ${statProfile.summary} combine con el resto de tu build. Es más justificable frente a ${statProfile.useful}; considerá otra opción frente a ${statProfile.weak}.`
-        : `No descartes el objeto sólo por esta muestra: revisá si combina con el resto de tu build, qué estadística te aporta y qué amenaza concreta del equipo rival necesitás responder.`;
+        ? tr('insights.antesDeComprarloComproba', { summary: statProfile.summary, useful: statProfile.useful, weak: statProfile.weak })
+        : tr('insights.noDescartesElObjeto');
   const choiceTitle = type === 'rune'
     ? positive
-      ? `Revisá cuándo te conviene elegir ${best.right} con ${best.left}`
-      : `Dejá de equipar ${best.right} por defecto con ${best.left}`
+      ? tr('insights.revisaCuandoTeConviene2', { right: best.right, left: best.left })
+      : tr('insights.dejaDeEquiparPor', { right: best.right, left: best.left })
     : positive
-      ? `Revisá cuándo te conviene usar ${best.right} con ${best.left}`
-      : `Dejá de usar ${best.right} por defecto con ${best.left}`;
+      ? tr('insights.revisaCuandoTeConviene3', { right: best.right, left: best.left })
+      : tr('insights.dejaDeUsarPor', { right: best.right, left: best.left });
   const choiceAction = type === 'rune'
     ? positive
-      ? `Conservala como una opción prioritaria con ${best.left}, pero elegila sólo cuando encaje con el matchup y el plan de la partida.`
-      : `Sacala de la página de runas predeterminada y equipala únicamente cuando encaje con el matchup y el plan de la partida.`
+      ? tr('insights.conservalaComoUnaOpcion', { left: best.left })
+      : tr('insights.sacalaDeLaPagina')
     : positive
-      ? `Conservala como una opción prioritaria con ${best.left}, pero elegila según el matchup y el plan de la partida.`
-      : `Dejá de seleccionarla por defecto y usala únicamente cuando encaje con el matchup y el plan de la partida.`;
+      ? tr('insights.conservalaComoUnaOpcion2', { left: best.left })
+      : tr('insights.dejaDeSeleccionarlaPor');
 
   return [makeCard({
     id: `${type}-${keyOf(best.left)}-${keyOf(best.right)}`, domain: config.domain,
     tone: positive ? 'opportunity' : 'critical',
     title: type === 'item' ? cautiousItemTitle : choiceTitle,
-    thesis: `Con ${best.left}, registrás ${percent(best.wr)} de winrate en ${games(best.games)} usando ${best.right}, frente a ${percent(best.baseline.wr)} en ${games(best.baseline.games)} sin esa elección: una diferencia de ${percent(Math.abs(best.delta))}. Esta muestra señala una asociación, no demuestra que ${type === 'item' ? 'el objeto' : 'esta elección'} sea la causa del resultado.${context}${itemContext}`,
+    thesis: tr('insights.conRegistrasDeWinrate2', { left: best.left, percent: percent(best.wr), games: games(best.games), right: best.right, percent2: percent(best.baseline.wr), games2: games(best.baseline.games), percent3: percent(Math.abs(best.delta)), value: type === 'item' ? tr('insights.elObjeto') : tr('insights.estaEleccion'), context, itemContext }),
     action: type === 'item' ? itemAction : choiceAction,
     sample: best.games + best.baseline.games, effect: best.delta,
     corroboration: corroboratedGood || corroboratedBad || recommended ? 1 : 0,
-    evidence: [`Con: ${percent(best.wr)} (${best.games})`, `Sin: ${percent(best.baseline.wr)} (${best.baseline.games})`, corroboratedGood ? `Buena vs ${corroboratedGood}` : recommended && 'Recomendado para el campeón'],
+    evidence: [tr('insights.con2', { percent: percent(best.wr), games: best.games }), tr('insights.sin', { percent: percent(best.baseline.wr), games: best.baseline.games }), corroboratedGood ? tr('insights.buenaVs', { corroboratedGood }) : recommended && tr('insights.recomendadoParaElCampeon')],
     entities: [best.left, best.right], score: type === 'item' ? 82 : 72,
     sources: ['partidas', type === 'item' && itemData ? 'objetos' : type === 'rune' ? 'runas' : 'hechizos', recommended ? 'campeones' : null],
   })];
@@ -550,11 +551,11 @@ function detectRecommendedItemFit(ctx) {
   const delta = comparison ? pick.withStats.wr - pick.withoutStats.wr : 0;
   return [makeCard({
     id: `recommended-items-${keyOf(pick.champion.name)}`, domain: 'build', tone: pick.adherence < 0.5 ? 'warning' : 'neutral',
-    title: `Contrastá tu build de ${pick.champion.name} con sus objetos recomendados`,
-    thesis: `${pick.champion.name} tiene como objetos recomendados ${pick.wanted.join(', ')}. En tu historial, al menos uno aparece en ${pick.withStats.games} de ${pick.champion.games} partidas (${percent(pick.adherence * 100)}).${comparison ? ` Con objetos recomendados registrás ${percent(pick.withStats.wr)} de winrate y sin ellos ${percent(pick.withoutStats.wr)}; es una asociación contextual, no una prueba de causalidad.` : ' Todavía no hay dos grupos comparables para relacionarlos con el resultado.'}`,
-    action: pick.missing.length ? `Probá primero ${pick.missing.slice(0, 2).join(' o ')} cuando sus estadísticas respondan al draft rival; mantené estable el resto de la build.` : `Revisá en qué matchups usaste estos objetos y conservá sólo las compras que respondan a una amenaza concreta.`,
+    title: tr('insights.contrastaTuBuildDe', { name: pick.champion.name }),
+    thesis: tr('insights.tieneComoObjetosRecomendados', { name: pick.champion.name, value: pick.wanted.join(', '), games: pick.withStats.games, games2: pick.champion.games, percent: percent(pick.adherence * 100), value2: comparison ? tr('insights.conObjetosRecomendadosRegistras', { percent: percent(pick.withStats.wr), percent2: percent(pick.withoutStats.wr) }) : tr('insights.todaviaNoHayDos') }),
+    action: pick.missing.length ? tr('insights.probaPrimeroCuandoSus', { value: pick.missing.slice(0, 2).join(' o ') }) : tr('insights.revisaEnQueMatchups'),
     sample: pick.champion.games, effect: delta,
-    evidence: [`Recomendados presentes: ${percent(pick.adherence * 100)}`, `${pick.champion.games} partidas con ${pick.champion.name}`, comparison && `Diferencia observada: ${percent(Math.abs(delta))}`],
+    evidence: [tr('insights.recomendadosPresentes', { percent: percent(pick.adherence * 100) }), tr('insights.partidasCon', { games: pick.champion.games, name: pick.champion.name }), comparison && tr('insights.diferenciaObservada', { percent: percent(Math.abs(delta)) })],
     entities: [pick.champion.name, ...pick.wanted], score: 84, sources: ['partidas', 'campeones', 'objetos'],
   })];
 }
@@ -574,19 +575,19 @@ function detectAllySynergy(ctx) {
   if (!pair) return [];
   const catalogSynergy = championRelations(ctx.championCatalog.get(keyOf(pair.left))).synergies.some(name => keyOf(name) === keyOf(pair.right));
   const allyRoles = championRoles(ctx.championCatalog.get(keyOf(pair.right)));
-  const allyRole = allyRoles.includes('dragonline') ? 'ADC' : allyRoles.includes('support') ? 'support' : allyRoles[0];
+  const allyRole = allyRoles.includes('dragonline') ? tr('lanes.adc') : allyRoles.includes('support') ? tr('lanes.support') : allyRoles[0];
   const roleContext = pair.rows[0]?.lane === 'support' && allyRole === 'ADC'
-    ? ' Esta es además tu dupla de bot: la lectura evalúa específicamente la relación support–ADC.'
-    : allyRole ? ` La señal también queda asociada al rol ${allyRole} de ${pair.right}.` : '';
+    ? tr('insights.estaEsAdemasTu')
+    : allyRole ? tr('insights.laSenalTambienQueda', { allyRole, right: pair.right }) : '';
   return [makeCard({
     id: `synergy-${pair.id}`, domain: 'sinergia', tone: pair.delta > 0 ? 'opportunity' : 'warning',
-    title: pair.delta > 0 ? `Buscá la dupla ${pair.left} + ${pair.right} en el draft` : `Revisá la sinergia de ${pair.left} + ${pair.right}`,
-    thesis: `Cuando ${pair.right} aparece como aliado, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${catalogSynergy ? ' El catálogo también identifica esta dupla como sinergia favorable.' : ''}${roleContext}`,
+    title: pair.delta > 0 ? tr('insights.buscaLaDuplaEn', { left: pair.left, right: pair.right }) : tr('insights.revisaLaSinergiaDe', { left: pair.left, right: pair.right }),
+    thesis: tr('insights.cuandoApareceComoAliado', { right: pair.right, left: pair.left, percent: percent(pair.wr), games: games(pair.games), percent2: percent(pair.baseline.wr), left2: pair.left, value: catalogSynergy ? tr('insights.elCatalogoTambienIdentifica') : '', roleContext }),
     action: pair.delta > 0
-      ? `Priorizá ${pair.left} cuando tu equipo ya haya mostrado ${pair.right}; si no está disponible, buscá un aliado con una función equivalente.`
-      : `No completes esta dupla por inercia. Compensá con primera línea, iniciación, protección o variedad de daño según lo que falte.`,
+      ? tr('insights.priorizaCuandoTuEquipo', { left: pair.left, right: pair.right })
+      : tr('insights.noCompletesEstaDupla'),
     sample: pair.games, effect: pair.delta, corroboration: catalogSynergy ? 1 : 0,
-    evidence: [`Juntos: ${percent(pair.wr)} (${pair.games})`, `${pair.left}: ${percent(pair.baseline.wr)}`, allyRole && `Rol aliado: ${allyRole}`],
+    evidence: [tr('insights.juntos', { percent: percent(pair.wr), games: pair.games }), `${pair.left}: ${percent(pair.baseline.wr)}`, allyRole && tr('insights.rolAliado', { allyRole })],
     entities: [pair.left, pair.right], score: catalogSynergy ? 88 : 78,
     sources: ['partidas', 'composiciones', catalogSynergy ? 'campeones' : null],
   })];
@@ -603,8 +604,8 @@ function snapshotTime(entry) {
 
 function snapshotLabel(entry) {
   const rawDate = clean(entry?.snapshot_date || entry?.updated_at).slice(0, 10);
-  const dateLabel = rawDate ? rawDate.split('-').reverse().join('/') : 'sin fecha';
-  return `${clean(entry?.patch) || 'sin parche'} · ${dateLabel}`;
+  const dateLabel = rawDate ? rawDate.split('-').reverse().join('/') : tr('tierlist.sinFecha');
+  return `${clean(entry?.patch) || tr('insights.sinParche')} · ${dateLabel}`;
 }
 
 function detectMetaMovement(ctx) {
@@ -636,13 +637,13 @@ function detectMetaMovement(ctx) {
   const agrees = (rising && personal > 5) || (!rising && personal < -5);
   return [makeCard({
     id: `meta-move-${keyOf(move.champ.name)}`, domain: 'meta', tone: agrees ? 'opportunity' : 'neutral',
-    title: `${move.champ.name} cambió de posición en la tierlist reciente`,
-    thesis: `${move.champ.name} pasó de tier ${move.previous.tier || 'sin clasificación'} en la tierlist ${snapshotLabel(move.previous)} a tier ${move.latest.tier || 'sin clasificación'} en ${snapshotLabel(move.latest)}. En tu historial tiene ${percent(move.champ.wr)} de winrate en ${games(move.champ.games)}, frente a tu ${percent(summarize(ctx.matches).wr)} general. La tierlist describe el meta; tu muestra personal indica si ese cambio también es relevante para vos.`,
+    title: tr('insights.cambioDePosicionEn', { name: move.champ.name }),
+    thesis: tr('insights.pasoDeTierEn', { name: move.champ.name, value: move.previous.tier || tr('insights.sinClasificacion'), snapshotLabel: snapshotLabel(move.previous), value2: move.latest.tier || tr('insights.sinClasificacion'), snapshotLabel2: snapshotLabel(move.latest), percent: percent(move.champ.wr), games: games(move.champ.games), percent2: percent(summarize(ctx.matches).wr) }),
     action: agrees
-      ? `Priorizá ${move.champ.name} durante las próximas 5 partidas manteniendo la misma build para validar la coincidencia entre meta y rendimiento personal.`
-      : 'No cambies todavía su lugar en tu pool: probá una build estable y registrá al menos dos matchups antes de tomar la decisión.',
+      ? tr('insights.priorizaDuranteLasProximas', { name: move.champ.name })
+      : tr('insights.noCambiesTodaviaSu'),
     sample: move.champ.games, effect: move.rankDelta,
-    evidence: [`${snapshotLabel(move.previous)}: ${move.previous.tier}`, `${snapshotLabel(move.latest)}: ${move.latest.tier}`, `Personal: ${percent(move.champ.wr)}`],
+    evidence: [`${snapshotLabel(move.previous)}: ${move.previous.tier}`, `${snapshotLabel(move.latest)}: ${move.latest.tier}`, tr('insights.personal', { percent: percent(move.champ.wr) })],
     entities: [move.champ.name], score: 76, sources: ['partidas', 'tierlists'],
   })];
 }
@@ -672,16 +673,16 @@ function detectMatchup(ctx) {
   const counter = poolCounterFor(ctx, pair.right, pair.left, pair.rows[0]?.lane);
   const unfavorable = catalogBad || pair.delta < 0;
   return [makeCard({
-    id: `matchup-${pair.id}`, domain: 'matchup directo', tone: unfavorable ? 'critical' : 'positive',
-    title: unfavorable ? `${pair.left} queda expuesto en el cruce directo contra ${pair.right}` : `Considerá ${pair.left} como respuesta frente a ${pair.right}`,
-    thesis: `En el matchup directo contra ${pair.right}, tu winrate con ${pair.left} es ${percent(pair.wr)} en ${games(pair.games)}, frente al ${percent(pair.baseline.wr)} general con ${pair.left}.${catalogBad ? ` El catálogo marca a ${pair.left} como débil contra ${pair.right}.` : catalogGood ? ` El catálogo marca a ${pair.left} como fuerte contra ${pair.right}.` : ''}${corroborates ? ' Tu rendimiento personal coincide con esa relación.' : conflict ? ' Tu resultado personal va en sentido contrario, por lo que conviene considerar la composición completa y ampliar la muestra.' : ''}${counter ? ` Dentro de tu pool, ${counter.name} figura fuerte contra ${pair.right} y es una alternativa concreta para ese draft.` : ''}`,
+    id: `matchup-${pair.id}`, domain: tr('insights.matchupDirecto'), tone: unfavorable ? 'critical' : 'positive',
+    title: unfavorable ? tr('insights.quedaExpuestoEnEl', { left: pair.left, right: pair.right }) : tr('insights.consideraComoRespuestaFrente', { left: pair.left, right: pair.right }),
+    thesis: tr('insights.enElMatchupDirecto', { right: pair.right, left: pair.left, percent: percent(pair.wr), games: games(pair.games), percent2: percent(pair.baseline.wr), left2: pair.left, value: catalogBad ? tr('insights.elCatalogoMarcaA', { left: pair.left, right: pair.right }) : catalogGood ? tr('insights.elCatalogoMarcaA2', { left: pair.left, right: pair.right }) : '', value2: corroborates ? tr('insights.tuRendimientoPersonalCoincide') : conflict ? tr('insights.tuResultadoPersonalVa') : '', value3: counter ? tr('insights.dentroDeTuPool', { name: counter.name, right: pair.right }) : '' }),
     action: !unfavorable
-      ? `Subí la prioridad de ${pair.left} cuando el rival muestre ${pair.right}${catalogGood ? '; el historial y el catálogo respaldan esa respuesta' : ', si el resto del draft se mantiene equilibrado'}.`
+      ? tr('insights.subiLaPrioridadDe', { left: pair.left, right: pair.right, value: catalogGood ? tr('insights.elHistorialYEl') : tr('insights.siElRestoDel') })
       : counter
-        ? `La próxima vez que el rival muestre ${pair.right}, priorizá ${counter.name} en lugar de ${pair.left}. Si ya fijaste ${pair.left}, adaptá runas y primer objeto para sobrevivir al cruce.`
-        : `Si el rival muestra ${pair.right}, evitá seleccionar ${pair.left} a ciegas. Tu pool todavía no registra una alternativa catalogada como fuerte contra él; si ya fijaste el pick, adaptá runas y primer objeto.`,
+        ? tr('insights.laProximaVezQue', { right: pair.right, name: counter.name, left: pair.left, left2: pair.left })
+        : tr('insights.siElRivalMuestra', { right: pair.right, left: pair.left }),
     sample: pair.games, effect: pair.delta, corroboration: corroborates ? 1 : 0,
-    evidence: [`Directo: ${percent(pair.wr)} (${pair.games})`, `Promedio de ${pair.left}: ${percent(pair.baseline.wr)}`, counter && `Alternativa: ${counter.name}`],
+    evidence: [tr('insights.directo', { percent: percent(pair.wr), games: pair.games }), tr('insights.promedioDe', { left: pair.left, percent: percent(pair.baseline.wr) }), counter && tr('insights.alternativa', { name: counter.name })],
     entities: [pair.left, pair.right, counter?.name], score: unfavorable ? 91 : 83,
     sources: ['partidas', champion ? 'campeones' : null],
   })];
@@ -710,32 +711,32 @@ function detectSavedBuilds(ctx) {
     const entry = used.sort((a, b) => b.wr - a.wr || b.games - a.games)[0];
     cards.push(makeCard({
       id: `saved-build-${entry.build.id || keyOf(entry.build.name)}`, domain: 'build', tone: entry.wr >= 55 ? 'positive' : 'warning',
-      title: `La build “${entry.build.name || entry.build.champion_name}” ya tiene una muestra medible`,
+      title: tr('insights.laBuildYaTiene', { value: entry.build.name || entry.build.champion_name }),
       thesis: entry.inferred
-        ? `La build aparece asociada a ${games(entry.games)} con ${percent(entry.wr)} de winrate. Como esas partidas no tenían una build vinculada, la relación se estimó por una coincidencia mínima del 66% de sus objetos; el dato es orientativo y puede mezclar variantes diferentes.`
-        : `La build está vinculada directamente a ${games(entry.games)} y registra ${percent(entry.wr)} de winrate. La asociación es precisa, aunque la muestra todavía debe leerse junto con los campeones rivales y el parche en que se jugó.`,
+        ? tr('insights.laBuildApareceAsociada', { games: games(entry.games), percent: percent(entry.wr) })
+        : tr('insights.laBuildEstaVinculada', { games: games(entry.games), percent: percent(entry.wr) }),
       action: entry.wr >= 55
-        ? 'Conservá sus objetos principales y creá una única variante para un matchup concreto; evitá cambiar varias piezas a la vez porque impediría comparar resultados.'
-        : 'Compará sus primeros 3 objetos con los de tus victorias usando el mismo campeón y modificá una sola pieza durante las próximas 5 partidas.',
+        ? tr('insights.conservaSusObjetosPrincipales')
+        : tr('insights.comparaSusPrimeros3'),
       sample: entry.games, effect: entry.wr - summarize(ctx.matches).wr,
-      evidence: [`${entry.build.champion_name}`, `${percent(entry.wr)} de winrate`, entry.inferred ? 'Vínculo estimado' : 'Vínculo directo'],
+      evidence: [`${entry.build.champion_name}`, tr('insights.deWinrate', { percent: percent(entry.wr) }), entry.inferred ? tr('insights.vinculoEstimado') : tr('insights.vinculoDirecto')],
       entities: [entry.build.champion_name, entry.build.name], score: 79, sources: ['partidas', 'builds'],
     }));
   } else if (unused.length >= 2) {
     cards.push(makeCard({
-      id: 'unused-builds', domain: 'build', tone: 'neutral', title: 'Tus builds guardadas todavía no tienen evidencia de uso',
-      thesis: `${unused.length} de tus ${ctx.builds.length} builds guardadas no tienen partidas vinculadas ni una coincidencia suficiente de objetos. Por ese motivo, el Coach puede leer su contenido, pero todavía no puede comparar su rendimiento real.`,
-      action: 'Elegí una build, vinculala explícitamente al registrar la partida y usala al menos 3 veces antes de crear otra variante.',
-      sample: ctx.builds.length, evidence: [`${unused.length} sin uso medible`, `${ctx.builds.length} guardadas`],
+      id: 'unused-builds', domain: 'build', tone: 'neutral', title: tr('insights.tusBuildsGuardadasTodavia'),
+      thesis: tr('insights.deTusBuildsGuardadas', { length: unused.length, length2: ctx.builds.length }),
+      action: tr('insights.elegiUnaBuildVinculala'),
+      sample: ctx.builds.length, evidence: [tr('insights.sinUsoMedible', { length: unused.length }), tr('insights.guardadas', { length: ctx.builds.length })],
       score: 60, sources: ['builds', 'partidas'],
     }));
   }
   if (stale.length >= 2) {
     cards.push(makeCard({
-      id: 'stale-builds', domain: 'meta', tone: 'warning', title: 'Parte de tus builds pertenece a un parche anterior',
-      thesis: `${stale.length} builds fueron guardadas en un parche diferente del ${ctx.latestPatch}, que es el parche más reciente disponible en la tierlist. Esto no significa que sean inválidas, pero sí que sus objetos y runas deben volver a comprobarse antes de tratarlas como opciones actuales.`,
-      action: 'Revisá primero las builds de tus 2 campeones más usados y actualizá únicamente las piezas afectadas por el parche.',
-      sample: stale.length, evidence: [`Parche actual: ${ctx.latestPatch}`, `${stale.length} builds anteriores`],
+      id: 'stale-builds', domain: 'meta', tone: 'warning', title: tr('insights.parteDeTusBuilds'),
+      thesis: tr('insights.buildsFueronGuardadasEn', { length: stale.length, latestPatch: ctx.latestPatch }),
+      action: tr('insights.revisaPrimeroLasBuilds'),
+      sample: stale.length, evidence: [tr('insights.parcheActual', { latestPatch: ctx.latestPatch }), tr('insights.buildsAnteriores', { length: stale.length })],
       score: 70, sources: ['builds', 'tierlist'],
     }));
   }
@@ -767,7 +768,7 @@ function detectFoundationSignals(ctx) {
   const mostUsedRune = runes[0];
   const mostFrequentEnemy = enemies[0];
   const mostUsedSpells = spellPairs[0];
-  const laneLabels = { top: 'Baron Lane', jungler: 'Jungla', mid: 'Mid', dragonline: 'Dragon Lane', adc: 'Dragon Lane', support: 'Support' };
+  const laneLabels = { top: tr('insights.baronLane'), jungler: tr('lanes.jungler'), mid: tr('lanes.mid'), dragonline: tr('champion.lane.Dragonlane'), adc: tr('champion.lane.Dragonlane'), support: tr('lanes.support') };
   const mainLaneLabel = laneLabels[mainLane?.name] || mainLane?.name;
   const laneCombatSegments = lanes
     .filter(lane => lane.games >= 4)
@@ -789,95 +790,95 @@ function detectFoundationSignals(ctx) {
 
   return [
     makeCard({
-      id: 'foundation-overall-performance', domain: 'rendimiento general', tone: overall.wr >= 50 ? 'positive' : 'warning',
-      title: `Tu rendimiento general es de ${percent(overall.wr)} de winrate`,
-      thesis: `Ganaste ${overall.wins} de las ${total} partidas analizadas y perdiste ${total - overall.wins}. Este valor funciona como tu referencia personal: los demás insights comparan campeones, builds y matchups contra este rendimiento, no contra el promedio de otros jugadores.`,
-      action: 'Usá este promedio como punto de control y evaluá los cambios únicamente cuando una decisión tenga varias partidas comparables.',
-      sample: total, evidence: [`${overall.wins} victorias`, `${total - overall.wins} derrotas`, `${percent(overall.wr)} de winrate`],
+      id: 'foundation-overall-performance', domain: tr('insights.rendimientoGeneral'), tone: overall.wr >= 50 ? 'positive' : 'warning',
+      title: tr('insights.tuRendimientoGeneralEs', { percent: percent(overall.wr) }),
+      thesis: tr('insights.ganasteDeLasPartidas', { wins: overall.wins, total, value: total - overall.wins }),
+      action: tr('insights.usaEstePromedioComo'),
+      sample: total, evidence: [tr('insights.victorias', { wins: overall.wins }), tr('insights.derrotas', { value: total - overall.wins }), tr('insights.deWinrate', { percent: percent(overall.wr) })],
       score: 18, sources: ['partidas'],
     }),
     mainLane && makeCard({
       id: `foundation-lane-${keyOf(mainLane.name)}`, domain: 'rol', tone: 'neutral',
-      title: `${mainLaneLabel} es tu rol con mayor volumen`,
-      thesis: `Jugaste ${games(mainLane.games)} en ${mainLaneLabel}, que representan el ${percent((mainLane.games / total) * 100)} de tu historial, con ${percent(mainLane.wr)} de winrate. Es la línea donde tus estadísticas tienen mayor respaldo y, por lo tanto, la mejor referencia para evaluar campeones y builds.`,
-      action: `Compará cualquier cambio de rol contra tu ${percent(mainLane.wr)} en ${mainLaneLabel}, sin mezclar ambas muestras.`,
-      sample: mainLane.games, evidence: [`${games(mainLane.games)}`, `${percent(mainLane.wr)} de winrate`, `${percent((mainLane.games / total) * 100)} del historial`],
+      title: tr('insights.esTuRolCon', { mainLaneLabel }),
+      thesis: tr('insights.jugasteEnQueRepresentan', { games: games(mainLane.games), mainLaneLabel, percent: percent((mainLane.games / total) * 100), percent2: percent(mainLane.wr) }),
+      action: tr('insights.comparaCualquierCambioDe', { percent: percent(mainLane.wr), mainLaneLabel }),
+      sample: mainLane.games, evidence: [`${games(mainLane.games)}`, tr('insights.deWinrate', { percent: percent(mainLane.wr) }), tr('insights.delHistorial', { percent: percent((mainLane.games / total) * 100) })],
       score: 25, sources: ['partidas'],
     }),
     makeCard({
       id: 'foundation-recent-reference', domain: 'forma', tone: recent.wr >= overall.wr ? 'positive' : 'warning',
-      title: `Tus últimas ${recent.games} partidas están en ${percent(recent.wr)} de winrate`,
-      thesis: `El bloque reciente registra ${percent(recent.wr)}, mientras que tu historial completo está en ${percent(overall.wr)}. Esta comparación no define una tendencia por sí sola, pero muestra si tu rendimiento inmediato está por encima o por debajo de la referencia acumulada.`,
-      action: `Completá otras ${recent.games} partidas sin cambiar drásticamente de pool y compará ambos bloques bajo condiciones similares.`,
-      sample: recent.games, evidence: [`Últimas ${recent.games}: ${percent(recent.wr)}`, `General: ${percent(overall.wr)}`],
+      title: tr('insights.tusUltimasPartidasEstan', { games: recent.games, percent: percent(recent.wr) }),
+      thesis: tr('insights.elBloqueRecienteRegistra', { percent: percent(recent.wr), percent2: percent(overall.wr) }),
+      action: tr('insights.completaOtrasPartidasSin', { games: recent.games }),
+      sample: recent.games, evidence: [tr('insights.ultimas2', { games: recent.games, percent: percent(recent.wr) }), tr('insights.general', { percent: percent(overall.wr) })],
       score: 24, sources: ['partidas'],
     }),
     makeCard({
       id: 'foundation-survival', domain: 'supervivencia', tone: overall.avgDeaths <= 5 ? 'positive' : 'warning',
-      title: `Promediás ${overall.avgDeaths.toFixed(1)} muertes por partida`,
-      thesis: `La cifra se calcula sobre tus ${games(total)} y permite medir estabilidad entre bloques, campeones y matchups. Por sí sola no determina si jugaste bien, pero un aumento sostenido suele reducir el margen para disputar objetivos y cerrar partidas.`,
-      action: 'Compará este promedio con tus próximos bloques y registrá especialmente las muertes anteriores al primer objetivo importante.',
-      sample: total, evidence: [`${overall.avgDeaths.toFixed(1)} muertes`, `${games(total)}`],
+      title: tr('insights.promediasMuertesPorPartida', { value: overall.avgDeaths.toFixed(1) }),
+      thesis: tr('insights.laCifraSeCalcula', { games: games(total) }),
+      action: tr('insights.comparaEstePromedioCon'),
+      sample: total, evidence: [tr('insights.muertes', { value: overall.avgDeaths.toFixed(1) }), `${games(total)}`],
       score: 20, sources: ['partidas'],
     }),
     laneCombatSegments.length > 0 && makeCard({
-      id: 'foundation-offensive-profile', domain: 'producción ofensiva', tone: 'neutral',
+      id: 'foundation-offensive-profile', domain: tr('insights.produccionOfensiva'), tone: 'neutral',
       title: laneCombatSegments.length === 1
-        ? `Tu perfil ofensivo en ${laneCombatSegments[0].name}`
-        : 'Tu perfil ofensivo cambia según la línea',
-      thesis: laneCombatSegments.map(segment => `${segment.name}: ${segment.kills.toFixed(1)} / ${segment.deaths.toFixed(1)} / ${segment.assists.toFixed(1)} → KDA ${segment.kda.toFixed(2)} en ${games(segment.games)}.`).join(' '),
-      action: 'Compará cada línea por separado: buscá aumentar asesinatos y asistencias sin superar su propio promedio de muertes, evitando mezclar roles con responsabilidades distintas.',
+        ? tr('insights.tuPerfilOfensivoEn', { name: laneCombatSegments[0].name })
+        : tr('insights.tuPerfilOfensivoCambia'),
+      thesis: laneCombatSegments.map(segment => tr('insights.kdaEn', { name: segment.name, value: segment.kills.toFixed(1), value2: segment.deaths.toFixed(1), value3: segment.assists.toFixed(1), value4: segment.kda.toFixed(2), games: games(segment.games) })).join(' '),
+      action: tr('insights.comparaCadaLineaPor'),
       sample: laneCombatSegments.reduce((sum, segment) => sum + segment.games, 0),
-      evidence: laneCombatSegments.map(segment => `${segment.name}: KDA ${segment.kda.toFixed(2)} (${segment.games})`),
+      evidence: laneCombatSegments.map(segment => tr('insights.kda', { name: segment.name, value: segment.kda.toFixed(2), games: segment.games })),
       score: 19, sources: ['partidas'],
     }),
     blue && red && makeCard({
-      id: 'foundation-side-comparison', domain: 'lado del mapa', tone: 'neutral',
-      title: 'Tu rendimiento cambia según el lado del mapa',
-      thesis: `En lado azul tenés ${percent(blue.wr)} de winrate en ${games(blue.games)}; en lado rojo, ${percent(red.wr)} en ${games(red.games)}. La diferencia puede estar asociada al orden de selección, los objetivos o la composición, por lo que conviene observarla junto con el draft.`,
-      action: 'Compará en cada lado qué campeones seleccionás y cuántas veces obtenés tu pick principal antes de atribuir la diferencia al mapa.',
+      id: 'foundation-side-comparison', domain: tr('insights.ladoDelMapa'), tone: 'neutral',
+      title: tr('insights.tuRendimientoCambiaSegun'),
+      thesis: tr('insights.enLadoAzulTenes', { percent: percent(blue.wr), games: games(blue.games), percent2: percent(red.wr), games2: games(red.games) }),
+      action: tr('insights.comparaEnCadaLado'),
       sample: blue.games + red.games, effect: blue.wr - red.wr,
-      evidence: [`Azul: ${percent(blue.wr)} (${blue.games})`, `Rojo: ${percent(red.wr)} (${red.games})`],
+      evidence: [tr('insights.azul', { percent: percent(blue.wr), games: blue.games }), tr('insights.rojo', { percent: percent(red.wr), games: red.games })],
       score: 27, sources: ['partidas'],
     }),
     mostUsedItem && makeCard({
-      id: `foundation-item-${keyOf(mostUsedItem.name)}`, domain: 'objeto frecuente', tone: 'neutral',
-      title: `${mostUsedItem.name} es tu objeto más repetido`,
-      thesis: `Aparece en ${games(mostUsedItem.games)}, que representan el ${percent((mostUsedItem.games / total) * 100)} de tu historial, y esas partidas registran ${percent(mostUsedItem.wr)} de winrate. El dato describe frecuencia y resultado conjunto; no prueba que el objeto sea la causa del rendimiento.`,
-      action: `Compará ${mostUsedItem.name} dentro del mismo campeón y contra una alternativa concreta antes de convertirlo en una compra automática.`,
-      sample: mostUsedItem.games, evidence: [`${games(mostUsedItem.games)}`, `${percent(mostUsedItem.wr)} de winrate`],
+      id: `foundation-item-${keyOf(mostUsedItem.name)}`, domain: tr('insights.objetoFrecuente'), tone: 'neutral',
+      title: tr('insights.esTuObjetoMas', { name: mostUsedItem.name }),
+      thesis: tr('insights.apareceEnQueRepresentan', { games: games(mostUsedItem.games), percent: percent((mostUsedItem.games / total) * 100), percent2: percent(mostUsedItem.wr) }),
+      action: tr('insights.comparaDentroDelMismo', { name: mostUsedItem.name }),
+      sample: mostUsedItem.games, evidence: [`${games(mostUsedItem.games)}`, tr('insights.deWinrate', { percent: percent(mostUsedItem.wr) })],
       entities: [mostUsedItem.name], score: 23, sources: ['partidas', 'objetos'],
     }),
     mostUsedRune && makeCard({
-      id: `foundation-rune-${keyOf(mostUsedRune.name)}`, domain: 'runa frecuente', tone: 'neutral',
-      title: `${mostUsedRune.name} es tu runa más utilizada`,
-      thesis: `La usaste en ${games(mostUsedRune.games)} y esas partidas alcanzan ${percent(mostUsedRune.wr)} de winrate. Para interpretar la cifra correctamente debe compararse dentro del mismo campeón, porque una runa usada por varios picks mezcla planes de juego diferentes.`,
-      action: `Mantené ${mostUsedRune.name} fija durante un bloque con el mismo campeón y comparala después contra una sola alternativa.`,
-      sample: mostUsedRune.games, evidence: [`${games(mostUsedRune.games)}`, `${percent(mostUsedRune.wr)} de winrate`],
+      id: `foundation-rune-${keyOf(mostUsedRune.name)}`, domain: tr('insights.runaFrecuente'), tone: 'neutral',
+      title: tr('insights.esTuRunaMas', { name: mostUsedRune.name }),
+      thesis: tr('insights.laUsasteEnY', { games: games(mostUsedRune.games), percent: percent(mostUsedRune.wr) }),
+      action: tr('insights.manteneFijaDuranteUn', { name: mostUsedRune.name }),
+      sample: mostUsedRune.games, evidence: [`${games(mostUsedRune.games)}`, tr('insights.deWinrate', { percent: percent(mostUsedRune.wr) })],
       entities: [mostUsedRune.name], score: 22, sources: ['partidas', 'runas'],
     }),
     mostFrequentEnemy && makeCard({
-      id: `foundation-enemy-${keyOf(mostFrequentEnemy.name)}`, domain: 'rival frecuente', tone: mostFrequentEnemy.wr >= overall.wr ? 'positive' : 'warning',
-      title: `${mostFrequentEnemy.name} es el rival que más aparece en tu historial`,
-      thesis: `Estuvo presente en ${games(mostFrequentEnemy.games)} del equipo enemigo y tu winrate en esas partidas fue de ${percent(mostFrequentEnemy.wr)}, frente a tu ${percent(overall.wr)} general. La muestra incluye rival directo y composición completa, por lo que todavía no equivale a un matchup de línea.`,
-      action: `Separá las partidas donde ${mostFrequentEnemy.name} fue rival directo de aquellas donde ocupó otra línea y compará ambos resultados.`,
-      sample: mostFrequentEnemy.games, evidence: [`${games(mostFrequentEnemy.games)}`, `${percent(mostFrequentEnemy.wr)} de winrate`],
+      id: `foundation-enemy-${keyOf(mostFrequentEnemy.name)}`, domain: tr('insights.rivalFrecuente'), tone: mostFrequentEnemy.wr >= overall.wr ? 'positive' : 'warning',
+      title: tr('insights.esElRivalQue', { name: mostFrequentEnemy.name }),
+      thesis: tr('insights.estuvoPresenteEnDel', { games: games(mostFrequentEnemy.games), percent: percent(mostFrequentEnemy.wr), percent2: percent(overall.wr) }),
+      action: tr('insights.separaLasPartidasDonde', { name: mostFrequentEnemy.name }),
+      sample: mostFrequentEnemy.games, evidence: [`${games(mostFrequentEnemy.games)}`, tr('insights.deWinrate', { percent: percent(mostFrequentEnemy.wr) })],
       entities: [mostFrequentEnemy.name], score: 21, sources: ['partidas', 'composiciones'],
     }),
     mostUsedSpells && makeCard({
-      id: `foundation-spells-${keyOf(mostUsedSpells.name)}`, domain: 'hechizos frecuentes', tone: 'neutral',
-      title: `${mostUsedSpells.name} es tu combinación de hechizos más usada`,
-      thesis: `La combinación aparece en ${games(mostUsedSpells.games)} y registra ${percent(mostUsedSpells.wr)} de winrate. Su frecuencia muestra tu configuración predeterminada, pero el valor estratégico depende del campeón y del matchup en que la elegís.`,
-      action: 'Identificá en qué matchups cambiás uno de estos hechizos y compará ese grupo por separado.',
-      sample: mostUsedSpells.games, evidence: [`${games(mostUsedSpells.games)}`, `${percent(mostUsedSpells.wr)} de winrate`],
+      id: `foundation-spells-${keyOf(mostUsedSpells.name)}`, domain: tr('insights.hechizosFrecuentes'), tone: 'neutral',
+      title: tr('insights.esTuCombinacionDe', { name: mostUsedSpells.name }),
+      thesis: tr('insights.laCombinacionApareceEn', { games: games(mostUsedSpells.games), percent: percent(mostUsedSpells.wr) }),
+      action: tr('insights.identificaEnQueMatchups'),
+      sample: mostUsedSpells.games, evidence: [`${games(mostUsedSpells.games)}`, tr('insights.deWinrate', { percent: percent(mostUsedSpells.wr) })],
       score: 20, sources: ['partidas', 'hechizos'],
     }),
     mainChampion && makeCard({
       id: `foundation-champion-${keyOf(mainChampion.name)}`, domain: 'pool', tone: mainChampion.wr >= overall.wr ? 'positive' : 'warning',
-      title: `${mainChampion.name} es tu campeón más jugado`,
-      thesis: `Acumula ${games(mainChampion.games)}, equivalentes al ${percent((mainChampion.games / total) * 100)} de tu historial, con ${percent(mainChampion.wr)} de winrate. Tu promedio general es ${percent(overall.wr)}, por lo que esta comparación muestra si tu pick con mayor volumen está impulsando o frenando el resultado global.`,
-      action: `Tomá el ${percent(mainChampion.wr)} de ${mainChampion.name} como referencia y compará por separado sus builds y matchups más repetidos.`,
-      sample: mainChampion.games, evidence: [`${games(mainChampion.games)}`, `${percent(mainChampion.wr)} de winrate`],
+      title: tr('insights.esTuCampeonMas3', { name: mainChampion.name }),
+      thesis: tr('insights.acumulaEquivalentesAlDe', { games: games(mainChampion.games), percent: percent((mainChampion.games / total) * 100), percent2: percent(mainChampion.wr), percent3: percent(overall.wr) }),
+      action: tr('insights.tomaElDeComo', { percent: percent(mainChampion.wr), name: mainChampion.name }),
+      sample: mainChampion.games, evidence: [`${games(mainChampion.games)}`, tr('insights.deWinrate', { percent: percent(mainChampion.wr) })],
       entities: [mainChampion.name], score: 21, sources: ['partidas'],
     }),
   ].filter(Boolean);
@@ -962,10 +963,10 @@ export function computeInsightReport({
 
   if (!candidates.length) {
     candidates.push(makeCard({
-      id: 'learning-mode', domain: 'calidad', tone: 'neutral', title: 'Todavía no hay un patrón suficientemente consistente',
-      thesis: `El Coach analizó ${games(normalizedMatches.length)}, pero no encontró una diferencia que combine suficiente tamaño de muestra y contraste entre decisiones. En lugar de convertir una variación pequeña en una recomendación, mantiene el resultado abierto hasta contar con más contexto.`,
-      action: 'En las próximas partidas completá build, runas, hechizos, matchup y tags; esos datos permiten comparar decisiones similares bajo contextos equivalentes.',
-      sample: normalizedMatches.length, evidence: [`${games(normalizedMatches.length)}`, 'Sin patrón robusto'], score: 50,
+      id: 'learning-mode', domain: 'calidad', tone: 'neutral', title: tr('insights.todaviaNoHayUn'),
+      thesis: tr('insights.elCoachAnalizoPero', { games: games(normalizedMatches.length) }),
+      action: tr('insights.enLasProximasPartidas3'),
+      sample: normalizedMatches.length, evidence: [`${games(normalizedMatches.length)}`, tr('insights.sinPatronRobusto')], score: 50,
       sources: ['partidas'],
     }));
   }

@@ -7,12 +7,14 @@ import { useGoalMutations } from '../hooks/useGoals';
 import { editPermissions, goalToInput, validateGoalUpdate } from '../validation/goalSchema';
 import GoalConfigForm from './form/GoalConfigForm';
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from './goalUi';
+import { useT } from '@/lib/LocaleContext';
 
 /**
  * Edición de un objetivo según las reglas de período y ciclo de vida.
  * @param {{ goal: any, now: Date }} props
  */
 export default function GoalEditor({ goal, now }) {
+  const t = useT();
   const navigate = useNavigate();
   const { champions } = useGoalCatalog();
   const { update } = useGoalMutations();
@@ -29,12 +31,12 @@ export default function GoalEditor({ goal, now }) {
     }
     update.mutate({ goal, input }, {
       onSuccess: () => {
-        notify({ title: 'Objetivo actualizado', description: 'El progreso se recalculó con la nueva configuración.' });
+        notify({ title: t('goals.editor.updated'), description: t('goals.editor.updatedDescription') });
         navigate(`/objetivos/${goal.id}`);
       },
       onError: error => {
         if (/** @type {any} */ (error)?.errors) setErrors(/** @type {any} */ (error).errors);
-        notify({ variant: 'destructive', title: 'No se pudo guardar', description: error?.message || 'Intentá nuevamente.' });
+        notify({ variant: 'destructive', title: t('goals.editor.saveError'), description: error?.message || t('common.tryAgain') });
       },
     });
   };
@@ -43,9 +45,9 @@ export default function GoalEditor({ goal, now }) {
     <div className="rd-goal-flow space-y-4">
       <div className="space-y-1">
         <Link to={`/objetivos/${goal.id}`} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-          <ArrowLeft size={14} /> Volver al objetivo
+          <ArrowLeft size={14} /> {t('goals.editor.backToGoal')}
         </Link>
-        <h1 className="font-rajdhani text-3xl font-bold uppercase tracking-[-0.06em] text-foreground md:text-4xl">Editar objetivo</h1>
+        <h1 className="font-rajdhani text-3xl font-bold uppercase tracking-[-0.06em] text-foreground md:text-4xl">{t('goals.editor.title')}</h1>
       </div>
 
       <section className="rd-card rd-goal-flow-body rd-goal-step flex flex-col gap-4 p-4 md:p-5">
@@ -60,9 +62,9 @@ export default function GoalEditor({ goal, now }) {
           />
         </div>
         <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">
-          <Link to={`/objetivos/${goal.id}`} className={BUTTON_SECONDARY}>Cancelar</Link>
+          <Link to={`/objetivos/${goal.id}`} className={BUTTON_SECONDARY}>{t('common.cancel')}</Link>
           <button type="button" onClick={save} disabled={update.isPending} className={BUTTON_PRIMARY}>
-            <Save size={15} /> {update.isPending ? 'Guardando...' : 'Guardar cambios'}
+            <Save size={15} /> {update.isPending ? t('common.saving') : t('common.saveChanges')}
           </button>
         </div>
       </section>

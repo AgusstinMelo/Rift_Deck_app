@@ -4,6 +4,7 @@
 // Las fórmulas se reutilizan de src/domain/matchStats.js.
 import { averageOf, matchKda, percentageOf, sumOf, winratePct } from '../../../domain/matchStats.js';
 import { AGGREGATION, EXCLUSION_REASON, METRIC_FAMILY, METRIC_KIND, OPERATOR } from '../model/goalConstants.js';
+import { labels, tr } from '../../../i18n/uiI18n.js';
 import {
   championMatchesAny, championOf, countStatOf, deathsOf, durationOf, goldOf, resultOf,
 } from '../engine/matchFacts.js';
@@ -13,28 +14,24 @@ const BOTH_DIRECTIONS = [OPERATOR.GTE, OPERATOR.LTE];
 
 /** Datos que se leen de cada partida. */
 export const STATS = {
-  partidas: { label: 'Partidas' },
-  victorias: { label: 'Victorias' },
+  partidas: { },
+  victorias: { },
   asesinatos: {
-    label: 'Asesinatos',
     unit: 'asesinatos',
     read: match => countStatOf(match, 'kills'),
     missing: { reason: EXCLUSION_REASON.MISSING_KILLS, field: 'kills' },
   },
   muertes: {
-    label: 'Muertes',
     unit: 'muertes',
     read: deathsOf,
     missing: { reason: EXCLUSION_REASON.MISSING_DEATHS, field: 'deaths' },
   },
   asistencias: {
-    label: 'Asistencias',
     unit: 'asistencias',
     read: match => countStatOf(match, 'assists'),
     missing: { reason: EXCLUSION_REASON.MISSING_ASSISTS, field: 'assists' },
   },
   kda: {
-    label: 'KDA',
     unit: '',
     read: match => {
       const kills = countStatOf(match, 'kills');
@@ -45,27 +42,30 @@ export const STATS = {
     missing: { reason: EXCLUSION_REASON.MISSING_KDA, field: 'kda' },
   },
   oro: {
-    label: 'Oro',
     unit: 'de oro',
     read: goldOf,
     missing: { reason: EXCLUSION_REASON.MISSING_GOLD, field: 'gold' },
   },
   duracion: {
-    label: 'Duración',
     unit: 'min',
     read: durationOf,
     missing: { reason: EXCLUSION_REASON.MISSING_DURATION, field: 'duration_minutes' },
   },
-  campeones: { label: 'Campeones elegidos' },
-  manual: { label: 'Hábito propio (check-ins)' },
+  campeones: { },
+  manual: { },
 };
 
-export const AGGREGATION_LABELS = {
-  [AGGREGATION.TOTAL]: 'Total (suma)',
-  [AGGREGATION.AVERAGE]: 'Promedio por partida',
-  [AGGREGATION.BEST]: 'En una sola partida',
-  [AGGREGATION.PERCENTAGE]: 'Porcentaje de partidas',
-};
+// Etiqueta visible de cada dato (goals.stat.<id>), en el idioma activo.
+for (const id of Object.keys(STATS)) {
+  Object.defineProperty(STATS[id], 'label', { enumerable: true, get: () => tr(`goals.stat.${id}`) });
+}
+
+export const AGGREGATION_LABELS = labels({
+  [AGGREGATION.TOTAL]: 'goals.aggregation.total',
+  [AGGREGATION.AVERAGE]: 'goals.aggregation.average',
+  [AGGREGATION.BEST]: 'goals.aggregation.best',
+  [AGGREGATION.PERCENTAGE]: 'goals.aggregation.percentage',
+});
 
 /** Medición de un dato numérico: valor o motivo de exclusión. */
 function measureStat(stat) {
@@ -94,11 +94,11 @@ function base(statId, aggregation) {
  * Promedio por partida (rendimiento): admite "al menos" y "como máximo".
  * @returns {import('./registry.js').MetricDefinition}
  */
-function averageOfStat(statId, { id, label, description, decimals, operator, target }) {
+function averageOfStat(statId, { id, decimals, operator, target }) {
   const stat = STATS[statId];
   return {
     ...base(statId, AGGREGATION.AVERAGE),
-    id, label, description,
+    id,
     family: METRIC_FAMILY.AVERAGE,
     kind: METRIC_KIND.PERFORMANCE,
     operator,
@@ -116,11 +116,11 @@ function averageOfStat(statId, { id, label, description, decimals, operator, tar
  * Total del período (acumulativo): solo crece, la meta es "al menos".
  * @returns {import('./registry.js').MetricDefinition}
  */
-function totalOfStat(statId, { id, label, description, decimals, target }) {
+function totalOfStat(statId, { id, decimals, target }) {
   const stat = STATS[statId];
   return {
     ...base(statId, AGGREGATION.TOTAL),
-    id, label, description,
+    id,
     family: METRIC_FAMILY.CUMULATIVE,
     kind: METRIC_KIND.CUMULATIVE,
     operator: OPERATOR.GTE,
@@ -139,12 +139,12 @@ function totalOfStat(statId, { id, label, description, decimals, target }) {
  * Con `lowest` se busca la partida con menos (por ejemplo, 0 muertes) y la meta es "como máximo".
  * @returns {import('./registry.js').MetricDefinition}
  */
-function bestOfStat(statId, { id, label, description, decimals, target, lowest = false, measure = null }) {
+function bestOfStat(statId, { id, decimals, target, lowest = false, measure = null }) {
   const stat = STATS[statId];
   const operator = lowest ? OPERATOR.LTE : OPERATOR.GTE;
   return {
     ...base(statId, AGGREGATION.BEST),
-    id, label, description,
+    id,
     family: METRIC_FAMILY.RECORD,
     kind: METRIC_KIND.CUMULATIVE,
     operator,
@@ -166,8 +166,6 @@ const range = (min, max, step, integer, defaultValue) => ({ min, max, step, inte
 export const partidasRegistradas = {
   ...base('partidas', AGGREGATION.TOTAL),
   id: 'partidas_registradas',
-  label: 'Partidas registradas',
-  description: 'Cantidad de partidas registradas en el período que cumplen los filtros.',
   family: METRIC_FAMILY.CUMULATIVE,
   kind: METRIC_KIND.CUMULATIVE,
   operator: OPERATOR.GTE,
@@ -184,8 +182,6 @@ export const partidasRegistradas = {
 export const victorias = {
   ...base('victorias', AGGREGATION.TOTAL),
   id: 'victorias',
-  label: 'Victorias',
-  description: 'Cantidad de partidas ganadas en el período que cumplen los filtros.',
   family: METRIC_FAMILY.CUMULATIVE,
   kind: METRIC_KIND.CUMULATIVE,
   operator: OPERATOR.GTE,
@@ -203,102 +199,86 @@ export const victorias = {
 };
 
 export const sumaAsesinatos = totalOfStat('asesinatos', {
-  id: 'suma_asesinatos', label: 'Asesinatos totales', decimals: 0,
-  description: 'Suma de los asesinatos de las partidas del período que tienen ese dato registrado.',
+  id: 'suma_asesinatos', decimals: 0,
   target: range(1, 5000, 1, true, 100),
 });
 
 export const sumaAsistencias = totalOfStat('asistencias', {
-  id: 'suma_asistencias', label: 'Asistencias totales', decimals: 0,
-  description: 'Suma de las asistencias de las partidas del período que tienen ese dato registrado.',
+  id: 'suma_asistencias', decimals: 0,
   target: range(1, 10000, 1, true, 150),
 });
 
 export const sumaOro = totalOfStat('oro', {
-  id: 'suma_oro', label: 'Oro total', decimals: 0,
-  description: 'Suma del oro de las partidas del período que tienen ese dato registrado.',
+  id: 'suma_oro', decimals: 0,
   target: range(1000, 5000000, 1000, true, 100000),
 });
 
 export const sumaDuracion = totalOfStat('duracion', {
-  id: 'suma_duracion', label: 'Tiempo jugado', decimals: 0,
-  description: 'Suma de la duración (en minutos) de las partidas del período que tienen ese dato registrado.',
+  id: 'suma_duracion', decimals: 0,
   target: range(1, 20000, 1, true, 300),
 });
 
 // ---------------------------------------------------------------- Promedios
 
 export const promedioMuertes = averageOfStat('muertes', {
-  id: 'promedio_muertes', label: 'Promedio de muertes', decimals: 2, operator: OPERATOR.LTE,
-  description: 'Promedio de muertes de las partidas que tienen ese dato registrado.',
+  id: 'promedio_muertes', decimals: 2, operator: OPERATOR.LTE,
   target: range(0.1, 30, 0.1, false, 4),
 });
 
 export const promedioKda = averageOfStat('kda', {
-  id: 'promedio_kda', label: 'KDA promedio', decimals: 2, operator: OPERATOR.GTE,
-  description: 'Promedio del KDA de cada partida, (asesinatos + asistencias) / muertes, en las partidas con K, D y A registrados.',
+  id: 'promedio_kda', decimals: 2, operator: OPERATOR.GTE,
   target: range(0.1, 50, 0.1, false, 3),
 });
 
 export const promedioAsesinatos = averageOfStat('asesinatos', {
-  id: 'promedio_asesinatos', label: 'Promedio de asesinatos', decimals: 2, operator: OPERATOR.GTE,
-  description: 'Promedio de asesinatos de las partidas que tienen ese dato registrado.',
+  id: 'promedio_asesinatos', decimals: 2, operator: OPERATOR.GTE,
   target: range(0.1, 40, 0.1, false, 6),
 });
 
 export const promedioAsistencias = averageOfStat('asistencias', {
-  id: 'promedio_asistencias', label: 'Promedio de asistencias', decimals: 2, operator: OPERATOR.GTE,
-  description: 'Promedio de asistencias de las partidas que tienen ese dato registrado.',
+  id: 'promedio_asistencias', decimals: 2, operator: OPERATOR.GTE,
   target: range(0.1, 50, 0.1, false, 8),
 });
 
 export const promedioOro = averageOfStat('oro', {
-  id: 'promedio_oro', label: 'Oro promedio', decimals: 0, operator: OPERATOR.GTE,
-  description: 'Promedio de oro por partida en las partidas que tienen ese dato registrado.',
+  id: 'promedio_oro', decimals: 0, operator: OPERATOR.GTE,
   target: range(100, 50000, 100, true, 10000),
 });
 
 export const promedioDuracion = averageOfStat('duracion', {
-  id: 'promedio_duracion', label: 'Duración promedio', decimals: 1, operator: OPERATOR.LTE,
-  description: 'Duración promedio de las partidas (en minutos) que tienen ese dato registrado.',
+  id: 'promedio_duracion', decimals: 1, operator: OPERATOR.LTE,
   target: range(1, 60, 0.5, false, 18),
 });
 
 // ---------------------------------------------------------------- Mejor partida
 
 export const maxAsesinatos = bestOfStat('asesinatos', {
-  id: 'max_asesinatos', label: 'Asesinatos en una partida', decimals: 0,
-  description: 'Se cumple cuando una sola partida del período llega a esa cantidad de asesinatos.',
+  id: 'max_asesinatos', decimals: 0,
   target: range(1, 60, 1, true, 20),
 });
 
 export const maxAsistencias = bestOfStat('asistencias', {
-  id: 'max_asistencias', label: 'Asistencias en una partida', decimals: 0,
-  description: 'Se cumple cuando una sola partida del período llega a esa cantidad de asistencias.',
+  id: 'max_asistencias', decimals: 0,
   target: range(1, 80, 1, true, 20),
 });
 
 export const maxOro = bestOfStat('oro', {
-  id: 'max_oro', label: 'Oro en una partida', decimals: 0,
-  description: 'Se cumple cuando una sola partida del período llega a esa cantidad de oro.',
+  id: 'max_oro', decimals: 0,
   target: range(1000, 80000, 500, true, 20000),
 });
 
 export const maxKda = bestOfStat('kda', {
-  id: 'max_kda', label: 'KDA en una partida', decimals: 2,
-  description: 'Se cumple cuando una sola partida del período llega a ese KDA.',
+  id: 'max_kda', decimals: 2,
   target: range(0.5, 100, 0.5, false, 10),
 });
 
 export const minMuertes = bestOfStat('muertes', {
-  id: 'min_muertes', label: 'Muertes en una partida', decimals: 0, lowest: true,
-  description: 'Se cumple cuando una sola partida del período termina con esa cantidad de muertes o menos (0 = sin morir).',
+  id: 'min_muertes', decimals: 0, lowest: true,
   target: range(0, 20, 1, true, 0),
 });
 
 export const minDuracion = bestOfStat('duracion', {
-  id: 'min_duracion', label: 'Victoria más rápida', decimals: 1, lowest: true,
-  description: 'Se cumple cuando ganás una partida que dura esos minutos o menos. Solo cuentan las victorias.',
+  id: 'min_duracion', decimals: 1, lowest: true,
   target: range(5, 60, 0.5, false, 15),
   measure: match => {
     const result = resultOf(match);
@@ -315,8 +295,6 @@ export const minDuracion = bestOfStat('duracion', {
 export const winrate = {
   ...base('victorias', AGGREGATION.PERCENTAGE),
   id: 'winrate',
-  label: 'Winrate',
-  description: 'Victorias sobre partidas con resultado conocido, en porcentaje.',
   family: METRIC_FAMILY.PERCENTAGE,
   kind: METRIC_KIND.PERFORMANCE,
   operator: OPERATOR.GTE,
@@ -337,8 +315,6 @@ export const winrate = {
 export const porcentajeCampeones = {
   ...base('campeones', AGGREGATION.PERCENTAGE),
   id: 'porcentaje_campeones',
-  label: 'Porcentaje con campeones',
-  description: 'Partidas jugadas con los campeones elegidos sobre todas las partidas del período que cumplen los demás filtros.',
   family: METRIC_FAMILY.PERCENTAGE,
   kind: METRIC_KIND.PERFORMANCE,
   operator: OPERATOR.GTE,
@@ -365,8 +341,6 @@ export const manual = {
   stat: 'manual',
   aggregation: AGGREGATION.TOTAL,
   id: 'manual',
-  label: 'Manual',
-  description: 'Suma de los check-ins que registres a mano.',
   family: METRIC_FAMILY.MANUAL,
   kind: METRIC_KIND.CUMULATIVE,
   operator: OPERATOR.GTE,

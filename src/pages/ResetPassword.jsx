@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Eye, EyeOff, KeyRound, Loader2, Lock } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import wordmarkUrl from '@/assets/riftdeck-final.png';
+import { useT } from '@/lib/LocaleContext';
 
 const LOGO_URL = 'https://media.base44.com/images/public/69f960ee6e584cfa5a577a24/aedbcc40d_FullColor.png';
 const BG_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/9309d557d_Targon.webp';
 
 export default function ResetPassword() {
+  const t = useT();
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -43,11 +45,11 @@ export default function ResetPassword() {
     setError('');
 
     if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres.');
+      setError(t('auth.laContrasenaDebeTener'));
       return;
     }
     if (password !== confirmation) {
-      setError('Las contraseñas no coinciden.');
+      setError(t('auth.lasContrasenasNoCoinciden'));
       return;
     }
 
@@ -56,7 +58,7 @@ export default function ResetPassword() {
     setLoading(false);
 
     if (updateError) {
-      setError(updateError.message || 'No se pudo guardar la contraseña. Solicitá un enlace nuevo.');
+      setError(updateError.message || t('auth.noSePudoGuardar'));
       return;
     }
 
@@ -80,13 +82,13 @@ export default function ResetPassword() {
 
         <div className="rd-card p-8">
           {checkingSession ? (
-            <Status icon={<Loader2 size={26} className="animate-spin text-primary" />} title="Validando el enlace…" />
+            <Status icon={<Loader2 size={26} className="animate-spin text-primary" />} title={t('auth.validandoElEnlace')} />
           ) : !hasSession ? (
             <Status
               icon={<Lock size={22} className="text-red-400" />}
-              title="El enlace no es válido"
-              text="Puede haber vencido o ya haber sido utilizado."
-              action="Solicitar otro enlace"
+              title={t('auth.elEnlaceNoEs')}
+              text={t('auth.puedeHaberVencidoO')}
+              action={t('auth.solicitarOtroEnlace')}
               onAction={() => { window.location.href = '/login'; }}
               negative
             />
@@ -96,19 +98,19 @@ export default function ResetPassword() {
                 <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-3">
                   <KeyRound size={22} className="text-primary" />
                 </div>
-                <h1 className="font-rajdhani text-2xl font-bold text-foreground">Nueva contraseña</h1>
-                <p className="text-sm text-muted-foreground mt-2">Elegí una contraseña de al menos 8 caracteres.</p>
+                <h1 className="font-rajdhani text-2xl font-bold text-foreground">{t('auth.nuevaContrasena')}</h1>
+                <p className="text-sm text-muted-foreground mt-2">{t('auth.elegiUnaContrasenaDe')}</p>
               </div>
 
               <form onSubmit={handleUpdate} className="space-y-4">
-                <PasswordField label="Contraseña" value={password} onChange={setPassword} visible={showPassword} onToggle={() => setShowPassword(value => !value)} autoFocus />
-                <PasswordField label="Repetir contraseña" value={confirmation} onChange={setConfirmation} visible={showPassword} />
+                <PasswordField label={t('auth.contrasena')} value={password} onChange={setPassword} visible={showPassword} onToggle={() => setShowPassword(value => !value)} autoFocus />
+                <PasswordField label={t('auth.repetirContrasena')} value={confirmation} onChange={setConfirmation} visible={showPassword} />
 
                 {error && <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>}
 
                 <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                   {loading && <Loader2 size={15} className="animate-spin" />}
-                  Guardar contraseña
+                 {t('auth.guardarContrasena')}
                 </button>
               </form>
             </>

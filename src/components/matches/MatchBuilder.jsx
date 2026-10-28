@@ -1,12 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
-import { useCatalogText } from '@/lib/LocaleContext';
+import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
-import { PRESET_MATCH_TAGS } from '@/components/matches/matchTags';
+import { PRESET_MATCH_TAGS, matchTagLabel } from '@/components/matches/matchTags';
 import { matchKda } from '@/domain/matchStats';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
@@ -14,6 +14,7 @@ import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
 
 import { useSpells } from '@/hooks/useSpells';
+import { runeBranchLabel } from '@/utils/runeBranches';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 const PRIMARY_BRANCHES = ['Dominación', 'Precisión', 'Valor', 'Brujería'];
@@ -27,14 +28,15 @@ const getChampionNamesByRole = (selected) =>
     .filter(Boolean);
 
 function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, myLane, mirrored = false }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const ROLES = ['top', 'jungler', 'mid', 'adc', 'support'];
   const ROLE_LABELS = {
-    top: 'Top',
-    jungler: 'Jungla',
-    mid: 'Mid',
-    adc: 'ADC',
-    support: 'Support'
+    top: t('lanes.top'),
+    jungler: t('lanes.jungler'),
+    mid: t('lanes.mid'),
+    adc: t('lanes.adc'),
+    support: t('lanes.support')
   };
 
   const filteredChampions = champions.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()));
@@ -87,7 +89,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, myChampion, 
       {/* Champion grid */}
       <div className="relative mb-2">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar campeón..."
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('common.searchChampionPlaceholder')}
           className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
       </div>
       <div className="rd-team-pool-grid grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
@@ -167,6 +169,7 @@ export function StatInput({ label, value, onChange, placeholder = '—', autoFoc
 const BUILDER_STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
 
 export default function MatchBuilder({ champions: fallbackChampions = [], patches = [], defaultPatch = '', onSave, onCancel, isSaving = false }) {
+  const t = useT();
   const { entityName } = useCatalogText();
   const clientRequestIdRef = useRef(null);
   if (!clientRequestIdRef.current) {
@@ -529,26 +532,26 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       {step === 'info' && (
         <div className="space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Datos de la partida</h2>
-            <p className="text-muted-foreground text-sm">Elegí cuándo jugaste, el parche y el tipo de partida.</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">{t('matches.datosDeLaPartida')}</h2>
+            <p className="text-muted-foreground text-sm">{t('matches.elegiCuandoJugasteEl')}</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Fecha</label>
+              <label className="text-xs text-muted-foreground block mb-1">{t('common.date')}</label>
               <input type="date" value={date} onChange={e => setDate(e.target.value)}
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Hora (opcional)</label>
+              <label className="text-xs text-muted-foreground block mb-1">{t('matches.horaOpcional')}</label>
               <input type="time" value={hour} onChange={e => setHour(e.target.value)}
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Parche</label>
+              <label className="text-xs text-muted-foreground block mb-1">{t('goals.filterLabels.patches')}</label>
               <PatchSelect value={patch} onChange={handlePatchChange} patches={patches} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Tipo de partida</label>
+              <label className="text-xs text-muted-foreground block mb-1">{t('goals.filterLabels.types')}</label>
               <select value={matchType} onChange={e => setMatchType(e.target.value)}
                 className="w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all">
                 {MATCH_TYPES.map(option => (
@@ -560,7 +563,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
           <div className="flex gap-3 pt-2">
             <button onClick={() => setStep('champion')}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-              Siguiente
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -570,8 +573,8 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       {step === 'champion' && (
         <div className="space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Rol y campeón</h2>
-            <p className="text-muted-foreground text-sm">Elegí la línea y el campeón que jugaste</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">{t('matches.rolYCampeon')}</h2>
+            <p className="text-muted-foreground text-sm">{t('matches.elegiLaLineaY')}</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {LANES.map(l => (
@@ -591,7 +594,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
           </div>
           <div className="relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder="Buscar campeón..."
+            <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder={t('common.searchChampionPlaceholder')}
               className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-20rem))] overflow-y-auto pr-1">
@@ -619,16 +622,16 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               onClick={() => setStep('info')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
             >
-              <ArrowLeft size={16} /> Atrás
+              <ArrowLeft size={16} /> {t('buildV2.atras')}
             </button>
             <button
               type="button"
               onClick={() => setStep('allies')}
               disabled={!lane || !myChampion}
-              title={lane && myChampion ? undefined : 'Elegí tu línea y tu campeón para continuar'}
+              title={lane && myChampion ? undefined : t('matches.elegiTuLineaY')}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Siguiente
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -638,12 +641,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       {step === 'allies' && (
         <div className="rd-team-step space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Equipo aliado</h2>
-            <p className="text-muted-foreground text-sm">Tu campeón ya está asignado, completa el resto del equipo</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">{t('matches.equipoAliado')}</h2>
+            <p className="text-muted-foreground text-sm">{t('matches.tuCampeonYaEsta')}</p>
           </div>
           <ChampionPoolByRole
             champions={champions}
-            title="Equipo Azul"
+            title={t('matches.equipoAzul')}
             selected={allyChampions}
             onSelect={handleSelectAlly}
             myChampion={myChampion}
@@ -654,14 +657,14 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               onClick={() => setStep('champion')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
             >
-              <ArrowLeft size={16} /> Atrás
+              <ArrowLeft size={16} /> {t('buildV2.atras')}
             </button>
             <button
               onClick={() => setStep('enemies')}
               disabled={allyChampions.length < 5}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Siguiente
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -671,12 +674,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       {step === 'enemies' && (
         <div className="rd-team-step space-y-4">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Equipo enemigo</h2>
-            <p className="text-muted-foreground text-sm">Selecciona los 5 campeones enemigos</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">{t('matches.equipoEnemigo')}</h2>
+            <p className="text-muted-foreground text-sm">{t('matches.seleccionaLos5Campeones')}</p>
           </div>
           <ChampionPoolByRole
             champions={champions}
-            title="Equipo Rojo"
+            title={t('matches.equipoRojo')}
             selected={enemyChampions}
             onSelect={handleSelectEnemy}
             mirrored={true}
@@ -686,14 +689,14 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               onClick={() => setStep('allies')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
             >
-              <ArrowLeft size={16} /> Atrás
+              <ArrowLeft size={16} /> {t('buildV2.atras')}
             </button>
             <button
               onClick={() => setStep('build')}
               disabled={enemyChampions.length < 5}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Siguiente
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -706,10 +709,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               <div className="rd-buildstep-header flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
                 <div>
                   <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">
-                    Tu build
+                    {t('matches.tuBuild')}
                   </h2>
                   <p className="text-muted-foreground text-sm">
-                    Selecciona los items, runas y hechizos que usaste
+                    {t('matches.seleccionaLosItemsRunas')}
                   </p>
                 </div>
                 <div className="w-full xl:w-[min(36rem,55%)]">
@@ -720,8 +723,8 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               {/* Espacio de trabajo: objetos a la izquierda; runas y hechizos a la derecha. */}
               <div data-panel={buildPanel} className="rd-buildstep-body grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
                 {(isPhoneLandscape || isPhonePortrait) && (
-                  <div className="rd-panel-tabs rd-buildstep-tabs" role="tablist" aria-label="Paneles de la build">
-                    {[['items', 'Objetos'], ['runes', 'Runas']].map(([id, label]) => (
+                  <div className="rd-panel-tabs rd-buildstep-tabs" role="tablist" aria-label={t('builds.panelesDeLaBuild')}>
+                    {[['items', t('common.items')], ['runes', t('common.runes')]].map(([id, label]) => (
                       <button
                         key={id}
                         type="button"
@@ -743,7 +746,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                     <div className="flex items-center gap-2">
                       <span className="w-5 h-px bg-primary/50" />
                       <h3 className="rd-card-title">
-                        Objetos ({selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length}/5 + botas)
+                        {t('builds.objetos')}{selectedItems.filter(i => !isEnchantItem(i) && !isMovementItem(i)).length}/5 + botas)
                       </h3>
                     </div>
                     </div>
@@ -768,7 +771,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                   <div className="rd-card rd-buildstep-runes flex flex-col p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="w-5 h-px bg-primary/50" />
-                      <h3 className="rd-card-title">Runas</h3>
+                      <h3 className="rd-card-title">{t('common.runes')}</h3>
                     </div>
 
                     <div className="rd-runes-content flex flex-1 flex-col gap-3">
@@ -776,7 +779,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                       {claveRunes.length > 0 && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground mb-2">
-                            Clave
+                            {t('builds.clave')}
                           </p>
 
                           <div className="grid justify-items-center gap-1" style={{ gridTemplateColumns: `repeat(${claveRunes.length}, minmax(0, 1fr))` }}>
@@ -822,7 +825,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                         {/* Rama Principal */}
                         <div className="flex min-w-0 flex-col">
                           <label className="text-sm font-medium text-muted-foreground mb-1 block">
-                            Rama Principal
+                            {t('builds.ramaPrincipal')}
                           </label>
 
                           <select
@@ -832,7 +835,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                           >
                             {PRIMARY_BRANCHES.map(b => (
                               <option key={b} value={b}>
-                                {b}
+                                {runeBranchLabel(b)}
                               </option>
                             ))}
                           </select>
@@ -878,7 +881,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                         {/* Rama Secundaria */}
                         <div className="flex min-w-0 flex-col">
                           <label className="text-sm font-medium text-muted-foreground mb-1 block">
-                            Rama Secundaria
+                            {t('builds.ramaSecundaria')}
                           </label>
 
                           <select
@@ -888,7 +891,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                           >
                             {PRIMARY_BRANCHES.map(b => (
                               <option key={b} value={b}>
-                                {b}
+                                {runeBranchLabel(b)}
                               </option>
                             ))}
                           </select>
@@ -937,14 +940,14 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                   {/* Spells */}
                   <div className="rd-card rd-buildstep-spells p-4">
                     <label className="text-sm font-semibold text-foreground block mb-3">
-                      Hechizos ({selectedSpells.length}/2)
+                      {t('builds.hechizos')}{selectedSpells.length}/2)
                     </label>
                     <div className="grid w-full grid-cols-5 justify-items-center gap-2 sm:[grid-template-columns:repeat(var(--spell-count),minmax(0,1fr))]" style={/** @type {any} */ ({ '--spell-count': spells.length })}>
                       {spells.map(spell => {
                         const selected = selectedSpells.includes(spell.name);
                         const disabled = selectedSpells.length >= 2 && !selected;
                         return (
-                          <EntityHoverCard key={spell.id} entity={spell} kind="Hechizo">
+                          <EntityHoverCard key={spell.id} entity={spell} kind={t('builds.hechizo')}>
     <button
                             type="button"
                             onClick={() => toggleSpell(spell.name)}
@@ -974,7 +977,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                   onClick={() => setStep('enemies')}
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
                 >
-                  <ArrowLeft size={16} /> Atrás
+                  <ArrowLeft size={16} /> {t('buildV2.atras')}
                 </button>
 
                 <button
@@ -982,7 +985,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                   onClick={() => setStep('stats')}
                   className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
                 >
-                  Siguiente
+                  {t('common.next')}
                 </button>
               </div>
             </div>
@@ -992,35 +995,35 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       {step === 'stats' && (
         <div className="rd-statsstep space-y-6">
           <div>
-            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">Detalles de la partida</h2>
-            <p className="text-muted-foreground text-sm">Completa los datos de tu rendimiento</p>
+            <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">{t('matches.detallesDeLaPartida')}</h2>
+            <p className="text-muted-foreground text-sm">{t('matches.completaLosDatosDe')}</p>
           </div>
 
           <div className="rd-statsstep-body grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             {/* Resultado y rendimiento: lo que se carga en todas las partidas. */}
-            <section className="rd-card flex flex-col gap-5 p-4 md:p-5" aria-label="Resultado y rendimiento">
+            <section className="rd-card flex flex-col gap-5 p-4 md:p-5" aria-label={t('matches.resultadoYRendimiento')}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm font-semibold text-foreground mb-2">Resultado</p>
+                  <p className="text-sm font-semibold text-foreground mb-2">{t('matches.resultado')}</p>
                   <SegmentedChoice
                     value={result}
                     onChange={setResult}
                     options={[
-                      { value: 'win', label: 'Victoria', activeClass: 'border-green-500 bg-green-500/10 text-green-400', hoverClass: 'hover:border-green-500/50' },
-                      { value: 'loss', label: 'Derrota', activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
+                      { value: 'win', label: t('matches.victoria'), activeClass: 'border-green-500 bg-green-500/10 text-green-400', hoverClass: 'hover:border-green-500/50' },
+                      { value: 'loss', label: t('matches.derrota'), activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
                     ]}
                   />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground mb-2">
-                    Equipo <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                    {t('matches.equipo')} <span className="text-muted-foreground font-normal text-xs">{t('matches.opcional')}</span>
                   </p>
                   <SegmentedChoice
                     value={side}
                     onChange={value => setSide(side === value ? '' : value)}
                     options={[
-                      { value: 'blue', label: 'Azul', activeClass: 'border-blue-500 bg-blue-500/10 text-blue-400', hoverClass: 'hover:border-blue-500/50' },
-                      { value: 'red', label: 'Rojo', activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
+                      { value: 'blue', label: t('matches.azul'), activeClass: 'border-blue-500 bg-blue-500/10 text-blue-400', hoverClass: 'hover:border-blue-500/50' },
+                      { value: 'red', label: t('matches.rojo'), activeClass: 'border-red-500 bg-red-500/10 text-red-400', hoverClass: 'hover:border-red-500/50' },
                     ]}
                   />
                 </div>
@@ -1030,32 +1033,32 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                 <div className="mb-2 flex items-baseline justify-between gap-3">
                   <p className="text-sm font-semibold text-foreground">K / D / A</p>
                   <p className="text-xs text-muted-foreground">
-                    KDA <span className="font-semibold text-primary">{kdaPreview}</span>
+                    {t('goals.stat.kda')} <span className="font-semibold text-primary">{kdaPreview}</span>
                   </p>
                 </div>
                 <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-end gap-2">
-                  <StatInput label="Asesinatos" value={kills} onChange={setKills} autoFocus />
+                  <StatInput label={t('goals.stat.asesinatos')} value={kills} onChange={setKills} autoFocus />
                   <span className="pb-2 text-lg text-muted-foreground">/</span>
-                  <StatInput label="Muertes" value={deaths} onChange={setDeaths} />
+                  <StatInput label={t('goals.stat.muertes')} value={deaths} onChange={setDeaths} />
                   <span className="pb-2 text-lg text-muted-foreground">/</span>
-                  <StatInput label="Asistencias" value={assists} onChange={setAssists} />
+                  <StatInput label={t('goals.stat.asistencias')} value={assists} onChange={setAssists} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <StatInput label="Oro" value={gold} onChange={setGold} placeholder="ej. 9500" />
-                <StatInput label="Duración (min)" value={duration} onChange={setDuration} placeholder="ej. 18" />
+                <StatInput label={t('goals.stat.oro')} value={gold} onChange={setGold} placeholder={t('matches.ej9500')} />
+                <StatInput label={t('matches.duracionMin')} value={duration} onChange={setDuration} placeholder={t('matches.ej18')} />
               </div>
               <p className="mt-auto text-[11px] text-muted-foreground">
-                Los datos vacíos se guardan como “sin dato”: no cuentan como cero en tus estadísticas ni en tus objetivos.
+                {t('matches.losDatosVaciosSe')}
               </p>
             </section>
 
             {/* Contexto opcional: etiquetas y notas. */}
-            <section className="rd-card rd-statsstep-context flex flex-col gap-4 p-4 md:p-5" aria-label="Contexto">
+            <section className="rd-card rd-statsstep-context flex flex-col gap-4 p-4 md:p-5" aria-label={t('matches.contexto')}>
               <div>
                 <p className="text-sm font-semibold text-foreground mb-2">
-                  Etiquetas <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                  {t('matches.etiquetas')} <span className="text-muted-foreground font-normal text-xs">{t('matches.opcional')}</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_MATCH_TAGS.map(tag => {
@@ -1072,7 +1075,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                             : 'bg-secondary/50 border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
                         }`}
                       >
-                        {tag}
+                        {matchTagLabel(tag)}
                       </button>
                     );
                   })}
@@ -1081,10 +1084,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                       key={tag}
                       type="button"
                       onClick={() => removeTag(tag)}
-                      title="Quitar etiqueta"
+                      title={t('matches.quitarEtiqueta')}
                       className="px-3 py-1.5 rounded-lg text-sm border bg-primary/20 border-primary/50 text-primary transition-all hover:bg-primary/30"
                     >
-                      {tag} ×
+                      {matchTagLabel(tag)} ×
                     </button>
                   ))}
                 </div>
@@ -1099,7 +1102,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                         addTag();
                       }
                     }}
-                    placeholder="Etiqueta propia (Enter para agregar)"
+                    placeholder={t('matches.etiquetaPropiaEnterPara')}
                     className="min-w-0 flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
                   />
                   <button
@@ -1107,20 +1110,20 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                     onClick={addTag}
                     className="px-3 py-2 rounded-xl border border-primary/30 bg-primary/15 text-primary text-sm font-medium hover:bg-primary/25 transition-colors"
                   >
-                    Agregar
+                    {t('matches.agregar')}
                   </button>
                 </div>
               </div>
 
               <div className="rd-statsstep-notes flex min-h-0 flex-1 flex-col">
                 <label htmlFor="match-notes" className="text-sm font-semibold text-foreground mb-2">
-                  Notas <span className="text-muted-foreground font-normal text-xs">(opcional)</span>
+                  {t('matches.notas')} <span className="text-muted-foreground font-normal text-xs">{t('matches.opcional')}</span>
                 </label>
                 <textarea
                   id="match-notes"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  placeholder="Observaciones sobre la partida..."
+                  placeholder={t('matches.observacionesSobreLaPartida')}
                   className="min-h-24 w-full flex-1 bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all resize-none"
                 />
               </div>
@@ -1133,20 +1136,20 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               onClick={() => setStep('build')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm px-4 py-2"
             >
-              <ArrowLeft size={16} /> Atrás
+              <ArrowLeft size={16} /> {t('buildV2.atras')}
             </button>
             <button
               onClick={onCancel}
               className="flex-1 px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Guardando...' : 'Guardar Partida'}
+              {isSaving ? t('common.saving') : t('matches.guardarPartida')}
             </button>
           </div>
         </div>

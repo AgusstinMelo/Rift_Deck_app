@@ -3,6 +3,7 @@
 // `measure` y `aggregate`; el motor no cambia.
 import { AGGREGATION, METRIC_FAMILY, METRIC_KIND, OPERATOR } from '../model/goalConstants.js';
 import { listFilterKeys } from '../filters/filterRegistry.js';
+import { baseMessages, lookup, tr } from '../../../i18n/uiI18n.js';
 
 /**
  * @typedef {Object} Measurement
@@ -14,8 +15,8 @@ import { listFilterKeys } from '../filters/filterRegistry.js';
 /**
  * @typedef {Object} MetricDefinition
  * @property {string} id
- * @property {string} label
- * @property {string} description
+ * @property {string} [label]            Se completa al registrar: goals.metric.<id>.
+ * @property {string} [description]      Se completa al registrar: goals.metricDescription.<id>.
  * @property {string} stat                 Dato que mide (asesinatos, oro, victorias…).
  * @property {string} aggregation          AGGREGATION: cómo se combinan los valores (total, promedio…).
  * @property {string} family               METRIC_FAMILY (agrupación en la UI)
@@ -69,7 +70,15 @@ export function registerMetric(def) {
   assertDefinition(def);
   if (metrics.has(def.id)) throw new Error(`Métrica duplicada: ${def.id}`);
   if (findMetric(def.stat, def.aggregation)) throw new Error(`Combinación duplicada: ${def.stat} × ${def.aggregation}`);
-  metrics.set(def.id, Object.freeze({ ...def }));
+  const { unit } = def;
+  const metric = { ...def };
+  Object.defineProperties(metric, {
+    label: { enumerable: true, get: () => tr(`goals.metric.${def.id}`) },
+    description: { enumerable: true, get: () => tr(`goals.metricDescription.${def.id}`) },
+    // Unidades con traducción (goals.unit.<unidad>); '%', 'min' y '' quedan igual.
+    unit: { enumerable: true, get: () => (lookup(baseMessages, `goals.unit.${unit}`) ? tr(`goals.unit.${unit}`) : unit) },
+  });
+  metrics.set(def.id, Object.freeze(metric));
 }
 
 /** @returns {MetricDefinition} */

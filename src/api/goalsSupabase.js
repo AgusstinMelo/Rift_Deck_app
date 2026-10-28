@@ -2,12 +2,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { LIFECYCLE } from '@/features/goals/model/goalConstants';
 import { toGoalRecord, validateGoalInput, validateGoalUpdate } from '@/features/goals/validation/goalSchema';
 import { toCheckinRecord, validateCheckinInput } from '@/features/goals/validation/checkinSchema';
+import { tr } from '@/i18n/uiI18n';
 
 /** Error de validación con mensajes por campo, para mostrarlos en el formulario. */
 export class GoalValidationError extends Error {
   /** @param {Record<string, string>} errors */
   constructor(errors) {
-    super(Object.values(errors)[0] || 'Los datos del objetivo no son válidos.');
+    super(Object.values(errors)[0] || tr('goals.validation.invalidGoal'));
     this.name = 'GoalValidationError';
     this.errors = errors;
   }

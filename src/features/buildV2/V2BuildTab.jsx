@@ -16,15 +16,18 @@ import { newSuggesterRequestId } from '@/api/suggesterUsageSupabase';
 import { useSuggesterUsage } from '@/hooks/useSuggesterUsage';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useT } from '@/lib/LocaleContext';
+import { labels, responseLanguage } from '@/i18n/uiI18n';
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
-const LABELS = { top: 'Top', jungler: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
+const LABELS = labels({ top: 'lanes.top', jungler: 'lanes.jungler', mid: 'lanes.mid', adc: 'lanes.adc', support: 'lanes.support' });
 const emptyTeam = () => Object.fromEntries(LANES.map(lane => [lane, '']));
 
 // Campo con la etiqueta al costado del selector, para ahorrar alto en los pasos.
 const INLINE_FIELD = 'relative grid grid-cols-[4.75rem_minmax(0,1fr)] items-center gap-2';
 
 function ChampionSelect({ label, value, champions, onChange, inline = false }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const buttonRef = useRef(null);
@@ -50,7 +53,7 @@ function ChampionSelect({ label, value, champions, onChange, inline = false }) {
     <button ref={buttonRef} type="button" aria-label={inline ? label : undefined} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(current => !current)} className={`flex w-full items-center gap-2.5 rounded-xl border border-border/70 bg-secondary/55 px-3 text-left text-sm text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50 ${inline ? 'min-h-10 py-1.5' : 'min-h-11 py-2'}`}>
       {selected?.image_url ? <img src={selected.image_url} alt="" className="h-7 w-7 shrink-0 rounded-full border border-primary/20 object-cover" /> : <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-background/40 text-xs font-semibold text-primary">{selected?.name?.[0] || '?'}</span>}
       <span className="min-w-0 flex-1">
-        <span className={selected ? 'block truncate font-medium' : 'block truncate text-muted-foreground'}>{selected?.name || 'Seleccionar…'}</span>
+        <span className={selected ? 'block truncate font-medium' : 'block truncate text-muted-foreground'}>{selected?.name || t('buildV2.seleccionar')}</span>
       </span>
       <ChevronDown size={16} className={`shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
     </button>
@@ -58,13 +61,13 @@ function ChampionSelect({ label, value, champions, onChange, inline = false }) {
       <div className="shrink-0 border-b border-border/70 bg-[#0f1420] p-2">
         <div className="flex items-center gap-2 rounded-lg bg-secondary/70 px-2.5">
           <Search size={14} className="text-muted-foreground" />
-          <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar campeón…" className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+          <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder={t('buildV2.buscarCampeon')} className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground" />
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
         <button type="button" onClick={() => choose('')} className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-secondary">
           <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-secondary/70">—</span>
-          <span className="flex-1">Sin seleccionar</span>
+          <span className="flex-1">{t('buildV2.sinSeleccionar')}</span>
           {!value && <Check size={15} className="text-primary" />}
         </button>
         {filtered.map(champion => {
@@ -78,13 +81,14 @@ function ChampionSelect({ label, value, champions, onChange, inline = false }) {
             {active && <Check size={15} className="shrink-0 text-primary" />}
           </button>;
         })}
-        {!filtered.length && <p className="px-3 py-5 text-center text-sm text-muted-foreground">No se encontraron campeones.</p>}
+        {!filtered.length && <p className="px-3 py-5 text-center text-sm text-muted-foreground">{t('buildV2.noSeEncontraronCampeones')}</p>}
       </div>
     </div>, document.body)}
   </div>;
 }
 
 function RoleSelect({ value, onChange }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
@@ -98,10 +102,10 @@ function RoleSelect({ value, onChange }) {
   };
 
   return <div className={INLINE_FIELD}>
-    <span className="rd-label">Rol</span>
-    <button ref={buttonRef} type="button" aria-label="Rol" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(current => !current)} className="flex min-h-10 w-full items-center gap-2.5 rounded-xl border border-border/70 bg-secondary/55 px-3 py-1.5 text-left text-sm text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50">
+    <span className="rd-label">{t('library.rol')}</span>
+    <button ref={buttonRef} type="button" aria-label={t('library.rol')} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(current => !current)} className="flex min-h-10 w-full items-center gap-2.5 rounded-xl border border-border/70 bg-secondary/55 px-3 py-1.5 text-left text-sm text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50">
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-background/40 text-[10px] font-bold uppercase text-primary">{value ? LABELS[value].slice(0, 2) : '?'}</span>
-      <span className={value ? 'min-w-0 flex-1 truncate font-medium' : 'min-w-0 flex-1 truncate text-muted-foreground'}>{value ? LABELS[value] : 'Seleccionar rol…'}</span>
+      <span className={value ? 'min-w-0 flex-1 truncate font-medium' : 'min-w-0 flex-1 truncate text-muted-foreground'}>{value ? LABELS[value] : t('buildV2.seleccionarRol')}</span>
       <ChevronDown size={16} className={`shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
     </button>
     {open && panelStyle && createPortal(<div ref={panelRef} role="listbox" style={panelStyle} className="overflow-y-auto overscroll-contain rounded-xl border border-primary/20 bg-[#0f1420] p-1.5 shadow-2xl shadow-black/60">
@@ -121,11 +125,12 @@ function DraftCard({ title, icon: Icon, team, setter, champions, onMemberChange,
   return <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4"><div className="mb-3 flex items-center gap-2"><Icon size={15} className="text-primary" /><h2 className="rd-card-title">{title}</h2></div><div className="flex flex-1 flex-col justify-evenly gap-2">{LANES.filter(lane => lane !== hiddenLane).map(lane => <ChampionSelect key={lane} inline label={LABELS[lane]} value={team[lane]} champions={champions} onChange={value => onMemberChange(setter, lane, value)} />)}</div></section>;
 }
 
-const STEPS = ['Campeón', 'Aliados', 'Enemigos'];
+const STEPS = ['buildV2.steps.champion', 'buildV2.steps.allies', 'buildV2.steps.enemies'];
 // En smartphone el asistente ocupa el viewport y la build es un paso más.
 const RESULT_STEP = STEPS.length;
 
 export default function V2BuildTab({ tabSelector }) {
+  const t = useT();
   const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
   const usage = useSuggesterUsage('build');
   const [championId, setChampionId] = useState('');
@@ -141,7 +146,7 @@ export default function V2BuildTab({ tabSelector }) {
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const isPhone = isPhoneLandscape || isPhonePortrait;
-  const steps = isPhone ? [...STEPS, 'Build'] : STEPS;
+  const steps = (isPhone ? [...STEPS, 'matches.build'] : STEPS).map(step => t(step));
   const viewStep = Math.min(step, steps.length - 1);
   const onResultStep = viewStep === RESULT_STEP;
   const champions =useMemo(() => [...(snapshot?.champions || [])].sort((a, b) => a.name.localeCompare(b.name)), [snapshot]);
@@ -170,17 +175,17 @@ export default function V2BuildTab({ tabSelector }) {
   async function generate() {
     if (usage.remaining === 0) return;
     if (isPhone) setStep(RESULT_STEP);
-    if (!snapshot || !championId || !role) { setState('validation_error'); setError('Seleccioná un campeón y su rol.'); return; }
-    if (allies[role] !== championId) { setState('validation_error'); setError('El campeón elegido debe ocupar el rol seleccionado en aliados.'); return; }
+    if (!snapshot || !championId || !role) { setState('validation_error'); setError(t('buildV2.seleccionaUnCampeonY')); return; }
+    if (allies[role] !== championId) { setState('validation_error'); setError(t('buildV2.elCampeonElegidoDebe')); return; }
     const selectedAllies = Object.values(allies).filter(Boolean);
     const selectedEnemies = Object.values(enemies).filter(Boolean);
-    if (new Set(selectedAllies).size !== selectedAllies.length || new Set(selectedEnemies).size !== selectedEnemies.length) { setState('validation_error'); setError('No puede repetirse un campeón dentro del mismo equipo.'); return; }
+    if (new Set(selectedAllies).size !== selectedAllies.length || new Set(selectedEnemies).size !== selectedEnemies.length) { setState('validation_error'); setError(t('buildV2.noPuedeRepetirseUn')); return; }
     setState('loading'); setError(''); setResult(null);
     // Los dos intentos (el segundo corrige al primero) cuentan como una sola ejecución.
     const requestId = newSuggesterRequestId();
     try {
       const generationSnapshot = createEligibleV2Snapshot(snapshot, championId);
-      const requestContext = { snapshot: generationSnapshot, championId, role, allies, enemies, buildPreference };
+      const requestContext = { snapshot: generationSnapshot, championId, role, allies, enemies, buildPreference, language: responseLanguage() };
       let prompt = buildV2Prompt(requestContext);
       let lastValidation = null;
       // Build del primer intento ya reparada por el estabilizador. Se usa si la corrección falla.
@@ -237,46 +242,46 @@ export default function V2BuildTab({ tabSelector }) {
     finally { usage.refresh(); }
   }
 
-  if (isLoading) return <div className="rd-card p-8 text-center text-muted-foreground">Cargando snapshot del parche activo…</div>;
-  if (loadError) return <V2BuildResult state="provider_error" error={`No se pudo cargar Supabase: ${loadError.message}`} />;
+  if (isLoading) return <div className="rd-card p-8 text-center text-muted-foreground">{t('buildV2.cargandoSnapshotDelParche')}</div>;
+  if (loadError) return <V2BuildResult state="provider_error" error={t('buildV2.noSePudoCargar', { message: loadError.message })} />;
   return <div className="rd-v2-build">
     <header className="rd-v2-build-header flex items-start justify-between gap-4">
         <div>
           <div className="rd-page-kicker mb-1 flex items-center gap-2">
             <span className="h-px w-8 bg-primary/50" />
-            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">Rift Deck consigliere</span>
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('buildV2.riftDeckConsigliere')}</span>
           </div>
-          <h1 className="rd-page-title font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">Sugeridor de builds</h1>
-          <p className="rd-page-subtitle mt-1 text-sm text-muted-foreground">Objetos, runas y hechizos adaptados al campeón, rol y draft disponible.</p>
+          <h1 className="rd-page-title font-rajdhani text-4xl font-bold uppercase tracking-[-0.08em] text-foreground md:text-5xl">{t('buildV2.sugeridorDeBuilds')}</h1>
+          <p className="rd-page-subtitle mt-1 text-sm text-muted-foreground">{t('buildV2.objetosRunasYHechizos')}</p>
           {tabSelector}
         </div>
         <div className="rd-status-pill hidden items-center gap-3 sm:flex">
           <BrainCircuit size={16} className="text-primary" />
-          <span className="text-xs text-muted-foreground">Build Intelligence</span>
+          <span className="text-xs text-muted-foreground">{t('buildV2.buildIntelligence')}</span>
         </div>
     </header>
     <div className={`rd-v2-build-body grid items-start gap-5 xl:grid-cols-[310px_minmax(0,1fr)] ${onResultStep ? 'rd-v2-result-step' : ''}`}>
       <aside className="rd-v2-build-aside xl:sticky xl:top-6">
-        <StepNav steps={steps} label="Pasos del draft" step={viewStep} completed={stepCompleted} locked={!pickReady} available={steps.map((_, index) => index !== RESULT_STEP || state !== 'idle')} onStep={setStep} />
+        <StepNav steps={steps} label={t('buildV2.pasosDelDraft')} step={viewStep} completed={stepCompleted} locked={!pickReady} available={steps.map((_, index) => index !== RESULT_STEP || state !== 'idle')} onStep={setStep} />
         <div className="rd-v2-build-aside-scroll">
         {viewStep === 0 && <section className="rd-card rd-card-overflow-visible rd-v2-step-card flex flex-col p-4 focus-within:z-30">
-          <div className="mb-3 flex items-center justify-between gap-3"><div className="flex items-center gap-2"><Sparkles size={15} className="text-primary" /><h2 className="rd-card-title">Tu selección</h2></div><span className="rd-status-pill">Parche {snapshot.patchVersion}</span></div>
-          <div className="space-y-2.5"><ChampionSelect inline label="Campeón" value={championId} champions={champions} onChange={selectMain} /><RoleSelect value={role} onChange={changeRole} /></div>
+          <div className="mb-3 flex items-center justify-between gap-3"><div className="flex items-center gap-2"><Sparkles size={15} className="text-primary" /><h2 className="rd-card-title">{t('buildV2.tuSeleccion')}</h2></div><span className="rd-status-pill">{t('goals.filterLabels.patches')} {snapshot.patchVersion}</span></div>
+          <div className="space-y-2.5"><ChampionSelect inline label={t('common.champion')} value={championId} champions={champions} onChange={selectMain} /><RoleSelect value={role} onChange={changeRole} /></div>
           <div className="mt-3 flex flex-1 flex-col border-t border-border/50 pt-3">
-            <div className="mb-2 flex items-center gap-2"><BrainCircuit size={15} className="text-primary" /><h2 className="rd-card-title">Temática opcional</h2></div>
-            <textarea value={buildPreference} onChange={event => setBuildPreference(event.target.value)} maxLength={240} rows={3} placeholder="Ej: velocidad de ataque y poder de habilidad" className="min-h-[4.5rem] w-full flex-1 resize-none rounded-xl border border-border/70 bg-secondary/55 px-3 py-2 text-sm leading-relaxed text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/50" />
-            <div className="mt-1.5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground"><span title="La IA la priorizará si es viable para el campeón y el draft.">Se prioriza si es viable.</span><span className="shrink-0 tabular-nums">{buildPreference.length}/240</span></div>
+            <div className="mb-2 flex items-center gap-2"><BrainCircuit size={15} className="text-primary" /><h2 className="rd-card-title">{t('buildV2.tematicaOpcional')}</h2></div>
+            <textarea value={buildPreference} onChange={event => setBuildPreference(event.target.value)} maxLength={240} rows={3} placeholder={t('buildV2.ejVelocidadDeAtaque')} className="min-h-[4.5rem] w-full flex-1 resize-none rounded-xl border border-border/70 bg-secondary/55 px-3 py-2 text-sm leading-relaxed text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/50" />
+            <div className="mt-1.5 flex items-center justify-between gap-3 text-[11px] text-muted-foreground"><span title={t('buildV2.laIaLaPriorizara')}>{t('buildV2.sePriorizaSiEs')}</span><span className="shrink-0 tabular-nums">{buildPreference.length}/240</span></div>
           </div>
         </section>}
-        {viewStep === 1 && <DraftCard title="Composición aliada" icon={Users} team={allies} setter={setAllies} champions={champions} onMemberChange={setMember} hiddenLane={role} />}
-        {viewStep === 2 && <DraftCard title="Composición enemiga" icon={Swords} team={enemies} setter={setEnemies} champions={champions} onMemberChange={setMember} />}
+        {viewStep === 1 && <DraftCard title={t('buildV2.composicionAliada')} icon={Users} team={allies} setter={setAllies} champions={champions} onMemberChange={setMember} hiddenLane={role} />}
+        {viewStep === 2 && <DraftCard title={t('buildV2.composicionEnemiga')} icon={Swords} team={enemies} setter={setEnemies} champions={champions} onMemberChange={setMember} />}
         </div>
         <SuggesterUsageNotice usage={usage} />
         <div className="flex gap-2">
-          {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />Atrás</button>}
+          {viewStep > 0 && <button type="button" onClick={() => setStep(viewStep - 1)} className="flex items-center justify-center gap-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"><ChevronLeft size={16} />{t('buildV2.atras')}</button>}
           {viewStep < STEPS.length - 1
-            ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!pickReady} title={pickReady ? undefined : 'Elegí campeón y rol para continuar'} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">Siguiente<ChevronRight size={16} /></button>
-            : <button type="button" onClick={generate} disabled={state === 'loading' || usage.remaining === 0} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? 'Analizando draft…' : onResultStep ? 'Volver a generar' : 'Generar build'}</button>}
+            ? <button type="button" onClick={() => setStep(viewStep + 1)} disabled={!pickReady} title={pickReady ? undefined : t('buildV2.elegiCampeonYRol')} className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40">{t('common.next')}<ChevronRight size={16} /></button>
+            : <button type="button" onClick={generate} disabled={state === 'loading' || usage.remaining === 0} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{state === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}{state === 'loading' ? t('buildV2.analizandoDraft') : onResultStep ? t('buildV2.volverAGenerar') : t('buildV2.generarBuild')}</button>}
         </div>
       </aside>
       <div className="rd-v2-build-result">

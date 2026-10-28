@@ -17,6 +17,8 @@ import PatchFilter from '@/components/filters/PatchFilter';
 import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
 import { matchKda, winratePct } from '@/domain/matchStats';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useT } from '@/lib/LocaleContext';
+import { labels, tr } from '@/i18n/uiI18n';
 
 const STATS_MEMBERSHIP_GATE_ENABLED = true;
 
@@ -93,7 +95,7 @@ function calculatePoolScore(champArr, totalMatches) {
     return {
       score: 0,
       grade: '—',
-      label: 'Sin datos',
+      label: tr('dashboard.sinDatos'),
       tone: 'text-muted-foreground',
     };
   }
@@ -119,8 +121,8 @@ function calculatePoolScore(champArr, totalMatches) {
   if (totalMatches < 10) {
     return {
       score,
-      grade: 'Inicial',
-      label: `${totalMatches} ${totalMatches === 1 ? 'partida' : 'partidas'} · provisional`,
+      grade: tr('stats.inicial'),
+      label: tr('stats.provisional', { totalMatches, value: tr(totalMatches === 1 ? 'stats.partidaOne' : 'goals.unit.partidas') }),
       tone: 'text-yellow-400',
     };
   }
@@ -148,6 +150,7 @@ function HeroStat({ label, value, sub, tone }) {
 }
 
 function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, blueWins, blueLosses, redWins, redLosses, champImageUrl, poolScore }) {
+  const t = useT();
   return (
     <div className="rd-stats-hero relative overflow-hidden rounded-2xl border border-border min-h-[150px]"
     style={{
@@ -201,7 +204,7 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
 
       <div className="rd-stats-hero-grid relative z-10 grid grid-cols-1 lg:grid-cols-[minmax(220px,290px)_1fr_1fr_1fr_1fr] min-h-[150px]">
         <div className="flex flex-col items-center justify-center px-5 py-2 md:translate-x-6">
-          <p className="rd-label mb-1 text-center">WINRATE GENERAL</p>
+          <p className="rd-label mb-1 text-center">{t('stats.winrateGeneral')}</p>
           <div className="relative flex h-20 w-20 items-center justify-center">
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 120 120">
               <circle
@@ -235,24 +238,24 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
         </div>
 
         <div className="contents lg:[&>*]:-translate-x-8">
-          <HeroStat label="KDA PROM" value={avgKDA} sub={kdaLine} tone={getKdaTone(avgKDA)} />
+          <HeroStat label={t('stats.kdaProm')} value={avgKDA} sub={kdaLine} tone={getKdaTone(avgKDA)} />
 
           <HeroStat
-            label="WR LADO AZUL"
+            label={t('stats.wrLadoAzul')}
             value={blueWR ? `${blueWR}%` : '—'}
             sub={`${blueWins}W - ${blueLosses}L`}
             tone={getWrTone(blueWR)}
           />
 
           <HeroStat
-            label="WR LADO ROJO"
+            label={t('stats.wrLadoRojo')}
             value={redWR ? `${redWR}%` : '—'}
             sub={`${redWins}W - ${redLosses}L`}
             tone={getWrTone(redWR)}
           />
           
           <HeroStat
-            label="POOL SCORE"
+            label={t('stats.poolScore')}
             value={poolScore.grade}
             sub={poolScore.label}
             tone={poolScore.tone}
@@ -309,12 +312,13 @@ function SectionCard({ title, children, watermark = false, fixedHeight = false, 
 }
 
 function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
+  const t = useT();
   const totalGames = champArr.reduce((s, c) => s + c.games, 0) || 1;
 
   const diversityLabel =
-    poolScore.score >= 70 ? 'Buena' :
-    poolScore.score >= 50 ? 'Media' :
-    'Baja';
+    poolScore.score >= 70 ? t('stats.buena') :
+    poolScore.score >= 50 ? t('library.media') :
+    t('bugReport.severity.baja');
 
   const diversityTone =
     poolScore.score >= 70 ? 'text-green-400' :
@@ -439,14 +443,14 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
 
   return (
     <SectionCard
-      title="Pool de campeones"
+      title={t('stats.poolDeCampeones')}
       watermark
       headerExtra={(
         <div className="text-right leading-tight">
           <p className="text-[11px] text-muted-foreground">
-            Diversidad: <span className={`font-bold ${diversityTone}`}>{diversityLabel}</span>
+           {t('stats.diversidad')} <span className={`font-bold ${diversityTone}`}>{diversityLabel}</span>
           </p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">{champArr.length} campeones usados</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">{champArr.length} {t('stats.campeonesUsados')}</p>
         </div>
       )}
     >
@@ -467,7 +471,7 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
                 top: `${((cy - r) / CONTAINER_H) * 100}%`,
                 zIndex: Math.round(MAX_R - r + 1),
               }}
-              title={`${champ.name} · ${champ.games}p · ${champ.wr.toFixed(0)}% WR`}
+              title={t('stats.pWr', { name: champ.name, games: champ.games, value: champ.wr.toFixed(0) })}
             >
               {getChampImg(champ.name) ? (
                 <img
@@ -508,6 +512,7 @@ function PoolChampionsCard({ champArr, getChampImg, poolScore }) {
 // horizontal el CSS lo vuelve un carril de dos tarjetas por vista y muestra
 // las flechas, que se ocultan al llegar a cada extremo.
 function OverviewTrack({ children }) {
+  const t = useT();
   const trackRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const [edges, setEdges] = useState({ prev: false, next: false });
 
@@ -553,7 +558,7 @@ function OverviewTrack({ children }) {
         onClick={() => scrollByCard(-1)}
         disabled={!edges.prev}
         className="rd-arrow rd-stats-track-arrow rd-stats-track-arrow-prev"
-        aria-label="Tarjetas anteriores"
+        aria-label={t('stats.tarjetasAnteriores')}
       >
         <ChevronLeft size={16} />
       </button>
@@ -562,7 +567,7 @@ function OverviewTrack({ children }) {
         onClick={() => scrollByCard(1)}
         disabled={!edges.next}
         className="rd-arrow rd-stats-track-arrow rd-stats-track-arrow-next"
-        aria-label="Tarjetas siguientes"
+        aria-label={t('stats.tarjetasSiguientes')}
       >
         <ChevronRight size={16} />
       </button>
@@ -570,19 +575,20 @@ function OverviewTrack({ children }) {
   );
 }
 
-const LANE_LABELS = {
-  top: 'Top',
-  jungler: 'Jungla',
-  mid: 'Mid',
-  adc: 'ADC',
-  support: 'Supp',
-};
+const LANE_LABELS = labels({
+  top: 'lanes.top',
+  jungler: 'lanes.jungler',
+  mid: 'lanes.mid',
+  adc: 'lanes.adc',
+  support: 'stats.supportShort',
+});
 
 const LANE_COLORS = {
   top: '#4FC3F7', jungler: '#B388FF', mid: '#2EE6A6', adc: '#FF6B6B', support: '#FFC857',
 };
 
 function LaneBarChart({ laneArr }) {
+  const t = useT();
   const orderedLanes = ['top', 'jungler', 'mid', 'adc', 'support'];
   const data = orderedLanes.map(lane => {
     const entry = laneArr.find(item => item.lane === lane);
@@ -603,7 +609,7 @@ function LaneBarChart({ laneArr }) {
 
   return (
     <div className="rd-stats-lane flex h-full min-h-0 items-center justify-center">
-      <svg viewBox="0 0 300 210" className="rd-stats-lane-chart h-full max-h-[276px] w-full" role="img" aria-label="Winrate por línea">
+      <svg viewBox="0 0 300 210" className="rd-stats-lane-chart h-full max-h-[276px] w-full" role="img" aria-label={t('stats.winratePorLinea')}>
         {[0.33, 0.66, 1].map(level => (
           <polygon key={level} points={polygon(radius * level)} fill="none" stroke="rgba(148,163,184,.16)" strokeWidth="1" />
         ))}
@@ -645,10 +651,10 @@ function LaneBarChart({ laneArr }) {
 }
 
 function getSampleStatus(total) {
-  if (total === 1) return { label: 'Dato inicial', tone: 'text-yellow-300 border-yellow-500/25 bg-yellow-500/10' };
-  if (total < 3) return { label: 'Muestra baja', tone: 'text-yellow-300 border-yellow-500/25 bg-yellow-500/10' };
-  if (total < 6) return { label: 'Tendencia', tone: 'text-cyan-300 border-cyan-500/25 bg-cyan-500/10' };
-  return { label: 'Mayor respaldo', tone: 'text-green-300 border-green-500/25 bg-green-500/10' };
+  if (total === 1) return { label: tr('stats.datoInicial'), tone: 'text-yellow-300 border-yellow-500/25 bg-yellow-500/10' };
+  if (total < 3) return { label: tr('stats.muestraBaja'), tone: 'text-yellow-300 border-yellow-500/25 bg-yellow-500/10' };
+  if (total < 6) return { label: tr('stats.tendencia'), tone: 'text-cyan-300 border-cyan-500/25 bg-cyan-500/10' };
+  return { label: tr('stats.mayorRespaldo'), tone: 'text-green-300 border-green-500/25 bg-green-500/10' };
 }
 
 function MatchupList({ items, empty, getChampImg, positive = true }) {
@@ -684,6 +690,7 @@ function MatchupList({ items, empty, getChampImg, positive = true }) {
 }
 
 export default function Stats() {
+  const t = useT();
   const { user } = useAuth();
   const [matchTypeFilter, setMatchTypeFilter] = useState(DEFAULT_MATCH_TYPE);
   const [patchFilter, setPatchFilter] = useState('');
@@ -823,12 +830,12 @@ export default function Stats() {
   if (allMatches.length === 0) {
     return (
       <div className="rd-page">
-        <PageHeader title="Estadísticas Personales" />
+        <PageHeader title={t('stats.estadisticasPersonales')} />
         <div className="rd-card p-6">
           <EmptyState
             icon={BarChart3}
-            title="Sin partidas"
-            description="Registrá partidas para ver tus estadísticas personales."
+            title={t('stats.sinPartidas')}
+            description={t('stats.registraPartidasParaVer')}
           />
         </div>
       </div>
@@ -839,22 +846,22 @@ export default function Stats() {
     return (
       <div className="rd-page space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <PageHeader title="Estadísticas Personales" />
+          <PageHeader title={t('stats.estadisticasPersonales')} />
           <div className="flex items-center gap-3 rd-status-pill">
             <BarChart3 size={16} className="text-primary" />
-            <span className="text-xs text-muted-foreground">Performance personal</span>
+            <span className="text-xs text-muted-foreground">{t('stats.performancePersonal')}</span>
           </div>
         </div>
         <div className="rd-card overflow-hidden">
           <div className="flex flex-col gap-3 border-b border-border/70 bg-secondary/20 p-4 sm:flex-row sm:items-end sm:justify-end">
             <label className="min-w-0 flex-1 text-xs text-muted-foreground sm:max-w-64">
-              Tipo de partida
+             {t('goals.filterLabels.types')}
               <select
                 value={matchTypeFilter}
                 onChange={event => setMatchTypeFilter(event.target.value)}
                 className="mt-1 w-full bg-secondary/70 border border-border rounded-xl px-3 py-2 text-sm text-foreground outline-none focus:border-primary/40"
               >
-                <option value="all">Todas las partidas</option>
+                <option value="all">{t('stats.todasLasPartidas')}</option>
                 {MATCH_TYPES.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
@@ -870,8 +877,8 @@ export default function Stats() {
           <div className="flex min-h-[260px] items-center justify-center p-6">
             <EmptyState
               icon={BarChart3}
-              title="Sin partidas para estos filtros"
-              description="Elegí otro tipo de partida o parche para procesar sus estadísticas e insights."
+              title={t('stats.sinPartidasParaEstos')}
+              description={t('stats.elegiOtroTipoDe')}
             />
           </div>
         </div>
@@ -1055,22 +1062,22 @@ export default function Stats() {
   return (
     <div className="rd-page rd-dashboard rd-compact-page rd-stats-layout">
 
-      <section className="rd-viewport-section rd-stats-overview space-y-6" aria-label="Resumen de rendimiento">
+      <section className="rd-viewport-section rd-stats-overview space-y-6" aria-label={t('stats.resumenDeRendimiento')}>
       <div className="rd-stats-header flex flex-wrap items-start justify-between gap-4">
         <div className="rd-stats-title">
           <div className="rd-page-kicker flex items-center gap-2 mb-1">
             <span className="w-8 h-px bg-primary/50" />
             <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">
-              Rift Deck Analytics
+             {t('stats.riftDeckAnalytics')}
             </span>
           </div>
 
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
-            Estadísticas
+           {t('nav.stats')}
           </h1>
 
           <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">
-            Basado en {totalMatches} partidas registradas.
+           {t('stats.basadoEn')} {totalMatches} {t('stats.partidasRegistradas')}
           </p>
 
           {trialDaysLeft !== null && (
@@ -1078,20 +1085,20 @@ export default function Stats() {
               to="/membresia"
               className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
             >
-              Prueba gratis · {trialDaysLeft === 1 ? 'te queda 1 día' : `te quedan ${trialDaysLeft} días`} · Ver planes
+             {t('stats.pruebaGratis')} {trialDaysLeft === 1 ? t('stats.teQueda1Dia') : t('stats.teQuedanDias', { trialDaysLeft })} {t('stats.verPlanes')}
             </Link>
           )}
         </div>
 
         <div className="rd-stats-filters flex flex-wrap items-end justify-end gap-3">
           <label className="rd-stats-filter min-w-52 text-xs text-muted-foreground">
-            Tipo de partida
+           {t('goals.filterLabels.types')}
             <select
               value={matchTypeFilter}
               onChange={event => setMatchTypeFilter(event.target.value)}
               className="mt-1 h-9 w-full rounded-lg border border-border bg-secondary/90 px-3 text-xs font-medium text-foreground outline-none focus:border-primary/40"
             >
-              <option value="all">Todas las partidas</option>
+              <option value="all">{t('stats.todasLasPartidas')}</option>
               {MATCH_TYPES.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
@@ -1105,21 +1112,21 @@ export default function Stats() {
           />
           <div className="hidden items-center gap-3 rd-status-pill 2xl:flex">
             <BarChart3 size={16} className="text-primary" />
-            <span className="text-xs text-muted-foreground">Performance personal</span>
+            <span className="text-xs text-muted-foreground">{t('stats.performancePersonal')}</span>
           </div>
         </div>
       </div>
 
       </section>
 
-      <div className="rd-panel-tabs" role="tablist" aria-label="Secciones de estadísticas">
+      <div className="rd-panel-tabs" role="tablist" aria-label={t('stats.seccionesDeEstadisticas')}>
         {/* En smartphone vertical las cinco pestañas comparten una fila: nombres cortos. */}
         {[
-          ['overview', 'Rendimiento'],
-          ['direct', isPhonePortrait ? 'Directos' : 'Matchups directos'],
-          ['general', isPhonePortrait ? 'Generales' : 'Matchups generales'],
-          ['synergy', 'Sinergias'],
-          ...(insights.length ? [['coach', 'Coach']] : []),
+          ['overview', t('library.rendimiento')],
+          ['direct', isPhonePortrait ? t('stats.directos') : t('stats.matchupsDirectos')],
+          ['general', isPhonePortrait ? t('stats.generales') : t('stats.matchupsGenerales')],
+          ['synergy', t('stats.sinergias')],
+          ...(insights.length ? [['coach', t('home.anchors.coach')]] : []),
         ].map(([id, label]) => (
           <button
             key={id}
@@ -1134,7 +1141,7 @@ export default function Stats() {
         ))}
       </div>
 
-      {analyticsView === 'overview' && <section className="rd-analytics-panel rd-stats-overview-panel flex min-h-0 flex-col gap-3" aria-label="Rendimiento por campeón y línea">
+      {analyticsView === 'overview' && <section className="rd-analytics-panel rd-stats-overview-panel flex min-h-0 flex-col gap-3" aria-label={t('stats.rendimientoPorCampeonY')}>
         <OverviewTrack>
         <StatsHeroCard
           winrate={winrate}
@@ -1153,7 +1160,7 @@ export default function Stats() {
         />
         <div className="rd-stats-cards grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-6">
         <div className="lg:col-span-2 flex flex-col">
-          <SectionCard title="Winrate por campeón" watermark fullHeight>
+          <SectionCard title={t('stats.winratePorCampeon')} watermark fullHeight>
             <div className="rd-stats-champ-list grid h-full auto-rows-fr grid-cols-1 gap-1.5 xl:grid-cols-2">
               {champArr.slice(0, 10).map(c => {
                 const tone =
@@ -1186,11 +1193,11 @@ export default function Stats() {
         </div>
 
         <div className="lg:col-span-2 flex flex-col">
-          <SectionCard title="Winrate por línea" fullHeight watermark>
+          <SectionCard title={t('stats.winratePorLinea')} fullHeight watermark>
             {laneArr.length > 0 ? (
               <LaneBarChart laneArr={laneArr} />
             ) : (
-              <p className="text-muted-foreground text-sm">Sin datos de líneas.</p>
+              <p className="text-muted-foreground text-sm">{t('stats.sinDatosDeLineas')}</p>
             )}
           </SectionCard>
         </div>
@@ -1206,22 +1213,22 @@ export default function Stats() {
         </OverviewTrack>
       </section>}
 
-      {analyticsView === 'direct' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups directos">
+      {analyticsView === 'direct' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label={t('stats.matchupsDirectos')}>
         <div>
-          <SectionCard title="Mejores Matchups Directos" fixedHeight>
+          <SectionCard title={t('stats.mejoresMatchupsDirectos')} fixedHeight>
             <MatchupList
               items={bestMatchups}
-              empty="Todavía no hay resultados favorables contra un rival directo."
+              empty={t('stats.todaviaNoHayResultados')}
               getChampImg={getChampImg}
               positive
             />
           </SectionCard>
         </div>
         <div>
-          <SectionCard title="Matchups Directos Problemáticos" fixedHeight>
+          <SectionCard title={t('stats.matchupsDirectosProblematicos')} fixedHeight>
             <MatchupList
               items={worstMatchups}
-              empty="Todavía no hay resultados adversos en esta categoría."
+              empty={t('stats.todaviaNoHayResultados2')}
               getChampImg={getChampImg}
               positive={false}
             />
@@ -1229,12 +1236,12 @@ export default function Stats() {
         </div>
       </section>}
 
-      {analyticsView === 'general' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Matchups generales">
+      {analyticsView === 'general' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label={t('stats.matchupsGenerales')}>
         <div>
-          <SectionCard title="Mejores Matchups Generales" fixedHeight>
+          <SectionCard title={t('stats.mejoresMatchupsGenerales')} fixedHeight>
             <MatchupList
               items={bestGeneralMatchups}
-              empty="Todavía no hay resultados para mostrar en esta categoría."
+              empty={t('stats.todaviaNoHayResultados3')}
               getChampImg={getChampImg}
               positive
             />
@@ -1242,10 +1249,10 @@ export default function Stats() {
         </div>
 
         <div>
-          <SectionCard title="Peores Matchups Generales" fixedHeight>
+          <SectionCard title={t('stats.peoresMatchupsGenerales')} fixedHeight>
             <MatchupList
               items={worstGeneralMatchups}
-              empty="Todavía no hay resultados para mostrar en esta categoría."
+              empty={t('stats.todaviaNoHayResultados3')}
               getChampImg={getChampImg}
               positive={false}
             />
@@ -1254,13 +1261,13 @@ export default function Stats() {
 
       </section>}
 
-      {analyticsView === 'synergy' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label="Sinergias aliadas">
+      {analyticsView === 'synergy' && <section className="rd-analytics-panel rd-stats-pair grid grid-cols-1 lg:grid-cols-2 gap-4" aria-label={t('stats.sinergiasAliadas')}>
 
         <div>
-          <SectionCard title="Buena Sinergia Aliada" fixedHeight>
+          <SectionCard title={t('stats.buenaSinergiaAliada')} fixedHeight>
             <MatchupList
               items={bestSynergies}
-              empty="Todavía no hay resultados favorables con un aliado repetido."
+              empty={t('stats.todaviaNoHayResultados4')}
               getChampImg={getChampImg}
               positive
             />
@@ -1268,10 +1275,10 @@ export default function Stats() {
         </div>
 
         <div>
-          <SectionCard title="Mala Sinergia Aliada" fixedHeight>
+          <SectionCard title={t('stats.malaSinergiaAliada')} fixedHeight>
             <MatchupList
               items={worstSynergies}
-              empty="Todavía no hay resultados adversos en esta categoría."
+              empty={t('stats.todaviaNoHayResultados2')}
               getChampImg={getChampImg}
               positive={false}
             />
@@ -1280,35 +1287,35 @@ export default function Stats() {
       </section>}
 
       {analyticsView === 'coach' && insights.length > 0 && (
-        <section className="rd-analytics-panel rd-stats-coach rd-card rd-card-watermark p-5 md:p-7 overflow-hidden" aria-label="Lectura estratégica">
+        <section className="rd-analytics-panel rd-stats-coach rd-card rd-card-watermark p-5 md:p-7 overflow-hidden" aria-label={t('stats.lecturaEstrategica')}>
           <div className="rd-stats-coach-header flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
             <div className="flex items-center gap-4">
               <img
                 src={COACH_BOOK_URL}
-                alt="Libro de Rift Deck Coach"
+                alt={t('stats.libroDeRiftDeck')}
                 className="w-16 md:w-20 h-auto object-contain drop-shadow-[0_0_20px_rgba(212,175,55,0.22)]"
               />
               <div>
                 <div className="flex items-center gap-2 text-primary mb-2">
                   <Sparkles size={15} />
-                  <span className="text-[10px] uppercase tracking-[0.24em] font-semibold">Lectura estratégica</span>
+                  <span className="text-[10px] uppercase tracking-[0.24em] font-semibold">{t('stats.lecturaEstrategica')}</span>
                 </div>
-                <h2 className="font-rajdhani text-2xl font-bold text-foreground">Rift Deck Coach</h2>
-                <p className="text-xs text-muted-foreground mt-1">Hipótesis priorizadas para tu próximo bloque de partidas.</p>
+                <h2 className="font-rajdhani text-2xl font-bold text-foreground">{t('dashboard.riftDeckCoach')}</h2>
+                <p className="text-xs text-muted-foreground mt-1">{t('stats.hipotesisPriorizadasParaTu')}</p>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <p className="text-[11px] text-muted-foreground max-w-sm md:text-right">
-                La confianza refleja cuánto respaldo tiene cada consejo en tu historial y en los datos del juego.
+               {t('stats.laConfianzaReflejaCuanto')}
               </p>
               {coachPageCount > 1 && (
-                <div className="flex items-center gap-2" aria-label="Navegación de consejos">
+                <div className="flex items-center gap-2" aria-label={t('stats.navegacionDeConsejos')}>
                   <button
                     type="button"
                     onClick={() => setCoachPage(Math.max(0, effectiveCoachPage - 1))}
                     disabled={effectiveCoachPage === 0}
                     className="rd-arrow h-7 w-7"
-                    aria-label="Consejos anteriores"
+                    aria-label={t('stats.consejosAnteriores')}
                   >
                     <ChevronLeft size={15} />
                   </button>
@@ -1320,7 +1327,7 @@ export default function Stats() {
                     onClick={() => setCoachPage(Math.min(coachPageCount - 1, effectiveCoachPage + 1))}
                     disabled={effectiveCoachPage >= coachPageCount - 1}
                     className="rd-arrow h-7 w-7"
-                    aria-label="Consejos siguientes"
+                    aria-label={t('stats.consejosSiguientes')}
                   >
                     <ChevronRight size={15} />
                   </button>
@@ -1346,7 +1353,7 @@ export default function Stats() {
                 </div>
 
                 <div className="rd-stats-insight-body mt-1">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Qué muestran los datos</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5">{t('coach.queMuestranLosDatos')}</p>
                   <p className="text-sm text-foreground/85 leading-relaxed">{insight.thesis}</p>
                 </div>
 
@@ -1362,7 +1369,7 @@ export default function Stats() {
 
                 <div className="rd-stats-insight-action flex items-start gap-2 pt-4 border-t border-border/50 xl:h-[88px] xl:shrink-0">
                   <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">Consejo:</span> {insight.action}</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">{t('coach.consejo')}</span> {insight.action}</p>
                 </div>
               </article>
             ))}

@@ -13,13 +13,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import mercadoPagoLogo from '@/assets/mercado-pago.png';
 import paypalLogo from '@/assets/paypal.png';
+import { useT } from '@/lib/LocaleContext';
+import { formatLocale, labels } from '@/i18n/uiI18n';
 
 const FEATURES = [
-'Winrate personal por campeón y línea',
-'Matchups personales directos y generales',
-'Análisis de sinergias personales',
-'Insights personalizados',
-'Objetivos personales ilimitados'];
+'membership.features.winrate',
+'membership.features.matchups',
+'membership.features.synergies',
+'membership.features.insights',
+'membership.features.goals'];
+
+// Nombre visible de cada plan; el de la base (en español) queda de respaldo.
+const PLAN_NAMES = labels({
+  premium: 'membership.plans.premium',
+  premium_quarterly: 'membership.plans.premium_quarterly',
+  premium_annual: 'membership.plans.premium_annual',
+});
 
 // Se usan si membership_plans todavía no se pudo leer.
 const FALLBACK_PLANS = [
@@ -27,11 +36,11 @@ const FALLBACK_PLANS = [
 { code: 'premium_quarterly', name: 'Trimestral', amount_ars: 8500, amount_usd: 5.5, interval_months: 3 },
 { code: 'premium_annual', name: 'Anual', amount_ars: 30000, amount_usd: 20, interval_months: 12 }];
 
-const PERIOD_LABELS = { 1: 'mes', 3: '3 meses', 12: 'año' };
+const PERIOD_LABELS = labels({ 1: 'membership.period.1', 3: 'membership.period.3', 12: 'membership.period.12' });
 
 function formatAmount(value) {
   const amount = Number(value);
-  return amount.toLocaleString('es-AR', {
+  return amount.toLocaleString(formatLocale(), {
     minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
     maximumFractionDigits: 2,
   });
@@ -107,11 +116,12 @@ function PriceBlock({ title, description, price, period, monthlyEquivalent, pric
 }
 
 function PeriodSelector({ plans, selectedCode, onSelect }) {
+  const t = useT();
   const monthly = plans.find((plan) => plan.interval_months === 1);
 
   return (
     <div className="flex justify-center">
-      <div className="inline-flex rounded-xl border border-border bg-secondary/30 p-1 gap-1" role="radiogroup" aria-label="Período de la membresía">
+      <div className="inline-flex rounded-xl border border-border bg-secondary/30 p-1 gap-1" role="radiogroup" aria-label={t('membership.periodoDeLaMembresia')}>
         {plans.map((plan) => {
           const selected = plan.code === selectedCode;
           const savings = savingsPct(plan, monthly);
@@ -129,7 +139,7 @@ function PeriodSelector({ plans, selectedCode, onSelect }) {
               'text-muted-foreground hover:text-foreground'}`
               }>
 
-              {plan.name}
+              {PLAN_NAMES[plan.code] || plan.name}
               {savings > 0 &&
               <span className={`ml-1.5 text-[10px] font-bold ${selected ? 'opacity-90' : 'text-primary'}`}>
                   −{savings}%
@@ -144,6 +154,7 @@ function PeriodSelector({ plans, selectedCode, onSelect }) {
 }
 
 function TrialCard({ onStarted }) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -168,29 +179,30 @@ function TrialCard({ onStarted }) {
 
       <div className="flex-1 space-y-1">
         <h3 className="font-rajdhani font-bold text-xl text-foreground uppercase tracking-tight">
-          Probá Premium {TRIAL_DAYS} días gratis
+         {t('membership.probaPremium')} {TRIAL_DAYS} {t('membership.diasGratis')}
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Sin tarjeta ni medio de pago. Cuando termine la prueba elegís si querés seguir.
+         {t('membership.sinTarjetaNiMedio')}
         </p>
         {error && <p className="text-sm text-red-400">{error}</p>}
       </div>
 
       <Button className="h-10 sm:w-auto w-full" onClick={handleStart} disabled={loading}>
-        {loading ? 'Activando...' : 'Empezar prueba gratis'}
+        {loading ? t('membership.activando') : t('membership.empezarPruebaGratis')}
       </Button>
     </div>);
 
 }
 
 function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mpEmail, setMpEmail] = useState('');
 
   const handleActivate = async () => {
     if (!mpEmail || !mpEmail.includes('@')) {
-      setError('Ingresá tu email de Mercado Pago.');
+      setError(t('membership.ingresaTuEmailDe'));
       return;
     }
 
@@ -204,10 +216,10 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
-        setError('No se pudo obtener el link de pago. Intentá de nuevo.');
+        setError(t('membership.noSePudoObtener'));
       }
     } catch (e) {
-      setError(e?.message || 'Ocurrió un error. Intentá de nuevo.');
+      setError(e?.message || t('membership.ocurrioUnErrorIntenta'));
     } finally {
       setLoading(false);
     }
@@ -215,41 +227,41 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
 
   return (
     <div className="rd-card h-full p-6 grid auto-rows-max gap-5 relative border-primary/20">
-      <CardHeaderRow region="🇦🇷 Argentina" />
+      <CardHeaderRow region={t('membership.argentina')} />
 
       <div className="h-12 flex items-center">
         <div className="bg-[#ffe900] rounded-xl px-4 py-2.5 inline-flex items-center shadow-sm">
           <img
             src={mercadoPagoLogo}
-            alt="Mercado Pago"
+            alt={t('membership.mercadoPago')}
             className="h-7 w-auto object-contain" />
 
         </div>
       </div>
 
       <PriceBlock
-        title="Pagar con Mercado Pago"
-        description="Recomendado para usuarios de Argentina. Necesitás tener una cuenta activa en Mercado Pago"
-        price={`AR$ ${formatAmount(plan.amount_ars)}`}
+        title={t('membership.pagarConMercadoPago')}
+        description={t('membership.recomendadoParaUsuariosDe')}
+        price={t('membership.ar', { formatAmount: formatAmount(plan.amount_ars) })}
         period={period}
-        monthlyEquivalent={monthlyEquivalent && `≈ AR$ ${formatAmount(monthlyEquivalent)} por mes`}
+        monthlyEquivalent={monthlyEquivalent && t('membership.arPorMes', { formatAmount: formatAmount(monthlyEquivalent) })}
         priceClass="text-primary" />
 
 
       <div className="min-h-[158px] flex flex-col">
         <div className="min-h-[102px] space-y-2">
-          <label className="rd-label">Tu email de Mercado Pago</label>
+          <label className="rd-label">{t('membership.tuEmailDeMercado')}</label>
 
           <Input
             type="email"
-            placeholder="ejemplo@gmail.com"
+            placeholder={t('membership.ejemploGmailCom')}
             value={mpEmail}
             onChange={(e) => setMpEmail(e.target.value)}
             disabled={loading} />
 
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Puede ser distinto al email con el que te registraste en Rift Deck.
+           {t('membership.puedeSerDistintoAl')}
           </p>
         </div>
 
@@ -258,7 +270,7 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
           onClick={handleActivate}
           disabled={loading || !mpEmail}>
 
-          {loading ? 'Redirigiendo...' : 'Activar membresía'}
+          {loading ? t('membership.redirigiendo') : t('membership.activarMembresia')}
         </Button>
 
         {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
@@ -266,23 +278,23 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
 
       <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 min-h-[172px]">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-          Cómo funciona:
+         {t('membership.comoFunciona')}
         </p>
 
-        <StepItem index={1}>Ingresá tu email de Mercado Pago.</StepItem>
+        <StepItem index={1}>{t('membership.ingresaTuEmailDe')}</StepItem>
 
         <StepItem index={2}>
-          Tocá “Activar membresía” para ir al checkout seguro.
+         {t('membership.tocaActivarMembresiaPara')}
         </StepItem>
 
         <StepItem index={3}>
-          La membresía se activa automáticamente y se renueva cada {period}.
+         {t('membership.laMembresiaSeActiva')} {period}.
         </StepItem>
       </div>
 
       <div className="h-11 flex items-end justify-center text-center">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Pago seguro con Mercado Pago · Cancelá cuando quieras
+         {t('membership.pagoSeguroConMercado')}
         </p>
       </div>
     </div>);
@@ -290,6 +302,7 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
 }
 
 function PayPalCard({ plan, period, monthlyEquivalent }) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -303,44 +316,44 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
       if (res?.checkout_url) {
         window.location.href = res.checkout_url;
       } else {
-        setError('No se pudo obtener el link de pago. Intentá de nuevo.');
+        setError(t('membership.noSePudoObtener'));
         setLoading(false);
       }
     } catch (e) {
-      setError(e?.message || 'Ocurrió un error. Intentá de nuevo.');
+      setError(e?.message || t('membership.ocurrioUnErrorIntenta'));
       setLoading(false);
     }
   };
 
   return (
     <div className="rd-card h-full p-6 grid auto-rows-max gap-5 relative border-border">
-      <CardHeaderRow region="🌎 Internacional" variant="accent" />
+      <CardHeaderRow region={t('membership.internacional')} variant="accent" />
 
       <div className="h-12 flex items-center">
         <div className="bg-white rounded-xl px-4 py-2.5 inline-flex items-center gap-1.5 shadow-sm">
           <img
             src={paypalLogo}
-            alt="PayPal"
+            alt={t('membership.paypal')}
             className="h-7 w-auto object-contain"
           />
         </div>
       </div>
 
       <PriceBlock
-        title="Pagar con PayPal"
-        description="Opción para usuarios internacionales. Podés pagar con tu saldo de PayPal o con una tarjeta asociada."
+        title={t('membership.pagarConPaypal')}
+        description={t('membership.opcionParaUsuariosInternacionales')}
         price={`U$D ${formatAmount(plan.amount_usd)}`}
         period={period}
-        monthlyEquivalent={monthlyEquivalent && `≈ U$D ${formatAmount(monthlyEquivalent)} por mes`}
+        monthlyEquivalent={monthlyEquivalent && t('membership.uDPorMes', { formatAmount: formatAmount(monthlyEquivalent) })}
         priceClass="text-accent" />
       
 
       <div className="min-h-[158px] flex flex-col">
         <div className="min-h-[102px] space-y-2">
-          <label className="rd-label">Suscripción con PayPal</label>
+          <label className="rd-label">{t('membership.suscripcionConPaypal')}</label>
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            No necesitás completar datos acá: el pago se hace en PayPal.
+           {t('membership.noNecesitasCompletarDatos')}
           </p>
         </div>
 
@@ -349,7 +362,7 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
           onClick={handleSubscribe}
           disabled={loading}>
           
-          {loading ? 'Redirigiendo...' : 'Suscribirme con PayPal'}
+          {loading ? t('membership.redirigiendo') : t('membership.suscribirmeConPaypal')}
         </Button>
 
         {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
@@ -357,25 +370,25 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
 
       <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 min-h-[172px]">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-          Cómo funciona:
+         {t('membership.comoFunciona')}
         </p>
 
         <StepItem index={1} variant="accent">
-          Tocá “Suscribirme con PayPal”.
+         {t('membership.tocaSuscribirmeConPaypal')}
         </StepItem>
 
         <StepItem index={2} variant="accent">
-          Iniciá sesión en PayPal y aprobá la suscripción.
+         {t('membership.iniciaSesionEnPaypal')}
         </StepItem>
 
         <StepItem index={3} variant="accent">
-          La membresía se activa automáticamente y se renueva cada {period}.
+         {t('membership.laMembresiaSeActiva')} {period}.
         </StepItem>
       </div>
 
       <div className="h-11 flex items-end justify-center text-center">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Pago seguro con PayPal · Cancelá cuando quieras
+         {t('membership.pagoSeguroConPaypal')}
         </p>
       </div>
     </div>);
@@ -387,6 +400,7 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
  * `onAccessGranted` se llama al activar la prueba; sin él se recarga la página.
  */
 export function MembershipOffer({ membership, onAccessGranted }) {
+  const t = useT();
   const [plans, setPlans] = useState(FALLBACK_PLANS);
   const [selectedCode, setSelectedCode] = useState('premium');
 
@@ -397,7 +411,7 @@ export function MembershipOffer({ membership, onAccessGranted }) {
   }, []);
 
   const plan = plans.find((p) => p.code === selectedCode) || plans[0];
-  const period = PERIOD_LABELS[plan.interval_months] || `${plan.interval_months} meses`;
+  const period = PERIOD_LABELS[plan.interval_months] || t('membership.meses', { interval_months: plan.interval_months });
   const monthlyEquivalent = plan.interval_months > 1 ? Math.round(plan.amount_ars / plan.interval_months) : null;
   const monthlyEquivalentUsd = plan.interval_months > 1 ? Math.round((plan.amount_usd / plan.interval_months) * 100) / 100 : null;
   const trialExpired = membership?.trialEndsAt && membership.trialEndsAt <= new Date() && !membership.hasAccess;
@@ -413,7 +427,7 @@ export function MembershipOffer({ membership, onAccessGranted }) {
 
       {trialExpired &&
       <div className="rd-card p-4 text-center text-sm text-muted-foreground">
-          Tu prueba gratis terminó. Elegí un plan para seguir usando Premium.
+         {t('membership.tuPruebaGratisTermino')}
         </div>
       }
 
@@ -428,6 +442,7 @@ export function MembershipOffer({ membership, onAccessGranted }) {
 }
 
 export default function MembershipGate({ onAccessGranted }) {
+  const t = useT();
   const { user } = useAuth();
   const [membership, setMembership] = useState(null);
   const hasAccess = user?.role === 'admin' || membership?.hasAccess === true;
@@ -451,16 +466,15 @@ export default function MembershipGate({ onAccessGranted }) {
           </div>
 
           <div>
-            <p className="rd-section-kicker mb-1">Premium</p>
+            <p className="rd-section-kicker mb-1">{t('membership.premium')}</p>
 
             <h2 className="font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-tight uppercase">
-              Acceso Premium a Stats
+             {t('membership.accesoPremiumAStats')}
             </h2>
           </div>
 
           <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
-            Para acceder a las estadísticas avanzadas necesitás tener una
-            membresía Premium activa.
+           {t('membership.paraAccederALas')}
           </p>
 
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5 pt-2">
@@ -470,7 +484,7 @@ export default function MembershipGate({ onAccessGranted }) {
               className="flex items-center gap-1.5 text-xs text-muted-foreground">
 
                 <Sparkles size={11} className="text-primary shrink-0" />
-                {feature}
+                {t(feature)}
               </span>
             )}
           </div>
