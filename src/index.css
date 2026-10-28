@@ -8939,7 +8939,7 @@
 
   /* Nombres largos ("Filo del Infinito") pasan a dos líneas en vez de cortarse. */
   .rd-entity-hero h1 {
-    font-size: clamp(1.6rem, 4.2dvh, 2.3rem);
+    font-size: clamp(1.5rem, 1.8dvh, 2rem);
     line-height: 0.95;
     overflow-wrap: anywhere;
   }
@@ -9030,7 +9030,7 @@
   }
 
   .rd-entity-detail:not(:has(.rd-entity-tabs)) .rd-entity-hero h1 {
-    font-size: clamp(1.9rem, 5.2dvh, 2.8rem);
+    font-size: clamp(1.2rem, 5.2dvh, 1.8rem);
   }
 
   .rd-entity-detail:not(:has(.rd-entity-tabs)) .rd-entity-desc {
