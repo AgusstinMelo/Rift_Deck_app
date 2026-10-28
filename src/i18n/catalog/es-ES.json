@@ -229,7 +229,7 @@
       "source": "26d64964"
     },
     "6a04bc1334f787bb5bb2e053": {
-      "name": "Filofugaz de Navori",
+      "name": "Filoveloz de Navori",
       "description": "Golpes Certeros: Los ataques reducen el enfriamiento restante de tus habilidades básicas en un 15%.",
       "source": "422ba962"
     },
@@ -395,7 +395,7 @@
       "source": "6ffa4f59"
     },
     "6a04bc1334f787bb5bb2e079": {
-      "name": "Botas de dinamismo",
+      "name": "Botas dinámicas",
       "description": "Golpe: +8 de penetración de armadura.",
       "source": "67faa6c4"
     },
@@ -573,7 +573,7 @@
       "source": "951523f3"
     },
     "6a04bc1334f787bb5bb2e09f": {
-      "name": "Tridente de la oceánide",
+      "name": "Tridente de la oceánida",
       "description": "Arma Mortal: Infligir daño con habilidades a un campeón enemigo reduce cualquier escudo que obtenga durante 3 seg. Las habilidades de área de efecto aplican un (5% de Poder de Habilidad + 25)% de reducción de escudo, con límite de un 45%; las habilidades contra un solo objetivo aplican un (5% de Poder de Habilidad + 40)% de reducción de escudo, con límite de un 60%. Cuando infliges daño a un enemigo que no está afectado por Arma Mortal, reduce todos sus escudos por el mismo valor.",
       "source": "993f5ab9"
     },
@@ -618,7 +618,7 @@
       "source": "4fa12eac"
     },
     "6a04bc1334f787bb5bb2e0a8": {
-      "name": "Manto de la duodécima hora",
+      "name": "Túnica del mediodía",
       "description": "Salvavidas: Al caer por debajo del 30% de la Vida Máxima, obtienes de inmediato de 200 a 300 de Vida adicional durante 5 seg y te curas durante 5 seg de 200 a 400 + 120% de Armadura adicional + 120% de Resistencia Mágica adicional + 15% de Vida adicional. Durante este tiempo, aumentas de tamaño en un 10% y obtienes un 10% de Velocidad de Movimiento y un 20% de Tenacidad adicionales.",
       "source": "94f6c1ab"
     },
@@ -714,7 +714,7 @@
       "name": "Sudario glacial"
     },
     "6a04bc1334f787bb5bb2e0bc": {
-      "name": "Coraza doble de Amaranto",
+      "name": "Coraza dual purpúrea",
       "description": "Resistencia: Mientras estés en combate contra campeones enemigos, obtiene una acumulación de Resistencia cada seg, hasta un máximo de 5. Al alcanzar el máximo de acumulaciones, aumentas de tamaño en un 20% y obtienes un 20% de Tenacidad, 30% de Armadura adicional y 30% de Resistencia Mágica adicional hasta salir del combate.",
       "source": "d075b4a6"
     },
@@ -974,12 +974,12 @@
       "source": "c84ea650"
     },
     "6a04bc5f681bf773dac12a90": {
-      "name": "Ataque intensificado",
+      "name": "Fortalecimiento",
       "description": "Al impactar a un campeón enemigo con 3 ataques consecutivos, le infliges daño adaptable adicional y obtienes un 8% de amplificación de daño hasta que abandones el combate contra campeones. Daño adaptable: entre 40 y 165.\nEnfriamiento 4 seg.\nLa amplificación de daño solo surtirá efecto contra campeones.",
       "source": "3196817d"
     },
     "6a04bc5f681bf773dac12a91": {
-      "name": "Protector",
+      "name": "Guardián",
       "description": "Proteges a los aliados que estén a 350 unidades de distancia y a los objetivos de tus habilidades durante 2.5 seg. Si tú o un aliado reciben una cantidad de daño que supera cierto umbral mientras lo proteges, ambos obtendrán un escudo durante 1.5 seg.\nEnfriamiento: De 55 a 25 seg.\nEscudo: De 40 a 165 + 6% de vida adicional + 15% de poder de habilidad\nUmbral de daño: De 70 a 240 de daño recibido.",
       "source": "44ca4dfa"
     },
@@ -989,7 +989,7 @@
       "source": "28511d03"
     },
     "6a04bc5f681bf773dac12a93": {
-      "name": "Soberano del hielo",
+      "name": "Soberano gélido",
       "description": "Inmovilizar a un campeón enemigo hace que se formen 3 rayos a su alrededor, lo que crea hielo debajo de él durante 3 seg y ralentiza a los enemigos que se encuentren dentro. La ralentización perdura en los enemigos durante 1.5 seg tras abandonar el área de hielo. Obtienes una capa protectora de hielo a tu alrededor que aumenta tus defensas. Tras un breve retraso, el hielo explota e inflige una ráfaga de daño mágico a tu alrededor.\nRalentización: (1% de tu Vida adicional + 15)%\nDefensas: 35 + 75% adicional de Armadura y Resistencia Mágica. El efecto dura 2.5 seg.\nDaño mágico: 15-100 + 5% de tu vida adicional\nEnfriamiento: 20 seg",
       "source": "eb00a52d"
     },
@@ -999,12 +999,12 @@
       "source": "eeeea0cd"
     },
     "6a04bc5f681bf773dac12a95": {
-      "name": "Ataque en cadena",
+      "name": "Asalto encadenado",
       "description": "Infligir daño a un campeón enemigo con una habilidad activa le aplica una marca. Esto causa que tus próximos 2 ataques o lanzamientos de habilidades activas contra él inflijan daño adaptable adicional igual a (12-38 + 3% de daño de ataque adicional + 1.5% de poder de habilidad). (15 seg de enfriamiento).",
       "source": "cd8ebb4b"
     },
     "6a04bc5f681bf773dac12a96": {
-      "name": "Arrogancia",
+      "name": "Soberbia",
       "description": "Lograr un derribo contra un campeón enemigo dentro de los 3 seg después de haberle infligido daño, otorga (5 + 1 por cada asesinato de campeón que hayas logrado) de fuerza adaptable durante 30 seg.",
       "source": "6db65a86"
     },
@@ -1019,7 +1019,7 @@
       "source": "43176d3b"
     },
     "6a04bc5f681bf773dac12a99": {
-      "name": "Invocar a Aery",
+      "name": "Aery",
       "description": "Tus ataques y habilidades envían a Aery a un objetivo, lo que inflige daño a enemigos o escuda a aliados.\nDaño: 15 a 70 + 10% de daño de ataque adicional + 5% de poder de habilidad\nEscudo: 20 a 100 + 10% de daño de ataque adicional + 5% de poder de habilidad\nNo puedes volver a lanzar a Aery hasta que regrese a ti.",
       "source": "4485c803"
     },
@@ -1029,7 +1029,7 @@
       "source": "ee2dc1a1"
     },
     "6a04bc5f681bf773dac12a9b": {
-      "name": "Botánico",
+      "name": "Botanista",
       "description": "Al destruir una planta, obtienes 10 de oro y los efectos potenciados de la planta. Las flores Álmicas cerca de las torretas otorgan bonificaciones adicionales.\n\nFrutamiel: Al consumirla, la curación aumenta un 20%.\n\nBrote del Vidente: Al destruirla, la visión otorgada dura un 20% más.\n\nCono Explosivo: Tras el lanzamiento hacia atrás, otorga un 40% de Velocidad de Movimiento durante 2.5 seg.",
       "source": "01f9bbcb"
     },
@@ -1069,7 +1069,7 @@
       "source": "fc88d85a"
     },
     "6a04bc5f681bf773dac12aa3": {
-      "name": "Brutalidad",
+      "name": "Brutal",
       "description": "Tus ataques infligen (5 + 6% de daño de ataque adicional + 3% de Poder de Habilidad) de daño adaptable adicional a los campeones enemigos",
       "source": "ff41c34f"
     },
@@ -1079,12 +1079,12 @@
       "source": "2b0d02c1"
     },
     "6a04bc5f681bf773dac12aa5": {
-      "name": "Ímpetu de fase",
+      "name": "Irrupción de fase",
       "description": "Usar ataques básicos o habilidades contra un campeón enemigo 3 veces en un lapso de 4 seg otorga velocidad de movimiento y reduce el enfriamiento restante de las habilidades básicas en un 20%.\nDuración: 3 seg\nVelocidad de Movimiento: Cuerpo a cuerpo: de un 40% a un 60% | A distancia: de un 20% a un 35%\nAceleración de habilidad: 10\nEnfriamiento: de 21 a 7 seg (según nivel).",
       "source": "0cff236a"
     },
     "6a04bc5f681bf773dac12aa6": {
-      "name": "Vasija ixtali",
+      "name": "Semillero ixtalí",
       "description": "Al destruir una planta, obtienes de inmediato una semilla que reemplaza tu baratija durante 60 seg. La semilla madura y se autodestruye poco después de plantarla en una ubicación objetivo. También podrás recoger las semillas que aparezcan cuando un aliado destruya una planta.\n\nLas semillas se pueden obtener 2 min después del inicio de la partida.\n\nCada planta tiene un enfriamiento individual de 30 seg.",
       "source": "a051e0eb"
     },
@@ -1134,7 +1134,7 @@
       "source": "777fae9e"
     },
     "6a04bc5f681bf773dac12ab0": {
-      "name": "Fervor de combate",
+      "name": "Fervor de batalla",
       "description": "Mientras estás en combate contra un campeón, obtienes un 1.4% de amplificación de daño acumulable para tus habilidades básicas cada 1 seg. Se acumula hasta 3 veces y solo se activa contra campeones enemigos.",
       "source": "92c00274"
     },
@@ -1159,7 +1159,7 @@
       "source": "5802cb57"
     },
     "6a04bc5f681bf773dac12ab5": {
-      "name": "Centinela zombi",
+      "name": "Guardián zombi",
       "description": "Al destruir un centinela enemigo, aparece un centinela zombi en su lugar que otorga visión del área circundante durante 120 seg. Además, obtienes 3 de Daño de Ataque o 6 de Poder de Habilidad (máx.: 5 acumulaciones). También obtienes acumulaciones y creas un centinela zombi si ayudas a destruir un centinela enemigo.",
       "source": "677d6f77"
     },

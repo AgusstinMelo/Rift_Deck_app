@@ -254,7 +254,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         <RelatedIcon size={16} className="text-primary" />
                       </div>
                     )}
-                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(rune)}</h3>
+                    <h3 className="min-w-0 truncate pr-[0.15em] font-rajdhani text-base font-bold">{entityName(rune)}</h3>
                   </Link>
                 );
               })}
@@ -362,7 +362,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         <RelatedIcon size={18} className="text-primary" />
                       </div>
                     )}
-                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(rune)}</h3>
+                    <h3 className="min-w-0 truncate pr-[0.15em] font-rajdhani text-base font-bold">{entityName(rune)}</h3>
                   </Link>
                 );
               })}
@@ -499,7 +499,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
                                   <div className="min-w-0">
-                                    <h3 className="font-rajdhani font-bold text-lg tracking-[-0.05em] text-foreground leading-none truncate">
+                                    <h3 className="font-rajdhani font-bold text-[15px] tracking-[-0.05em] text-foreground leading-tight truncate pr-[0.15em]">
                                       {entityName(rune)}
                                     </h3>
 
