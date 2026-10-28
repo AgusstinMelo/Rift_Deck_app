@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
+import { useCatalogText } from '@/lib/LocaleContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { updateMatch } from '@/api/matchesSupabase';
 import { ArrowLeft, Save, Search } from 'lucide-react';
@@ -167,6 +168,7 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole, 
 }
 
 export default function MatchForm({ match, patches = [], defaultPatch = '', onClose, onSaved }) {
+  const { entityName } = useCatalogText();
   const [step, setStep] = useState('info');
   // Smartphone, paso "Tu build": objetos y hechizos fijos (a la izquierda en horizontal,
   // arriba en vertical) y un panel por vez (objetos / runas), como en el creador de builds.
@@ -813,12 +815,12 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                               {rune.image_url ? (
                                 <img
                                   src={rune.image_url}
-                                  alt={rune.name}
+                                  alt={entityName(rune)}
                                   className="w-full h-full object-cover rounded-full scale-[1.35]"
                                 />
                               ) : (
                                 <span className="text-xs font-bold text-primary">
-                                  {rune.name?.[0]}
+                                  {entityName(rune)[0]}
                                 </span>
                               )}
                             </button>
@@ -872,12 +874,12 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
                                         {rune.image_url ? (
                                           <img
                                             src={rune.image_url}
-                                            alt={rune.name}
+                                            alt={entityName(rune)}
                                             className="w-full h-full object-cover rounded-full"
                                           />
                                         ) : (
                                           <span className="text-xs font-bold text-primary">
-                                            {rune.name?.[0]}
+                                            {entityName(rune)[0]}
                                           </span>
                                         )}
                                       </button>

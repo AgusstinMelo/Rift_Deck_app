@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 const CATEGORIES = [
   { key: 'all', label: 'Todos' },
@@ -161,11 +162,12 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
   const tooltipRef = useRef(null);
   // Mouse: al pasar por encima. Táctil: solo manteniendo presionado (ver usePressPreview).
   const pressPreview = usePressPreview();
+  const { entityName, entityDescription, matchesName } = useCatalogText();
 
   const showTooltip = (element, item, lockReason) => {
     const rect = element.getBoundingClientRect();
     // Las descripciones largas usan un tooltip más ancho: queda más bajo y entra en pantalla.
-    const isLong = String(item.description || '').length > 280;
+    const isLong = entityDescription(item).length > 280;
     const tooltipWidth = Math.min(isLong ? 380 : 320, window.innerWidth - 24);
     const wouldOverflowRight = rect.left + tooltipWidth > window.innerWidth - 12;
     const left = wouldOverflowRight
@@ -200,7 +202,7 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
 
   const filtered = items.filter(item => {
     const normalizedSearch = normalizeSearch(search);
-    const matchSearch = !normalizedSearch || normalizeSearch(item.name).includes(normalizedSearch);
+    const matchSearch = !normalizedSearch || matchesName(item, normalizedSearch, normalizeSearch);
     const matchCat = category === 'all' || (item.category && item.category.toLowerCase() === category.toLowerCase());
     const matchType = typeFilter === 'all' || getItemTypes(item).some(type => type.toLowerCase() === typeFilter.toLowerCase());
     return matchSearch && matchCat && matchType;
@@ -262,15 +264,15 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
                 <button
                   onClick={() => addable && onSelect(item)}
                   disabled={isDisabled}
-                  aria-label={item.name}
+                  aria-label={entityName(item)}
                   className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center transition-all
                     ${alreadyInBuild ? 'ring-2 ring-primary opacity-60' : ''}
                     ${isDisabled ? 'opacity-25 cursor-not-allowed' : 'cursor-pointer hover:border-primary/50'}
                     ${itemIsEnchant && canAddEnchantment ? 'border-purple-400/50' : 'border-border'}
                     bg-secondary/20`}>
                   {item.image_url
-                    ? <img src={item.image_url} alt={item.name} className="w-10 h-10 object-contain rounded" />
-                    : <span className="text-xs font-bold text-primary px-0.5 text-center leading-tight">{item.name?.slice(0, 5)}</span>}
+                    ? <img src={item.image_url} alt={entityName(item)} className="w-10 h-10 object-contain rounded" />
+                    : <span className="text-xs font-bold text-primary px-0.5 text-center leading-tight">{entityName(item).slice(0, 5)}</span>}
                 </button>
               </div>
             );
@@ -295,7 +297,7 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
               <div className="flex items-start gap-3">
                 {tooltip.item.image_url && <img src={tooltip.item.image_url} alt="" className="w-11 h-11 object-contain rounded-lg border border-border bg-secondary/30 shrink-0" />}
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-foreground text-sm leading-tight">{tooltip.item.name}</p>
+                  <p className="font-semibold text-foreground text-sm leading-tight">{entityName(tooltip.item)}</p>
                   <div className="flex flex-wrap items-center gap-x-2 mt-1">
                     {tooltip.item.category && <span className="text-[11px] text-muted-foreground">{tooltip.item.category}</span>}
                     {tooltip.item.price != null && <span className="text-[11px] text-primary font-semibold">{tooltip.item.price} oro</span>}
@@ -314,7 +316,7 @@ export default function ItemBrowser({ items, selectedItems, onSelect }) {
               )}
               {tooltip.item.description && (
                 <p className="mt-3 pt-2.5 border-t border-border/70 text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {String(tooltip.item.description).replace(/\\n/g, '\n')}
+                  {entityDescription(tooltip.item)}
                 </p>
               )}
               {getItemTypes(tooltip.item).length > 0 && <p className="mt-2 text-[10px] text-muted-foreground/80">{getItemTypes(tooltip.item).join(' / ')}</p>}

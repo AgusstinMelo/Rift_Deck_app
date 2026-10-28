@@ -1,6 +1,7 @@
 import { cloneElement, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 const uniqueText = (...values) => [...new Set(
   values
@@ -11,6 +12,7 @@ const uniqueText = (...values) => [...new Set(
 export default function EntityHoverCard({ entity, kind, children }) {
   const [position, setPosition] = useState(null);
   const pressPreview = usePressPreview();
+  const { entityName, entityDescription } = useCatalogText();
 
   const show = element => {
     const rect = element.getBoundingClientRect();
@@ -26,7 +28,7 @@ export default function EntityHoverCard({ entity, kind, children }) {
       : { bottom: window.innerHeight - rect.top + 8, left, width });
   };
 
-  const descriptions = uniqueText(entity?.description, entity?.effect, entity?.passive);
+  const descriptions = uniqueText(entityDescription(entity), entity?.effect, entity?.passive);
   // Mouse: al pasar por encima. Táctil: solo manteniendo presionado (ver usePressPreview).
   const handlers = pressPreview.bind({ onShow: show, onHide: () => setPosition(null) });
   const chained = Object.fromEntries(Object.entries(handlers).map(([name, handler]) => [
@@ -39,7 +41,7 @@ export default function EntityHoverCard({ entity, kind, children }) {
   const trigger = cloneElement(children, {
     ...chained,
     style: { ...children.props.style, ...PRESS_PREVIEW_STYLE },
-    'aria-label': children.props['aria-label'] || entity?.name,
+    'aria-label': children.props['aria-label'] || entityName(entity),
   });
 
   return (
@@ -53,7 +55,7 @@ export default function EntityHoverCard({ entity, kind, children }) {
                 <img src={entity.image_url} alt="" className="h-11 w-11 shrink-0 rounded-lg border border-border bg-secondary/30 object-contain" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-tight text-foreground">{entity?.name}</p>
+                <p className="text-sm font-semibold leading-tight text-foreground">{entityName(entity)}</p>
                 <p className="mt-1 text-[11px] text-primary">{kind || entity?.branch || entity?.category}</p>
               </div>
             </div>

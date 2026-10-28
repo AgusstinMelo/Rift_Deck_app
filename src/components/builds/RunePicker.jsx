@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 const BRANCH_COLORS = {
   'Clave': 'border-yellow-400/70 shadow-yellow-400/40',
@@ -13,6 +14,7 @@ const BRANCH_COLORS = {
 
 function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9', imageClassName = '' }) {
   const branchGlow = BRANCH_COLORS[rune.branch] || 'border-primary/70 shadow-primary/40';
+  const { entityName } = useCatalogText();
 
   return (
     <EntityHoverCard entity={rune} kind={rune.branch}>
@@ -25,11 +27,11 @@ function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9', imageClassName = 
         }`}
     >
       {rune.image_url
-        ? <img src={rune.image_url} alt={rune.name} className={`w-full h-full object-cover rounded-full ${imageClassName}`} />
+        ? <img src={rune.image_url} alt={entityName(rune)} className={`w-full h-full object-cover rounded-full ${imageClassName}`} />
         : (
           <div className={`w-full h-full flex items-center justify-center text-xs font-bold rounded-full
             ${selected ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'}`}>
-            {rune.name?.[0]}
+            {entityName(rune)[0]}
           </div>
         )
       }

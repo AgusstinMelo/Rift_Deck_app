@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
+import { useCatalogText } from '@/lib/LocaleContext';
 import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const CATEGORY_LABELS = {
@@ -32,6 +33,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, mediaOptions);
   const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY, mediaOptions);
   const [section, setSection] = useState('description');
+  const { entityName, entityDescription, matchesName, compareNames } = useCatalogText();
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['writems'],
@@ -126,7 +128,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
     .filter(item => {
       const matchSearch =
         !search ||
-        item.name?.toLowerCase().includes(search.toLowerCase());
+        matchesName(item, search);
 
       const matchCat =
         catFilter === 'all' ||
@@ -157,10 +159,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
 
       if (categoryA !== categoryB) return categoryA - categoryB;
 
-      return normalize(a.name).localeCompare(normalize(b.name), 'es', {
-        sensitivity: 'base',
-        numeric: true,
-      });
+      return compareNames(a, b);
     });
 
   const groupedItems = filtered.reduce((acc, item) => {
@@ -225,7 +224,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
           const selectedTypes = getItemTypes(selected.type).map(normalizeKey);
           return getItemTypes(item.type).some(type => selectedTypes.includes(normalizeKey(type)));
         })
-        .sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), 'es', { sensitivity: 'base' }))
+        .sort(compareNames)
         .slice(0, 6)
     : [];
 
@@ -245,7 +244,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   };
 
   const itemImage = (className, iconSize) => (selected?.image_url ? (
-    <img src={selected.image_url} alt={selected.name} className={className} />
+    <img src={selected.image_url} alt={entityName(selected)} className={className} />
   ) : (
     <div className={`${className} bg-secondary flex items-center justify-center`}>
       <Sword size={iconSize} className="text-primary" />
@@ -259,7 +258,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
         strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
       }}
     >
-      {selected.description.replace(/\\n/g, '\n')}
+      {entityDescription(selected)}
     </ReactMarkdown>
   );
 
@@ -309,7 +308,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                 </span>
               )}
             </div>
-            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{selected.name}</h1>
+            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{entityName(selected)}</h1>
           </div>
         </div>
 
@@ -390,13 +389,13 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
                   {item.image_url ? (
-                    <img src={item.image_url} alt={`${item.name} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                    <img src={item.image_url} alt={`${entityName(item)} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
                   ) : (
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
                       <Sword size={16} className="text-primary" />
                     </div>
                   )}
-                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{item.name}</h3>
+                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(item)}</h3>
                 </Link>
               ))}
             </div>
@@ -440,7 +439,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                 {selected.image_url ? (
                   <img
                     src={selected.image_url}
-                    alt={selected.name}
+                    alt={entityName(selected)}
                     className="
                       w-24 h-24 rounded-3xl object-cover
                       border border-primary/20
@@ -482,7 +481,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                 </div>
 
                 <h1 className="font-rajdhani font-bold text-5xl tracking-[-0.08em] text-foreground uppercase">
-                  {selected.name}
+                  {entityName(selected)}
                 </h1>
 
                 {selected.description && (
@@ -580,7 +579,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
               <h2 className="rd-card-title">Objetos del mismo tipo</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Otros objetos que comparten la clasificación registrada de {selected.name}.
+              Otros objetos que comparten la clasificación registrada de {entityName(selected)}.
             </p>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {relatedItems.map(item => (
@@ -590,13 +589,13 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
                   {item.image_url ? (
-                    <img src={item.image_url} alt={`${item.name} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                    <img src={item.image_url} alt={`${entityName(item)} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                   ) : (
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary">
                       <Sword size={18} className="text-primary" />
                     </div>
                   )}
-                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{item.name}</h3>
+                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(item)}</h3>
                 </Link>
               ))}
             </div>
@@ -746,12 +745,12 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
                         text-left hover:border-primary/40 hover:bg-primary/5
                         transition-all group aspect-square
                       "
-                      title={item.name}
+                      title={entityName(item)}
                     >
                       {item.image_url ? (
                         <img
                           src={item.image_url}
-                          alt={item.name}
+                          alt={entityName(item)}
                           width="160"
                           height="160"
                           loading="lazy"

@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { AlertTriangle, CircleCheck, Loader2, Package, ShieldAlert, Sparkles, Swords, Users, Zap } from 'lucide-react';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 function EntityIcon({ selection, label, badge, round = false, featured = false, small = false }) {
   const entity = selection.entity;
+  const { entityName } = useCatalogText();
   const shape = round ? 'rounded-full' : small ? 'rounded-md' : 'rounded-lg';
   const size = small ? 'h-7 w-7' : 'h-10 w-10 2xl:h-11 2xl:w-11';
-  const tooltip = [label, entity.name].filter(Boolean).join(' · ') + (selection.reason ? `\n${selection.reason}` : '');
+  const tooltip = [label, entityName(entity)].filter(Boolean).join(' · ') + (selection.reason ? `\n${selection.reason}` : '');
   return <div title={small ? undefined : tooltip} className="group relative shrink-0">
-    {entity.image_url ? <img src={entity.image_url} alt={entity.name} className={`${size} ${shape} border object-cover transition-transform ${small ? '' : 'group-hover:-translate-y-0.5'} ${featured ? 'border-primary/70 shadow-[0_0_14px_rgba(212,175,55,.25)]' : 'border-primary/25'}`} /> : <div className={`${size} ${shape} bg-secondary`} />}
+    {entity.image_url ? <img src={entity.image_url} alt={entityName(entity)} className={`${size} ${shape} border object-cover transition-transform ${small ? '' : 'group-hover:-translate-y-0.5'} ${featured ? 'border-primary/70 shadow-[0_0_14px_rgba(212,175,55,.25)]' : 'border-primary/25'}`} /> : <div className={`${size} ${shape} bg-secondary`} />}
     {badge && <span className={`absolute flex items-center justify-center rounded-full border border-primary/40 bg-[#0f1420] font-bold leading-none text-primary ${small ? '-right-1.5 -top-1.5 h-3.5 min-w-3.5 px-0.5 text-[8px]' : '-right-1 -top-1 h-4 min-w-4 px-1 text-[9px]'}`}>{badge}</span>}
   </div>;
 }
@@ -26,10 +28,11 @@ const cleanText = text => String(text || '').replace(/\\n/g, '\n').replace(/\n{2
 
 function ReasonRow({ selection, label, badge, round = false, featured = false, className = '' }) {
   const entity = selection.entity;
+  const { entityName } = useCatalogText();
   return <li className={`flex items-center gap-2.5 border-b border-border/30 py-1.5 ${className}`}>
     <EntityIcon selection={selection} label={label} badge={badge} round={round} featured={featured} small />
     <div className="min-w-0 text-[13px] leading-snug">
-      <p><span className="font-semibold text-foreground">{entity.name}</span><span className="ml-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">{label}</span></p>
+      <p><span className="font-semibold text-foreground">{entityName(entity)}</span><span className="ml-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">{label}</span></p>
       <p title={cleanText(selection.reason)} className="rd-v2-reason whitespace-pre-line">{cleanText(selection.reason)}</p>
     </div>
   </li>;

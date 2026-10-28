@@ -19,6 +19,7 @@ import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
+import { useCatalogText } from '@/lib/LocaleContext';
 import TierBadge from '@/components/ui/TierBadge';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
@@ -77,6 +78,7 @@ const formatKdaLine = (match) =>
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { entityName } = useCatalogText();
   const [patchFilter, setPatchFilter] = useState('');
   const [activeTab, setActiveTab] = useState('summary');
   const [mainIndex, setMainIndex] = useState(0);
@@ -518,9 +520,9 @@ export default function Dashboard() {
                     </div>
 
                     <div className="rd-build-loadout">
-                      <div className="rd-build-keystone" title={keystone?.name || 'Sin runa clave'}>
+                      <div className="rd-build-keystone" title={keystone ? entityName(keystone) : 'Sin runa clave'}>
                         {keystone?.image_url
-                          ? <img src={keystone.image_url} alt={keystone.name} />
+                          ? <img src={keystone.image_url} alt={entityName(keystone)} />
                           : <span>R</span>}
                       </div>
 
@@ -534,7 +536,7 @@ export default function Dashboard() {
                         {itemSlots.map((itemName, index) => {
                           const item = wrItems.find(entry => entry.name === itemName);
                           return item?.image_url
-                            ? <img key={`${itemName}-${index}`} src={item.image_url} alt={itemName} title={itemName} />
+                            ? <img key={`${itemName}-${index}`} src={item.image_url} alt={entityName(item)} title={entityName(item)} />
                             : <span key={index} />;
                         })}
                       </div>

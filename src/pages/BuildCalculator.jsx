@@ -120,6 +120,7 @@ export default function BuildCalculator() {
     return (
       <ChampionBuilds
         champion={selectedChampion}
+        items={items}
         onNewBuild={handleNewBuild}
         onEditBuild={handleEditBuild}
         onBack={handleBack}

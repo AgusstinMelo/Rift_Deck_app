@@ -1,6 +1,7 @@
 import { Edit, Trash2, Clock3 } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { getMatchTypeLabel } from '@/constants/matchTypes';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 const isMovement = (item) =>
   item && Array.isArray(item.type) && item.type.includes('Movimiento');
@@ -72,6 +73,8 @@ function ChampionIcon({
 
 function ItemIcon({ name, items, size = 'w-10 h-10' }) {
   const item = items.find(i => i.name === name);
+  const { entityName } = useCatalogText();
+  const label = item ? entityName(item) : name;
 
   return (
     <div
@@ -87,17 +90,17 @@ function ItemIcon({ name, items, size = 'w-10 h-10' }) {
         hover:border-primary/40
         hover:scale-[1.03]
       `}
-      title={name}
+      title={label}
     >
       {item?.image_url ? (
         <img
           src={item.image_url}
-          alt={name}
+          alt={label}
           className="w-full h-full object-cover"
         />
       ) : (
         <span className="text-[9px] font-bold text-primary text-center px-0.5 leading-tight">
-          {name?.slice(0, 3)}
+          {label?.slice(0, 3)}
         </span>
       )}
     </div>
@@ -112,16 +115,17 @@ function EmptyIconSlot({ size = 'w-10 h-10' }) {
 
 /** Sexto slot de la build: encantamiento (con botas superpuestas), botas o vacío. */
 function SixthSlot({ enchantItem, movementItem, items, size = 'w-10 h-10' }) {
+  const { entityName } = useCatalogText();
   if (enchantItem && movementItem) {
     return (
-      <div className={`relative ${size} rounded-xl border border-purple-400/50 bg-purple-400/10 flex items-center justify-center shrink-0 overflow-visible`} title={enchantItem.name}>
+      <div className={`relative ${size} rounded-xl border border-purple-400/50 bg-purple-400/10 flex items-center justify-center shrink-0 overflow-visible`} title={entityName(enchantItem)}>
         {enchantItem.image_url
-          ? <img src={enchantItem.image_url} alt={enchantItem.name} className="w-full h-full object-cover rounded-xl" />
-          : <span className="text-[9px] font-bold text-primary text-center px-0.5 leading-tight">{enchantItem.name?.slice(0, 3)}</span>}
-        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded border border-blue-400/50 bg-card overflow-hidden shadow-md z-10" title={movementItem.name}>
+          ? <img src={enchantItem.image_url} alt={entityName(enchantItem)} className="w-full h-full object-cover rounded-xl" />
+          : <span className="text-[9px] font-bold text-primary text-center px-0.5 leading-tight">{entityName(enchantItem).slice(0, 3)}</span>}
+        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded border border-blue-400/50 bg-card overflow-hidden shadow-md z-10" title={entityName(movementItem)}>
           {movementItem.image_url
-            ? <img src={movementItem.image_url} alt={movementItem.name} className="w-full h-full object-contain" />
-            : <span className="text-[7px] font-bold text-blue-300">{movementItem.name?.[0]}</span>}
+            ? <img src={movementItem.image_url} alt={entityName(movementItem)} className="w-full h-full object-contain" />
+            : <span className="text-[7px] font-bold text-blue-300">{entityName(movementItem)[0]}</span>}
         </div>
       </div>
     );

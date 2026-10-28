@@ -1,4 +1,5 @@
 import { X, Plus, Footprints } from 'lucide-react';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 const NORMAL_SLOTS = 5;
 
@@ -37,6 +38,7 @@ function buildDisplaySlots(selectedItems) {
 
 export default function ItemPool({ selectedItems, onRemove }) {
   const { normalItems, movementItem, enchantItem } = buildDisplaySlots(selectedItems);
+  const { entityName } = useCatalogText();
   const emptyNormalCount = Math.max(0, NORMAL_SLOTS - normalItems.length);
   const hasMovementSlot = movementItem || enchantItem;
 
@@ -49,8 +51,8 @@ export default function ItemPool({ selectedItems, onRemove }) {
           ${CATEGORY_COLOR[item.category] || 'border-primary/30 bg-secondary/30'}`}
       >
         {item.image_url
-          ? <img src={item.image_url} alt={item.name} className="w-10 h-10 object-contain rounded" />
-          : <span className="text-xs font-bold text-primary text-center px-1 leading-tight">{item.name?.slice(0, 6)}</span>}
+          ? <img src={item.image_url} alt={entityName(item)} className="w-10 h-10 object-contain rounded" />
+          : <span className="text-xs font-bold text-primary text-center px-1 leading-tight">{entityName(item).slice(0, 6)}</span>}
         <button
           onClick={() => onRemove(index)}
           className="absolute -bottom-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-20">
@@ -67,13 +69,13 @@ export default function ItemPool({ selectedItems, onRemove }) {
       return (
         <div className="relative w-16 h-16 rounded-xl border-2 border-purple-400/50 bg-purple-400/10 flex items-center justify-center transition-all">
           {enchantItem.item.image_url
-            ? <img src={enchantItem.item.image_url} alt={enchantItem.item.name} className="w-10 h-10 object-contain rounded" />
-            : <span className="text-xs font-bold text-primary text-center px-1 leading-tight">{enchantItem.item.name?.slice(0, 6)}</span>}
+            ? <img src={enchantItem.item.image_url} alt={entityName(enchantItem.item)} className="w-10 h-10 object-contain rounded" />
+            : <span className="text-xs font-bold text-primary text-center px-1 leading-tight">{entityName(enchantItem.item).slice(0, 6)}</span>}
           {/* Boots badge */}
-          <div className="absolute -top-2 -right-2 w-6 h-6 rounded-md border border-blue-400/50 bg-card overflow-hidden shadow-md z-10" title={movementItem.item.name}>
+          <div className="absolute -top-2 -right-2 w-6 h-6 rounded-md border border-blue-400/50 bg-card overflow-hidden shadow-md z-10" title={entityName(movementItem.item)}>
             {movementItem.item.image_url
-              ? <img src={movementItem.item.image_url} alt={movementItem.item.name} className="w-full h-full object-contain" />
-              : <span className="text-[8px] font-bold text-blue-300 leading-tight text-center block">{movementItem.item.name?.[0]}</span>}
+              ? <img src={movementItem.item.image_url} alt={entityName(movementItem.item)} className="w-full h-full object-contain" />
+              : <span className="text-[8px] font-bold text-blue-300 leading-tight text-center block">{entityName(movementItem.item)[0]}</span>}
           </div>
           <button
             onClick={() => onRemove(movementItem.index, enchantItem.index)}

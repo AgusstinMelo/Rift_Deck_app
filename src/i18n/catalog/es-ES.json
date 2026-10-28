@@ -1,0 +1,1172 @@
+{
+  "items": {
+    "": {
+      "name": "Florescencia sepulcral",
+      "description": "Vida en la Muerte: Cada vez que un campeón enemigo muere en un lapso de 3 seg tras haberle infligido daño, se crea una nova en su ubicación que cura a los campeones aliados por 100 + 20% de Poder de Habilidad como Vida (60 seg de enfriamiento).",
+      "source": "b967a1a7"
+    },
+    "0251fc17-b855-4670-b857-d91d45d99f92": {
+      "name": "Espejo de cristal de Bandle"
+    },
+    "02975a7a-5eb6-41c9-8719-99789024c33a": {
+      "name": "Botas del lanzahechizos",
+      "description": "Gran Bravucón: Los ataques básicos y las habilidades activas infligen 18 de daño verdadero adicional a los súbditos",
+      "source": "943f66cd"
+    },
+    "123685c1-f458-46c7-bcda-a01c1366819b": {
+      "name": "Maldición sanguinolenta",
+      "description": "Desgaste Vil: Cuando las habilidades o pasivas infligen daño mágico a campeones, su Resistencia Mágica se reduce un 7.5% durante 6 seg (se acumula hasta un 30%).",
+      "source": "37967c6e"
+    },
+    "2e3e6027-0702-4245-9dbd-b81a5f5a9d07": {
+      "name": "Diadema susurrante",
+      "description": "Armonía: Obtiene un 0.5% de Poder de curaciones y escudos adicional equivalente al Maná Máximo y recupera un 25% del Maná gastado\nCarga de Maná: El gasto de Maná otorga 14 de Maná Máximo, hasta acumular 700. Esto puede activarse hasta 2 veces cada 10 seg. Al alcanzar el máximo de acumulaciones, se mejora automáticamente a Diadema melodiosa.",
+      "source": "59c383cf"
+    },
+    "3af5f23b-a5e8-4daf-a1e0-d56788a2e986": {
+      "name": "Amanecer y anochecer",
+      "description": "Espada Encantada: Después de lanzar una habilidad, tu siguiente ataque inflige daño mágico adicional equivalente al 75% del Daño de Ataque básico + 10% del Poder de Habilidad y te cura por un valor equivalente al 10% del Poder de Habilidad + 3% de la Vida adicional. Poco después, aplica un efecto al impacto adicional en el objetivo (1.5 seg de enfriamiento). Inflige menos daño a las estructuras.",
+      "source": "e502f2d3"
+    },
+    "40943a92-2500-4b24-8202-7ed1b67bd615": {
+      "name": "Capa negatrón"
+    },
+    "497996e0-5a4e-42bb-8395-a8945ca7484b": {
+      "name": "Cimitarra mercurial",
+      "description": "Capa Mercurial: Elimina todos los efectos de control de masas de tu campeón y te vuelves inmune al control de masas durante 0.25 seg. Después, obtienes un 30% de Tenacidad y un 30% de resistencia a la ralentización durante 1.5 seg (60 seg de enfriamiento)",
+      "source": "fe4ada7e"
+    },
+    "4d4a4531-e7d5-450a-9ef9-3747c244c3f4": {
+      "name": "Bastón del Vacío"
+    },
+    "4e5aa7ec-5caf-4255-af5d-127f49fcaffe": {
+      "name": "Bendición de Mikael",
+      "description": "Purificación: Elimina todos los efectos de control de masas del campeón objetivo y otorga inmunidad al control de masas (a excepción de las supresiones y los lanzamientos en el aire) durante 0.2 seg También cura al objetivo entre 150 a 250 de Vida (75 seg de enfriamiento)",
+      "source": "2fcf4039"
+    },
+    "5b3915da-d551-4450-acb6-8566d16e03ba": {
+      "name": "Hacha hogareña"
+    },
+    "5e258e25-76b0-4dfc-8669-ff5dfbc57e4f": {
+      "name": "Botas rompearmaduras",
+      "description": "Trotanubes: Obtienes 20 de Velocidad de Movimiento al estar fuera de combate.",
+      "source": "271f46cc"
+    },
+    "68f6f056-2ea8-4c50-8d44-a0f14e520ea6": {
+      "name": "Dardos rastreademonios",
+      "description": "Vigilancia Nocturna: Obtienes 20 de Aceleración de Habilidad para la definitiva\nRáfaga Inicial: Después de lanzar tu definitiva, tus siguientes 3 ataques obtienen un 50% de Velocidad de Ataque y siempre asestan golpes críticos, que infligen un 80% de tu daño de Golpe Crítico normal durante 8 seg. Si un ataque ya asesta un golpe crítico, en su lugar inflige un 15% de daño verdadero adicional. (45 seg de enfriamiento).",
+      "source": "32dd2522"
+    },
+    "6a04bc1334f787bb5bb2e030": {
+      "name": "Manamune",
+      "description": "Asombro: Otorga Daño de Ataque igual al 2% de Maná Máximo y restaura el 15% de todo el maná gastado.\nCarga de Maná: Aumenta el Maná Máximo en 14 cada vez que gastas maná o en cada ataque. Tiene un límite de 700 de Maná adicional y transforma a Manamune en Muramana. Se activa hasta 3 veces cada 10 seg. Solo puedes llevar un objeto de Lágrima de la diosa a la vez.",
+      "source": "95c0f8ee"
+    },
+    "6a04bc1334f787bb5bb2e031": {
+      "name": "Bláster magnético",
+      "description": "Sobremarcha: Obtienes un 5% de Velocidad de Movimiento.\nFrenesí de Poder: Al desplazarte y atacar, generas ataques energizados. Los ataques energizados obtienen 100 de alcance (50 de alcance para los ataques cuerpo a cuerpo), infligen de 40 a 100 de daño mágico adicional y otorgan 60 de Velocidad de Movimiento durante 0.75 seg. Este daño rebota a un máximo de 5 enemigos cercanos y puede asestar golpes críticos. (inflige entre un 50% y un 80% de daño adicional contra súbditos).",
+      "source": "8fa7d671"
+    },
+    "6a04bc1334f787bb5bb2e032": {
+      "name": "Fragmento de Kircheis",
+      "description": "Descarga: Los ataques energizados infligen 40 de daño mágico adicional. Al desplazarte y atacar generas ataques energizados",
+      "source": "ba323825"
+    },
+    "6a04bc1334f787bb5bb2e033": {
+      "name": "Arco curvo",
+      "description": "Reforzado: Los ataques infligen 15 de daño físico adicional al impacto contra campeones",
+      "source": "7b0ea41e"
+    },
+    "6a04bc1334f787bb5bb2e034": {
+      "name": "Filo fantasmal de Youmuu",
+      "description": "Cortar: +15 de Penetración de Armadura.\nImpulso: 3 seg después de salir del combate con campeones enemigos, obtiene 30 de Velocidad de Movimiento adicional (20 para campeones a distancia).",
+      "source": "503479e4"
+    },
+    "6a04bc1334f787bb5bb2e035": {
+      "name": "Cetro vampírico"
+    },
+    "6a04bc1334f787bb5bb2e036": {
+      "name": "Filo infinito",
+      "description": "Infinidad: Los golpes críticos infligen un 230% de daño en vez de 200%.",
+      "source": "91c55626"
+    },
+    "6a04bc1334f787bb5bb2e037": {
+      "name": "Muramana",
+      "description": "Asombro: Otorga Daño de Ataque igual al 2% de Maná Máximo y restaura el 15% de todo el maná gastado.\nImpacto: Cuando un ataque impacta contra un campeón enemigo, drena un 1.5% del maná actual y le inflige daño físico adicional equivalente al 3.5% (cuerpo a cuerpo)/3% (a distancia) del Maná Máximo.",
+      "source": "6331fe58"
+    },
+    "6a04bc1334f787bb5bb2e038": {
+      "name": "Desgarrador divino",
+      "description": "Espada Encantada: Tras usar una habilidad, tu próximo ataque en los 10 seg siguientes inflige un 10% de la Vida Máxima del objetivo como daño físico adicional (7% si el ataque es a distancia). Si el objetivo es un campeón, cura un 6% de la Vida Máxima del objetivo (2.5% si el ataque es a distancia). (1.5 seg de enfriamiento). El daño se reduce contra estructuras.",
+      "source": "8355b7f9"
+    },
+    "6a04bc1334f787bb5bb2e039": {
+      "name": "Fervor",
+      "description": "Fervor: +4% de velocidad de movimiento.",
+      "source": "6780349b"
+    },
+    "6a04bc1334f787bb5bb2e03a": {
+      "name": "Calibrador de Sterak",
+      "description": "Severo: +50% del daño de ataque básico como daño físico adicional.\nSalvavidas: Al recibir daño que te haga bajar del 35% de vida, recibes un escudo equivalente al 75% de la Vida adicional que se desvanece a lo largo de 5 s. (75 s de enfriamiento).",
+      "source": "43e80532"
+    },
+    "6a04bc1334f787bb5bb2e03b": {
+      "name": "Carcaj del mediodía"
+    },
+    "6a04bc1334f787bb5bb2e03c": {
+      "name": "Final del ingenio",
+      "description": "Final del ingenio: Los ataques básicos infligen 40 de daño mágico adicional al impacto.",
+      "source": "5d085222"
+    },
+    "6a04bc1334f787bb5bb2e03d": {
+      "name": "Eclipse",
+      "description": "Luna siempre creciente: impactar a un campeón enemigo con 2 ataques o habilidades diferentes en un periodo de 1.8 seg inflige daño físico adicional igual al 7% de la Vida Máxima del objetivo (3.5 para campeones a distancia). Además te otorga un escudo que absorbe una cantidad de daño igual a 140 + 35% de Daño de Ataque adicional (70 + 18% de Daño de Ataque adicional para campeones a distancia) durante 2 seg. (6 seg de enfriamiento).",
+      "source": "d8785cd7"
+    },
+    "6a04bc1334f787bb5bb2e03e": {
+      "name": "Garra de Nashor",
+      "description": "Aguja Mágica: Obtienes 15 de Daño de Ataque o 30 de Poder de Habilidad (adaptable).",
+      "source": "d95b8725"
+    },
+    "6a04bc1334f787bb5bb2e03f": {
+      "name": "Huracán de Runaan",
+      "description": "Furia del Viento: Los ataques impactan a 2 enemigos cercanos adicionales, cada uno inflige un 55% de daño físico. Esos ataques pueden infligir golpes críticos y activar efectos al impacto.",
+      "source": "53742682"
+    },
+    "6a04bc1334f787bb5bb2e040": {
+      "name": "Colmillo de serpiente",
+      "description": "Puñalada: +15 de Penetración de Armadura.\nSaqueador de Escudos: Infligir daño a un campeón enemigo reduce los escudos que obtengan durante 3 seg. Los campeones cuerpo a cuerpo aplican un (10% de Daño de Ataque adicional + 40% de reducción de escudo, con límite del 60%) Los campeones a distancia aplican un (10% de Daño de Ataque adicional + 25% de reducción de escudo, con límite de 45%). Cuando infliges daño a un enemigo que no está afectado por Saqueador de Escudos, reduce todos sus escudos por el mismo valor.",
+      "source": "da201e76"
+    },
+    "6a04bc1334f787bb5bb2e041": {
+      "name": "Baile de la muerte",
+      "description": "Desafiar: Si a un campeón al que le infligiste daño en los últimos 3 seg muere, el daño restante de Ignorar el Dolor se purifica y te curas durante 2 seg por una cantidad igual al 90% de Daño de Ataque adicional.\nCauterizar: Almacena un 30% del daño físico y mágico recibido (12% para campeones a distancia) y recibe la cantidad almacenada como daño verdadero durante 3 seg.",
+      "source": "483bf745"
+    },
+    "6a04bc1334f787bb5bb2e042": {
+      "name": "Sanguinaria",
+      "description": "Convierte la sobrecuración de tu Robo de Vida en un escudo, hasta 165-345 (según el nivel).",
+      "source": "72196b9b"
+    },
+    "6a04bc1334f787bb5bb2e043": {
+      "name": "Hoja del rey arruinado",
+      "description": "Ataques Arruinados: Los ataques infligen daño físico adicional al impacto igual al 7% de la Vida actual del enemigo. (Los ataques cuerpo a cuerpo infligen 10%). Daño mínimo: 15. Max. daño contra monstruos: 60.\nDrenar: Impactar al mismo campeón enemigo 3 veces con ataques básicos o habilidades lo ralentiza un 30% durante 1.5 seg (30 seg de enfriamiento).",
+      "source": "6a483d06"
+    },
+    "6a04bc1334f787bb5bb2e044": {
+      "name": "Recordatorio letal",
+      "description": "Últimas palabras: Obtienes un 30% de Penetración de Armadura. Los ataques que asestan golpes críticos obtienen un 6% de Penetración de Armadura adicional.\nSepsis: infligir daño físico aplica un 50% de Heridas Graves a los campeones enemigos por 3 seg.",
+      "source": "25f78792"
+    },
+    "6a04bc1334f787bb5bb2e045": {
+      "name": "Lágrima de la diosa",
+      "description": "Asombro: Regenera un 10% del Maná gastado.\nCarga de Maná: Aumenta el maná máximo en 6 cada vez que gastas maná. Tiene un límite de 700 de Maná adicional. Se activa hasta 3 veces cada 10 seg. Solo puedes llevar un objeto de Lágrima de la diosa a la vez.",
+      "source": "80cb309e"
+    },
+    "6a04bc1334f787bb5bb2e046": {
+      "name": "Daga dentada",
+      "description": "Punzante: +8 de Penetración de Armadura.",
+      "source": "a910f200"
+    },
+    "6a04bc1334f787bb5bb2e047": {
+      "name": "Segador de esencia",
+      "description": "Espada Encantada: Tras lanzar una habilidad, tu siguiente ataque básico dentro de 10 seg posteriores inflige daño físico adicional equivalente a un 135% x Daño de Ataque básico + 0 - 80 (según la Tasa de Críticos) y restaura Maná equivalente al 50% del daño infligido (1.5 seg de enfriamiento).\nSifón de Maná: Los ataques restauran un 3% de tu Maná faltante al impacto.",
+      "source": "1f76eef2"
+    },
+    "6a04bc1334f787bb5bb2e048": {
+      "name": "Mecanoespada punki",
+      "description": "Paliza: Al infligir daño físico a los campeones enemigos, aplica un 50% de Heridas Graves durante 3 seg.",
+      "source": "28760ddf"
+    },
+    "6a04bc1334f787bb5bb2e049": {
+      "name": "Rompecascos",
+      "description": "A Toda Vela: Obtienes un 5% de Velocidad de Movimiento.\nCapitán: Cada 4º ataque contra campeones y monstruos épicos inflige daño físico adicional equivalente a un 160% básico más un 5% de la vida máxima (los campeones a distancia infligen un 40% del daño), que aumenta a un 240% básico más un 9% de la vida máxima contra estructuras (los campeones a distancia infligen un 40% del daño).\nTripulación de Abordaje: Los súbditos de asedio y los supersúbditos aliados cercanos obtienen entre 20 y 130 de Armadura (25% adicional si es un campeón a distancia) y entre 10 y 120 de Resistencia Mágica (25% adicional si es un campeón a distancia).",
+      "source": "4fd98e3a"
+    },
+    "6a04bc1334f787bb5bb2e04a": {
+      "name": "Lanza de Shojin",
+      "description": "Fuerza del Dragón: Obtienen 20 de Aceleración de Habilidad para habilidades básicas.\nVoluntad Enfocada: Al infligir daño a enemigos o monstruos con habilidades, el daño de las habilidades y de la pasiva de tu campeón aumenta un 3% durante 6 seg. (Se puede acumular 4 veces). La acumulación de Voluntad Enfocada tiene un bloqueo de 1 seg por cada lanzamiento de habilidad.",
+      "source": "5aaba17e"
+    },
+    "6a04bc1334f787bb5bb2e04b": {
+      "name": "El final",
+      "description": "Sombra: Los ataques infligen 30 de daño mágico adicional al impacto.\nYuxtaposición: Alterna entre los efectos al impacto de Luz y Oscuridad al atacar. Los ataques de Luz otorgan de 5 a 8 de Armadura y de Resistencia Mágica durante 5 seg. al impacto. Los ataques de Oscuridad otorgan un 10% de Penetración de Armadura y un 10% de Penetración de Magia durante 5 seg. al impacto. Cada efecto al impacto se acumula hasta 3 veces. Mientras tengas este objeto, la Penetración de Armadura y la Penetración de Magia adicionales que te otorga tendrán un máximo de 40%.",
+      "source": "97a548b7"
+    },
+    "6a04bc1334f787bb5bb2e04c": {
+      "name": "Hidra titánica",
+      "description": "Hender: Cada 1.75 seg, tu siguiente ataque inflige una cantidad de daño físico adicional equivalente a 25 + 3% de tu vida máxima adicional (también aplica a las torretas) y genera una onda de choque que inflige una cantidad de daño físico equivalente a 80 + 10% de tu vida máxima adicional a los enemigos que estén detrás del objetivo. Los campeones a distancia infligen un 75% del daño.",
+      "source": "198afd20"
+    },
+    "6a04bc1334f787bb5bb2e04d": {
+      "name": "Brillo",
+      "description": "Espada Encantada: Usar una habilidad hace que el siguiente ataque dentro de 10 seg inflija daño físico adicional igual a un 100% del daño de Ataque básico. (1.5 seg de enfriamiento). Se reduce el daño contra estructuras.",
+      "source": "72646bb7"
+    },
+    "6a04bc1334f787bb5bb2e04e": {
+      "name": "Fuerza de trinidad",
+      "description": "Fervor: +5% de velocidad de movimiento.\nHoja encantada: Tras usar una habilidad, el siguiente ataque básico en los próximos 10 s inflige daño físico adicional equivalente al 200% básico. (1,5 s de enfriamiento). El daño es menor contra estructuras.",
+      "source": "d7dc6d85"
+    },
+    "6a04bc1334f787bb5bb2e04f": {
+      "name": "Rencor de Serylda",
+      "description": "Últimas palabras: Obtienes un 30% de Penetración de Armadura. Gélido: Las habilidades activas que infligen daño y los ataques potenciados aplican un 30% de ralentización a la Velocidad de Movimiento durante 1 seg a los enemigos que se encuentren por debajo del 60% de su Vida actual.",
+      "source": "f44e8a6b"
+    },
+    "6a04bc1334f787bb5bb2e050": {
+      "name": "Cuchilla negra",
+      "description": "Desgarrar: Infligir daño físico a un campeón reduce su Armadura un 6% durante 6 seg y se acumula hasta 5 veces para llegar a una reducción de 30%.\nPersecución: Obtienes 20 de Velocidad de Movimiento cuando infliges daño físico. Obtienes 40 de Velocidad de Movimiento cuando te desplazas hacia campeones enemigos que tengan 5 acumulaciones de Desgarrar. Los campeones a distancia obtienen la mitad de las bonificaciones.",
+      "source": "95893ab2"
+    },
+    "6a04bc1334f787bb5bb2e051": {
+      "name": "Transferencia de alma",
+      "description": "Baile Sombrío: Al asestarle un golpe crítico a un campeón enemigo o a un monstruo épico, invocas un clon que dura 4 seg y ataca a los enemigos cercanos. El clon adquiere un 20% de tu Daño de Ataque. Además, obtiene un 30% de tu Tasa de Críticos como Velocidad de Ataque. Puede hacer hasta 2 clones al mismo tiempo. Si un clon se aleja a más de 600 unidades de ti, desaparecerá antes.",
+      "source": "01ac2664"
+    },
+    "6a04bc1334f787bb5bb2e052": {
+      "name": "Filoscuro de Draktharr",
+      "description": "Navaja: +18 de Penetración de Armadura.\nAcechador Nocturno: El primer ataque contra un campeón infligirá de 60 a 160 de daño físico adicional y lo ralentizará un 99% durante 0.35 seg (10 seg de enfriamiento).\nLos derribos de campeones restablecen el enfriamiento.",
+      "source": "26d64964"
+    },
+    "6a04bc1334f787bb5bb2e053": {
+      "name": "Filofugaz de Navori",
+      "description": "Golpes Certeros: Los ataques reducen el enfriamiento restante de tus habilidades básicas en un 15%.",
+      "source": "422ba962"
+    },
+    "6a04bc1334f787bb5bb2e054": {
+      "name": "Recaudadora",
+      "description": "Asesino: +10 de Penetración de Armadura.\nMuerte y Tributos: Al infligir daño que dejaría a un campeón enemigo por debajo de (4% + 2% de Tasa de Críticos) de su Vida Máxima, lo ejecuta, aumenta de forma permanente el umbral de ejecución de Vida Máxima en un 0.1% y otorga 25 de oro adicional.",
+      "source": "3f1d7e02"
+    },
+    "6a04bc1334f787bb5bb2e055": {
+      "name": "Filo de la noche",
+      "description": "Enterrar: +8 de Penetración de Armadura.\nAnular: Otorga un escudo mágico que bloquea la siguiente habilidad enemiga. (35 seg de enfriamiento).",
+      "source": "74661dc9"
+    },
+    "6a04bc1334f787bb5bb2e056": {
+      "name": "Fauces de Malmortius",
+      "description": "Salvavidas: Tras recibir una cantidad de daño mágico que te dejaría con menos de un 35% de Vida, obtienes un 10% de Omnivampirismo hasta el final del combate y un escudo que absorbe entre 220 y 530 de daño mágico durante 3 seg. (75 seg de enfriamiento).",
+      "source": "9056e200"
+    },
+    "6a04bc1334f787bb5bb2e057": {
+      "name": "Bailarín espectral",
+      "description": "Pies Ligeros: +7% de velocidad de movimiento.\nVals Espectral: Al impactar a un enemigo con un ataque, obtienes un 6% de Velocidad de Ataque y un 1% de Velocidad de Movimiento durante 6 seg, acumulable hasta 5 veces.",
+      "source": "d09000a7"
+    },
+    "6a04bc1334f787bb5bb2e058": {
+      "name": "Firmamento desgarrado",
+      "description": "Golpe de Escudo de Luz: El primer ataque contra un campeón enemigo asesta un golpe crítico (6 seg de enfriamiento por cada objetivo), inflige un 160% de daño y te restaura Vida igual a un 125% del Daño de Ataque básico + 6% de tu Vida faltante.",
+      "source": "c1b3b3c3"
+    },
+    "6a04bc1334f787bb5bb2e059": {
+      "name": "Espadón"
+    },
+    "6a04bc1334f787bb5bb2e05a": {
+      "name": "Botas blindadas",
+      "description": "Bloqueo: Los ataques básicos de los campeones te infligen un 10% de daño reducido",
+      "source": "8874d0a3"
+    },
+    "6a04bc1334f787bb5bb2e05b": {
+      "name": "Corona de la reina quebrada",
+      "description": "Salvaguarda: Otorga un escudo mágico que bloquea la siguiente habilidad enemiga. Cuando el escudo acaba, el daño recibido se reduce en un 40% durante 1 seg. (40 seg de enfriamiento).\nElegancia: El poder de habilidad aumenta en 20 al estar bajo el efecto de Salvaguarda. Infligir daño mágico a campeones enemigos con una habilidad activa reduce el enfriamiento de Salvaguarda en 4 seg.",
+      "source": "2b191f67"
+    },
+    "6a04bc1334f787bb5bb2e05c": {
+      "name": "Precisión infalible",
+      "description": "Hiperdisparo: infligir daño a un campeón enemigo con una habilidad a 600 unidades de distancia lo revela durante 8 seg. y aumenta el daño infligido en un 10%.\nConcentración: Al activar Hiperdisparo, revelará a todos los campeones enemigos a 1200 unidades de distancia del objetivo durante 3 seg. (12 seg de enfriamiento).",
+      "source": "875f6927"
+    },
+    "6a04bc1334f787bb5bb2e05d": {
+      "name": "Colgante del profeta",
+      "description": "Predicador del Fin: +12 de Penetración de Magia.",
+      "source": "ef868777"
+    },
+    "6a04bc1334f787bb5bb2e05e": {
+      "name": "Botas de velocidad"
+    },
+    "6a04bc1334f787bb5bb2e05f": {
+      "name": "Aguijón"
+    },
+    "6a04bc1334f787bb5bb2e060": {
+      "name": "Brisa de éter",
+      "description": "Brisa: +4% de velocidad de movimiento.",
+      "source": "d8abc378"
+    },
+    "6a04bc1334f787bb5bb2e061": {
+      "name": "Ídolo prohibido"
+    },
+    "6a04bc1334f787bb5bb2e062": {
+      "name": "Martillo de guerra de Caulfield"
+    },
+    "6a04bc1334f787bb5bb2e063": {
+      "name": "Tormento de Liandry",
+      "description": "Tormento: Las habilidades de daño y los ataques potenciados infligen un 2% de la Vida Máxima del objetivo como daño mágico por segundo durante 3 seg.\n\nLocura: Al luchar contra campeones enemigos, infliges un 2% de daño adicional por seg (hasta un máximo de 6%).",
+      "source": "1c90ba2c"
+    },
+    "6a04bc1334f787bb5bb2e064": {
+      "name": "Fantasía de Bandle",
+      "description": "Flor de Fuego: Al infligirle daño a un campeón enemigo con una habilidad activa, aparecerá una trampa a sus pies. Tras un breve retraso, la trampa inflige daño mágico igual a 105 más un 15% de poder de habilidad a los enemigos en su interior (8 seg de enfriamiento por objetivo). Si un objetivo es alcanzado por más de una trampa colocada por el mismo campeón dentro de un breve periodo, las trampas después de la primera solo infligirán un 20% de daño.",
+      "source": "d6dba493"
+    },
+    "6a04bc1334f787bb5bb2e065": {
+      "name": "Promesa de caballero",
+      "description": "Sacrificio: Mientras tu aliado digno esté cerca, el 12% del daño que recibe se redirige a ti. Además, te curas un 10% del daño a campeones que inflige tu aliado digno.\nJuramento: Cuando compras o vuelves a comprar este objeto designas un aliado que sea digno.",
+      "source": "569a5ad6"
+    },
+    "6a04bc1334f787bb5bb2e066": {
+      "name": "Verdugo de krakens",
+      "description": "Paso de Nube: Obtienes un 5% de Velocidad de Movimiento.\nDerríbalo: Cada tercer ataque inflige entre 150 y 210 de daño físico adicional (entre 120 y 168 para los campeones a distancia), que aumenta un 0.75% por cada 1% de Vida que le falte al objetivo. El daño físico adicional tiene un límite de un 75%.",
+      "source": "8166c3c7"
+    },
+    "6a04bc1334f787bb5bb2e067": {
+      "name": "Capa de agilidad"
+    },
+    "6a04bc1334f787bb5bb2e068": {
+      "name": "Llamada del verdugo",
+      "description": "Golpe Paralizante: Al infligir daño físico a los campeones enemigos, aplica un 40% de Heridas Graves durante 3 seg.",
+      "source": "c36517d7"
+    },
+    "6a04bc1334f787bb5bb2e069": {
+      "name": "Puño de Jaurim"
+    },
+    "6a04bc1334f787bb5bb2e06a": {
+      "name": "Guantes de pelea"
+    },
+    "6a04bc1334f787bb5bb2e06b": {
+      "name": "Daga"
+    },
+    "6a04bc1334f787bb5bb2e06c": {
+      "name": "Creagrietas",
+      "description": "Corrupción del Vacío: Al combatir contra campeones enemigos, infliges un 2% de daño adicional por seg (hasta un máximo de 8%). Al nivel de fuerza máxima, obtienes un 10% (cuerpo a cuerpo) / 6% (a distancia) de Omnivampirismo.\n\nInfusión del Vacío: Obtienes Poder de Habilidad equivalente a un 2% de tu Vida adicional",
+      "source": "468178ae"
+    },
+    "6a04bc1334f787bb5bb2e06d": {
+      "name": "Alternador hextech",
+      "description": "Acelerado: Las habilidades de daño y los ataques potenciados contra campeones infligen 25-60 de daño mágico adicional (20 s de enfriamiento).",
+      "source": "11e0d1b9"
+    },
+    "6a04bc1334f787bb5bb2e06e": {
+      "name": "Malla de espinas",
+      "description": "Espinas: Cuando recibes un ataque, infliges (20 + 6% de armadura adicional + 1% de vida adicional) de daño mágico al atacante.\nEntrelazado: Cuando recibes el ataque de un campeón enemigo o le infliges daño, le aplicas un 50% de Heridas Graves durante 3 seg.",
+      "source": "c1eeaf5d"
+    },
+    "6a04bc1334f787bb5bb2e06f": {
+      "name": "Sangría del soberano",
+      "description": "Tiranía: Obtienes daño de ataque igual al 2.5% de tu Vida adicional.\nReprensión: Obtienes hasta un 9% de Daño de Ataque aumentado según tu vida faltante.\nObtienes la bonificación máxima de Reprensión al tener menos de un 30% de Vida.",
+      "source": "51bf4fd4"
+    },
+    "6a04bc1334f787bb5bb2e070": {
+      "name": "Escudo reliquia",
+      "description": "Tributo: Cada 30 seg, obtienes 1 orbe de energía que te orbita (máx 3 orbes). Al estar cerca de un aliado, las siguientes acciones activarán Tributo, lo que consumirá 1 orbe de energía para otorgarte 65 de oro y restaurarte entre 20 y 80 de Vida:\n1. Infligir daño a campeones o estructuras enemigas con habilidades o ataques.\n2. Atacar a súbditos que tengan menos de un 65% de Vida. Esta acción también los ejecuta. Además, el oro que generen tus asesinatos de súbditos se entregará al aliado que esté más cerca de ti.\n3. Tener 3 orbes y estar cerca de un súbdito cuando muere.\nAl activar Tributo, el aliado más cercano a ti obtiene acumulaciones de Tributo.\nGuardián: Infliges 1 de daño adicional a los centinelas de visión que hayan sido revelados con Lente Revelador, Centinela de Control y Brote Vidente.\nRestricción: No recibes oro al matar súbditos, pero obtienes una cantidad de oro que equivale a un 50% de la recompensa. El oro que generen tus asesinatos de súbditos se entregará al aliado que esté más cerca de ti. Además el oro que obtienes al matar monstruos se reduce un 50%.\nMisión: Obtén 750 de oro con este objeto para transformarlo en Guadaña de la Niebla Negra. Esto te unirá al aliado con la mayor cantidad de acumulaciones de Tributo y los convertirá en los mejores compañeros.",
+      "source": "27a53c24"
+    },
+    "6a04bc1334f787bb5bb2e071": {
+      "name": "Botas de maná",
+      "description": "Ruptura mágica: +8 de penetración mágica.\nEquilibrio: Los campeones sin maná obtienen un 75% de regeneración de vida adicional.\nGran bravucón: Los ataques y habilidades activas infligen 18 de daño físico adicional a los súbditos.",
+      "source": "50e14ae0"
+    },
+    "6a04bc1334f787bb5bb2e072": {
+      "name": "Gema avivadora"
+    },
+    "6a04bc1334f787bb5bb2e073": {
+      "name": "Anillo de la revelación"
+    },
+    "6a04bc1334f787bb5bb2e074": {
+      "name": "Bastón de aguas fluidas",
+      "description": "Rápidos: Curar u otorgar escudos a un aliado le otorga a este y a ti un 15 de Aceleración de Habilidad y 40 de poder de habilidad (según el nivel del objetivo) durante 6 s.",
+      "source": "1e04b5ef"
+    },
+    "6a04bc1334f787bb5bb2e075": {
+      "name": "Mandato imperial",
+      "description": "Control: Las habilidades de control de masas obtienen 20 de Aceleración de Habilidad.\n\nComando: Aplicar control de masas a un campeón enemigo lo marca durante 4 seg, lo que hace que reciba un 7% de daño adicional mientras dura el efecto.",
+      "source": "7d8214fb"
+    },
+    "6a04bc1334f787bb5bb2e076": {
+      "name": "Guadaña de la Niebla Negra",
+      "description": "Versátil: Obtienes 14 de Daño de Ataque o 28 de Poder de Habilidad (adaptable).\nInvocación Álmica: Cada 60 seg obtienes 75 de oro, 25 de Vida y 2 de Daño de Ataque o 4 de Poder de Habilidad (adaptable); hasta un máximo de 250 de Vida y 20 de Daño de Ataque o 40 de Poder de Habilidad (adaptable). Infliges 2 de daño adicional a los centinelas de visión que hayan sido revelados con Lente Revelador, Centinela de Control y Brote del Vidente.\nObtienes un 10% de Velocidad de Movimiento al desplazarte hacia tu compañero perfecto fuera del combate. Si están a más de 2500 unidades de distancia, esta bonificación aumenta a un 30%.",
+      "source": "0b575410"
+    },
+    "6a04bc1334f787bb5bb2e077": {
+      "name": "Botas de mercurio"
+    },
+    "6a04bc1334f787bb5bb2e078": {
+      "name": "Grebas de berserker",
+      "description": "Espada bendita: Los ataques restauran 10 de vida al impactar.",
+      "source": "6ffa4f59"
+    },
+    "6a04bc1334f787bb5bb2e079": {
+      "name": "Botas de dinamismo",
+      "description": "Golpe: +8 de penetración de armadura.",
+      "source": "67faa6c4"
+    },
+    "6a04bc1334f787bb5bb2e07a": {
+      "name": "Morellonomicón",
+      "description": "Aflicción: Al infligir daño mágico a los campeones enemigos aplica un 50% de Heridas Graves durante 3 seg.",
+      "source": "fabaac6f"
+    },
+    "6a04bc1334f787bb5bb2e07b": {
+      "name": "Robaalmas de Mejai",
+      "description": "Gloria: Obtienes hasta 30 acumulaciones de gloria tras derribar a un campeón. Los campeones cuerpo a cuerpo obtienen 3 acumulaciones por cada asesinato y 2 acumulaciones por cada asistencia; los campeones a distancia obtienen 4 acumulaciones por cada asesinato y 2 acumulaciones por cada asistencia. Pierdes 10 acumulaciones al morir.\nMiedo: Obtienes 5 de Poder de Habilidad por cada acumulación de gloria que tengas. Al tener 10 acumulaciones de gloria o más, obtienes un 10% de Velocidad de Movimiento adicional.",
+      "source": "e9408f77"
+    },
+    "6a04bc1334f787bb5bb2e07c": {
+      "name": "Disfraz encantado",
+      "description": "Locura: Al luchar contra campeones enemigos, infliges un 2% de daño adicional por seg (hasta un máximo de 6%).",
+      "source": "bd1cf987"
+    },
+    "6a04bc1334f787bb5bb2e07d": {
+      "name": "Cristal de zafiro",
+      "description": "Carga de Maná: Aumenta el Maná Máximo en 5 cada vez que gastas maná. Tiene un límite de 250 de Maná adicional. Se activa hasta 3 veces cada 12 seg. Solo puedes llevar un objeto de Lágrima de la diosa a la vez.",
+      "source": "0941ff28"
+    },
+    "6a04bc1334f787bb5bb2e07e": {
+      "name": "Desesperanza eterna",
+      "description": "Angustia: Cada 4 seg que estés en combate contra un campeón, infliges un 3% de tu Vida Máxima como daño mágico a los campeones enemigos cercanos y te curas un 250% del daño infligido. La aceleración de habilidad de los objetos no afecta a Angustia.",
+      "source": "421acf23"
+    },
+    "6a04bc1334f787bb5bb2e07f": {
+      "name": "Fulgor vano",
+      "description": "Inmolar: Al estar en combate, infliges una cantidad de daño mágico equivalente a entre 20 y 30 más un 1% de tu Vida adicional por segundo a los enemigos cercanos durante 5 seg. Inflige un 125% de daño a monstruos y un 200% de daño a súbditos.\nDesolar: Al matar a un monstruo neutral o un enemigo infliges una cantidad de daño mágico equivalente a 30 más un 2% de tu Vida adicional en el área circundante.",
+      "source": "b2604578"
+    },
+    "6a04bc1334f787bb5bb2e080": {
+      "name": "Diente de Nashor",
+      "description": "Roer: Los ataques básicos infligen 15 + 20% de Poder de Habilidad como daño mágico adicional al impacto.",
+      "source": "0f1c639c"
+    },
+    "6a04bc1334f787bb5bb2e081": {
+      "name": "Ángel de la guarda",
+      "description": "Resucitar: Tras recibir daño letal, te restaura un 50% de la Vida básica y un 100% de Maná Máximo tras 4 seg de estasis. (180 seg de enfriamiento).",
+      "source": "52f639ec"
+    },
+    "6a04bc1334f787bb5bb2e082": {
+      "name": "Hoz espectral",
+      "description": "Versátil: Obtienes 10 de Daño de Ataque o 20 de Poder de Habilidad (adaptable).\nTributo: Cada 30 seg, obtienes 1 orbe de energía que te orbita (máx 3 orbes). Al estar cerca de un aliado, las siguientes acciones activarán Tributo, lo que consumirá 1 orbe de energía para otorgarte 65 de oro y restaurarte entre 20 y 80 de Vida:\n1. Infligir daño a campeones o estructuras enemigas con habilidades o ataques.\n2. Atacar a súbditos que tengan menos de un 65% de Vida. Esta acción también los ejecuta. Además, el oro que generen tus asesinatos de súbditos se entregará al aliado que esté más cerca de ti.\n3. Tener 3 orbes y estar cerca de un súbdito cuando muere.\nAl activar Tributo, el aliado más cercano a ti obtiene acumulaciones de Tributo.\nGuardián: Infliges 1 de daño adicional a los centinelas de visión que hayan sido revelados con Lente Revelador, Centinela de Control y Brote Vidente.\nRestricción: No recibes oro al matar súbditos, pero obtienes una cantidad de oro que equivale a un 50% de la recompensa. El oro que generen tus asesinatos de súbditos se entregará al aliado que esté más cerca de ti. Además el oro que obtienes al matar monstruos se reduce un 50%.\nMisión: Obtén 750 de oro con este objeto para transformarlo en Guadaña de la Niebla Negra. Esto te unirá al aliado con la mayor cantidad de acumulaciones de Tributo y los convertirá en los mejores compañeros.",
+      "source": "35328bee"
+    },
+    "6a04bc1334f787bb5bb2e083": {
+      "name": "Vara de las edades",
+      "description": "Eternidad: Restaura maná igual al 15% del daño recibido de campeones. Gastar maná regenera Vida igual al 20% del costo de maná. Tiene un límite de 25 de Vida por cada lanzamiento.\nVeterano: Cada acumulación otorga 15 de Vida, 30 de Maná y 4 de Poder de Habilidad. Se acumula con una tasa de 1 cada 35 seg. Tiene un max. de 10 acumulaciones y otorga 150 de Vida, 300 de Maná y 40 de Poder de Habilidad.",
+      "source": "accc8931"
+    },
+    "6a04bc1334f787bb5bb2e084": {
+      "name": "Abrazo del serafín",
+      "description": "Asombro: Otorga una cantidad de poder de habilidad equivalente a un 2% del maná máximo y restaura un 25% de todo el maná gastado.\nSalvavidas: Al recibir daño que te haga bajar del 35% de vida, se consume un 20% de tu maná actual para otorgarte un escudo equivalente a dicha cantidad +100 durante 2 s. (70 s de enfriamiento).",
+      "source": "8b30d3f1"
+    },
+    "6a04bc1334f787bb5bb2e085": {
+      "name": "Vara explosiva"
+    },
+    "6a04bc1334f787bb5bb2e086": {
+      "name": "Catalizador de eones",
+      "description": "Eternidad: Restaura una cantidad de maná equivalente a un 15% del daño recibido de campeones. Regenera una cantidad de vida equivalente a un 20% del maná utilizado. El límite es de 15 de vida por lanzamiento",
+      "source": "f8ea9c36"
+    },
+    "6a04bc1334f787bb5bb2e087": {
+      "name": "Redención",
+      "description": "Intervención: Selecciona un área grande como objetivo. Después de 2.5 seg, restauras entre 150 y 350 de Vida (según el nivel del aliado) a las unidades aliadas e infliges un 10% de la Vida Máxima como daño verdadero a los campeones enemigos (Enfriamiento: 60 seg). Se puede lanzar aunque hayas muerto.",
+      "source": "e6851cc2"
+    },
+    "6a04bc1334f787bb5bb2e088": {
+      "name": "Experimento de hexarmadura",
+      "description": "Carga Hex: Obtienes 20 de Aceleración de Habilidad para tu definitiva.\n\nSobremarcha: Tras usar tu definitiva, obtienes un 40% de Velocidad de Ataque (20% para campeones a distancia) y un 20% de Velocidad de Movimiento (10% para campeones a distancia) durante 8 seg. (30 seg de enfriamiento).",
+      "source": "43a731ab"
+    },
+    "6a04bc1334f787bb5bb2e089": {
+      "name": "Botas jonias de la lucidez",
+      "description": "Invocado: Reduce los enfriamientos de hechizos un 15%",
+      "source": "53441cd2"
+    },
+    "6a04bc1334f787bb5bb2e08a": {
+      "name": "Sorbemaleficios"
+    },
+    "6a04bc1334f787bb5bb2e08b": {
+      "name": "Sombrero mortal de Rabadon",
+      "description": "Daño Excesivo: Aumenta el Poder de Habilidad en un 30%.",
+      "source": "48cd5935"
+    },
+    "6a04bc1334f787bb5bb2e08c": {
+      "name": "Códice diabólico"
+    },
+    "6a04bc1334f787bb5bb2e08d": {
+      "name": "Cristal de rubí"
+    },
+    "6a04bc1334f787bb5bb2e08e": {
+      "name": "Égida de fuego solar",
+      "description": "Inmolar: Al entrar en combate, inflige 20 + 1.5% de Vida adicional como daño mágico a los enemigos cercanos cada seg. Inmolar inflige entre 175% y 250% de daño a súbditos y un 130% de daño a monstruos.",
+      "source": "c2a63652"
+    },
+    "6a04bc1334f787bb5bb2e08f": {
+      "name": "Hoja de furia de Guinsoo",
+      "description": "Ira: los ataques infligen 30 de Daño Mágico adicional.\nAtaque Furioso: Los ataques básicos otorgan un 8% de Velocidad de Ataque y se puede acumular hasta cuatro veces. Al alcanzar el máximo de acumulaciones, cada tercer ataque básico activa un efecto al impacto adicional",
+      "source": "80c2fa7f"
+    },
+    "6a04bc1334f787bb5bb2e090": {
+      "name": "Últimas palabras",
+      "description": "Últimas palabras: Obtienes un 12% de Penetración de Armadura.",
+      "source": "99435260"
+    },
+    "6a04bc1334f787bb5bb2e091": {
+      "name": "Bacteriófago",
+      "description": "Rabia: Cada vez que un ataque básico impacta a una unidad, otorga 20 de Velocidad de Movimiento durante 2 seg. Esta velocidad de movimiento adicional no se acumula y el efecto se reduce a la mitad para campeones a distancia.",
+      "source": "ffe648e7"
+    },
+    "6a04bc1334f787bb5bb2e092": {
+      "name": "Espada larga"
+    },
+    "6a04bc1334f787bb5bb2e093": {
+      "name": "Perdición del liche",
+      "description": "Maldición: +5% de Velocidad de Movimiento.\nEspada Encantada: Usar una habilidad causa que el siguiente ataque dentro de 10 seg. inflija daño mágico adicional igual al 75% de daño de ataque básico + 45% de poder de habilidad. (1.5 seg de enfriamiento). El daño se reduce contra estructuras.",
+      "source": "e47df4ec"
+    },
+    "6a04bc1334f787bb5bb2e094": {
+      "name": "Bastón del arcángel",
+      "description": "Asombro: Otorga una cantidad de poder de habilidad equivalente a un 1% del maná máximo y restaura un 25% de todo el maná gastado.\nCarga de maná: Aumenta el maná máximo en 14 cada vez que se gaste maná. El límite de maná adicional es 700, lo que transforma Bastón del arcángel en Abrazo del serafín. Se activa hasta 3 veces cada 10 s. Solo se puede tener una lágrima de la diosa.",
+      "source": "e6f53457"
+    },
+    "6a04bc1334f787bb5bb2e095": {
+      "name": "Vara innecesariamente grande"
+    },
+    "6a04bc1334f787bb5bb2e096": {
+      "name": "Baluarte de la montaña",
+      "description": "Cada 60 s, otorga 75 de oro y 1 acumulación de fuerza de alma (máximo: 10 acumulaciones). Cada acumulación de fuerza de alma otorga 25 de vida y 2 de daño de ataque o 4 de poder de habilidad (adaptable).",
+      "source": "93f566de"
+    },
+    "6a04bc1334f787bb5bb2e097": {
+      "name": "Cetro de cristal de Rylai",
+      "description": "Gélido: Las habilidades ofensivas activas y los ataques potenciados ralentizan a los enemigos en un 30% durante 0.75 seg.",
+      "source": "90d3eb5e"
+    },
+    "6a04bc1334f787bb5bb2e098": {
+      "name": "Malignidad",
+      "description": "Desprecio: Tu habilidad definitiva obtiene 20 de Aceleración de Habilidad.\nCampo Tóxico: Infligir daño a un campeón con tu definitiva quema el suelo debajo de este durante 3 seg. lo que inflige daño mágico igual a 60 más un 5% de poder de habilidad por seg y reduce su Resistencia mágica en 10. El radio de la quemadura aumenta con el daño; alcanza su radio máximo con 800 de daño.",
+      "source": "b641169b"
+    },
+    "6a04bc1334f787bb5bb2e099": {
+      "name": "Capítulo perdido",
+      "description": "Iluminación: Al subir de nivel, restaura un 20% del Maná Máximo durante 3 seg.",
+      "source": "6213f339"
+    },
+    "6a04bc1334f787bb5bb2e09a": {
+      "name": "Orbe del olvido",
+      "description": "Heridas Graves: Al infligir daño mágico a campeones enemigos, les aplicas un 40% de Heridas Graves durante 3 seg.",
+      "source": "7ed6beaf"
+    },
+    "6a04bc1334f787bb5bb2e09b": {
+      "name": "Grebas codiciosas",
+      "description": "Equilibrio de poder: Obtienes 12 de Daño de Ataque o 20 de Poder de Habilidad\n\nConversión: Obtienes 5% de Omnivampirismo + 0.5% de Omnivampirismo por cada participación en derribos (hasta un 5% adicional y un máximo de 10% de Omnivampirismo)",
+      "source": "bbad7810"
+    },
+    "6a04bc1334f787bb5bb2e09c": {
+      "name": "Eco de Luden",
+      "description": "Eco: Tu siguiente habilidad de daño o ataque básico potenciado inflige 75 + 8% de Poder de Habilidad como daño mágico al objetivo principal y a un máximo de otros 5 enemigos cercanos. Por cada objetivo que alcance Eco, el objetivo principal recibe 20 + 1.2% de Poder de Habilidad como daño mágico adicional (9 seg de enfriamiento).",
+      "source": "fb9564a0"
+    },
+    "6a04bc1334f787bb5bb2e09d": {
+      "name": "Orbe del infinito",
+      "description": "Destino: +5% de Velocidad de Movimiento.\nBalance: +15 de Penetración de Magia.\nMuerte Inevitable: Las habilidades y los ataques potenciados asestan golpes críticos que infligen un 20% de daño adicional contra enemigos que tengan menos de un 40% de Vida.",
+      "source": "73f2b809"
+    },
+    "6a04bc1334f787bb5bb2e09e": {
+      "name": "Impulso cósmico",
+      "description": "Danza de Hechizos: Infligir daño mágico o daño verdadero a campeones otorga 30 de Velocidad de Movimiento durante 4 seg.",
+      "source": "951523f3"
+    },
+    "6a04bc1334f787bb5bb2e09f": {
+      "name": "Tridente de la oceánide",
+      "description": "Arma Mortal: Infligir daño con habilidades a un campeón enemigo reduce cualquier escudo que obtenga durante 3 seg. Las habilidades de área de efecto aplican un (5% de Poder de Habilidad + 25)% de reducción de escudo, con límite de un 45%; las habilidades contra un solo objetivo aplican un (5% de Poder de Habilidad + 40)% de reducción de escudo, con límite de un 60%. Cuando infliges daño a un enemigo que no está afectado por Arma Mortal, reduce todos sus escudos por el mismo valor.",
+      "source": "993f5ab9"
+    },
+    "6a04bc1334f787bb5bb2e0a0": {
+      "name": "Proyector psíquico",
+      "description": "Conversión: Obtienes Poder de Habilidad igual a un 3.5% de la Vida adicional.\nProyección: Cuando tengas al menos 950 de Vida adicional, obtiene un 20% de poder de habilidad como Armadura y un 10% de poder de habilidad como Resistencia Mágica (la cantidad máxima de bonificaciones se alcanza con 400 de Poder de Habilidad).",
+      "source": "efe81d90"
+    },
+    "6a04bc1334f787bb5bb2e0a1": {
+      "name": "Robaalmas despierto",
+      "description": "Cacería de almas: +15 de Penetración de Magia.\nAlma Errante: Cada vez que derribes a un campeón enemigo a los 3 seg después de haberle infligido daño, los enfriamientos de tus habilidad se reducen en un 25%. Robas un 10% de su Velocidad de Movimiento básica durante 10 seg y un 50% de su Aceleración de Habilidad hasta que reaparezcan. La aceleración de habilidad robada de esta forma se acumula.",
+      "source": "7348f661"
+    },
+    "6a04bc1334f787bb5bb2e0a2": {
+      "name": "Máscara abisal",
+      "description": "Deshacer: Todos los campeones enemigos a menos de 6.5 metros reciben un 12% más de daño mágico.",
+      "source": "a3479046"
+    },
+    "6a04bc1334f787bb5bb2e0a3": {
+      "name": "Presagio de Randuin",
+      "description": "Contracorriente: Cuando recibes un golpe crítico de daño físico, obtienes 1 acumulación de Contracorriente. Cada acumulación otorga un 5% de Velocidad de Movimiento y un 5% de resistencia a ralentizaciones. Máximo de acumulaciones 4.\nResiliencia: Los golpes críticos te infligen un 30% menos de daño físico.",
+      "source": "6eade03e"
+    },
+    "6a04bc1334f787bb5bb2e0a4": {
+      "name": "Chispa resplandeciente",
+      "description": "Inmolar: Inflige de 5 a 10 de daño mágico por segundo a los enemigos cercanos.",
+      "source": "35222729"
+    },
+    "6a04bc1334f787bb5bb2e0a5": {
+      "name": "Coraza del muerto",
+      "description": "Implacable: +4% de velocidad de movimiento.\nImpulso: Moverte genera Impulso, lo que otorga hasta 40 de Velocidad de Movimiento al llegar a 100 acumulaciones. Atacar elimina todas las acumulaciones de Impulso. Las acumulaciones decaen cuando se afecta la velocidad de movimiento.\nGolpe Aplastante: Los ataques infligen hasta 100 de daño mágico adicional según el Impulso acumulado. Los ataques cuerpo a cuerpo que consumen el Impulso máximo también ralentizan un 75% durante 1 seg.",
+      "source": "72f7b18a"
+    },
+    "6a04bc1334f787bb5bb2e0a6": {
+      "name": "Fuerza de la naturaleza",
+      "description": "Tormenta: +5% de Velocidad de Movimiento.\nAbsorber: Al recibir daño mágico de campeones enemigos, obtienes una acumulación de Firmeza, con un máximo de 4 acumulaciones, durante 7 seg. Infligir daño a campeones enemigos restablece la duración. Con el máximo de acumulaciones, obtienes un 6% de Velocidad de Movimiento y 70 de Resistencia Mágica adicional.",
+      "source": "9c4d4f07"
+    },
+    "6a04bc1334f787bb5bb2e0a7": {
+      "name": "Velo del amanecer",
+      "description": "Portador del Amanecer: Cuando inmovilizas a un campeón o te inmovilizan a 400 unidades de distancia de un campeón enemigo obtienes un 20% de Armadura y de Resistencia Mágica, revelas a los campeones enemigos cercanos durante 3 seg y les infliges una cantidad de daño mágico equivalente a 40 más un 2.5% de Vida adicional. (3 seg de enfriamiento).",
+      "source": "4fa12eac"
+    },
+    "6a04bc1334f787bb5bb2e0a8": {
+      "name": "Manto de la duodécima hora",
+      "description": "Salvavidas: Al caer por debajo del 30% de la Vida Máxima, obtienes de inmediato de 200 a 300 de Vida adicional durante 5 seg y te curas durante 5 seg de 200 a 400 + 120% de Armadura adicional + 120% de Resistencia Mágica adicional + 15% de Vida adicional. Durante este tiempo, aumentas de tamaño en un 10% y obtienes un 10% de Velocidad de Movimiento y un 20% de Tenacidad adicionales.",
+      "source": "94f6c1ab"
+    },
+    "6a04bc1334f787bb5bb2e0a9": {
+      "name": "Cinturón de gigante"
+    },
+    "6a04bc1334f787bb5bb2e0aa": {
+      "name": "Malla del guardián",
+      "description": "Acero Frío: Reduce la Velocidad de Ataque de los enemigos en un 15% durante 1.5 seg al recibir un ataque.",
+      "source": "61eae9bd"
+    },
+    "6a04bc1334f787bb5bb2e0ab": {
+      "name": "Armadura de Warmog",
+      "description": "Corazón de Warmog: Si tienes al menos 1250 de vida adicional, recupera un 3.5% de vida máxima por seg si no has recibido daño en los últimos 5 s.\nBendito: Aumenta todos los efectos de curación y escudo sobre ti mismo en un 30%.",
+      "source": "d83f8be9"
+    },
+    "6a04bc1334f787bb5bb2e0ac": {
+      "name": "Corazón de hielo",
+      "description": "Caricia Invernal: Todos los campeones enemigos a menos de 650 unidades pierden un 25% de Velocidad de Ataque.",
+      "source": "04723983"
+    },
+    "6a04bc1334f787bb5bb2e0ad": {
+      "name": "Corazón de acero",
+      "description": "Consumo colosal: Al estar a 700 unidades de un campeón enemigo, carga durante 2,5 s para asestarle un golpe tremendo. Este ataque cargado inflige daño físico adicional equivalente a 140 + 3.5% de la vida máxima y otorga vida máxima equivalente al 15% del daño infligido. Este efecto tiene 20 seg de enfriamiento por objetivo.",
+      "source": "d50dcca0"
+    },
+    "6a04bc1334f787bb5bb2e0ae": {
+      "name": "Virtud radiante",
+      "description": "Luz Guía: Trasciendes al lanzar tu definitiva, lo que aumenta tu Vida Máxima en un 10% durante 6 seg. Mientras estés bajo el efecto de Trascendencia, tú y los campeones aliados que estén a 1200 unidades de distancia se curan un 2.5% de tu Vida Máxima por seg mientras dure el efecto. (60 seg de enfriamiento). Si eres un campeón a distancia, las curaciones que otorgues se reducen en un 50%.",
+      "source": "a8dca3b1"
+    },
+    "6a04bc1334f787bb5bb2e0af": {
+      "name": "Guantelete de hielo",
+      "description": "Espada Encantada: Usar una habilidad ocasiona que el siguiente ataque que se lance dentro de 10 seg inflija daño físico adicional igual a (100% básico + 25% de armadura adicional) en un área y crea un campo gélido durante 2 seg que ralentiza a los enemigos en un 30%. La armadura aumenta el tamaño del campo gélido. (1.5 seg de enfriamiento). El daño se reduce contra estructuras.",
+      "source": "084ede4c"
+    },
+    "6a04bc1334f787bb5bb2e0b0": {
+      "name": "Llegada del invierno",
+      "description": "Asombro: Otorga Vida adicional igual al 15% de Maná Máximo y restaura el 15% de todo el maná gastado.\nCarga de Maná: Los ataques básicos, el gasto de Maná y el recibir daño de campeones, estructuras y monstruos épicos otorgan 14 de Maná Máximo. Este efecto otorga hasta 700 de Maná Máximo y se puede activar como máximo 3 veces cada 10 seg Limitado a un solo objeto de Lágrima de la diosa.",
+      "source": "be17c184"
+    },
+    "6a04bc1334f787bb5bb2e0b1": {
+      "name": "El gran invierno",
+      "description": "Asombro: Otorga Vida adicional igual al 15% de Maná Máximo y restaura el 15% de todo el maná gastado.\nColoso Congelado: Cada vez que reduzcas el movimiento de un campeón enemigo, obtienes un escudo durante 3 seg que absorbe 120 + 4.5% de Maná Máximo. Si hay más de un campeón enemigo cerca, el escudo aumenta un 80% (8 seg de enfriamiento). Este escudo tiene un 50% de efectividad para campeones a distancia.\nSolo se activa al estar por encima del 20% de Maná Máximo. (8 seg de enfriamiento). El Escudo tiene un 50% de efectividad contra campeones a distancia.",
+      "source": "0a4a50eb"
+    },
+    "6a04bc1334f787bb5bb2e0b2": {
+      "name": "Recuerdos de lord Dominik",
+      "description": "Verdugo de Gigantes: Infliges daño adicional según la vida adicional del campeón enemigo. El límite de daño adicional es de un 12% y se alcanza cuando atacas a un campeón enemigo que tiene 1200 de Vida adicional.",
+      "source": "738f4778"
+    },
+    "6a04bc1334f787bb5bb2e0b3": {
+      "name": "Incensario ardiente",
+      "description": "Pebetero: Cuando curas o escudas a un campeón aliado (es decir, un campeón que no seas tú), dicho campeón obtiene un 30% de Velocidad de Ataque y sus ataques infligen 25 de daño mágico adicional durante 6 seg. Este daño puede asestar golpes críticos.",
+      "source": "d4588b2d"
+    },
+    "6a04bc1334f787bb5bb2e0b4": {
+      "name": "Hábito del espectro",
+      "description": "Visita Espectral: Otorga un 150% de Regen. de Vida durante 10 seg tras recibir daño de un campeón enemigo.",
+      "source": "f46b6df4"
+    },
+    "6a04bc1334f787bb5bb2e0b5": {
+      "name": "Armadura lunar alada",
+      "description": "Vuelo: +4% de velocidad de movimiento.",
+      "source": "386997ce"
+    },
+    "6a04bc1334f787bb5bb2e0b6": {
+      "name": "Escamas emergentes",
+      "description": "Descarga: Obtienes un 20% de resistencia a ralentizaciones mientras estás en combate contra un campeón enemigo.",
+      "source": "dc422087"
+    },
+    "6a04bc1334f787bb5bb2e0b7": {
+      "name": "Eco armónico",
+      "description": "Eco armónico: Cuando curas o escudas a un campeón aliado, el efecto se vincula al campeón aliado más cercano dentro del alcance que tenga el menor porcentaje de vida (excluyéndote a ti) y le otorga un 30% de esa curación o un 35% de ese escudo. Si no hay otro campeón aliado al alcance, el objetivo original recibe en su lugar esa misma curación o escudo adicional.",
+      "source": "cd73a444"
+    },
+    "6a04bc1334f787bb5bb2e0b8": {
+      "name": "Corona abrasadora",
+      "description": "Toque de fuego: Después de infligir daño con un ataque o habilidad, quema al objetivo durante 3 seg, lo que inflige un 1.4% de la Vida Máxima del objetivo como daño mágico por seg (el daño se reduce a un 0.7% para usuarios a distancia). Inflige un 150% de daño contra súbditos y monstruos. Máximo de 125 de daño contra monstruos.",
+      "source": "acca125b"
+    },
+    "6a04bc1334f787bb5bb2e0b9": {
+      "name": "Rookern kaénico",
+      "description": "Aniquilamagos: Si no recibes daño mágico durante 12 seg, obtienes un escudo mágico que absorbe daño equivalente de 50 a 150 + 14% de vida máxima.",
+      "source": "dc2a2a58"
+    },
+    "6a04bc1334f787bb5bb2e0ba": {
+      "name": "Chaleco de zarzas",
+      "description": "Espinas: Al recibir un ataque de un campeón enemigo, inflige 4 + 6% adicional (Armadura) de daño mágico al atacante. Entrelazado: Cuando recibes el ataque de un campeón enemigo o le infliges daño, le aplicas un 40% de Heridas graves durante 3 s.",
+      "source": "ff08a1bf"
+    },
+    "6a04bc1334f787bb5bb2e0bb": {
+      "name": "Sudario glacial"
+    },
+    "6a04bc1334f787bb5bb2e0bc": {
+      "name": "Coraza doble de Amaranto",
+      "description": "Resistencia: Mientras estés en combate contra campeones enemigos, obtiene una acumulación de Resistencia cada seg, hasta un máximo de 5. Al alcanzar el máximo de acumulaciones, aumentas de tamaño en un 20% y obtienes un 20% de Tenacidad, 30% de Armadura adicional y 30% de Resistencia Mágica adicional hasta salir del combate.",
+      "source": "d075b4a6"
+    },
+    "6a04bc1334f787bb5bb2e0bd": {
+      "name": "Trampa para yordles",
+      "description": "Atrapador: Al ralentizar o inmovilizar a un campeón enemigo, te potencias durante 8 seg (4 seg para campeones a distancia) y recibes 20 de Velocidad de Movimiento. Mientras dure el efecto, tú y los aliados cercanos obtienen un 30% de Velocidad de Ataque adicional (20% para campeones a distancia). Si tú o un aliado consiguen un asesinato estando inspirados, recibes 20 de oro.",
+      "source": "ee49adcd"
+    },
+    "6a04bc1334f787bb5bb2e0be": {
+      "name": "Armadura de tela"
+    },
+    "6a04bc1334f787bb5bb2e0bf": {
+      "name": "Convergencia de Zeke",
+      "description": "Convergencia: Obtienes 10 de Aceleración de Habilidad para la definitiva.\n\nTempestad de Fuego Escarchado: Lanzar tu habilidad definitiva inflige 150 de daño mágico y ralentiza a los enemigos cercanos un 30% durante 5 seg. Si no hay ningún campeón enemigo al alcance al lanzar la definitiva, el efecto se pospone hasta un máximo de 5 seg o hasta que un campeón enemigo entre en el alcance.",
+      "source": "c82f5611"
+    },
+    "6a04bc1334f787bb5bb2e0c0": {
+      "name": "Chaleco de cadenas"
+    },
+    "6a04bc1334f787bb5bb2e0c1": {
+      "name": "Manto de anulación de magia"
+    },
+    "6a04bc1334f787bb5bb2e0c2": {
+      "name": "Rescoldo de Bami",
+      "description": "Cenizas: Infliges entre 10 y 20 de daño mágico por segundo a los enemigos cercanos. (inflige un 115% de daño contra súbditos y monstruos).",
+      "source": "ee6c1dcf"
+    },
+    "6a0a641493de40f0abdf74a2": {
+      "name": "Reloj de arena de Zhonya",
+      "description": "Estasis: Te vuelves inmune al daño e inalcanzable durante 2.5 seg, pero no puedes moverte, atacar, lanzar habilidades ni usar objetos de nuevo durante este tiempo (120 seg de enfriamiento)",
+      "source": "6a1eeb82"
+    },
+    "6a1cebcd3454830b3e2b44c1": {
+      "name": "Gloria",
+      "description": "Gloria: Obtienes un 30% de Velocidad de Movimiento. Después de 4 seg o al estar cerca de un campeón enemigo, emites una onda de choque que ralentiza a los campeones impactados en un 60% durante 2 seg. Además, obtienes un 20% de Tenacidad y un 20% de resistencia a las ralentizaciones durante 4 seg. (45 seg de enfriamiento).",
+      "source": "2415f34d"
+    },
+    "6a1cec679f4b6d4b3e644715": {
+      "name": "Cortasendas",
+      "description": "Onda Rompiente: Te desplazas una distancia corta hacia adelante e infliges daño físico equivalente al 100% de tu Daño de ataque a los enemigos cercanos. Los enemigos alcanzados quedan ralentizados en un 40% durante 3 seg (25 seg de enfriamiento).\n\nZancada: Infligir daño físico otorga 20 de Velocidad de Movimiento durante 2 seg",
+      "source": "01244864"
+    },
+    "6a1ced16e5e2ea7c46739296": {
+      "name": "Chupasangre",
+      "description": "Corte Sediento: Inflige daño físico a los enemigos cercanos equivalente al 175% de tu Daño de Ataque. Por cada campeón enemigo impactado, recuperas una cantidad de Vida equivalente al 20% de Daño de Ataque + 10% de la Vida faltante (12 seg de enfriamiento)",
+      "source": "597300d2"
+    },
+    "6a1cee51ff5f404fb9352f46": {
+      "name": "Protector pétreo de gárgola",
+      "description": "Obtienes un escudo equivalente a 100 + 90% de Vida adicional que decae rápidamente durante 2.5 seg (60 seg de enfriamiento).",
+      "source": "5f2efa67"
+    },
+    "6a1cef5635e22b3448e504c3": {
+      "name": "Cintomisil hextech",
+      "description": "Protocinturón: Te desplazas hacia la dirección objetivo y liberas 7 proyectiles mágicos, que infligen 100 + 10% de Poder de Habilidad como daño mágico a los enemigos alcanzados (30 seg de enfriamiento).\n\nSi un campeón o monstruo recibe el impacto de más de un misil, cada misil adicional solo inflige un 10% de daño",
+      "source": "8fc98f55"
+    },
+    "6a1cf06aa1ca3779fa800060": {
+      "name": "Fajín de mercurio",
+      "description": "Fajín de mercurio: Elimina todos los efectos de control de masas de tu campeón y te vuelves inmune al control de masas durante 0.25 seg. Después, obtienes un 30% de Tenacidad y un 30% de resistencia a la ralentización durante 1.5 seg (60 seg de enfriamiento)",
+      "source": "910294ce"
+    },
+    "6a1cf11f44083aeb3854a21c": {
+      "name": "Viento huracanado",
+      "description": "Tromba: Te desplazas en la dirección objetivo y disparas 3 proyectiles al enemigo con menos vida que se encuentre cerca de tu destino, lo que inflige entre 40 a 125 (según el nivel) + 35% de Daño de Ataque adicional como daño físico (60 seg de enfriamiento).",
+      "source": "4a7b6181"
+    },
+    "6a1cf18456e576c5f5343978": {
+      "name": "Velo",
+      "description": "Velo: Otorga un escudo antihechizos a un aliado cercano por 3 seg que bloquea la siguiente habilidad hostil. (60 seg de enfriamiento).",
+      "source": "b1e384c5"
+    },
+    "6a1cf21fc4bfa81cbdf50d09": {
+      "name": "Medallón de los Solari de Hierro",
+      "description": "Relicario: Otorga un escudo para ti y tus aliados cercanos que absorbe de 250 a 370 de daño durante 2.5 seg (60 seg de enfriamiento).\n\nSi el objetivo recibió este efecto en los últimos 20 seg, el valor del escudo se reduce a la mitad",
+      "source": "e178247e"
+    },
+    "6a1cf2d8479e8bbb7e065c76": {
+      "name": "Tejesueños",
+      "description": "Tejesueños: Obtienes dos Burbujas de Sueño cada 6 seg Si otorgas a un aliado curaciones o escudos activos, ambas burbujas de sueño estallan sobre él y lo potencian durante 3 seg. Las dos burbujas le otorgan al objetivo de un 15% a un 30% de Velocidad de Movimiento adicional durante 3 seg y hacen que su próximo golpe inflija entre 15 y 90 de daño mágico adicional.",
+      "source": "631be6ce"
+    },
+    "6a2395ddedf125ebb49621b7": {
+      "name": "Tomo amplificador"
+    },
+    "6c583d9a-97d1-4393-b6d1-7edc900965bd": {
+      "name": "Avance blindado",
+      "description": "Bloqueo: Los ataques básicos de campeones te infligen un 10% de daño reducido.\n\nResistencia Noxiana: Al recibir daño físico de campeones, obtienes un escudo físico de 20 a 140 (según el nivel) + 5% de tu Vida Máxima (12 seg de enfriamiento).",
+      "source": "9eacb519"
+    },
+    "6fe1445d-5159-4fab-8368-2aac6effdccf": {
+      "name": "Navaja de asalto",
+      "description": "Energizado: Se genera un ataque energizado al moverse y atacar\nProyectil: El ataque energizado inflige 120 de daño mágico adicional y otorga un 45% de Velocidad de Movimiento durante 1.5 seg",
+      "source": "a7544c38"
+    },
+    "79eaa54e-10e9-4aa4-aeec-fe3e78c6df0b": {
+      "name": "Barrera frondosa",
+      "description": "Anulación: Otorga un escudo antihechizos que bloquea la siguiente habilidad enemiga (65 seg de enfriamiento).",
+      "source": "66a4dc77"
+    },
+    "7d70c694-3912-48ae-9b98-67a41b12f7fa": {
+      "name": "Cañón de fuego rápido",
+      "description": "Energizado: Se genera un ataque energizado al moverse y atacar\nFrancotirador: El ataque energizado inflige 80 de daño mágico adicional y otorga un 35% de alcance de ataque adicional, hasta un máximo de 150",
+      "source": "7f9d3301"
+    },
+    "858b7893-3259-4c97-b41b-80c07937ec52": {
+      "name": "Sobrecarga tormentosa",
+      "description": "Jinete de la Tormenta: Al infligir daño equivalente al 25% de la Vida Máxima de un campeón en 2.5 seg, le aplicas Aguacero y obtienes un 25% de Velocidad de Movimiento durante 2.5 seg (25 seg de enfriamiento).\n\nAguacero: Después de 2 seg, inflige 125 + 10% de Poder de Habilidad como daño mágico. Si el objetivo muere antes de que se active Aguacero, inflige la misma cantidad de daño a los enemigos cercanos y otorga 25 de oro.",
+      "source": "26b83b8f"
+    },
+    "91548f71-58ab-40fe-8f7e-5e083caae648": {
+      "name": "Amatista del Vacío"
+    },
+    "94de135a-1674-48a1-bda5-85cbd1db0592": {
+      "name": "Velo del hada de la muerte",
+      "description": "Anulación: Otorga un escudo antihechizos que bloquea la siguiente habilidad enemiga (30 seg de enfriamiento).",
+      "source": "0b268e85"
+    },
+    "a4cf16f6-1f4e-48a4-9dea-85da75884780": {
+      "name": "Cenizas predestinadas",
+      "description": "Enardecer: Las habilidades de daño infligen 15 de daño mágico adicional durante 3 seg\nInflige 45 de daño mágico adicional a monstruos.",
+      "source": "4a2fdf6f"
+    },
+    "a79c1701-67af-4477-b653-8e9504ac3448": {
+      "name": "Antorcha de fuego negro",
+      "description": "Llamarada Maligna: Las habilidades de daño infligen 20 + 2% de Poder de Habilidad como daño mágico adicional por seg durante 3 seg. Contra monstruos, infligen 40 + 2% de Poder de Habilidad como daño mágico por seg.\n\nFuegoscuro: Por cada campeón enemigo, monstruo épico y monstruo grande afectado por tu Fuegoscuro, obtienes un 4% de Poder de Habilidad.",
+      "source": "7f9c146a"
+    },
+    "a87e010e-8568-4cfc-b203-dbf2fa69884c": {
+      "name": "Lucidez carmesí",
+      "description": "Invocación: Obtienes un 20% de Aceleración de Hechizo de Invocador.\n\nAceleración Noxiana: Después de infligir daño a un campeón enemigo con una habilidad, otorgar un escudo o curar a un campeón aliado, o lanzar un Hechizo de Invocador, obtienes un 10% (cuerpo a cuerpo) / 8% (a distancia) de Velocidad de Movimiento durante 4 seg. Una misma habilidad solo puede activar este efecto una vez cada 4 seg.",
+      "source": "fe67f665"
+    },
+    "aa423732-7fc1-4eeb-9b72-e524a5392d0c": {
+      "name": "Grebas de metal",
+      "description": "Espada Bendita: Los ataques básicos restauran 12 de Vida al impacto.\n\nMarcha Noxiana: Cuando tus ataques básicos impactan a campeones, obtienes una ráfaga de Velocidad de Movimiento de un 10% (cuerpo a cuerpo) / 7% (a distancia) durante 2 seg.",
+      "source": "c530fea4"
+    },
+    "bb63a691-8760-4708-b83e-152ae93e96c9": {
+      "name": "Flechas de los Yun Tal",
+      "description": "La práctica hace al maestro: Los ataques básicos otorgan permanentemente tasa de críticos. Cada ataque otorga un 0.4%/0.2% (cuerpo a cuerpo/a distancia), hasta un máximo de un 25%\nRáfaga: Atacar a un campeón enemigo otorga un 25% de Velocidad de Ataque durante 6 seg (20 seg de enfriamiento). Los ataques reducen este enfriamiento en 1 seg, y los golpes críticos aumentan esta reducción a 2 seg",
+      "source": "947d6ddf"
+    },
+    "c1140d29-16b8-4772-ad3a-7eb61006a85d": {
+      "name": "Diadema melodiosa",
+      "description": "Armonía: Obtiene un 0.5% de Poder de curaciones y escudos adicional equivalente al Maná Máximo y recupera un 25% del Maná gastado\nDiadema: Si tú o un campeón aliado al que hayas curado o protegido con un escudo en los últimos 3 seg están en combate, curas cada seg al campeón aliado cercano con la Vida más baja que se encuentre en un alcance de 800 unidades por una cantidad equivalente al 0.8% de tu Maná Máximo.",
+      "source": "9212dbe2"
+    },
+    "c634158a-8548-4e64-bc09-7cb4c2ca11f1": {
+      "name": "Botas inmortales",
+      "description": "Equilibrio de poder: Obtienes 12 de Daño de Ataque o 20 de Poder de Habilidad.\n\nConversión: Obtienes 5% de Omnivampirismo + 0.5% de Omnivampirismo por cada participación en derribos (hasta un 5% adicional y un máximo de 10% de Omnivampirismo).\n\nAhora y Siempre: Mientras tengas más del 50% de Vida, infliges un 50% de daño adicional. Mientras tengas menos del 50% de Vida, obtienes un 12% de aumento en curaciones y escudos.",
+      "source": "25b5dcaf"
+    },
+    "cd6aa587-8d9e-4195-b6f9-00174743e6b0": {
+      "name": "Óptica hextech C44",
+      "description": "Magnificación: Los ataques infligen entre un 0% y un 10% de daño adicional según la distancia a la que se encuentre el enemigo y alcanzan el daño máximo a 550 unidades\n\nPrecisión Arcana: Cuando un campeón al que le infligieron daño en los últimos 3 seg muere, obtienen 100 de alcance de ataque adicional durante 8 seg",
+      "source": "9c1eb846"
+    },
+    "dcd347a4-5936-486a-8a89-95788e844bde": {
+      "name": "Trituradoras encadenadas",
+      "description": "Presencia Noxiana: Recibir daño mágico de campeones otorga un escudo mágico de 20 a 140 (según el nivel) + 5% de tu Vida Máxima (12 seg de enfriamiento)",
+      "source": "b88e96e9"
+    },
+    "de7c7f70-e176-40e9-881e-024697d571dd": {
+      "name": "Pico"
+    },
+    "e3c3992b-f516-4eea-8668-bb548db4cc13": {
+      "name": "Puñal de Statikk",
+      "description": "Ataques energizados: Se genera un ataque energizado al moverse y atacar.\nElectrochispa: Tu ataque energizado lanza una cadena de rayos que rebota hacia objetivos adicionales. Cantidad de Rebotes: 3/4/5/6, que aumenta en los niveles 1/5/9/13 e inflige 60 de daño mágico, el cual aumenta a 90 contra súbditos y monstruos. Aplica efectos al impacto a los objetivos secundarios del rebote.\nElectrochoque: Los ataques básicos otorgan 7 acumulaciones adicionales de Energizado.",
+      "source": "8027554b"
+    },
+    "e438010b-a803-4778-a993-ce5f7981649c": {
+      "name": "Canción de batalla de Shurelya",
+      "description": "Discurso Inspirador: Otorga a los aliados cercanos un 30% de Velocidad de Movimiento durante 4 seg (60 seg de enfriamiento)",
+      "source": "0ed4d623"
+    },
+    "e7b8a0b3-7f3c-4676-854f-83bef5bacd66": {
+      "name": "Ecos de Helia",
+      "description": "Sifón del Alma: El 30% del daño previo a la mitigación infligido a campeones enemigos se almacena como Fragmentos de Alma, hasta un máximo de 80 a 250 según el nivel. Cuando curas o escudas a un campeón aliado que no seas tú, todos los Fragmentos de Alma se consumen para curar a ese objetivo por la misma cantidad.",
+      "source": "3ecbd553"
+    },
+    "fb8b108f-bba1-4442-b0a8-8eb4038352a2": {
+      "name": "Brazalete de la buscadora",
+      "description": "Estasis: Te vuelves inmune al daño e inalcanzable durante 2.5 seg, pero no puedes moverte, atacar, lanzar habilidades ni usar objetos de nuevo durante este tiempo (150 seg de enfriamiento)",
+      "source": "514c6033"
+    },
+    "fcb693e4-be04-4205-a175-e64c69dd8740": {
+      "name": "Arcoescudo inmortal",
+      "description": "Salvavidas: Cuando recibas daño que reduzca tu Vida por debajo del 35%, obtienes un escudo durante 3 seg (de 350 a 650 para campeones cuerpo a cuerpo, de 300 a 550 para campeones a distancia, según el nivel del campeón) (70 seg de enfriamiento).",
+      "source": "f1055fed"
+    }
+  },
+  "runes": {
+    "44e9f76c-5a0b-4446-953a-db6a1f3fdb75": {
+      "name": "Leyenda: Velocidad",
+      "description": "Los derribos y matar monstruos y súbditos otorgan Aceleración de Habilidad, hasta un máximo de 15, y cada acumulación otorga 1.5 de Aceleración de Habilidad",
+      "source": "d9f261f4"
+    },
+    "6a04bc5f681bf773dac12a83": {
+      "name": "Fuente de vida",
+      "description": "Al impactar a un campeón enemigo con un ataque o una habilidad, tú y el campeón aliado cercano con la menor cantidad de vida se curan.\n\nAliado: Recupera un 1.5% de Vida Máxima + un 5% de Poder de Habilidad.\n\nTú: Recuperas un 1% de tu Vida Máxima + un 5% de tu Poder de Habilidad. Enfriamiento: 20 seg.\n\nSi eres un campeón cuerpo a cuerpo, la curación tiene un 130% de efectividad. (No se activa si tú o tus aliados cercanos tienen la vida al máximo; tampoco se activa si no hay aliados cerca).",
+      "source": "d68af113"
+    },
+    "6a04bc5f681bf773dac12a84": {
+      "name": "Impacto repentino",
+      "description": "Tras salir del sigilo o usar un efecto de desplazamiento, salto o teleportación, tu siguiente ataque o habilidad contra un campeón enemigo en un lapso de 4 seg inflige de 15 a 65 de daño verdadero adicional (10 seg de enfriamiento). Este efecto se potencia al subir de nivel:\n\nNivel 5: Infliges 5 de daño verdadero adicional.\n\nNivel 9: Infliges 5 de daño verdadero adicional y obtienes un 10% de Velocidad de Movimiento durante 1.5 seg después de infligir el daño.",
+      "source": "aca48a81"
+    },
+    "6a04bc5f681bf773dac12a85": {
+      "name": "Inquebrantable",
+      "description": "Obtienes un 3% de Armadura y Resistencia Mágica. Por cada 1 campeón(es) enemigo(s) cercano(s), obtienes un 2% de Armadura y Resistencia Mágica adicionales. Si estás cerca de la cantidad máxima de campeones enemigos (max. 3), también obtienes un 20% de resistencia a las ralentizaciones.",
+      "source": "851c09fe"
+    },
+    "6a04bc5f681bf773dac12a86": {
+      "name": "Electrocutar",
+      "description": "Dentro de 3 seg, impacta al mismo campeón enemigo con 3 ataques o habilidades básicas para infligir daño adaptable adicional al objetivo.\nValor de daño: 60-210 + 10% adicional de Daño de Ataque + 5% Poder de Habilidad.\nEnfriamiento: de 20 a 13 seg.",
+      "source": "0f0cf24b"
+    },
+    "6a04bc5f681bf773dac12a87": {
+      "name": "Trascendencia",
+      "description": "Obtienes un efecto adicional al alcanzar los siguientes niveles: En el nivel 1, obtienes 5 de Aceleración de Habilidad; al nivel 5, obtienes 5 de Aceleración de Habilidad; al nivel 9 después de que una habilidad básica impacte al objetivo, reduce un 8% el enfriamiento de la habilidad (8 seg de enfriamiento).",
+      "source": "3809e331"
+    },
+    "6a04bc5f681bf773dac12a88": {
+      "name": "Perseverancia",
+      "description": "Obtienes un 10% de Tenacidad. Obtienes de 10 a 15 de Armadura y Resistencia Mágica durante 1.5 seg tras ser inmovilizado. El tiempo de duración se renueva al ser inmovilizado varias veces.",
+      "source": "4eae0a60"
+    },
+    "6a04bc5f681bf773dac12a89": {
+      "name": "Ataque potenciado",
+      "description": "Cada 8 seg, el siguiente ataque se potencia e inflige entre 20 y 60 de daño adaptable adicional a los campeones enemigos.\n\n80% para campeones a distancia.",
+      "source": "aa2f2949"
+    },
+    "6a04bc5f681bf773dac12a8a": {
+      "name": "Revitalizar",
+      "description": "Obtienes un 5% de efecto de amplificación al curar y otorgar escudos. Si el objetivo tiene menos de un 40% de Vida, este efecto se amplifica un 10% adicional.",
+      "source": "26f85ffb"
+    },
+    "6a04bc5f681bf773dac12a8c": {
+      "name": "Último esfuerzo",
+      "description": "Cuando te queda menos de un 60% de Vida, tus ataques contra campeones enemigos infligen de un 5% a un 11% de daño adaptable adicional.\n\nInfliges la cantidad máxima de daño adicional cuando tienes menos de un 30% de Vida.",
+      "source": "c82d6a0c"
+    },
+    "6a04bc5f681bf773dac12a8d": {
+      "name": "Se avecina tormenta",
+      "description": "A los 6 min de la partida, obtienes 2 de Daño de Ataque o 4 de Poder de Habilidad (adaptable).\n\nCada 3 min, la bonificación aumenta a 5 o 10, 9 o 18, 14 o 28, etc.",
+      "source": "1d5526dd"
+    },
+    "6a04bc5f681bf773dac12a8e": {
+      "name": "Pies veloces",
+      "description": "Al desplazarte, atacar y lanzar habilidades, obtienes acumulaciones de energía. Al llegar a 100 acumulaciones, tu siguiente ataque obtiene velocidad de ataque, te cura y te otorga velocidad de movimiento adicional. Si atacas a un campeón, también restaura maná o energía.\nVelocidad de Ataque adicional: 40%\nVida restaurada: 15-110 + 15% daño de ataque adicional + 10% de poder de habilidad\nVelocidad de Movimiento adicional: 20% durante 1 seg\nAl atacar a un campeón, restaura un 8% del Maná faltante o un 8% de la energía faltante\nAl atacar súbditos o monstruos, te cura por un 35% (campeones cuerpo a cuerpo) o un 15% (campeones a distancia) de la cantidad de curación original.",
+      "source": "2da90b5b"
+    },
+    "6a04bc5f681bf773dac12a8f": {
+      "name": "Piroláser",
+      "description": "Infligir daño a un campeón enemigo con una habilidad hace que se queme, lo que inflige 21-49 de daño mágico adicional (según el nivel) después de 1 seg (8 seg de enfriamiento).",
+      "source": "c84ea650"
+    },
+    "6a04bc5f681bf773dac12a90": {
+      "name": "Ataque intensificado",
+      "description": "Al impactar a un campeón enemigo con 3 ataques consecutivos, le infliges daño adaptable adicional y obtienes un 8% de amplificación de daño hasta que abandones el combate contra campeones. Daño adaptable: entre 40 y 165.\nEnfriamiento 4 seg.\nLa amplificación de daño solo surtirá efecto contra campeones.",
+      "source": "3196817d"
+    },
+    "6a04bc5f681bf773dac12a91": {
+      "name": "Protector",
+      "description": "Proteges a los aliados que estén a 350 unidades de distancia y a los objetivos de tus habilidades durante 2.5 seg. Si tú o un aliado reciben una cantidad de daño que supera cierto umbral mientras lo proteges, ambos obtendrán un escudo durante 1.5 seg.\nEnfriamiento: De 55 a 25 seg.\nEscudo: De 40 a 165 + 6% de vida adicional + 15% de poder de habilidad\nUmbral de daño: De 70 a 240 de daño recibido.",
+      "source": "44ca4dfa"
+    },
+    "6a04bc5f681bf773dac12a92": {
+      "name": "Cometa arcano",
+      "description": "Infligir daño a un campeón con una habilidad dispara un cometa hacia su ubicación. Cuando un cometa impacta a un campeón enemigo, aumenta el daño del siguiente cometa.\nDaño: (18 a 95) + (3 × total de impactos contra campeones enemigos) + 35% de daño de ataque adicional + 20% poder de habilidad\nEnfriamiento: 16 a 8 seg",
+      "source": "28511d03"
+    },
+    "6a04bc5f681bf773dac12a93": {
+      "name": "Soberano del hielo",
+      "description": "Inmovilizar a un campeón enemigo hace que se formen 3 rayos a su alrededor, lo que crea hielo debajo de él durante 3 seg y ralentiza a los enemigos que se encuentren dentro. La ralentización perdura en los enemigos durante 1.5 seg tras abandonar el área de hielo. Obtienes una capa protectora de hielo a tu alrededor que aumenta tus defensas. Tras un breve retraso, el hielo explota e inflige una ráfaga de daño mágico a tu alrededor.\nRalentización: (1% de tu Vida adicional + 15)%\nDefensas: 35 + 75% adicional de Armadura y Resistencia Mágica. El efecto dura 2.5 seg.\nDaño mágico: 15-100 + 5% de tu vida adicional\nEnfriamiento: 20 seg",
+      "source": "eb00a52d"
+    },
+    "6a04bc5f681bf773dac12a94": {
+      "name": "Colección de globos oculares",
+      "description": "Obtienes 1.5 de Daño de Ataque o 3 de Poder de Habilidad al derribar a un campeón o monstruo épico. Este efecto se acumula hasta 8 veces.",
+      "source": "eeeea0cd"
+    },
+    "6a04bc5f681bf773dac12a95": {
+      "name": "Ataque en cadena",
+      "description": "Infligir daño a un campeón enemigo con una habilidad activa le aplica una marca. Esto causa que tus próximos 2 ataques o lanzamientos de habilidades activas contra él inflijan daño adaptable adicional igual a (12-38 + 3% de daño de ataque adicional + 1.5% de poder de habilidad). (15 seg de enfriamiento).",
+      "source": "cd8ebb4b"
+    },
+    "6a04bc5f681bf773dac12a96": {
+      "name": "Arrogancia",
+      "description": "Lograr un derribo contra un campeón enemigo dentro de los 3 seg después de haberle infligido daño, otorga (5 + 1 por cada asesinato de campeón que hayas logrado) de fuerza adaptable durante 30 seg.",
+      "source": "6db65a86"
+    },
+    "6a04bc5f681bf773dac12a97": {
+      "name": "Coraje del coloso",
+      "description": "Obtienes un escudo que absorbe de 25 a 45 de daño + 1% de daño como Vida Máxima durante 3 seg tras inmovilizar a un campeón enemigo (18 seg de enfriamiento).",
+      "source": "1941b60c"
+    },
+    "6a04bc5f681bf773dac12a98": {
+      "name": "Revestimiento de huesos",
+      "description": "Al recibir daño de un campeón, la habilidad o ataque actual y las 3 habilidades o ataques siguientes de un campeón contra ti y dentro de 1.5 seg. infligen de 30 a 60 de daño menos (40 seg de enfriamiento)",
+      "source": "43176d3b"
+    },
+    "6a04bc5f681bf773dac12a99": {
+      "name": "Invocar a Aery",
+      "description": "Tus ataques y habilidades envían a Aery a un objetivo, lo que inflige daño a enemigos o escuda a aliados.\nDaño: 15 a 70 + 10% de daño de ataque adicional + 5% de poder de habilidad\nEscudo: 20 a 100 + 10% de daño de ataque adicional + 5% de poder de habilidad\nNo puedes volver a lanzar a Aery hasta que regrese a ti.",
+      "source": "4485c803"
+    },
+    "6a04bc5f681bf773dac12a9a": {
+      "name": "Tirano",
+      "description": "Al infligirle daño a un campeón que tiene menos de un 50% de Vida, infliges (de 20 a 70 + 6% de daño de ataque adicional + 3% de poder de habilidad) de daño adaptable adicional. (10 seg de enfriamiento).",
+      "source": "ee2dc1a1"
+    },
+    "6a04bc5f681bf773dac12a9b": {
+      "name": "Botánico",
+      "description": "Al destruir una planta, obtienes 10 de oro y los efectos potenciados de la planta. Las flores Álmicas cerca de las torretas otorgan bonificaciones adicionales.\n\nFrutamiel: Al consumirla, la curación aumenta un 20%.\n\nBrote del Vidente: Al destruirla, la visión otorgada dura un 20% más.\n\nCono Explosivo: Tras el lanzamiento hacia atrás, otorga un 40% de Velocidad de Movimiento durante 2.5 seg.",
+      "source": "01f9bbcb"
+    },
+    "6a04bc5f681bf773dac12a9c": {
+      "name": "Arcanólogo axiomático",
+      "description": "Tu definitiva obtiene un 10% de daño y de poder de curaciones y escudos aumentados. (El daño de área de efecto se reduce a un 5% del aumento). Al derribar un campeón enemigo, el enfriamiento restante de tu definitiva se reduce en un 7%.",
+      "source": "ca1eb774"
+    },
+    "6a04bc5f681bf773dac12a9d": {
+      "name": "Sobrecrecimiento",
+      "description": "Por cada 3 súbditos enemigos o 3 monstruo(s) que asesinen cerca de ti, obtienes 3 de Vida Máxima de forma permanente. La Vida Máxima puede aumentar indefinidamente de esta manera. Obtienes un 3% de Vida Máxima adicional al alcanzar 30 acumulaciones.",
+      "source": "77828b2f"
+    },
+    "6a04bc5f681bf773dac12a9e": {
+      "name": "Leyenda: Linaje",
+      "description": "Obtienes un 1% de Omnivampirismo. Derriba monstruos, campeones enemigos o súbditos para obtener hasta un 7% Omnivampirismo adicional.",
+      "source": "fff03bed"
+    },
+    "6a04bc5f681bf773dac12a9f": {
+      "name": "Garras del inmortal",
+      "description": "Cada 3 seg en combate, tu siguiente ataque contra un campeón se potenciará.\nDaño mágico adicional: 3% de tu Vida\nCuración: 1.3% de tu Vida\nAumento de Vida de forma permanente: 8\nEn campeones a distancia, los efectos se reducen en un 60%",
+      "source": "8bc20ad4"
+    },
+    "6a04bc5f681bf773dac12aa0": {
+      "name": "Capa del nimbo",
+      "description": "Tras usar un hechizo (Destello, Ignición, etc.), obtienes un 10-40% de Velocidad de Movimiento adicional por 3 seg. La eficiencia de la aceleración depende del enfriamiento del hechizo",
+      "source": "b6a6a78d"
+    },
+    "6a04bc5f681bf773dac12aa1": {
+      "name": "Concentración absoluta",
+      "description": "Mientras tienes más de un 65% de Vida, obtienes entre 2 y 20 de Daño de Ataque adicional o entre 4 y 40 de Poder de Habilidad adicional (adaptable)",
+      "source": "b1cfcc51"
+    },
+    "6a04bc5f681bf773dac12aa2": {
+      "name": "Orbe anulador",
+      "description": "Si recibes daño de un campeón y provoca que quedes con menos de un 35% de tu Vida Máxima, obtienes un escudo que absorbe de 60 a 180 de daño durante 4 seg (60 seg de enfriamiento).",
+      "source": "fc88d85a"
+    },
+    "6a04bc5f681bf773dac12aa3": {
+      "name": "Brutalidad",
+      "description": "Tus ataques infligen (5 + 6% de daño de ataque adicional + 3% de Poder de Habilidad) de daño adaptable adicional a los campeones enemigos",
+      "source": "ff41c34f"
+    },
+    "6a04bc5f681bf773dac12aa4": {
+      "name": "Cosecha oscura",
+      "description": "Dañar a un campeón que tenga menos de un 50% de Vida le inflige daño adaptable y cosecha su alma, lo que aumenta de forma permanente el daño de Cosecha oscura en 10.\nDaño de Cosecha oscura: 35 + 11 por alma + 10% de daño de ataque adicional + 5% de poder de habilidad\n(20 seg de enfriamiento. Se restablece a 1 seg con derribos).",
+      "source": "2b0d02c1"
+    },
+    "6a04bc5f681bf773dac12aa5": {
+      "name": "Ímpetu de fase",
+      "description": "Usar ataques básicos o habilidades contra un campeón enemigo 3 veces en un lapso de 4 seg otorga velocidad de movimiento y reduce el enfriamiento restante de las habilidades básicas en un 20%.\nDuración: 3 seg\nVelocidad de Movimiento: Cuerpo a cuerpo: de un 40% a un 60% | A distancia: de un 20% a un 35%\nAceleración de habilidad: 10\nEnfriamiento: de 21 a 7 seg (según nivel).",
+      "source": "0cff236a"
+    },
+    "6a04bc5f681bf773dac12aa6": {
+      "name": "Vasija ixtali",
+      "description": "Al destruir una planta, obtienes de inmediato una semilla que reemplaza tu baratija durante 60 seg. La semilla madura y se autodestruye poco después de plantarla en una ubicación objetivo. También podrás recoger las semillas que aparezcan cuando un aliado destruya una planta.\n\nLas semillas se pueden obtener 2 min después del inicio de la partida.\n\nCada planta tiene un enfriamiento individual de 30 seg.",
+      "source": "a051e0eb"
+    },
+    "6a04bc5f681bf773dac12aa7": {
+      "name": "Banda de maná",
+      "description": "Alcanzar a un campeón enemigo con una habilidad o ataque potenciado aumenta permanentemente tu Maná Máximo en 30 hasta 300 de Maná.",
+      "source": "475f5c54"
+    },
+    "6a04bc5f681bf773dac12aa8": {
+      "name": "Fuerzas renovadas",
+      "description": "Gana 5 de Vida cada 5 seg.\n\nDespués de recibir daño de un campeón enemigo, regenera 3 + (1.5% de tu Vida faltante) durante los próximos 5 seg. Este efecto se duplica para los campeones cuerpo a cuerpo.",
+      "source": "8a5018e0"
+    },
+    "6a04bc5f681bf773dac12aa9": {
+      "name": "Demoler",
+      "description": "Después de golpear una torreta con 3 ataques básicos, los campeones cuerpo a cuerpo infligen 85 + 28% de Vida Máxima como daño físico adicional, mientras que los campeones a distancia infligen 50 + 20% de Vida Máxima como daño físico adicional.",
+      "source": "76d5ff95"
+    },
+    "6a04bc5f681bf773dac12aaa": {
+      "name": "Primer golpe",
+      "description": "Si inicias el combate con un campeón enemigo o le infliges daño durante los primeros 0.25 seg desde el inicio del combate, otorga 10 de oro y Primer golpe durante 3 seg, lo que te permite infligir un 7% de daño verdadero adicional al campeón enemigo. Una vez finalizado el efecto, obtienes oro adicional según el daño adicional infligido durante el efecto.\nSi no le infliges daño al campeón enemigo durante los primeros 0.25 desde el inicio del combate, Primer golpe entrará en un enfriamiento de 10 seg.\nOro adicional:\nCuerpo a cuerpo: 60% de daño adicional\nA distancia: 45% de daño adicional\nEnfriamiento: 20 a 13 seg",
+      "source": "81c9f993"
+    },
+    "6a04bc5f681bf773dac12aab": {
+      "name": "Celeridad",
+      "description": "Obtienes un 2% de Velocidad de Movimiento. Además, las bonificaciones de velocidad de movimiento que tengas aumentan en un 7%.",
+      "source": "829d0025"
+    },
+    "6a04bc5f681bf773dac12aac": {
+      "name": "Triunfo",
+      "description": "Al derribar campeones, recuperas un 10% de la Vida faltante y un 10% del Maná Máximo o la Energía máxima. Además, obtienes 35 de Velocidad de Movimiento durante 2 seg.",
+      "source": "bda76ce7"
+    },
+    "6a04bc5f681bf773dac12aad": {
+      "name": "Leyenda: Presteza",
+      "description": "Obtienes un 3% de Velocidad de Ataque. Derriba monstruos, campeones enemigos o súbditos para obtener hasta un 18% de Velocidad de Ataque adicional",
+      "source": "a3b4f6c8"
+    },
+    "6a04bc5f681bf773dac12aae": {
+      "name": "Compás letal",
+      "description": "Asestar ataques básicos a campeones enemigos otorga velocidad de ataque acumulable, un 8% para campeones cuerpo a cuerpo y un 6.4% para campeones a distancia, hasta 6 acumulaciones durante 6 seg. Al alcanzar el máximo de acumulaciones, los ataques también disparan una bala que inflige de 9 a 30 de daño adaptable para campeones cuerpo a cuerpo y de 6 a 24 para campeones a distancia. Cada 1% de Velocidad de Ataque adicional, el daño aumenta un 1% para campeones cuerpo a cuerpo y un 0.67% para campeones a distancia.",
+      "source": "a65e1d16"
+    },
+    "6a04bc5f681bf773dac12aaf": {
+      "name": "Conquistador",
+      "description": "Obtienes acumulaciones de fuerza adaptable al atacar a un campeón con habilidades o ataques separados. Se acumula hasta 6 veces. Al máximo de acumulaciones, obtienes omnivampirismo adicional.\nPor acumulación: 3 a 5 de Daño de Ataque adicional o 5 a 8.33 de Poder de Habilidad adicional durante 6 seg.\nBonus al máximo de acumulaciones: Cuerpo a cuerpo: 9% | A distancia 5% de Omnivampirismo adicional.",
+      "source": "777fae9e"
+    },
+    "6a04bc5f681bf773dac12ab0": {
+      "name": "Fervor de combate",
+      "description": "Mientras estás en combate contra un campeón, obtienes un 1.4% de amplificación de daño acumulable para tus habilidades básicas cada 1 seg. Se acumula hasta 3 veces y solo se activa contra campeones enemigos.",
+      "source": "92c00274"
+    },
+    "6a04bc5f681bf773dac12ab1": {
+      "name": "Golpe de gracia",
+      "description": "Tus ataques infligen un 8% de daño adaptable adicional a los campeones enemigos que tienen menos de un 40% de Vida.",
+      "source": "197fa38a"
+    },
+    "6a04bc5f681bf773dac12ab2": {
+      "name": "Golpe bajo",
+      "description": "Inflige de 10 a 45 de daño verdadero adicional a los enemigos cuyo movimiento esté limitado (5 seg de enfriamiento).",
+      "source": "0e494db3"
+    },
+    "6a04bc5f681bf773dac12ab3": {
+      "name": "Hexdestello",
+      "description": "Mientras Destello está en enfriamiento, se reemplaza por Hexdestello. La distancia de desplazamiento depende del tiempo de carga (2 seg máx.). (18 seg de enfriamiento). Queda bajo un enfriamiento de 6 seg al entrar en combate contra campeones.",
+      "source": "50c85107"
+    },
+    "6a04bc5f681bf773dac12ab4": {
+      "name": "Derribado",
+      "description": "Tus ataques y habilidades infligen un 6.5% de daño adaptable adicional a los campeones enemigos que tienen más de un 60% de Vida",
+      "source": "5802cb57"
+    },
+    "6a04bc5f681bf773dac12ab5": {
+      "name": "Centinela zombi",
+      "description": "Al destruir un centinela enemigo, aparece un centinela zombi en su lugar que otorga visión del área circundante durante 120 seg. Además, obtienes 3 de Daño de Ataque o 6 de Poder de Habilidad (máx.: 5 acumulaciones). También obtienes acumulaciones y creas un centinela zombi si ayudas a destruir un centinela enemigo.",
+      "source": "677d6f77"
+    },
+    "6a04bc5f681bf773dac12ab6": {
+      "name": "Cazador incesante",
+      "description": "Obtienes 10 de Velocidad de Movimiento al estar fuera de combate. Cada vez que derribas a un campeón o un monstruo épico, obtienes 2 de Velocidad de Movimiento al estar fuera de combate. La bonificación se acumula un máximo de 5 veces.",
+      "source": "24d53f88"
+    }
+  }
+}

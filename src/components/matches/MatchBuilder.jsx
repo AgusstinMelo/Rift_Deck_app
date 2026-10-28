@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
+import { useCatalogText } from '@/lib/LocaleContext';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Search } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
@@ -166,6 +167,7 @@ export function StatInput({ label, value, onChange, placeholder = '—', autoFoc
 const BUILDER_STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
 
 export default function MatchBuilder({ champions: fallbackChampions = [], patches = [], defaultPatch = '', onSave, onCancel, isSaving = false }) {
+  const { entityName } = useCatalogText();
   const clientRequestIdRef = useRef(null);
   if (!clientRequestIdRef.current) {
     clientRequestIdRef.current = globalThis.crypto?.randomUUID?.()
@@ -799,12 +801,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                 {rune.image_url ? (
                                   <img
                                     src={rune.image_url}
-                                    alt={rune.name}
+                                    alt={entityName(rune)}
                                     className="w-full h-full object-cover rounded-full scale-[1.35]"
                                   />
                                 ) : (
                                   <span className="text-xs font-bold text-primary">
-                                    {rune.name?.[0]}
+                                    {entityName(rune)[0]}
                                   </span>
                                 )}
                               </button>
@@ -855,12 +857,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                       {rune.image_url ? (
                                         <img
                                           src={rune.image_url}
-                                          alt={rune.name}
+                                          alt={entityName(rune)}
                                           className="w-full h-full object-cover rounded-full"
                                         />
                                       ) : (
                                         <span className="text-xs font-bold text-primary">
-                                          {rune.name?.[0]}
+                                          {entityName(rune)[0]}
                                         </span>
                                       )}
                                     </button>
@@ -911,12 +913,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                                       {rune.image_url ? (
                                         <img
                                           src={rune.image_url}
-                                          alt={rune.name}
+                                          alt={entityName(rune)}
                                           className="w-full h-full object-cover rounded-full"
                                         />
                                       ) : (
                                         <span className="text-xs font-bold text-primary">
-                                          {rune.name?.[0]}
+                                          {entityName(rune)[0]}
                                         </span>
                                       )}
                                     </button>

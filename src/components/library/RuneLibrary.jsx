@@ -16,6 +16,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
+import { useCatalogText } from '@/lib/LocaleContext';
 import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 
 const BRANCH_COLORS = {
@@ -40,6 +41,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [search, setSearch] = useState('');
   const [section, setSection] = useState('description');
   const [branchFilter, setBranchFilter] = useState('all');
+  const { entityName, entityDescription, matchesName, compareNames } = useCatalogText();
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialRunes, selectedSlug) : null);
   // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
   const mediaOptions = { ssrSafe: Boolean(publicBasePath) };
@@ -108,7 +110,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     .filter(rune => {
       const matchSearch =
         !search ||
-        rune.name?.toLowerCase().includes(search.toLowerCase());
+        matchesName(rune, search);
 
       const runeBranches = getRuneBranches(rune.branch);
 
@@ -136,10 +138,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
         return groupA - groupB;
       }
 
-      return normalize(a.name).localeCompare(normalize(b.name), 'es', {
-        sensitivity: 'base',
-        numeric: true,
-      });
+      return compareNames(a, b);
     });
 
   const groupedRunes = filtered.reduce((acc, rune) => {
@@ -165,7 +164,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
           const selectedBranches = getRuneBranches(selected.branch);
           return getRuneBranches(rune.branch).some(branch => selectedBranches.includes(branch));
         })
-        .sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), 'es', { sensitivity: 'base' }))
+        .sort(compareNames)
         .slice(0, 6)
     : [];
 
@@ -202,7 +201,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
 
         <div className="rd-card rd-entity-hero">
           {selected.image_url
-            ? <img src={selected.image_url} alt={selected.name} className="rd-entity-hero-img rd-entity-hero-img-round" />
+            ? <img src={selected.image_url} alt={entityName(selected)} className="rd-entity-hero-img rd-entity-hero-img-round" />
             : <div className="rd-entity-hero-img rd-entity-hero-img-round bg-secondary flex items-center justify-center"><BranchIcon size={26} className="text-primary" /></div>}
           <div className="min-w-0">
             {selected.branch && (
@@ -212,7 +211,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                 </span>
               </div>
             )}
-            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{selected.name}</h1>
+            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{entityName(selected)}</h1>
           </div>
         </div>
 
@@ -249,19 +248,19 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                   >
                     {rune.image_url ? (
-                      <img src={rune.image_url} alt={`${rune.name} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                      <img src={rune.image_url} alt={`${entityName(rune)} en Wild Rift`} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
                         <RelatedIcon size={16} className="text-primary" />
                       </div>
                     )}
-                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{rune.name}</h3>
+                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(rune)}</h3>
                   </Link>
                 );
               })}
             </div>
           ) : selected.description
-            ? <p className="rd-entity-desc text-muted-foreground">{selected.description}</p>
+            ? <p className="rd-entity-desc whitespace-pre-line text-muted-foreground">{entityDescription(selected)}</p>
             : <p className="text-sm text-muted-foreground">Sin descripción.</p>}
         </div>
       </div>
@@ -299,7 +298,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                 {selected.image_url ? (
                   <img
                     src={selected.image_url}
-                    alt={selected.name}
+                    alt={entityName(selected)}
                     className="w-24 h-24 rounded-3xl object-cover border border-primary/20 shadow-[0_0_25px_rgba(212,175,55,.10)]"
                   />
                 ) : (
@@ -324,12 +323,12 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                 </div>
 
                 <h1 className="font-rajdhani font-bold text-5xl tracking-[-0.08em] text-foreground uppercase">
-                  {selected.name}
+                  {entityName(selected)}
                 </h1>
 
                 {selected.description && (
-                  <p className="text-muted-foreground text-sm leading-relaxed mt-4 max-w-3xl">
-                    {selected.description}
+                  <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed mt-4 max-w-3xl">
+                    {entityDescription(selected)}
                   </p>
                 )}
 
@@ -345,7 +344,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
               <h2 className="rd-card-title">Runas de la misma rama</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Otras runas que comparten la rama registrada de {selected.name}.
+              Otras runas que comparten la rama registrada de {entityName(selected)}.
             </p>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {relatedRunes.map(rune => {
@@ -357,13 +356,13 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                     className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                   >
                     {rune.image_url ? (
-                      <img src={rune.image_url} alt={`${rune.name} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                      <img src={rune.image_url} alt={`${entityName(rune)} en Wild Rift`} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary">
                         <RelatedIcon size={18} className="text-primary" />
                       </div>
                     )}
-                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{rune.name}</h3>
+                    <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(rune)}</h3>
                   </Link>
                 );
               })}
@@ -487,7 +486,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                                 {rune.image_url ? (
                                   <img
                                     src={rune.image_url}
-                                    alt={rune.name}
+                                    alt={entityName(rune)}
                                     className="w-11 h-11 rounded-full object-cover border border-primary/15 shadow-[0_0_16px_rgba(212,175,55,.08)]"
                                   />
                                 ) : (
@@ -501,7 +500,7 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
                                 <div className="flex items-center justify-between gap-2">
                                   <div className="min-w-0">
                                     <h3 className="font-rajdhani font-bold text-lg tracking-[-0.05em] text-foreground leading-none truncate">
-                                      {rune.name}
+                                      {entityName(rune)}
                                     </h3>
 
                                     {rune.branch && (

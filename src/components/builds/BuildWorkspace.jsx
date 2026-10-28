@@ -13,10 +13,12 @@ import TierBadge from '@/components/ui/TierBadge';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import PatchSelect from '@/components/patches/PatchSelect';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useCatalogText } from '@/lib/LocaleContext';
 
 export default function BuildWorkspace({ champion, tierEntries, items, runes, patches, patchVersion, onPatchChange, existingBuild, onBack }) {
   const isEditing = !!existingBuild;
   const { user } = useAuth();
+  const { entityName } = useCatalogText();
   const { data: spells = [] } = useSpells();
 
   // When editing, resolve item names back to item objects
@@ -244,10 +246,10 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
                 <div className="flex min-w-0 flex-wrap gap-1.5">
                   {recommendedItems.map(({ itemName, item }, i) => (
                     <button key={i} onClick={() => item && selectedItems.length < 6 && addItem(item)}
-                      title={item?.name || itemName}
+                      title={item ? entityName(item) : itemName}
                       className="flex items-center gap-1.5 bg-secondary border border-border px-2 py-1 rounded-lg text-xs text-foreground hover:border-primary/40 transition-colors">
-                      {item?.image_url && <img src={item.image_url} alt={item.name} className="w-5 h-5 object-contain" />}
-                      <span className="max-w-[8rem] truncate">{item?.name || itemName}</span>
+                      {item?.image_url && <img src={item.image_url} alt={entityName(item)} className="w-5 h-5 object-contain" />}
+                      <span className="max-w-[8rem] truncate">{item ? entityName(item) : itemName}</span>
                     </button>
                   ))}
                 </div>

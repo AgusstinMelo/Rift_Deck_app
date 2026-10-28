@@ -10,6 +10,8 @@ import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import BugReportModal from '@/components/BugReportModal';
 import LegalInfoModal from '@/components/LegalInfoModal';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
+import LanguageSelect from '@/components/LanguageSelect';
+import { useCatalogText } from '@/lib/LocaleContext';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import logoUrl from '@/assets/riftdeck-logo.png';
 import markUrl from '@/assets/riftdeck-mark.png';
@@ -51,6 +53,7 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
   const [open, setOpen] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const { entityName, matchesName } = useCatalogText();
 
   const { data: champions = [] } = useQuery({
     queryKey: ['sidebar-search', 'champions'],
@@ -89,22 +92,22 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
     ];
 
     return allResults
-      .filter(({ entity }) => normalizeSearch(entity.name).includes(normalizedQuery))
+      .filter(({ entity }) => matchesName(entity, normalizedQuery, normalizeSearch))
       .sort((a, b) => {
-        const nameA = normalizeSearch(a.entity.name);
-        const nameB = normalizeSearch(b.entity.name);
+        const nameA = normalizeSearch(entityName(a.entity));
+        const nameB = normalizeSearch(entityName(b.entity));
         const startsA = nameA.startsWith(normalizedQuery);
         const startsB = nameB.startsWith(normalizedQuery);
 
         if (startsA !== startsB) return startsA ? -1 : 1;
 
-        return String(a.entity.name || '').localeCompare(String(b.entity.name || ''), 'es', {
+        return entityName(a.entity).localeCompare(entityName(b.entity), 'es', {
           sensitivity: 'base',
           numeric: true,
         });
       })
       .slice(0, 8);
-  }, [champions, items, query, runes]);
+  }, [champions, entityName, items, matchesName, query, runes]);
 
   const goToResult = ({ entity, type }) => {
     const config = SEARCH_TYPES[type];
@@ -170,18 +173,18 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
                     {imageUrl ? (
                       <img
                         src={imageUrl}
-                        alt={entity.name}
+                        alt={entityName(entity)}
                         className="h-9 w-9 rounded-lg object-cover border border-primary/15 shrink-0"
                       />
                     ) : (
                       <div className="h-9 w-9 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                        {entity.name?.[0] || '?'}
+                        {entityName(entity)[0] || '?'}
                       </div>
                     )}
 
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium text-foreground">
-                        {entity.name}
+                        {entityName(entity)}
                       </span>
                       <span className="block text-[11px] text-muted-foreground">
                         {config.label}
@@ -356,6 +359,7 @@ export default function Layout() {
         </nav>
 
         <div className="rd-sidebar-footer space-y-3">
+          {!collapsed && <LanguageSelect />}
           {user && (
             <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">

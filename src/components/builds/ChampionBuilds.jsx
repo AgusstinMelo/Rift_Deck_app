@@ -4,9 +4,16 @@ import { useAuth } from '@/lib/AuthContext';
 import { getBuildsForChampion, deleteBuild } from '@/api/buildsSupabase';
 import { Plus, Trash2, Wrench, ChevronRight, GitCompare, ArrowLeft } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
+import { useCatalogText } from '@/lib/LocaleContext';
 
-export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBack, onCompare }) {
+export default function ChampionBuilds({ champion, items = [], onNewBuild, onEditBuild, onBack, onCompare }) {
   const qc = useQueryClient();
+  const { entityName } = useCatalogText();
+  // Las builds guardan el nombre en español; se muestra en el idioma elegido.
+  const itemLabel = name => {
+    const item = items.find(entry => entry.name === name);
+    return item ? entityName(item) : name;
+  };
   const { user } = useAuth();
   const [buildToDelete, setBuildToDelete] = useState(null);
 
@@ -95,7 +102,7 @@ export default function ChampionBuilds({ champion, onNewBuild, onEditBuild, onBa
                   {build.patch && <span className="text-xs text-muted-foreground bg-secondary/60 border border-border/50 px-2 py-0.5 rounded-md">Parche {build.patch}</span>}
                 </div>
                 {build.items?.length > 0 && (
-                  <p className="text-xs text-muted-foreground truncate">{build.items.join(' · ')}</p>
+                  <p className="text-xs text-muted-foreground truncate">{build.items.map(itemLabel).join(' · ')}</p>
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
