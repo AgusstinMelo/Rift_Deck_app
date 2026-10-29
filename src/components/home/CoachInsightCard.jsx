@@ -20,16 +20,17 @@ export default function CoachInsightCard({ index, domain, confidenceLabel, title
   return (
     <article className={`relative flex flex-col rounded-2xl border p-5 overflow-hidden land:p-4 ${insightTone[tone] || insightTone.neutral} ${className}`}>
       <div className={`absolute inset-y-0 left-0 w-1 ${insightAccent[tone] || insightAccent.neutral}`} aria-hidden="true" />
-      <div className="flex items-start justify-between gap-3 mb-3 land:mb-2">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+      {/* El badge va en la fila de la volanta para que el título use todo el ancho de la carta. */}
+      <div className="mb-3 land:mb-2">
+        <div className="flex items-center justify-between gap-3 mb-2 land:mb-1">
+          <p className="min-w-0 truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             {String(index).padStart(2, '0')} · {domain}
           </p>
-          <h3 className="font-rajdhani text-xl font-bold leading-tight text-foreground land:text-base">{title}</h3>
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full border border-border/70 px-2 py-1 text-[10px] text-muted-foreground">
+            <ShieldCheck size={11} aria-hidden="true" /> {confidenceLabel}
+          </span>
         </div>
-        <span className="shrink-0 inline-flex items-center gap-1 rounded-full border border-border/70 px-2 py-1 text-[10px] text-muted-foreground">
-          <ShieldCheck size={11} aria-hidden="true" /> {confidenceLabel}
-        </span>
+        <h3 className="font-rajdhani text-lg font-bold leading-tight text-foreground md:text-xl land:text-base">{title}</h3>
       </div>
 
       <div className="mt-1">
@@ -38,7 +39,7 @@ export default function CoachInsightCard({ index, domain, confidenceLabel, title
       </div>
 
       {evidence.length > 0 && (
-        <ul className="flex flex-wrap gap-2 mt-4 land:hidden short:mt-3">
+        <ul className="flex flex-wrap gap-1.5 mt-3 md:gap-2 md:mt-4 land:hidden">
           {evidence.map(item => (
             <li key={item} className="rounded-md bg-background/45 border border-border/50 px-2 py-1 text-[11px] text-muted-foreground">{item}</li>
           ))}

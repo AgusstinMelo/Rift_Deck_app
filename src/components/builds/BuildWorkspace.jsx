@@ -166,7 +166,7 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
             </div>
             {tierEntry && (
               <p className="text-xs text-muted-foreground mt-1">
-               {t('builds.wr')} <span className="text-foreground">{tierEntry.winrate?.toFixed(1)}%</span>
+               {t('builds.wr')} <span className="text-foreground">{tierEntry.winrate?.toFixed(0)}%</span>
                 <span className="mx-2">·</span>
                {t('builds.pr')} <span className="text-foreground">{tierEntry.pickrate?.toFixed(1)}%</span>
                 <span className="mx-2">·</span>

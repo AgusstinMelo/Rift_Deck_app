@@ -483,7 +483,7 @@ export default function ChampionDetail({
 
   const wr =
     champMatches.length > 0
-      ? ((wins / champMatches.length) * 100).toFixed(1)
+      ? ((wins / champMatches.length) * 100).toFixed(0)
       : null;
 
   const totalKills = champMatches.reduce((acc, m) => acc + Number(m.kills || 0), 0);
@@ -1083,7 +1083,7 @@ export default function ChampionDetail({
                       <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp((toNumber(t.winrate) - 40) * 5)}%` }}>
                         <p className="rd-label mb-1">{tr('tierlist.wr')}</p>
                         <p className="font-bold text-foreground">
-                          {t.winrate?.toFixed(1)}%
+                          {t.winrate?.toFixed(0)}%
                         </p>
                       </div>
                       <div className="bg-secondary/50 rounded-xl p-3 text-center" style={{ '--rd-fill': `${clamp(toNumber(t.pickrate) * 4)}%` }}>

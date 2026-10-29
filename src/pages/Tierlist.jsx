@@ -452,7 +452,7 @@ export default function Tierlist() {
                     {avgWinrate !== null && (
                       <div>
                         <dt>{t('tierlist.wr')}</dt>
-                        <dd>{avgWinrate.toFixed(1)}%</dd>
+                        <dd>{avgWinrate.toFixed(0)}%</dd>
                       </div>
                     )}
                     {avgPickrate !== null && (
@@ -532,7 +532,7 @@ export default function Tierlist() {
                     </td>
                     <td className="p-3"><LaneBadge lane={entry.lane} /></td>
                     <td className="p-3"><TierBadge tier={entry.tier} size="sm" /></td>
-                    <td className="p-3 text-right text-sm text-foreground">{entry.winrate?.toFixed(2)}%</td>
+                    <td className="p-3 text-right text-sm text-foreground">{entry.winrate?.toFixed(0)}%</td>
                     <td className="p-3 text-right text-sm text-muted-foreground">{entry.pickrate?.toFixed(2)}%</td>
                     <td className="p-3 text-right text-sm text-muted-foreground">{entry.banrate?.toFixed(2)}%</td>
                     <td className="p-3 text-right text-sm font-semibold text-primary">{entry.ranking_final?.toFixed(2)}</td>
@@ -574,7 +574,7 @@ export default function Tierlist() {
                   <div className="grid grid-cols-3 gap-2 mt-1 max-w-[10.5rem]">
                     <div className="text-xs leading-tight text-muted-foreground">
                       <p>{t('tierlist.wr')}</p>
-                      <p className="text-blue-300">{entry.winrate?.toFixed(1)}%</p>
+                      <p className="text-blue-300">{entry.winrate?.toFixed(0)}%</p>
                     </div>
 
                     <div className="text-xs leading-tight text-muted-foreground">

@@ -293,7 +293,7 @@ export default function Dashboard() {
     const insight = getChampionInsight({
       championName: name,
       totalGames: championMatches.length,
-      numericWr: Number(personalWr.toFixed(1)),
+      numericWr: Number(personalWr.toFixed(0)),
       deathsAvg: Number(deathsAvg.toFixed(1)),
       killsAvg: Number(killsAvg.toFixed(1)),
       assistsAvg: Number(assistsAvg.toFixed(1)),
@@ -414,7 +414,7 @@ export default function Dashboard() {
               </article>
               <article className="rd-card rd-dashboard-stat">
                 <div className="flex items-center justify-between"><span className="rd-label">{t('goals.metric.winrate')}</span><Trophy size={17} className="text-primary" /></div>
-                <p className={`font-rajdhani rd-dashboard-stat-value ${wrColor}`}>{winrate === null ? '—' : `${winrate.toFixed(1)}%`}</p>
+                <p className={`font-rajdhani rd-dashboard-stat-value ${wrColor}`}>{winrate === null ? '—' : `${winrate.toFixed(0)}%`}</p>
                 <p className="text-xs text-muted-foreground">{t('dashboard.rendimientoGlobalFiltrado')}</p>
               </article>
               <article className="rd-card rd-dashboard-stat rd-dashboard-stat-with-avatar">
@@ -586,7 +586,7 @@ export default function Dashboard() {
                 {laneHighlights.map(({ lane, champions: laneChampions }) => <div key={lane} className={`rd-meta-lane-card ${metaLane === lane ? 'rd-meta-lane-card-active' : ''} rounded-xl border border-border/80 bg-secondary/25 p-2 min-w-0 overflow-hidden`}>
                   <div className="flex items-center gap-2 mb-1.5"><img src={LANE_ICONS[lane]} alt="" className="w-5 h-5 object-contain" /><span className="text-[11px] font-bold text-muted-foreground">{LANE_LABELS[lane]}</span></div>
                   {laneChampions.length ? laneChampions.map((champion, index) => <div key={champion.id || `${champion.champion_name}-${index}`} className="rd-meta-lane-row font-rajdhani flex items-center gap-2 border-t border-border/50 first:border-0">
-                    <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(1)}{t('dashboard.wr')}</p></div><TierBadge tier={champion.tier} size="sm" />
+                    <span className="text-[10px] text-muted-foreground w-3">{index + 1}</span>{renderChampionAvatar(champion.champion_name, 'w-7 h-7', champion.image_url)}<div className="min-w-0 flex-1"><p className="text-xs font-semibold truncate">{champion.champion_name}</p><p className="text-[9px] text-muted-foreground">{Number(champion.winrate || 0).toFixed(0)}{t('dashboard.wr')}</p></div><TierBadge tier={champion.tier} size="sm" />
                   </div>) : <p className="text-[11px] text-muted-foreground mt-4 text-center">{t('dashboard.sinDatos')}</p>}
                 </div>)}
               </div>
@@ -603,8 +603,8 @@ export default function Dashboard() {
                   {renderChampionAvatar(selectedMain.name, 'w-20 h-20')}
                   <div className="min-w-0"><p className="font-rajdhani text-[11px] uppercase tracking-[0.18em] text-muted-foreground">#{selectedMain.position || '—'} {t('dashboard.en')} {LANE_LABELS[selectedMain.meta?.lane] || t('dashboard.sinLinea')}</p><h3 className="font-rajdhani text-3xl font-bold tracking-tight truncate">{selectedMain.name}</h3><div className="flex items-center gap-2 mt-1.5"><TierBadge tier={selectedMain.meta?.tier || '—'} /><span className="font-rajdhani text-xs text-muted-foreground">{t('dashboard.score')} {Number(selectedMain.meta?.ranking_final || 0).toFixed(1)}</span></div></div>
                 </div>
-                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">{t('dashboard.estadisticasDelMeta')}</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{Number(selectedMain.meta?.winrate || 0).toFixed(1)}%</strong><span>{t('goals.metric.winrate')}</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.pickrate || 0).toFixed(1)}%</strong><span>{t('dashboard.pickrate')}</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.banrate || 0).toFixed(1)}%</strong><span>{t('dashboard.banrate')}</span></div></div></div>
-                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">{t('dashboard.tuRendimiento')}</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{selectedMain.games}</strong><span>{t('nav.matches')}</span></div><div><strong className={`font-rajdhani ${selectedMain.personalWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{selectedMain.personalWr.toFixed(1)}%</strong><span>{t('goals.metric.winrate')}</span></div><div><strong className="font-rajdhani text-primary">{selectedMain.personalKda.toFixed(2)}</strong><span>{t('goals.stat.kda')}</span></div></div></div>
+                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">{t('dashboard.estadisticasDelMeta')}</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{Number(selectedMain.meta?.winrate || 0).toFixed(0)}%</strong><span>{t('goals.metric.winrate')}</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.pickrate || 0).toFixed(1)}%</strong><span>{t('dashboard.pickrate')}</span></div><div><strong className="font-rajdhani">{Number(selectedMain.meta?.banrate || 0).toFixed(1)}%</strong><span>{t('dashboard.banrate')}</span></div></div></div>
+                <div className="font-rajdhani rd-main-stat-group"><p className="rd-mini-label">{t('dashboard.tuRendimiento')}</p><div className="grid grid-cols-3 gap-2"><div><strong className="font-rajdhani">{selectedMain.games}</strong><span>{t('nav.matches')}</span></div><div><strong className={`font-rajdhani ${selectedMain.personalWr >= 50 ? 'text-green-400' : 'text-red-400'}`}>{selectedMain.personalWr.toFixed(0)}%</strong><span>{t('goals.metric.winrate')}</span></div><div><strong className="font-rajdhani text-primary">{selectedMain.personalKda.toFixed(2)}</strong><span>{t('goals.stat.kda')}</span></div></div></div>
                 {selectedMain.insight && <div className="rd-main-insight"><p className="rd-mini-label text-primary">{t('dashboard.insightCon')} {selectedMain.name}</p><p className="line-clamp-2">{selectedMain.insight}</p></div>}
               </div> : <p className="text-sm text-muted-foreground text-center mt-10">{t('dashboard.registraPartidasParaComparar')}</p>}
             </article>

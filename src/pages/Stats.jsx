@@ -230,7 +230,7 @@ function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, 
             </svg>
 
             <span className="relative font-rajdhani text-sm font-bold text-green-400 tracking-[-0.06em]">
-              {winrate.toFixed(1)}%
+              {winrate.toFixed(0)}%
             </span>
           </div>
 
@@ -901,8 +901,8 @@ export default function Stats() {
 
   const blueMatches = matches.filter(m => m.side === 'blue');
   const redMatches = matches.filter(m => m.side === 'red');
-  const blueWR = calcWR(blueMatches).toFixed(1);
-  const redWR = calcWR(redMatches).toFixed(1);
+  const blueWR = calcWR(blueMatches).toFixed(0);
+  const redWR = calcWR(redMatches).toFixed(0);
   const blueWins = blueMatches.filter(m => m.result === 'win').length;
   const blueLosses = blueMatches.length - blueWins;
   const redWins = redMatches.filter(m => m.result === 'win').length;

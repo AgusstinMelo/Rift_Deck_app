@@ -1682,9 +1682,9 @@
     flex-shrink: 0;
   }
 
-  /* Crece con el alto disponible, pero el ancho de la columna pone el techo ("67.5%"). */
+  /* Crece con el alto disponible, pero el ancho de la columna pone el techo ("100.0%"). */
   .rd-dashboard-stat-value {
-    font-size: clamp(1.5rem, min(4.4dvh, 8.2vw), 2.3rem);
+    font-size: clamp(1.3rem, min(3.8dvh, 6.6vw), 1.95rem);
   }
 
   .rd-dashboard-stat .text-xs {
@@ -2291,7 +2291,7 @@
   }
 
   .rd-dashboard-stat-value {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   /* Meta: filas de la línea más bajas para dejarle alto a "Mis mains". */
@@ -12773,25 +12773,15 @@
   padding-bottom: 0;
 }
 
-/* Smartphone vertical: la captura (apaisada) quedaría diminuta; el marco llena el
-   alto disponible y muestra ampliada la parte izquierda del Dashboard. */
+/* Smartphone vertical: se muestra la captura del Dashboard mobile (360×800) entera,
+   tan grande como permita el alto, sin la barra de ventana. */
 @media (orientation: portrait) and (max-width: 767px) {
   .rd-home-hero-frame {
-    width: 100%;
-    height: min(100cqh, 40rem);
+    width: min(100cqw, 100cqh * 360 / 800, 24rem);
   }
 
-  .rd-home-hero-frame > figure {
-    display: flex;
-    height: 100%;
-    flex-direction: column;
-  }
-
-  .rd-home-hero-frame > figure > img {
-    min-height: 0;
-    flex: 1 1 0;
-    object-fit: cover;
-    object-position: 21% 0;
+  .rd-home-shot-bar {
+    display: none;
   }
 }
 

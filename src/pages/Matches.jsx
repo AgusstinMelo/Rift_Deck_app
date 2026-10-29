@@ -200,7 +200,7 @@ export default function Matches() {
 
   const wins = filtered.filter(m => m.result === 'win').length;
   const losses = filtered.length - wins;
-  const wr = filtered.length > 0 ? ((wins / filtered.length) * 100).toFixed(1) : null;
+  const wr = filtered.length > 0 ? ((wins / filtered.length) * 100).toFixed(0) : null;
 
   const wrTone =
     wr === null ? 'primary' :

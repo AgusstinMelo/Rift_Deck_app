@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, BarChart3, BookOpen, ClipboardList, Cpu, Globe2, LayoutDashboard, Layers, Lock, ShieldCheck,
@@ -9,12 +9,17 @@ import HomeFooter from '@/components/home/HomeFooter';
 import CoachInsightCard from '@/components/home/CoachInsightCard';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import shotDashboard from '@/assets/landing/dashboard.webp';
+import shotDashboardMobile from '@/assets/landing/dashboard-mobile.webp';
 import { useT } from '@/lib/LocaleContext';
 import { tr } from '@/i18n/uiI18n';
 
 // Todas las capturas de src/assets/landing miden 1910×915.
 const SHOT_WIDTH = 1910;
 const SHOT_HEIGHT = 915;
+// Captura del Dashboard en smartphone vertical (mismo criterio que el @media de index.css).
+const MOBILE_SHOT_WIDTH = 360;
+const MOBILE_SHOT_HEIGHT = 800;
+const PORTRAIT_PHONE_QUERY = '(orientation: portrait) and (max-width: 767px)';
 
 // Cada pantalla de la home ocupa el alto visible debajo de la nav (ver .rd-home-section en index.css).
 const SECTION = 'rd-home-section';
@@ -116,23 +121,34 @@ function SectionHeading({ id, eyebrow, title, lead, centered = false }) {
 }
 
 // Captura dentro de un marco tipo ventana.
-function ScreenshotFrame({ src, alt, eager = false, className = '' }) {
+// Con mobileSrc, en smartphone vertical se muestra esa captura (la versión mobile de la app).
+function ScreenshotFrame({ src, mobileSrc, alt, eager = false, className = '' }) {
   return (
     <figure className={`overflow-hidden rounded-2xl border border-primary/15 bg-card shadow-[0_40px_120px_-40px_rgba(0,0,0,0.85)] ${className}`}>
-      <div className="flex h-8 items-center gap-1.5 border-b border-border/60 bg-secondary/40 px-4" aria-hidden="true">
+      <div className="rd-home-shot-bar flex h-8 items-center gap-1.5 border-b border-border/60 bg-secondary/40 px-4" aria-hidden="true">
         <span className="h-2.5 w-2.5 rounded-full bg-border" />
         <span className="h-2.5 w-2.5 rounded-full bg-border" />
         <span className="h-2.5 w-2.5 rounded-full bg-border" />
       </div>
-      <img
-        src={src}
-        alt={alt}
-        width={SHOT_WIDTH}
-        height={SHOT_HEIGHT}
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        className="block h-auto w-full"
-      />
+      <picture>
+        {mobileSrc && (
+          <source
+            media={PORTRAIT_PHONE_QUERY}
+            srcSet={mobileSrc}
+            width={MOBILE_SHOT_WIDTH}
+            height={MOBILE_SHOT_HEIGHT}
+          />
+        )}
+        <img
+          src={src}
+          alt={alt}
+          width={SHOT_WIDTH}
+          height={SHOT_HEIGHT}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          className="block h-auto w-full"
+        />
+      </picture>
     </figure>
   );
 }
@@ -251,6 +267,73 @@ function ProgressSection() {
   );
 }
 
+// En smartphone vertical las cartas se deslizan de a una, con puntos que marcan cuál se ve;
+// en el resto, dos columnas.
+function CoachCarousel() {
+  const t = useT();
+  const trackRef = useRef(null);
+  const [active, setActive] = useState(0);
+
+  const handleScroll = () => {
+    const track = trackRef.current;
+    if (!track) return;
+    const cards = Array.from(track.children);
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let closest = 0;
+    cards.forEach((card, index) => {
+      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      const best = Math.abs(cards[closest].offsetLeft + cards[closest].offsetWidth / 2 - center);
+      if (distance < best) closest = index;
+    });
+    setActive(closest);
+  };
+
+  const goTo = index => {
+    const card = trackRef.current?.children[index];
+    card?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  };
+
+  return (
+    <>
+      <div
+        ref={trackRef}
+        onScroll={handleScroll}
+        className="-mx-4 mt-5 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:mt-10 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 md:pb-0 land:mx-0 land:mt-4 land:grid land:grid-cols-2 land:overflow-visible land:px-0 land:pb-0"
+      >
+        {COACH_INSIGHTS.map((insight, index) => (
+          <CoachInsightCard
+            key={insight.title}
+            index={index + 1}
+            className="w-[calc(100%-2.5rem)] max-w-sm shrink-0 snap-center md:w-auto md:max-w-none land:w-auto land:max-w-none"
+            {...insight}
+          />
+        ))}
+      </div>
+
+      <div className="mt-4 flex justify-center gap-2 md:hidden land:hidden">
+        {COACH_INSIGHTS.map((insight, index) => (
+          <button
+            key={insight.title}
+            type="button"
+            onClick={() => goTo(index)}
+            aria-label={`${index + 1} / ${COACH_INSIGHTS.length}`}
+            aria-current={active === index}
+            className={`h-1.5 rounded-full transition-all duration-300 ${active === index ? 'w-6 bg-primary' : 'w-1.5 bg-border'}`}
+          />
+        ))}
+      </div>
+
+      <p className="mt-3 flex items-start gap-2 text-xs leading-snug text-muted-foreground md:mt-4 md:items-center land:hidden">
+        <BarChart3 size={14} className="mt-px shrink-0 text-primary md:mt-0" aria-hidden="true" />
+        <span>
+         {t('home.ejemplosIlustrativosElCoach')}
+          <span className="md:hidden land:hidden"> {t('home.deslizaParaVerEl')}</span>
+        </span>
+      </p>
+    </>
+  );
+}
+
 export default function Home() {
   const t = useT();
   return (
@@ -264,13 +347,13 @@ export default function Home() {
 
           <div className={`${CONTAINER} relative text-center`}>
             <Eyebrow centered>{t('home.juegaConInformacion')}</Eyebrow>
-            <h1 id="home-title" className="mx-auto mt-5 max-w-6xl font-rajdhani text-[clamp(2.25rem,min(10vw,11svh),5.5rem)] font-bold uppercase leading-[0.95] tracking-[-0.06em] text-foreground md:mt-7 land:mt-3">
+            <h1 id="home-title" className="mx-auto max-w-6xl font-rajdhani text-[clamp(2.25rem,min(10.5vw,11svh),5.5rem)] font-bold uppercase leading-[0.95] tracking-[-0.06em] text-foreground mt-[clamp(1rem,3svh,1.75rem)] md:mt-7 land:mt-3">
              {t('home.empiezaAJugarCon')} <span className="text-primary">{t('home.criterio')}</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:mt-7 md:text-xl land:mt-3 land:text-sm">
+            <p className="mx-auto mt-[clamp(1rem,3svh,1.75rem)] max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base md:mt-7 md:text-xl land:mt-3 land:text-sm">
              {t('home.riftDeckConvierteTus')}
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-10 land:mt-5 land:flex-row">
+            <div className="mt-[clamp(1.5rem,5svh,2.75rem)] flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-10 land:mt-5 land:flex-row">
               <Link to="/registro" className={PRIMARY_BUTTON}>
                {t('home.crearMiCuentaGratis')}
                 <ArrowRight size={16} aria-hidden="true" />
@@ -289,7 +372,7 @@ export default function Home() {
             <Eyebrow centered>{t('home.asiSeVeRift')}</Eyebrow>
             <div className="rd-home-hero-shot mt-4 md:mt-6 land:mt-2">
               <div className="rd-home-hero-frame">
-                <ScreenshotFrame src={shotDashboard} alt={t('home.dashboardDeRiftDeck')} eager />
+                <ScreenshotFrame src={shotDashboard} mobileSrc={shotDashboardMobile} alt={t('home.dashboardDeRiftDeck')} eager />
 
                 {/* Tarjetas flotantes: solo en pantallas grandes */}
                 <div className="absolute -left-8 top-[30%] hidden w-56 rounded-2xl border border-green-500/25 bg-card/95 p-4 text-left shadow-2xl backdrop-blur lg:block">
@@ -376,24 +459,7 @@ export default function Home() {
               title={t('home.unCoachPersonalQue')}
               lead={t('home.hipotesisPriorizadasParaTu')}
             />
-            {/* En smartphone vertical las cartas se deslizan de a una; en el resto, dos columnas. */}
-            <div className="-mx-4 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:mt-10 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 md:pb-0 land:mx-0 land:mt-4 land:grid land:grid-cols-2 land:overflow-visible land:px-0 land:pb-0">
-              {COACH_INSIGHTS.map((insight, index) => (
-                <CoachInsightCard
-                  key={insight.title}
-                  index={index + 1}
-                  className="w-[86%] shrink-0 snap-center md:w-auto land:w-auto"
-                  {...insight}
-                />
-              ))}
-            </div>
-            <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground md:mt-4 land:hidden">
-              <BarChart3 size={14} className="shrink-0 text-primary" aria-hidden="true" />
-              <span>
-               {t('home.ejemplosIlustrativosElCoach')}
-                <span className="md:hidden land:hidden"> {t('home.deslizaParaVerEl')}</span>
-              </span>
-            </p>
+            <CoachCarousel />
           </div>
         </section>
 
