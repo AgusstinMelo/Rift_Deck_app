@@ -4,6 +4,7 @@ import { BookOpen, Menu, X } from 'lucide-react';
 import logoHorizontalUrl from '@/assets/riftdeck-logo-horizontal.png';
 import { tr } from '@/i18n/uiI18n';
 import { useT } from '@/lib/LocaleContext';
+import LanguageSelect from '@/components/LanguageSelect';
 
 // En el orden de las secciones de la home.
 export const HOME_ANCHORS = [
@@ -44,31 +45,34 @@ export default function HomeNav() {
           ))}
         </ul>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <Link
-            to="/login"
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-          >
-           {t('home.iniciarSesion')}
-          </Link>
-          <Link
-            to="/registro"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-           {t('home.crearCuenta')}
-          </Link>
-        </div>
+        <div className="flex items-center gap-3">
+          <LanguageSelect flagOnly />
+            <div className="hidden items-center gap-2 lg:flex">
+            <Link
+              to="/login"
+              className="whitespace-nowrap rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            >
+             {t('home.iniciarSesion')}
+            </Link>
+            <Link
+              to="/registro"
+              className="whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+             {t('home.crearCuenta')}
+            </Link>
+            </div>
 
-        <button
-          type="button"
-          onClick={() => setMenuOpen(open => !open)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground lg:hidden"
-          aria-expanded={menuOpen}
-          aria-controls="home-mobile-menu"
-          aria-label={menuOpen ? t('home.cerrarMenu') : t('nav.openMenu')}
-        >
-          {menuOpen ? <X size={18} /> : <Menu size={18} />}
-        </button>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(open => !open)}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground lg:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="home-mobile-menu"
+            aria-label={menuOpen ? t('home.cerrarMenu') : t('nav.openMenu')}
+          >
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
       </nav>
 
       {menuOpen && (

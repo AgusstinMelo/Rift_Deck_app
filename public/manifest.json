@@ -1,6 +1,8 @@
 {
   "name": "Rift Deck",
   "short_name": "Rift Deck",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/riftdeck-icon-192.png?v=3",

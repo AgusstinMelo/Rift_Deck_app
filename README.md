@@ -2,7 +2,7 @@
 
 **Rift Deck** is a web platform for **League of Legends: Wild Rift** designed to help players analyze their performance, track matches, explore game data and make better decisions based on their own gameplay.
 
-🌐 **Live:** [riftdeck.com.ar](https://www.riftdeck.com.ar)
+🌐 **Live:** [riftdeckapp.com](https://www.riftdeckapp.com)
 
 ---
 
@@ -268,4 +268,4 @@ Developed by **Agustín Melo**
 
 GitHub: [@AgusstinMelo](https://github.com/AgusstinMelo)
 
-Project: [riftdeck.com.ar](https://www.riftdeck.com.ar)
+Project: [riftdeckapp.com](https://www.riftdeckapp.com)

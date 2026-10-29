@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getPayPalSubscription, PayPalError, paypalFetch, syncPayPalSubscription } from "../_shared/paypal.ts";
+import { getSiteUrl } from "../_shared/siteUrl.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,7 +53,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = requireEnv("SUPABASE_URL");
     const supabaseAnonKey = requireEnv("SUPABASE_ANON_KEY");
     const serviceRoleKey = requireEnv("SERVICE_ROLE_KEY");
-    const publicAppUrl = requireEnv("PUBLIC_APP_URL").replace(/\/$/, "");
+    const publicAppUrl = getSiteUrl();
 
     const authHeader = req.headers.get("Authorization") || "";
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {

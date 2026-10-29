@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { X } from 'lucide-react';
 import { tr } from '@/i18n/uiI18n';
 import { useT } from '@/lib/LocaleContext';
+import { SITE_URL } from '@/seo/publicSeo';
 
 // Datos del titular (LSSI-CE art. 10). Actualizar acá si cambian.
 // TODO: completar código postal y ciudad del domicilio.
@@ -11,7 +12,7 @@ const OWNER = {
   nie: 'Z5684386X',
   address: 'Av. Dr. Waksman 1, 46006, Valencia, España',
   email: 'riftdeckapp@gmail.com',
-  site: 'https://www.riftdeck.com.ar',
+  site: SITE_URL,
 };
 
 // Edad mínima para registrarse (LOPDGDD art. 7: consentimiento propio desde los 14 años).

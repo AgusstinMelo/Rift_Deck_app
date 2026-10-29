@@ -1,4 +1,7 @@
-export const SITE_URL = 'https://www.riftdeck.com.ar';
+// En el navegador y en el build de Vite llega por import.meta.env; en los scripts de Node (sitemap, prerender), por process.env.
+const envSiteUrl = import.meta.env?.VITE_SITE_URL
+  || (typeof process !== 'undefined' ? process.env.VITE_SITE_URL : undefined);
+export const SITE_URL = (envSiteUrl || 'https://www.riftdeckapp.com').replace(/\/+$/, '');
 export const SOCIAL_IMAGE = `${SITE_URL}/riftdeck-final.png`;
 
 export const LANDING_SEO = {

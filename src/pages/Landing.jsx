@@ -16,6 +16,7 @@ import shotSugeridorBuilds from '@/assets/landing/sugeridor-builds.webp';
 import shotSugeridorCampeones from '@/assets/landing/sugeridor-campeones.webp';
 import shotTierlist from '@/assets/landing/tierlist.webp';
 import { useT } from '@/lib/LocaleContext';
+import LanguageSelect from '@/components/LanguageSelect';
 import { tr } from '@/i18n/uiI18n';
 
 // En el orden del menú lateral.
@@ -206,6 +207,8 @@ export default function Landing({ initialMode = 'login' }) {
         <ArrowLeft size={15} />
        {t('membership.volverAlInicio')}
       </Link>
+
+      <LanguageSelect compact className="!absolute right-4 top-5 z-20" />
 
       {/* Card */}
       <div className="rd-landing-shell relative z-10 w-full max-w-md mx-4 py-10 lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:content-center lg:items-center lg:gap-x-16">

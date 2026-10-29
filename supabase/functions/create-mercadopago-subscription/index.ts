@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSiteUrl } from "../_shared/siteUrl.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
     const supabaseAnonKey = requireEnv("SUPABASE_ANON_KEY");
     const serviceRoleKey = requireEnv("SERVICE_ROLE_KEY");
     const mercadoPagoAccessToken = requireEnv("MERCADOPAGO_ACCESS_TOKEN");
-    const publicAppUrl = requireEnv("PUBLIC_APP_URL");
+    const publicAppUrl = getSiteUrl();
 
     const authHeader = req.headers.get("Authorization") || "";
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -144,7 +145,7 @@ Deno.serve(async (req) => {
     };
 
     const externalReference = `${user.id}:${planCode}`;
-    const backUrl = `${publicAppUrl.replace(/\/$/, "")}/membresia/resultado`;
+    const backUrl = `${publicAppUrl}/membresia/resultado`;
     const mpBody = {
       reason: `Rift Deck Premium ${plan.name}`,
       external_reference: externalReference,

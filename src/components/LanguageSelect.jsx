@@ -11,8 +11,8 @@ const splitLabel = label => {
 };
 
 // Selector de idioma con el estilo de la app (el <select> nativo no se puede estilizar).
-// `compact` muestra solo el código (ES-LA, EN...) para encabezados angostos.
-export default function LanguageSelect({ compact = false, className = '' }) {
+// `compact` muestra solo el código (ES-LA, EN...) para encabezados angostos; `flagOnly`, solo la bandera.
+export default function LanguageSelect({ compact = false, flagOnly = false, className = '' }) {
   const { locale, setLocale } = useLocale();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -20,6 +20,7 @@ export default function LanguageSelect({ compact = false, className = '' }) {
   const triggerRef = useRef(null);
   const optionRefs = useRef([]);
   const listId = useId();
+  const narrow = compact || flagOnly;
   const current = LOCALES.find(option => option.code === locale) || LOCALES[0];
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function LanguageSelect({ compact = false, className = '' }) {
   };
 
   return (
-    <div ref={rootRef} className={`relative ${compact ? '' : 'mb-2'} ${className}`}>
+    <div ref={rootRef} className={`relative ${narrow ? '' : 'mb-2'} ${className}`}>
       <button
         ref={triggerRef}
         type="button"
@@ -69,18 +70,22 @@ export default function LanguageSelect({ compact = false, className = '' }) {
         title={t('common.language')}
         // Solo texto, sin recuadro: ocupa una línea y no compite con el buscador.
         className={`flex max-w-full items-center gap-1.5 text-xs font-medium transition-colors
-          ${compact ? '' : 'px-3 py-1'}
+          ${narrow ? '' : 'px-3 py-1'}
           ${open ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <LocaleFlag locale={current.code} />
-        <span className="truncate">
-          {compact ? current.short : current.label}
-        </span>
-        <ChevronDown
-          size={12}
-          className={`shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          aria-hidden="true"
-        />
+        {!flagOnly && (
+          <>
+            <span className="truncate">
+              {compact ? current.short : current.label}
+            </span>
+            <ChevronDown
+              size={12}
+              className={`shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+          </>
+        )}
       </button>
 
       {open && (
@@ -90,7 +95,7 @@ export default function LanguageSelect({ compact = false, className = '' }) {
           aria-label={t('common.language')}
           onKeyDown={onListKeyDown}
           className={`absolute top-[calc(100%+6px)] z-[370] rounded-xl border border-primary/20 bg-popover/95 p-1.5 shadow-2xl backdrop-blur-md
-            ${compact ? 'right-0 w-56' : 'left-0 right-0'}`}
+            ${narrow ? 'right-0 w-56' : 'left-0 right-0'}`}
         >
           {LOCALES.map((option, index) => {
             const selected = option.code === locale;
