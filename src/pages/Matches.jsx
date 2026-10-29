@@ -438,7 +438,7 @@ export default function Matches() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rd-card p-6">
+          <div className="rd-card rd-matches-empty p-6">
             <EmptyState
               icon={Swords}
               title={t('matches.sinPartidasRegistradas')}

@@ -54,6 +54,9 @@ const DASHBOARD_HEADINGS = {
 };
 
 // Tarjetas de Actividad; en mobile vertical son un carrusel y estos chips saltan entre ellas.
+// Mensaje de tarjeta vacía: centrado en el alto libre, igual en las tres tarjetas de actividad.
+const ACTIVITY_EMPTY = 'rd-dashboard-empty flex flex-1 items-center justify-center text-center text-sm text-muted-foreground';
+
 const ACTIVITY_SLIDES = ['dashboard.slides.matches', 'dashboard.slides.builds', 'dashboard.slides.matchups'];
 
 const LANE_LABELS = {
@@ -508,19 +511,19 @@ export default function Dashboard() {
           <section ref={activityRef} onScroll={handleActivityScroll} className="rd-dashboard-activity" aria-label={t('dashboard.actividad')}>
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.ultimasPartidas')}</h2><Link to="/matches" className="rd-link">{t('dashboard.verTodas')}</Link></div>
-              <div className="rd-dashboard-list rd-dashboard-match-list">
-                {latestMatches.length ? latestMatches.map(match => <div key={match.id} className="font-rajdhani rd-dashboard-row">
+              {latestMatches.length ? <div className="rd-dashboard-list rd-dashboard-match-list">
+                {latestMatches.map(match => <div key={match.id} className="font-rajdhani rd-dashboard-row">
                   {renderChampionAvatar(match.own_champion_name, 'w-9 h-9')}
                   <div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{match.own_champion_name}</p><p className="text-[11px] text-muted-foreground">{match.lane} · {formatKdaLine(match)}</p></div>
                   <div className="text-right"><p className={`text-xs font-bold ${match.result === 'win' ? 'text-green-400' : 'text-red-400'}`}>{match.result === 'win' ? t('matches.victoria') : t('matches.derrota')}</p><p className="text-[10px] text-muted-foreground">{formatDate(match.date)}</p></div>
-                </div>) : <p className="text-sm text-muted-foreground text-center my-auto">{t('dashboard.noHayPartidasRegistradas')}</p>}
-              </div>
+                </div>)}
+              </div> : <p className={ACTIVITY_EMPTY}>{t('dashboard.noHayPartidasRegistradas')}</p>}
             </article>
 
             <article className="rd-card rd-card-watermark p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.ultimasBuilds')}</h2><Link to="/build-calculator" className="rd-link">{t('dashboard.verTodas')}</Link></div>
-              <div className="rd-dashboard-list">
-                {buildsWithStats.length ? buildsWithStats.slice(0, 5).map(build => {
+              {buildsWithStats.length ? <div className="rd-dashboard-list">
+                {buildsWithStats.slice(0, 5).map(build => {
                   const keystone = runes.find(rune => rune.branch === 'Clave' && (build.additional_runes || []).includes(rune.name));
                   const itemSlots = Array.from({ length: 6 }, (_, index) => build.items?.[index] || null);
                   const spellSlots = Array.from({ length: 2 }, (_, index) => build.spells?.[index] || null);
@@ -558,15 +561,15 @@ export default function Dashboard() {
 
                     {build.wr !== null && <span className="rd-build-winrate">{build.wr}%</span>}
                   </div>;
-                }) : <p className="text-sm text-muted-foreground text-center my-auto">{t('dashboard.noHayBuildsCreadas')}</p>}
-              </div>
+                })}
+              </div> : <p className={ACTIVITY_EMPTY}>{t('dashboard.noHayBuildsCreadas')}</p>}
             </article>
 
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.analisisDeMatchups')}</h2><Link to="/stats" className="rd-link">{t('dashboard.ampliar')}</Link></div>
               {matchupStats.length ? <div className="rd-dashboard-matchups grid grid-rows-2 gap-3 min-h-0 flex-1">
                 {[{ title: t('dashboard.favorables'), rows: bestMatchups, positive: true }, { title: t('dashboard.problematicos'), rows: worstMatchups, positive: false }].map(group => <div key={group.title} className={`rd-dashboard-matchup-group rounded-xl border p-2 min-h-0 overflow-hidden ${group.positive ? 'bg-green-500/[0.05] border-green-400/15' : 'bg-red-500/[0.05] border-red-400/15'}`}><p className={`rd-mini-label ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{group.title}</p>{group.rows.map(item => <div key={item.champ} className="rd-dashboard-matchup-row flex items-center gap-2 min-h-0">{renderChampionAvatar(item.champ, 'w-6 h-6')}<span className="text-sm flex-1 truncate">{item.champ}</span><span className="text-[10px] text-muted-foreground">{item.total}p</span><span className={`text-xs font-bold ${group.positive ? 'text-green-400' : 'text-red-400'}`}>{item.wr.toFixed(0)}%</span></div>)}</div>)}
-              </div> : <p className="text-sm text-muted-foreground text-center my-auto">{t('dashboard.necesitasMasPartidasPara')}</p>}
+              </div> : <p className={ACTIVITY_EMPTY}>{t('dashboard.necesitasMasPartidasPara')}</p>}
             </article>
           </section>
           </>

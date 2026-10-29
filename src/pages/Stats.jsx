@@ -829,9 +829,9 @@ export default function Stats() {
 
   if (allMatches.length === 0) {
     return (
-      <div className="rd-page">
+      <div className="rd-page rd-dashboard flex flex-col">
         <PageHeader title={t('stats.estadisticasPersonales')} />
-        <div className="rd-card p-6">
+        <div className="rd-card p-6 flex flex-1 items-center justify-center">
           <EmptyState
             icon={BarChart3}
             title={t('stats.sinPartidas')}

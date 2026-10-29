@@ -649,7 +649,8 @@
     overflow: visible;
   }
 
-  .rd-dashboard-list {
+  .rd-dashboard-list,
+  .rd-dashboard-empty {
     min-height: 22rem;
   }
 
@@ -1171,7 +1172,8 @@
     font-size: 11px;
   }
 
-  .rd-dashboard-activity .rd-dashboard-list {
+  .rd-dashboard-activity .rd-dashboard-list,
+  .rd-dashboard-activity .rd-dashboard-empty {
     min-height: 0;
   }
 
@@ -1969,7 +1971,8 @@
   }
 
   .rd-dashboard-activity .rd-dashboard-list,
-  .rd-dashboard-activity .rd-dashboard-match-list {
+  .rd-dashboard-activity .rd-dashboard-match-list,
+  .rd-dashboard-activity .rd-dashboard-empty {
     min-height: 0;
   }
 
@@ -2405,6 +2408,19 @@
     overscroll-behavior: contain;
     padding-right: 0.35rem;
     scrollbar-gutter: stable;
+  }
+
+  /* Sin partidas: la tarjeta vacía ocupa todo el alto restante. */
+  .rd-matches-scroll:has(> .rd-matches-empty) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-matches-empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -5847,6 +5863,14 @@
 
   .rd-goals-panel > :not(.rd-goals-carousel) {
     flex: none;
+  }
+
+  /* Sin objetivos activos: la tarjeta vacía ocupa el alto restante, como el carril. */
+  .rd-goals-panel > .rd-goals-empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
   }
 
   /* El carril horizontal ocupa el alto restante y cada tarjeta se estira a ese alto. */
@@ -9491,6 +9515,34 @@
 
   .rd-v2-build-header > div > :last-child {
     margin-top: 0.75rem;
+  }
+
+  /* Paso Campeón: márgenes más cortos para que entre sin scroll. */
+  .rd-v2-step-card:has(> .border-t) > div:first-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .rd-v2-step-card > .border-t {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+  }
+
+  .rd-v2-step-card .space-y-2\.5 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .rd-v2-step-card > .border-t textarea {
+    line-height: 1.4;
+  }
+}
+
+/* Columna de 310px: píldora del parche compacta para que el título entre completo. */
+@media (min-width: 1280px) {
+  .rd-v2-step-card .rd-status-pill {
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    font-size: 11px;
   }
 }
 

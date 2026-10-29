@@ -36,6 +36,10 @@ const FALLBACK_PLANS = [
 { code: 'premium_quarterly', name: 'Trimestral', amount_ars: 8500, amount_usd: 5.5, interval_months: 3 },
 { code: 'premium_annual', name: 'Anual', amount_ars: 30000, amount_usd: 20, interval_months: 12 }];
 
+// Cada tarjeta ocupa 4 filas de la grilla padre (subgrid): logo/precio, descripción, acción y pasos
+// quedan alineados entre Mercado Pago y PayPal sin alturas fijas.
+const PAYMENT_CARD = 'rd-card p-5 row-span-4 grid grid-rows-subgrid gap-3 [@media(max-height:700px)]:gap-2 [@media(max-height:700px)]:py-4';
+
 const PERIOD_LABELS = labels({ 1: 'membership.period.1', 3: 'membership.period.3', 12: 'membership.period.12' });
 
 function formatAmount(value) {
@@ -59,58 +63,86 @@ function StepItem({ index, children, variant = 'primary' }) {
   'bg-primary/15 text-primary';
 
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="flex items-start gap-2">
       <span
         className={`shrink-0 w-5 h-5 rounded-full ${bubbleClass} text-[10px] font-bold flex items-center justify-center mt-0.5`}>
 
         {index}
       </span>
 
-      <p className="text-xs text-muted-foreground leading-relaxed">
+      <p className="text-xs text-muted-foreground leading-snug">
         {children}
       </p>
     </div>);
 
 }
 
-function CardHeaderRow({ region, variant = 'primary' }) {
+function RegionBadge({ region, variant = 'primary' }) {
   const regionClass =
   variant === 'accent' ?
   'text-accent/80 border-accent/30' :
   'text-primary/80 border-primary/30';
 
   return (
-    <div className="flex items-center justify-between gap-3 h-7">
-      <span
-        className={`text-[10px] uppercase tracking-[0.2em] font-bold border rounded-full px-2.5 py-0.5 ${regionClass}`}>
+    <span
+      className={`shrink-0 text-[10px] uppercase tracking-[0.2em] font-bold border rounded-full px-2.5 py-0.5 ${regionClass}`}>
 
-        {region}
-      </span>
+      {region}
+    </span>);
+
+}
+
+// Logo y región del medio de pago a la izquierda, precio a la derecha.
+function LogoPriceRow({ logo, region, variant, price, period, monthlyEquivalent, priceClass }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        {logo}
+        <RegionBadge region={region} variant={variant} />
+      </div>
+
+      <div className="text-right">
+        <div className="flex items-baseline justify-end gap-1">
+          <span className={`font-rajdhani font-bold text-2xl ${priceClass}`}>
+            {price}
+          </span>
+          <span className="text-muted-foreground text-sm">/ {period}</span>
+        </div>
+
+        {monthlyEquivalent &&
+        <p className="text-xs text-muted-foreground">{monthlyEquivalent}</p>
+        }
+      </div>
     </div>);
 
 }
 
-function PriceBlock({ title, description, price, period, monthlyEquivalent, priceClass }) {
+// El logo ya dice el medio de pago: el título queda solo para lectores de pantalla.
+function TitleBlock({ title, description }) {
   return (
-    <div className="min-h-[132px] flex flex-col">
-      <h3 className="font-rajdhani font-bold text-xl text-foreground uppercase tracking-tight h-7 flex items-center">
-        {title}
-      </h3>
+    <div>
+      <h3 className="sr-only">{title}</h3>
 
-      <p className="text-muted-foreground text-sm mt-1 leading-relaxed min-h-[44px]">
+      <p className="text-muted-foreground text-sm leading-relaxed">
         {description}
       </p>
+    </div>);
 
-      <div className="flex items-baseline gap-1 mt-4">
-        <span className={`font-rajdhani font-bold text-3xl ${priceClass}`}>
-          {price}
-        </span>
-        <span className="text-muted-foreground text-sm">/ {period}</span>
+}
+
+function StepsBox({ title, note, variant, steps }) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-secondary/30 p-3 space-y-1.5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
+          {title}
+        </p>
+        <p className="text-[11px] text-muted-foreground">{note}</p>
       </div>
 
-      {monthlyEquivalent &&
-      <p className="text-xs text-muted-foreground mt-0.5">{monthlyEquivalent}</p>
-      }
+      {steps.map((step, index) =>
+      <StepItem key={index} index={index + 1} variant={variant}>{step}</StepItem>
+      )}
     </div>);
 
 }
@@ -153,7 +185,7 @@ function PeriodSelector({ plans, selectedCode, onSelect }) {
 
 }
 
-function TrialCard({ onStarted }) {
+function TrialCard({ onStarted, className = '' }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -172,16 +204,16 @@ function TrialCard({ onStarted }) {
   };
 
   return (
-    <div className="rd-card p-5 border-primary/40 bg-primary/5 flex flex-col sm:flex-row sm:items-center gap-4">
-      <div className="w-11 h-11 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-        <Gift size={22} className="text-primary" />
+    <div className={`rd-card px-4 py-3 border-primary/40 bg-primary/5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 ${className}`}>
+      <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+        <Gift size={20} className="text-primary" />
       </div>
 
-      <div className="flex-1 space-y-1">
-        <h3 className="font-rajdhani font-bold text-xl text-foreground uppercase tracking-tight">
+      <div className="flex-1 space-y-0.5">
+        <h3 className="font-rajdhani font-bold text-lg text-foreground uppercase tracking-tight">
          {t('membership.probaPremium')} {TRIAL_DAYS} {t('membership.diasGratis')}
         </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-snug">
          {t('membership.sinTarjetaNiMedio')}
         </p>
         {error && <p className="text-sm text-red-400">{error}</p>}
@@ -226,77 +258,65 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
   };
 
   return (
-    <div className="rd-card h-full p-6 grid auto-rows-max gap-5 relative border-primary/20">
-      <CardHeaderRow region={t('membership.argentina')} />
-
-      <div className="h-12 flex items-center">
-        <div className="bg-[#ffe900] rounded-xl px-4 py-2.5 inline-flex items-center shadow-sm">
-          <img
+    <div className={`${PAYMENT_CARD} border-primary/20`}>
+      <LogoPriceRow
+        logo={
+        <div className="bg-[#ffe900] rounded-xl px-4 py-2 inline-flex items-center shadow-sm">
+            <img
             src={mercadoPagoLogo}
             alt={t('membership.mercadoPago')}
             className="h-7 w-auto object-contain" />
 
-        </div>
-      </div>
-
-      <PriceBlock
-        title={t('membership.pagarConMercadoPago')}
-        description={t('membership.recomendadoParaUsuariosDe')}
+          </div>
+        }
         price={t('membership.ar', { formatAmount: formatAmount(plan.amount_ars) })}
         period={period}
         monthlyEquivalent={monthlyEquivalent && t('membership.arPorMes', { formatAmount: formatAmount(monthlyEquivalent) })}
-        priceClass="text-primary" />
+        priceClass="text-primary"
+        region={t('membership.argentina')} />
 
+      <TitleBlock
+        title={t('membership.pagarConMercadoPago')}
+        description={t('membership.recomendadoParaUsuariosDe')}
+ />
 
-      <div className="min-h-[158px] flex flex-col">
-        <div className="min-h-[102px] space-y-2">
-          <label className="rd-label">{t('membership.tuEmailDeMercado')}</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="rd-label">{t('membership.tuEmailDeMercado')}</label>
 
+        <p className="text-xs text-muted-foreground leading-snug">
+         {t('membership.puedeSerDistintoAl')}
+        </p>
+
+        <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
           <Input
             type="email"
             placeholder={t('membership.ejemploGmailCom')}
             value={mpEmail}
             onChange={(e) => setMpEmail(e.target.value)}
-            disabled={loading} />
+            disabled={loading}
+            className="h-10 flex-1" />
 
+          <Button
+            className="h-10 shrink-0"
+            onClick={handleActivate}
+            disabled={loading || !mpEmail}>
 
-          <p className="text-xs text-muted-foreground leading-relaxed">
-           {t('membership.puedeSerDistintoAl')}
-          </p>
+            {loading ? t('membership.redirigiendo') : t('membership.activarMembresia')}
+          </Button>
         </div>
 
-        <Button
-          className="w-full h-10 mt-auto"
-          onClick={handleActivate}
-          disabled={loading || !mpEmail}>
-
-          {loading ? t('membership.redirigiendo') : t('membership.activarMembresia')}
-        </Button>
-
-        {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+        {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 min-h-[172px]">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-         {t('membership.comoFunciona')}
-        </p>
+      <StepsBox
+        title={t('membership.comoFunciona')}
+        note={t('membership.pagoSeguroConMercado')}
+        steps={[
+        t('membership.ingresaTuEmailDe'),
+        t('membership.tocaActivarMembresiaPara'),
+        `${t('membership.laMembresiaSeActiva')} ${period}.`]
+        } />
 
-        <StepItem index={1}>{t('membership.ingresaTuEmailDe')}</StepItem>
-
-        <StepItem index={2}>
-         {t('membership.tocaActivarMembresiaPara')}
-        </StepItem>
-
-        <StepItem index={3}>
-         {t('membership.laMembresiaSeActiva')} {period}.
-        </StepItem>
-      </div>
-
-      <div className="h-11 flex items-end justify-center text-center">
-        <p className="text-xs text-muted-foreground leading-relaxed">
-         {t('membership.pagoSeguroConMercado')}
-        </p>
-      </div>
     </div>);
 
 }
@@ -326,71 +346,59 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
   };
 
   return (
-    <div className="rd-card h-full p-6 grid auto-rows-max gap-5 relative border-border">
-      <CardHeaderRow region={t('membership.internacional')} variant="accent" />
-
-      <div className="h-12 flex items-center">
-        <div className="bg-white rounded-xl px-4 py-2.5 inline-flex items-center gap-1.5 shadow-sm">
-          <img
+    <div className={`${PAYMENT_CARD} border-border`}>
+      <LogoPriceRow
+        logo={
+        <div className="bg-white rounded-xl px-4 py-2 inline-flex items-center shadow-sm">
+            <img
             src={paypalLogo}
             alt={t('membership.paypal')}
-            className="h-7 w-auto object-contain"
-          />
-        </div>
-      </div>
+            className="h-7 w-auto object-contain" />
 
-      <PriceBlock
-        title={t('membership.pagarConPaypal')}
-        description={t('membership.opcionParaUsuariosInternacionales')}
+          </div>
+        }
         price={`U$D ${formatAmount(plan.amount_usd)}`}
         period={period}
         monthlyEquivalent={monthlyEquivalent && t('membership.uDPorMes', { formatAmount: formatAmount(monthlyEquivalent) })}
-        priceClass="text-accent" />
-      
+        priceClass="text-accent"
+        region={t('membership.internacional')}
+        variant="accent" />
 
-      <div className="min-h-[158px] flex flex-col">
-        <div className="min-h-[102px] space-y-2">
-          <label className="rd-label">{t('membership.suscripcionConPaypal')}</label>
+      <TitleBlock
+        title={t('membership.pagarConPaypal')}
+        description={t('membership.opcionParaUsuariosInternacionales')}
+ />
 
-          <p className="text-xs text-muted-foreground leading-relaxed">
-           {t('membership.noNecesitasCompletarDatos')}
-          </p>
+      <div className="flex flex-col gap-1.5">
+        <label className="rd-label">{t('membership.suscripcionConPaypal')}</label>
+
+        <p className="text-xs text-muted-foreground leading-snug">
+         {t('membership.noNecesitasCompletarDatos')}
+        </p>
+
+        <div className="mt-auto pt-1">
+          <Button
+            className="w-full h-10 bg-[#003087] hover:bg-[#002070] text-white border-0"
+            onClick={handleSubscribe}
+            disabled={loading}>
+
+            {loading ? t('membership.redirigiendo') : t('membership.suscribirmeConPaypal')}
+          </Button>
         </div>
 
-        <Button
-          className="w-full h-10 mt-auto bg-[#003087] hover:bg-[#002070] text-white border-0"
-          onClick={handleSubscribe}
-          disabled={loading}>
-          
-          {loading ? t('membership.redirigiendo') : t('membership.suscribirmeConPaypal')}
-        </Button>
-
-        {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+        {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-secondary/30 p-4 space-y-2 min-h-[172px]">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-         {t('membership.comoFunciona')}
-        </p>
+      <StepsBox
+        title={t('membership.comoFunciona')}
+        note={t('membership.pagoSeguroConPaypal')}
+        variant="accent"
+        steps={[
+        t('membership.tocaSuscribirmeConPaypal'),
+        t('membership.iniciaSesionEnPaypal'),
+        `${t('membership.laMembresiaSeActiva')} ${period}.`]
+        } />
 
-        <StepItem index={1} variant="accent">
-         {t('membership.tocaSuscribirmeConPaypal')}
-        </StepItem>
-
-        <StepItem index={2} variant="accent">
-         {t('membership.iniciaSesionEnPaypal')}
-        </StepItem>
-
-        <StepItem index={3} variant="accent">
-         {t('membership.laMembresiaSeActiva')} {period}.
-        </StepItem>
-      </div>
-
-      <div className="h-11 flex items-end justify-center text-center">
-        <p className="text-xs text-muted-foreground leading-relaxed">
-         {t('membership.pagoSeguroConPaypal')}
-        </p>
-      </div>
     </div>);
 
 }
@@ -422,18 +430,18 @@ export function MembershipOffer({ membership, onAccessGranted }) {
   };
 
   return (
-    <div className="space-y-6">
-      {membership?.trialAvailable && <TrialCard onStarted={handleTrialStarted} />}
-
+    <div className="space-y-4 [@media(max-height:700px)]:space-y-2.5">
       {trialExpired &&
-      <div className="rd-card p-4 text-center text-sm text-muted-foreground">
+      <div className="rd-card p-3 text-center text-sm text-muted-foreground">
          {t('membership.tuPruebaGratisTermino')}
         </div>
       }
 
+      {membership?.trialAvailable && <TrialCard onStarted={handleTrialStarted} />}
+
       <PeriodSelector plans={plans} selectedCode={plan.code} onSelect={setSelectedCode} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <MercadoPagoCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} />
         <PayPalCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalentUsd} />
       </div>
@@ -458,26 +466,28 @@ export default function MembershipGate({ onAccessGranted }) {
   if (hasAccess) return null;
 
   return (
-    <div className="min-h-[60vh] flex items-start justify-center pt-10 pb-16 px-4">
-      <div className="w-full max-w-4xl space-y-8">
-        <div className="text-center space-y-3">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-            <Lock size={26} className="text-primary" />
+    <div className="min-h-full flex items-center justify-center py-4 px-4 [@media(max-height:700px)]:py-3">
+      <div className="w-full max-w-6xl space-y-3">
+        <div className="text-center space-y-2 [@media(max-height:700px)]:space-y-1.5">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Lock size={22} className="text-primary" />
+            </div>
+
+            <div className="text-left">
+              <p className="rd-section-kicker">{t('membership.premium')}</p>
+
+              <h2 className="font-rajdhani font-bold text-2xl md:text-3xl text-foreground tracking-tight uppercase leading-tight">
+               {t('membership.accesoPremiumAStats')}
+              </h2>
+            </div>
           </div>
 
-          <div>
-            <p className="rd-section-kicker mb-1">{t('membership.premium')}</p>
-
-            <h2 className="font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-tight uppercase">
-             {t('membership.accesoPremiumAStats')}
-            </h2>
-          </div>
-
-          <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+          <p className="text-muted-foreground text-sm max-w-2xl mx-auto leading-relaxed [@media(max-height:680px)]:hidden">
            {t('membership.paraAccederALas')}
           </p>
 
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-1.5 pt-2">
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
             {FEATURES.map((feature) =>
             <span
               key={feature}

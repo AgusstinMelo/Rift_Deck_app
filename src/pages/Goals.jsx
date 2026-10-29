@@ -138,7 +138,7 @@ function ActiveGoalsPanel({ current, all }) {
     <section className="rd-goals-panel" aria-label={t('goals.page.activeTab')}>
       <GoalsSummary current={current} all={all} />
       {current.length === 0 ? (
-        <div className="rd-card p-6">
+        <div className="rd-card rd-goals-empty p-6">
           <EmptyState
             icon={Target}
             title={t('goals.page.noActive')}
