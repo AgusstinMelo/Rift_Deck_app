@@ -3,10 +3,11 @@ import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { updateMatch } from '@/api/matchesSupabase';
-import { ArrowLeft, Save, Search } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import ItemPool from '@/components/builds/ItemPool';
 import ItemBrowser from '@/components/builds/ItemBrowser';
 import SavedBuildPicker from '@/components/matches/SavedBuildPicker';
+import ChampionGrid from '@/components/matches/ChampionGrid';
 import { PRESET_MATCH_TAGS, matchTagLabel } from '@/components/matches/matchTags';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
@@ -74,13 +75,11 @@ function buildTeamSlots({ champions, names = [], ownName, ownLane, directEnemyNa
 }
 
 function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole, mirrored = false }) {
-  const t = useT();
-  const [search, setSearch] = useState('');
-  const filteredChampions = champions.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()));
   const selectedByRole = {};
   LANES.forEach(role => {
     selectedByRole[role] = selected.find(s => s.role === role);
   });
+  const selectedRoleOf = (champ) => LANES.find(role => selectedByRole[role]?.name === champ.name);
 
   return (
     <div className="rd-card rd-team-pool p-4">
@@ -129,41 +128,20 @@ function ChampionPoolByRole({ champions, title, selected, onSelect, lockedRole, 
         </div>
 
         <div className="rd-team-pool-champions min-w-0">
-          <div className="relative mb-2">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder={t('common.searchChampionPlaceholder')}
-              className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all"
-            />
-          </div>
-          <div className="rd-team-pool-grid grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))] overflow-y-auto pr-1">
-            {filteredChampions.map(champ => {
-              const selectedRole = Object.keys(selectedByRole).find(role => selectedByRole[role]?.name === champ.name);
-              const isSelected = Boolean(selectedRole);
-              return (
-                <button
-                  key={champ.id || champ.name}
-                  type="button"
-                  onClick={() => {
-                    if (isSelected) {
-                      if (selectedRole !== lockedRole) onSelect(selectedByRole[selectedRole], selectedRole);
-                      return;
-                    }
-                    const firstEmptyRole = LANES.find(role => role !== lockedRole && !selectedByRole[role]);
-                    if (firstEmptyRole) onSelect(champ, firstEmptyRole);
-                  }}
-                  className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center transition-all overflow-hidden
-                    ${isSelected ? 'border-primary ring-2 ring-primary/50' : 'border-border/40 hover:border-primary/50'}`}
-                >
-                  {champ.image_url
-                    ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                    : <span className="text-xs font-bold text-primary">{champ.name?.[0]}</span>}
-                </button>
-              );
-            })}
-          </div>
+          <ChampionGrid
+            champions={champions}
+            isSelected={champ => Boolean(selectedRoleOf(champ))}
+            onPick={champ => {
+              const selectedRole = selectedRoleOf(champ);
+              if (selectedRole) {
+                if (selectedRole !== lockedRole) onSelect(selectedByRole[selectedRole], selectedRole);
+                return;
+              }
+              const firstEmptyRole = LANES.find(role => role !== lockedRole && !selectedByRole[role]);
+              if (firstEmptyRole) onSelect(champ, firstEmptyRole);
+            }}
+            gridClassName="rd-team-pool-grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 max-h-60 md:max-h-[max(15rem,calc(100dvh-26rem))]"
+          />
         </div>
       </div>
     </div>
@@ -183,7 +161,6 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
   // Champion & composition
   const [lane, setLane] = useState(match?.lane || '');
   const [ownChampion, setOwnChampion] = useState(null); // will init after data loads
-  const [champSearch, setChampSearch] = useState('');
   const [allyChampions, setAllyChampions] = useState([]);
   const [enemyChampions, setEnemyChampions] = useState([]);
   const [alliesChanged, setAlliesChanged] = useState(false);
@@ -294,7 +271,6 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
       ...prev.filter(ally => ally.role !== lane && ally.name !== champ.name),
       { ...champ, role: lane || 'adc' },
     ]);
-    setChampSearch('');
   };
 
   const handleLaneSelect = (nextLane) => {
@@ -514,7 +490,6 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
     setSelectedRunes(prev => [...prev, rune]);
   };
 
-  const filteredChamps = champions.filter(c => !champSearch || c.name?.toLowerCase().includes(champSearch.toLowerCase()));
 
   const stepIndex = STEPS.indexOf(step);
   const kdaPreview = kills !== '' && deaths !== '' && assists !== ''
@@ -628,19 +603,14 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
             </div>
           )}
 
-          <div className="relative">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input value={champSearch} onChange={e => setChampSearch(e.target.value)} placeholder={t('common.searchChampionPlaceholder')}
-              className="w-full bg-secondary/70 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40 transition-all" />
-          </div>
-          <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-2 max-h-[max(15rem,calc(100dvh-30rem))] overflow-y-auto pr-1">
-            {filteredChamps.map(champ => (
-              <button key={champ.id} type="button" onClick={() => handleOwnChampionSelect(champ)}
-                className={`w-16 h-16 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all
-                  ${ownChampion?.id === champ.id ? 'border-primary ring-2 ring-primary/50' : 'border-border/40 hover:border-primary/50'}`}>
-                {champ.image_url ? <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" /> : <span className="text-sm font-bold text-primary text-center px-1">{champ.name}</span>}
-              </button>
-            ))}
+          <div>
+            <ChampionGrid
+              champions={champions}
+              size="lg"
+              isSelected={champ => ownChampion?.id === champ.id}
+              onPick={handleOwnChampionSelect}
+              gridClassName="grid-cols-5 sm:grid-cols-7 md:grid-cols-9 max-h-[max(15rem,calc(100dvh-32rem))]"
+            />
           </div>
 
           <div className="flex gap-3">

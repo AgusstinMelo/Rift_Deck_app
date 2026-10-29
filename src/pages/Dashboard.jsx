@@ -18,6 +18,7 @@ import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistEntries, getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
+import { getActivePatchVersion } from '@/api/patchesSupabase';
 import { useAuth } from '@/lib/AuthContext';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import TierBadge from '@/components/ui/TierBadge';
@@ -110,6 +111,10 @@ export default function Dashboard() {
   const { data: executions = [] } = useQuery({
     queryKey: ['executions', 'patch-filters'],
     queryFn: () => getTierlistExecutions(100),
+  });
+  const { data: activePatchVersion } = useQuery({
+    queryKey: ['active-patch-version'],
+    queryFn: getActivePatchVersion,
   });
 
   const successfulExecutions = executions
@@ -375,7 +380,7 @@ export default function Dashboard() {
             <span className={`w-2 h-2 rounded-full shrink-0 ${latestSuccessExec ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,.65)]' : 'bg-red-400'}`} />
             <span>{t('dashboard.datosActualizados')}</span>
             <span className="text-border">|</span>
-            <span>{latestSuccessExec?.patch ? t('dashboard.parche', { patch: latestSuccessExec.patch }) : t('dashboard.sinParche')}</span>
+            <span>{activePatchVersion ? t('dashboard.parche', { patch: activePatchVersion }) : t('dashboard.sinParche')}</span>
             {latestSuccessExec?.snapshot_date && <>
               <span className="text-border">|</span>
               <span>{t('nav.tierlist')} {formatDate(latestSuccessExec.snapshot_date)}</span>
