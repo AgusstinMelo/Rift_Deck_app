@@ -3584,13 +3584,37 @@
     font-size: 13px;
   }
 
-  /* Campeón (registro y edición): la grilla llena el alto con scroll propio. */
-  .rd-match-flow > .space-y-4 > .relative:has(> input) input {
-    padding-block: 0.35rem;
+  /* Campeón (registro y edición): buscador, barra A–Z y grilla viven en un div propio
+     que llena el alto; la grilla scrollea adentro y los botones quedan al pie. */
+  .rd-match-flow > .space-y-4 > div:has(> .grid.overflow-y-auto) {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-match-flow > .space-y-4 > div > .relative:has(> input) {
+    flex: none;
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-match-flow > .space-y-4 > div > .relative:has(> input) input {
+    padding-block: 0.3rem;
     font-size: 13px;
   }
 
-  .rd-match-flow > .space-y-4 > .grid.overflow-y-auto {
+  .rd-match-flow > .space-y-4 > div > .relative:has(> input) + .flex {
+    flex: none;
+    margin-bottom: 0.3rem;
+  }
+
+  .rd-match-flow > .space-y-4 > div > .relative:has(> input) + .flex > button {
+    padding-block: 0;
+    font-size: 11px;
+    line-height: 1.1rem;
+  }
+
+  .rd-match-flow > .space-y-4 > div > .grid.overflow-y-auto {
     min-height: 0;
     max-height: none;
     flex: 1 1 auto;
@@ -3600,7 +3624,7 @@
     overscroll-behavior: contain;
   }
 
-  .rd-match-flow > .space-y-4 > .grid.overflow-y-auto > button {
+  .rd-match-flow > .space-y-4 > div > .grid.overflow-y-auto > button {
     width: 3rem;
     height: 3rem;
   }
@@ -3677,6 +3701,17 @@
   .rd-match-flow .rd-team-pool-champions input {
     padding-block: 0.3rem;
     font-size: 12px;
+  }
+
+  .rd-match-flow .rd-team-pool-champions > .relative + .flex {
+    flex: none;
+    margin-bottom: 0.3rem;
+  }
+
+  .rd-match-flow .rd-team-pool-champions > .relative + .flex > button {
+    padding-block: 0;
+    font-size: 10px;
+    line-height: 1rem;
   }
 
   .rd-match-flow .rd-team-pool-champions > .rd-team-pool-grid {
