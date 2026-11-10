@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import { X } from 'lucide-react';
 import { tr } from '@/i18n/uiI18n';
@@ -262,7 +263,9 @@ export default function LegalInfoModal({ type, onClose }) {
 
   if (!content) return null;
 
-  return (
+  // Portal a <body>: si un ancestro tiene backdrop-filter/transform (p. ej. el header público),
+  // el `fixed` quedaría atrapado en ese contenedor y detrás del resto de la página.
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}
@@ -342,6 +345,7 @@ export default function LegalInfoModal({ type, onClose }) {
           </nav>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
