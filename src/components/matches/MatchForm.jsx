@@ -609,7 +609,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
               size="lg"
               isSelected={champ => ownChampion?.id === champ.id}
               onPick={handleOwnChampionSelect}
-              gridClassName="grid-cols-5 sm:grid-cols-7 md:grid-cols-9 max-h-[max(15rem,calc(100dvh-32rem))]"
+              gridClassName="grid-cols-5 sm:grid-cols-7 md:grid-cols-9 max-h-[max(10rem,calc(100dvh-32rem))]"
             />
           </div>
 

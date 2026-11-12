@@ -577,7 +577,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               size="lg"
               isSelected={champ => myChampion?.id === champ.id}
               onPick={selectMyChampion}
-              gridClassName="grid-cols-5 sm:grid-cols-7 md:grid-cols-9 max-h-[max(15rem,calc(100dvh-22rem))]"
+              gridClassName="grid-cols-5 sm:grid-cols-7 md:grid-cols-9 max-h-[max(10rem,calc(100dvh-22rem))]"
             />
           </div>
           <div className="flex gap-3">

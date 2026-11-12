@@ -5,7 +5,7 @@ export const PHONE_LANDSCAPE_QUERY = '(orientation: landscape) and (max-height: 
 // Mismo corte que el CSS de smartphone vertical (index.css).
 export const PHONE_PORTRAIT_QUERY = '(orientation: portrait) and (max-width: 639px)';
 // Mismo corte que el CSS de escritorio ajustado al viewport (index.css).
-export const DESKTOP_FIT_QUERY = '(min-width: 1024px) and (min-height: 700px)';
+export const DESKTOP_FIT_QUERY = '(min-width: 1024px) and (min-height: 501px)';
 
 // ssrSafe: en páginas prerenderizadas (biblioteca pública) el primer render tiene que
 // coincidir con el HTML del servidor, así que arranca en false y se actualiza al montar.
