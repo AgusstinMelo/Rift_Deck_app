@@ -11703,18 +11703,46 @@
   }
 }
 
-@media (max-height: 760px) and (min-width: 1024px) {
-  .rd-sidebar-brand {
-    padding-block: 10px;
+/* Sidebar en escritorio: logo, márgenes e ítems escalan con el alto de la ventana
+   (topes en el tamaño original) para que todo entre sin scroll. */
+@media (min-width: 1024px) {
+  .rd-sidebar > .rd-sidebar-brand {
+    padding-block: clamp(8px, 2dvh, 18px) clamp(8px, 1.8dvh, 16px);
   }
 
-  .rd-sidebar-footer {
-    padding-block: 10px;
+  .rd-sidebar .rd-sidebar-brand img.h-20 {
+    height: clamp(3rem, 9dvh, 5rem);
   }
 
-  .rd-nav-item {
-    min-height: 38px;
-    padding-block: 8px;
+  .rd-sidebar .rd-sidebar-tools {
+    margin-top: clamp(0.25rem, 1.2dvh, 0.75rem);
+  }
+
+  /* Los ítems se reparten el alto libre de la navegación: crecen hasta 3.25rem y
+     se achican hasta 32px; si ni así entran, queda el scroll de respaldo. */
+  .rd-sidebar > .rd-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding-block: clamp(0.5rem, 1.8dvh, 1.25rem);
+  }
+
+  .rd-sidebar > .rd-sidebar-nav > * {
+    flex: none;
+  }
+
+  .rd-sidebar > .rd-sidebar-nav > .rd-nav-item {
+    flex: 1 1 0;
+    max-height: 3.25rem;
+  }
+
+  .rd-sidebar > .rd-sidebar-footer {
+    padding-block: clamp(8px, 1.8dvh, 16px);
+  }
+
+  .rd-sidebar .rd-nav-item {
+    min-height: 32px;
+    padding-block: 0;
+    margin-bottom: clamp(1px, 0.4dvh, 4px);
   }
 }
 
