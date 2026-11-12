@@ -21,7 +21,11 @@ import {
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024; // por captura, ya decodificada (el cliente manda ~300 KB)
 const MAX_BODY_BYTES = 12 * 1024 * 1024; // 2 capturas + láminas en base64 + margen
-const MODEL_TIMEOUT_MS = 45_000;
+const MODEL_TIMEOUT_MS = 25_000;      // por intento
+const MODEL_TOTAL_BUDGET_MS = 100_000; // tope de todos los intentos (la función corta a los 150 s)
+const MAX_MODEL_ATTEMPTS = 4;
+const DEFAULT_FALLBACK_MODELS = ['gemini-3.5-flash'];
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 
 const corsHeaders = {
@@ -149,8 +153,10 @@ type ModelCallResult =
   | { ok: true; text: string; model: string }
   | { ok: false; code: string; status: number };
 
-// Llama a Gemini con la primera key y, si responde 429/5xx o tarda demasiado, reintenta
-// una vez con la siguiente (mismo criterio que suggest-with-ai).
+// Llama a Gemini con reintentos: el plan gratuito responde "saturado" (429/503) con
+// frecuencia y suele resolverse en segundos. Hasta MAX_MODEL_ATTEMPTS intentos, rotando
+// las keys disponibles, con espera creciente, y pasando al modelo alternativo si el
+// principal sigue saturado o no existe (MATCH_CAPTURE_FALLBACK_MODELS, separados por coma).
 async function callGemini(images: ImageInput[], references: ImageInput[]): Promise<ModelCallResult> {
   const apiKeys = [...new Set([
     Deno.env.get('GEMINI_API_KEY'),
@@ -161,7 +167,11 @@ async function callGemini(images: ImageInput[], references: ImageInput[]): Promi
   ].filter((value): value is string => Boolean(value)))];
   if (!apiKeys.length) return { ok: false, code: 'not_configured', status: 500 };
 
-  const model = Deno.env.get('MATCH_CAPTURE_MODEL') || Deno.env.get('GEMINI_MODEL') || DEFAULT_MODEL;
+  const primaryModel = Deno.env.get('MATCH_CAPTURE_MODEL') || Deno.env.get('GEMINI_MODEL') || DEFAULT_MODEL;
+  const fallbackModels = (Deno.env.get('MATCH_CAPTURE_FALLBACK_MODELS') || DEFAULT_FALLBACK_MODELS.join(','))
+    .split(',').map(name => name.trim()).filter(name => name && name !== primaryModel);
+  // Plan de intentos: dos con el modelo principal y después los alternativos.
+  const plan = [primaryModel, primaryModel, ...fallbackModels, ...fallbackModels].slice(0, MAX_MODEL_ATTEMPTS);
   const body = JSON.stringify({
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{
@@ -186,21 +196,32 @@ async function callGemini(images: ImageInput[], references: ImageInput[]): Promi
   });
 
   let last: ModelCallResult = { ok: false, code: 'model_unavailable', status: 502 };
-  const attempts = Math.min(2, apiKeys.length);
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
+  const skippedModels = new Set<string>();
+  const startedAt = Date.now();
+  for (let attempt = 0; attempt < plan.length; attempt += 1) {
+    const model = plan[attempt];
+    if (skippedModels.has(model)) continue;
+    if (Date.now() - startedAt > MODEL_TOTAL_BUDGET_MS - MODEL_TIMEOUT_MS) break;
+    if (attempt > 0) await sleep(600 * 2 ** Math.min(attempt - 1, 2));
+    const apiKey = apiKeys[attempt % apiKeys.length];
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
-        headers: { 'x-goog-api-key': apiKeys[attempt], 'Content-Type': 'application/json' },
+        headers: { 'x-goog-api-key': apiKey, 'Content-Type': 'application/json' },
         body,
         signal: controller.signal,
       });
       if (!response.ok) {
         const detail = await response.text();
-        console.error('extract-match-capture Gemini error', response.status, `attempt=${attempt + 1}`, detail.slice(0, 500));
+        console.error('extract-match-capture Gemini error', response.status, `model=${model}`, `attempt=${attempt + 1}`, detail.slice(0, 500));
         last = { ok: false, code: errorCodeForStatus(response.status), status: 502 };
+        // Modelo inexistente o no disponible para esta key: se pasa al siguiente.
+        if (response.status === 404) {
+          skippedModels.add(model);
+          continue;
+        }
         if (isRetryableStatus(response.status)) continue;
         return last;
       }
@@ -217,7 +238,7 @@ async function callGemini(images: ImageInput[], references: ImageInput[]): Promi
       return { ok: true, text, model: completion?.modelVersion || model };
     } catch (error) {
       const timedOut = error instanceof DOMException && error.name === 'AbortError';
-      console.error('extract-match-capture Gemini call failed', timedOut ? 'timeout' : error);
+      console.error('extract-match-capture Gemini call failed', `model=${model}`, timedOut ? 'timeout' : error);
       last = { ok: false, code: timedOut ? 'model_timeout' : 'model_unavailable', status: timedOut ? 504 : 502 };
     } finally {
       clearTimeout(timer);

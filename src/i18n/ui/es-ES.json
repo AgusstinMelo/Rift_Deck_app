@@ -2200,7 +2200,7 @@
     "prefill": {
       "notice": "Hemos completado la partida con tus capturas. Revisa cada paso y guarda; solo falta el lado.",
       "review": "Revisa especialmente: {fields}.",
-      "textFailed": "No hemos podido leer el texto de las capturas ({reason}): completa K/D/A, oro, duración y resultado a mano."
+      "textFailed": "La lectura con IA no ha respondido ({reason}). Lo que falta lo completas en el formulario."
     },
     "review": {
       "title": "Revisa las capturas",

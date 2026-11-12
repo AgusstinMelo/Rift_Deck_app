@@ -44,7 +44,8 @@ Por eso casi todo se resuelve **en el celular, sin IA** (`scoreboardLayout.js`):
 | Los 10 campeones con su línea | Se recorta cada retrato en su posición fija y se compara por píxeles con el catálogo, sin repetir campeones. | Lámina de referencia de campeones (Gemini). |
 | Tus hechizos y objetos | Posiciones fijas en tu fila y comparación por píxeles. | Cajas `box_2d` de Gemini. |
 | Runas | Nombre escrito al lado de cada runa, leído por Gemini. | Columna central de la pestaña de runas comparada por píxeles en el celular, y por último las cajas de Gemini. |
-| K/D/A, oro, duración, resultado, modo | Gemini, que lee el texto. | — |
+| K/D/A, oro y resultado | **En el celular, sin IA** (`scoreboardText.js`): los dígitos de tu fila se recortan en su posición fija, se separan del fondo (umbral de Otsu) y se comparan con plantillas de la tipografía del juego (`scoreboardGlyphs.js`); el resultado sale del color del título (VICTORIA azul / DERROTA roja). | Gemini. |
+| Duración y modo | Gemini, que lee el texto. | — |
 
 El celular detecta solo qué captura es el marcador (por la barra dorada) y cuál es la pestaña de runas (porque las 5 posiciones de la columna se parecen mucho a runas reales). Si Gemini falla o no hay cupo, igual se abre el formulario con lo que se reconoció en el celular, y el texto queda para completar.
 
@@ -187,3 +188,12 @@ Hoy la app no tiene service worker, así que sumarlo implica agregar uno y proba
 - La precisión del modelo con distintos idiomas y layouts de la pantalla de resultados de Wild Rift hay que medirla con capturas reales. El prompt está en `SYSTEM_PROMPT` dentro de la función.
 - Objetos, runas y hechizos se reconocen por el ícono: es lo que más puede fallar. En la confirmación se pueden quitar los que estén mal; para sumar los que falten hay que editar la partida después de guardarla.
 - Las líneas de aliados y enemigos se deducen de la captura cuando se puede. Si no, se reparten en las líneas libres, y conviene revisarlas al editar la partida.
+
+## Lectura de texto y fallas de Gemini
+
+El plan gratuito de Gemini responde "saturado" (429/503) con frecuencia. Por eso:
+- **Sin IA en el celular:** K/D/A, oro y resultado se leen localmente. Calibración con las 3 partidas locales: 58/60 textos bien validando con una partida que no se usó para armar las plantillas, y 3/3 filas propias exactas. Si una lectura local es dudosa, el campo queda marcado para revisar.
+- **Gemini solo para lo que falta** (duración, modo y nombres de runas):
+  - recibe las capturas reducidas a 1280 px;
+  - recibe la lámina de campeones solo si no se reconoció el marcador.
+- **Reintentos:** la función hace hasta 4 intentos, rotando las keys, con espera creciente (0,6 s, 1,2 s, 2,4 s). Pasa al modelo alternativo si el principal sigue saturado o no existe (`MATCH_CAPTURE_FALLBACK_MODELS`, por defecto `gemini-3.5-flash`). Antes, con una sola key cargada no había ningún reintento.

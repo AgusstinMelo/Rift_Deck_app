@@ -2200,7 +2200,7 @@
     "prefill": {
       "notice": "We filled in the match from your screenshots. Check each step and save; only the side is left.",
       "review": "Double-check: {fields}.",
-      "textFailed": "We couldn't read the text in your screenshots ({reason}): fill in K/D/A, gold, duration and result manually."
+      "textFailed": "The AI reading didn't respond ({reason}). Fill in anything missing in the form."
     },
     "review": {
       "title": "Check your screenshots",

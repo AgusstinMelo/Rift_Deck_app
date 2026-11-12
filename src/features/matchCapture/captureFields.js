@@ -67,6 +67,28 @@ export const secondsToMinutes = seconds =>
 const pad = number => String(number).padStart(2, '0');
 
 const ICON_KINDS = ['items', 'runes', 'spells'];
+const LOCAL_TEXT_KEYS = ['kills', 'deaths', 'assists', 'gold', 'result'];
+
+/**
+ * Suma la lectura local del texto del marcador (K/D/A, oro, resultado: ver
+ * scoreboardText.js) a lo que leyó el modelo. Si la lectura local es segura, manda;
+ * si es dudosa, solo completa lo que el modelo no leyó y queda para revisar.
+ */
+export function mergeLocalText(modelFields, localText) {
+  const fields = { ...(modelFields || {}) };
+  if (!localText) return fields;
+  for (const key of LOCAL_TEXT_KEYS) {
+    const local = localText[key];
+    if (!local || local.value === null || local.value === undefined) continue;
+    const model = fields[key];
+    if (local.confidence === 'high') {
+      fields[key] = { value: local.value, confidence: 'high', needsReview: false, conflict: false };
+    } else if (!model || model.value === null) {
+      fields[key] = { value: local.value, confidence: local.confidence, needsReview: true, conflict: false };
+    }
+  }
+  return fields;
+}
 
 /**
  * Precarga del formulario manual a partir de los campos unificados y los íconos.
@@ -81,7 +103,8 @@ const ICON_KINDS = ['items', 'runes', 'spells'];
  *   scoreboard: lectura local del marcador (identifyScoreboard). Si está, manda sobre lo
  *   que leyó el modelo para campeones, líneas, objetos y hechizos (es más precisa).
  */
-export function fieldsToPrefill(fields, codeMaps, { defaultPatch = '', now = new Date(), icons: modelIcons = {}, scoreboard = null } = {}) {
+export function fieldsToPrefill(modelFields, codeMaps, { defaultPatch = '', now = new Date(), icons: modelIcons = {}, scoreboard = null } = {}) {
+  const fields = mergeLocalText(modelFields, scoreboard?.text);
   const value = key => fields?.[key]?.value ?? null;
   const known = list => (list || []).filter(entry => entry && !entry.empty && entry.name);
   const allHigh = list => list.length > 0 && list.every(entry => entry.confidence === 'high');

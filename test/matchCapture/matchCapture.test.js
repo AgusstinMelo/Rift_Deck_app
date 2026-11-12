@@ -430,3 +430,98 @@ test('la lectura local del marcador manda sobre la del modelo para campeones, l�
   assert.equal(prefill.kills, 0); // el texto sigue viniendo del modelo
   for (const key of ['champion', 'lane', 'allies', 'enemies', 'items', 'spells', 'runes']) assert.equal(prefill.review.includes(key), false, key);
 });
+
+// ── Texto del marcador sin IA (K/D/A, oro, resultado) ─────────────────────
+
+import { GLYPH_H, GLYPH_W, otsuThreshold, parseGold, parseKda, readResult, readText } from '../../src/features/matchCapture/scoreboardText.js';
+import { GLYPH_TEMPLATES } from '../../src/features/matchCapture/scoreboardGlyphs.js';
+import { mergeLocalText } from '../../src/features/matchCapture/captureFields.js';
+
+/** Dibuja un texto con las plantillas (escala `scale` px por celda), texto claro sobre fondo oscuro. */
+function renderText(text, { scale = 3, gap = 2, touching = false } = {}) {
+  const glyphHeight = GLYPH_H * scale;
+  const widths = [...text].map(char => (char === ' ' ? glyphHeight * 0.4 : Math.round(GLYPH_TEMPLATES[char].aspect * glyphHeight)));
+  const width = widths.reduce((sum, w) => sum + w + (touching ? 0 : gap), 0) + 8;
+  const height = glyphHeight + 8;
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < data.length; i += 4) { data[i] = 25; data[i + 1] = 35; data[i + 2] = 60; data[i + 3] = 255; }
+  let x = 4;
+  [...text].forEach((char, index) => {
+    const w = widths[index];
+    if (char !== ' ') {
+      const cells = GLYPH_TEMPLATES[char].cells;
+      for (let py = 0; py < glyphHeight; py += 1) {
+        for (let px = 0; px < w; px += 1) {
+          const cell = cells[Math.floor((py / glyphHeight) * GLYPH_H) * GLYPH_W + Math.floor((px / w) * GLYPH_W)];
+          if (cell >= 0.5) {
+            const i = ((4 + py) * width + (x + px)) * 4;
+            data[i] = 235; data[i + 1] = 235; data[i + 2] = 240;
+          }
+        }
+      }
+    }
+    x += w + (touching ? 0 : gap);
+  });
+  return { image: { width, height, data }, rect: { x: 0, y: 0, w: width, h: height } };
+}
+
+test('lee K/D/A y oro dibujados con la tipografía del marcador', () => {
+  for (const text of ['4/0/6', '13/4/4', '5/5/10', '0/4/0']) {
+    const { image, rect } = renderText(text);
+    assert.equal(readText(image, rect).text, text);
+  }
+  const gold = renderText('10674');
+  assert.equal(readText(gold.image, gold.rect).text, '10674');
+});
+
+test('separa dígitos pegados (la tipografía del oro es apretada)', () => {
+  const { image, rect } = renderText('8466', { touching: true });
+  assert.equal(readText(image, rect).text, '8466');
+});
+
+test('interpreta K/D/A y oro y descarta lecturas con otra forma', () => {
+  assert.deepEqual(parseKda('13/4/4'), { kills: 13, deaths: 4, assists: 4 });
+  assert.equal(parseKda('4/0'), null);
+  assert.equal(parseKda('4/0/6/1'), null);
+  assert.equal(parseGold('10674'), 10674);
+  assert.equal(parseGold('66'), null);
+  assert.equal(parseGold('1/2'), null);
+});
+
+test('el umbral de Otsu separa fondo oscuro y texto claro', () => {
+  const values = [...new Array(200).fill(40), ...new Array(50).fill(220)];
+  const threshold = otsuThreshold(values);
+  assert.ok(threshold >= 40 && threshold < 220);
+});
+
+test('victoria o derrota por el color del título', () => {
+  const make = color => {
+    const width = 400; const height = 200;
+    const data = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < data.length; i += 4) { data[i] = 15; data[i + 1] = 20; data[i + 2] = 35; data[i + 3] = 255; }
+    for (let y = 10; y < 18; y += 1) for (let x = 180; x < 220; x += 1) {
+      const i = (y * width + x) * 4; [data[i], data[i + 1], data[i + 2]] = color;
+    }
+    return { width, height, data };
+  };
+  assert.equal(readResult(make([90, 160, 240])), 'win');
+  assert.equal(readResult(make([230, 60, 70])), 'loss');
+  assert.equal(readResult(make([15, 20, 35])), null);
+});
+
+test('la lectura local segura manda; la dudosa solo completa lo que falta', () => {
+  const model = { kills: { value: 5, confidence: 'high' }, deaths: { value: null, confidence: null }, gold: { value: 9000, confidence: 'medium' } };
+  const local = {
+    kills: { value: 4, confidence: 'high' },
+    deaths: { value: 0, confidence: 'medium' },
+    gold: { value: 10674, confidence: 'medium' },
+    result: { value: 'win', confidence: 'high' },
+  };
+  const merged = mergeLocalText(model, local);
+  assert.equal(merged.kills.value, 4);          // local segura > modelo
+  assert.equal(merged.deaths.value, 0);         // local dudosa completa un faltante...
+  assert.equal(merged.deaths.needsReview, true); // ...y queda para revisar
+  assert.equal(merged.gold.value, 9000);        // local dudosa no pisa lo que leyó el modelo
+  assert.equal(merged.result.value, 'win');
+  assert.deepEqual(mergeLocalText(model, null), model);
+});

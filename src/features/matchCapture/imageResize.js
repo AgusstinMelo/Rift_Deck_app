@@ -57,3 +57,25 @@ export async function resizeCapture(file) {
   canvas.height = 0;
   return { media_type: 'image/jpeg', data: dataUrl.split(',')[1], previewUrl: dataUrl };
 }
+
+/**
+ * Versión más chica de una captura ya reducida (por ejemplo, para mandarla al modelo,
+ * que solo necesita leer texto). Si ya es chica, la devuelve igual.
+ * @param {{ media_type: string, data: string, previewUrl: string }} capture
+ * @param {number} maxSide
+ */
+export async function downscaleCapture(capture, maxSide) {
+  const image = new Image();
+  image.src = capture.previewUrl;
+  await image.decode();
+  const { width, height } = fitWithin(image.naturalWidth, image.naturalHeight, maxSide);
+  if (width === image.naturalWidth) return capture;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+  const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+  canvas.width = 0;
+  canvas.height = 0;
+  return { media_type: 'image/jpeg', data: dataUrl.split(',')[1], previewUrl: dataUrl };
+}

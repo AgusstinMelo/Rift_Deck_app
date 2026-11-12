@@ -5,6 +5,7 @@
 import { bestMatch, buildMask, matchConfidence, searchWindows, SHAPES, toFeature } from './iconMatcher.js';
 import { catalogSignature } from './referenceCodes.js';
 import { findHighlightBar, runeSlots, scoreboardSlots } from './scoreboardLayout.js';
+import { readScoreboardText } from './scoreboardText.js';
 
 const candidateCache = new Map();
 
@@ -111,6 +112,8 @@ export function identifyScoreboard(source, candidates) {
   const allies = champions.slice(0, 5).map((match, row) => ({ ...match, lane: slots.allies[row].lane }));
   const enemies = champions.slice(5).map((match, row) => ({ ...match, lane: slots.enemies[row].lane }));
   return {
+    // K/D/A, oro y resultado leídos en el celular (sin IA).
+    text: readScoreboardText(image, bar.top + bar.length / 2),
     ownLane: slots.ownLane,
     own: allies[slots.ownRow],
     allies: allies.filter((_, row) => row !== slots.ownRow),

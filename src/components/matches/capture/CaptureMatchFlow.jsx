@@ -17,7 +17,7 @@ import { useT } from '@/lib/LocaleContext';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import { Spell } from '@/api/entitiesSupabase';
 import { extractMatchFromCaptures, MatchCaptureError } from '@/api/matchCaptureSupabase';
-import { resizeCapture } from '@/features/matchCapture/imageResize';
+import { downscaleCapture, resizeCapture } from '@/features/matchCapture/imageResize';
 import { fieldsToPrefill } from '@/features/matchCapture/captureFields';
 import { buildCodeMaps } from '@/features/matchCapture/referenceCodes';
 import { getReferenceSheets } from '@/features/matchCapture/referenceSheets';
@@ -26,6 +26,8 @@ import { clearDraft, loadDraftImages, loadDraftState, saveDraftImages, saveDraft
 
 // Alcanza con 2: el marcador y la pestaña Estadísticas › Runa.
 export const MAX_CAPTURE_FILES = 2;
+// Para leer texto alcanza con 1280 px: el pedido al modelo es más liviano y rápido.
+const MODEL_MAX_SIDE = 1280;
 
 const RETRYABLE = new Set(['network_error', 'model_timeout', 'model_unavailable', 'model_busy', 'model_invalid_output', 'internal_error', 'catalog_unavailable']);
 // Códigos con mensaje propio en matchCapture.errors.*; el resto cae en internal_error.
@@ -122,25 +124,29 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
       setStage('references');
       const catalog = await loadCatalog();
       if (!catalog.champions.length) throw new MatchCaptureError('catalog_unavailable');
-      // La lámina y las características de los íconos se preparan en paralelo.
-      const candidatesPromise = loadIconCandidates(catalog);
-      const references = await getReferenceSheets(catalog);
+
+      // 1) Lo que se resuelve en el celular, sin IA: marcador (campeones, líneas,
+      //    objetos, hechizos, K/D/A, oro, resultado) y columna de runas.
+      setStage('icons');
+      const candidates = await loadIconCandidates(catalog);
+      const scoreboard = await identifyScoreboardIn(captures, candidates);
+      const localRunes = await identifyRunesIn(captures, candidates);
       if (run !== runRef.current) return;
 
+      // 2) El modelo, solo para lo que falta (duración, tipo de partida, nombres de
+      //    runas y, si no se reconoció el marcador, todo lo demás). Pedido liviano:
+      //    capturas reducidas y la lámina de campeones solo si hace falta.
       setStage('uploading');
       let data = null;
       let modelError = null;
       try {
-        data = await extractMatchFromCaptures(captures, references);
+        const references = scoreboard ? [] : await getReferenceSheets(catalog);
+        const light = await Promise.all(captures.map(capture => downscaleCapture(capture, MODEL_MAX_SIDE)));
+        data = await extractMatchFromCaptures(light, references);
       } catch (error) {
         modelError = error;
       }
       if (run !== runRef.current) return;
-
-      setStage('icons');
-      const candidates = await candidatesPromise;
-      const scoreboard = await identifyScoreboardIn(captures, candidates);
-      const localRunes = await identifyRunesIn(captures, candidates);
       if (modelError && !scoreboard && !localRunes) throw modelError;
       if (modelError) console.warn('Lectura de texto de las capturas falló:', modelError.code || modelError);
       // Runas: el nombre leído por el modelo manda; si no, la columna de runas comparada
@@ -150,7 +156,7 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
 
       const prefill = {
         ...fieldsToPrefill(data?.fields || {}, buildCodeMaps(catalog), { defaultPatch, icons, scoreboard }),
-        // Si el modelo falló, el formulario avisa que el texto (K/D/A, oro...) falta.
+        // Si el modelo falló, el resultado lo avisa (lo que falte se completa a mano).
         textError: modelError ? (KNOWN_ERRORS.has(modelError.code) ? modelError.code : 'internal_error') : null,
       };
       saveDraftState(userId, { stage: 'ready', prefill });
