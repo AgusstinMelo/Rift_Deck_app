@@ -7,7 +7,8 @@
 //  4. comparar la forma de cada uno con plantillas de dígitos y "/" (GLYPH_TEMPLATES,
 //     sacadas de capturas reales).
 // Módulo puro (trabaja con píxeles RGBA): lo usan el navegador y los tests.
-import { GLYPH_TEMPLATES } from './scoreboardGlyphs.js';
+import { DURATION_TEMPLATES, GLYPH_TEMPLATES } from './scoreboardGlyphs.js';
+import { LAYOUT } from './scoreboardLayout.js';
 
 export const GLYPH_W = 8;
 export const GLYPH_H = 12;
@@ -19,6 +20,18 @@ export const DIGIT_ASPECT = 0.62;
 export const TEXT_REGIONS = {
   kda: { x0: -0.486, x1: -0.345, dy: -0.0255, h: 0.034 },
   gold: { x0: -0.28, x1: -0.185, dy: -0.0255, h: 0.034 },
+};
+
+// Arriba del marcador (y en altos de pantalla desde arriba; x desde el centro):
+// - modo ("CLASIFICATORIA", "PVP"...) a la izquierda y, debajo, la duración
+//   ("Wild Rift·12:16", formato mm:ss),
+// - puntaje de cada equipo (asesinatos totales) a los lados de VICTORIA / DERROTA.
+export const TOP_REGIONS = {
+  mode: { x0: -0.9, x1: -0.45, y: 0.049, h: 0.05 },
+  // Desde el final de "Wild Rift" hasta después de los segundos: incluye el "·".
+  duration: { x0: -0.84, x1: -0.69, y: 0.0885, h: 0.034 },
+  blueScore: { x0: -0.26, x1: -0.16, y: 0.072, h: 0.05 },
+  redScore: { x0: 0.16, x1: 0.26, y: 0.072, h: 0.05 },
 };
 
 // Título "VICTORIA" / "DERROTA", arriba al centro.
@@ -34,6 +47,37 @@ function brightness(image, x0, y0, w, h) {
     }
   }
   return values;
+}
+
+/** Alto (en píxeles) al que se amplía una zona de texto antes de leerla. */
+export const TARGET_ZONE_HEIGHT = 40;
+
+/**
+ * Amplía el brillo de una zona con interpolación bilineal. En capturas chicas los
+ * dígitos miden 7-9 px y se pegan o se deforman al binarizar; ampliados, la separación
+ * entre caracteres y sus formas son mucho más estables.
+ */
+function upscale(values, w, h, factor) {
+  if (factor <= 1) return { values, w, h };
+  const W = Math.round(w * factor);
+  const H = Math.round(h * factor);
+  const out = new Float32Array(W * H);
+  for (let y = 0; y < H; y += 1) {
+    const sy = Math.min(h - 1, Math.max(0, (y + 0.5) / factor - 0.5));
+    const y0 = Math.floor(sy);
+    const y1 = Math.min(h - 1, y0 + 1);
+    const fy = sy - y0;
+    for (let x = 0; x < W; x += 1) {
+      const sx = Math.min(w - 1, Math.max(0, (x + 0.5) / factor - 0.5));
+      const x0 = Math.floor(sx);
+      const x1 = Math.min(w - 1, x0 + 1);
+      const fx = sx - x0;
+      const top = values[y0 * w + x0] * (1 - fx) + values[y0 * w + x1] * fx;
+      const bottom = values[y1 * w + x0] * (1 - fx) + values[y1 * w + x1] * fx;
+      out[y * W + x] = top * (1 - fy) + bottom * fy;
+    }
+  }
+  return { values: out, w: W, h: H };
 }
 
 /** Umbral de Otsu: separa los dos grupos de brillo (fondo y texto). */
@@ -72,13 +116,14 @@ export function otsuThreshold(values) {
  * @param {{ x: number, y: number, w: number, h: number }} rect  en píxeles
  */
 export function segmentBlocks(image, rect) {
-  const empty = { blocks: [], columnInk: [], textHeight: 0, makeGlyph: () => null };
+  const empty = { blocks: [], columnInk: [], textHeight: 0, scale: 1, makeGlyph: () => null };
   const x0 = Math.max(0, Math.round(rect.x));
   const y0 = Math.max(0, Math.round(rect.y));
-  const w = Math.min(image.width - x0, Math.round(rect.w));
-  const h = Math.min(image.height - y0, Math.round(rect.h));
-  if (w < 4 || h < 4) return empty;
-  const values = brightness(image, x0, y0, w, h);
+  const rawW = Math.min(image.width - x0, Math.round(rect.w));
+  const rawH = Math.min(image.height - y0, Math.round(rect.h));
+  if (rawW < 4 || rawH < 4) return empty;
+  const factor = Math.min(4, Math.max(1, TARGET_ZONE_HEIGHT / rawH));
+  const { values, w, h } = upscale(brightness(image, x0, y0, rawW, rawH), rawW, rawH, factor);
   const threshold = otsuThreshold(values);
   const ink = new Uint8Array(w * h);
   for (let i = 0; i < values.length; i += 1) ink[i] = values[i] > threshold ? 1 : 0;
@@ -156,7 +201,8 @@ export function segmentBlocks(image, rect) {
     return { left, right, height: gh, aspect: gw / gh, cells, textHeight };
   };
 
-  return { blocks, columnInk, textHeight, makeGlyph };
+  // scale: cuánto se amplió la zona (las posiciones de los bloques están ampliadas).
+  return { blocks, columnInk, textHeight, scale: factor, makeGlyph };
 }
 
 /** Cortes de un bloque en `parts` caracteres, por la columna con menos tinta cerca de cada corte esperado. */
@@ -178,7 +224,7 @@ function splitBlock(block, parts, columnInk, textHeight) {
   return pieces.every(piece => piece.right >= piece.left) ? pieces : null;
 }
 
-const isNoise = (glyph, textHeight) => !glyph || glyph.height < textHeight * 0.45;
+const isNoise = (glyph, textHeight, minHeight = 0.45) => !glyph || glyph.height < textHeight * minHeight;
 
 /**
  * Caracteres de una zona separando dígitos pegados por ancho (sin plantillas). Se usa
@@ -210,46 +256,52 @@ function distance(a, b) {
  * @returns {{ char: string, score: number, margin: number }}  score/margin: más es mejor
  */
 export function classifyGlyph(glyph, templates = GLYPH_TEMPLATES) {
+  // Cada carácter puede tener una plantilla o varias variantes (se usa la más parecida).
+  const costOf = template => distance(glyph.cells, template.cells) / glyph.cells.length + 4 * (glyph.aspect - template.aspect) ** 2;
   const ranked = Object.entries(templates).map(([char, template]) => ({
     char,
-    cost: distance(glyph.cells, template.cells) / glyph.cells.length + 4 * (glyph.aspect - template.aspect) ** 2,
+    cost: Array.isArray(template) ? Math.min(...template.map(costOf)) : costOf(template),
   })).sort((a, b) => a.cost - b.cost);
   return { char: ranked[0].char, score: 1 - ranked[0].cost, margin: (ranked[1]?.cost ?? 1) - ranked[0].cost };
 }
 
 /**
- * Lee una zona como texto ("4/0/6", "10674"). Los bloques anchos (dígitos pegados) se
- * prueban dividir en 1 a 4 caracteres y se queda la división que mejor coincide con las
- * plantillas. Devuelve también el margen del carácter más dudoso.
+ * Lee un bloque de columnas con tinta. Si es ancho (dígitos pegados) prueba dividirlo
+ * en 1 a 4 caracteres y se queda con la división que mejor coincide con las plantillas.
+ * @returns {Array<{ char: string, score: number, margin: number }> | null}
  */
-export function readText(image, rect, templates = GLYPH_TEMPLATES) {
-  const { blocks, columnInk, textHeight, makeGlyph } = segmentBlocks(image, rect);
-  const chars = [];
-  const margins = [];
-  for (const block of blocks) {
-    const width = block.right - block.left + 1;
-    const maxParts = Math.max(1, Math.min(4, Math.floor(width / (textHeight * 0.25))));
-    let best = null;
-    for (let parts = 1; parts <= maxParts; parts += 1) {
-      if (parts > 1 && width < textHeight * DIGIT_ASPECT * 1.2) break;
-      const pieces = parts === 1 ? [block] : splitBlock(block, parts, columnInk, textHeight);
-      if (!pieces) continue;
-      const glyphs = pieces.map(piece => makeGlyph(piece.left, piece.right));
-      if (glyphs.some(glyph => isNoise(glyph, textHeight))) {
-        if (parts === 1 && glyphs.every(glyph => isNoise(glyph, textHeight))) break; // ruido
-        continue;
-      }
-      const results = glyphs.map(glyph => classifyGlyph(glyph, templates));
-      const cost = results.reduce((sum, result) => sum + (1 - result.score), 0) / results.length;
-      if (!best || cost < best.cost - 0.002) best = { cost, results };
+function readBlock(block, segment, templates, minHeight) {
+  const { columnInk, textHeight, makeGlyph } = segment;
+  const width = block.right - block.left + 1;
+  const maxParts = Math.max(1, Math.min(4, Math.floor(width / (textHeight * 0.25))));
+  let best = null;
+  for (let parts = 1; parts <= maxParts; parts += 1) {
+    if (parts > 1 && width < textHeight * DIGIT_ASPECT * 1.2) break;
+    const pieces = parts === 1 ? [block] : splitBlock(block, parts, columnInk, textHeight);
+    if (!pieces) continue;
+    const glyphs = pieces.map(piece => makeGlyph(piece.left, piece.right));
+    if (glyphs.some(glyph => isNoise(glyph, textHeight, minHeight))) {
+      if (parts === 1 && glyphs.every(glyph => isNoise(glyph, textHeight, minHeight))) break; // ruido
+      continue;
     }
-    if (!best) continue;
-    for (const result of best.results) {
-      chars.push(result.char);
-      margins.push(result.margin);
-    }
+    const results = glyphs.map(glyph => classifyGlyph(glyph, templates));
+    const cost = results.reduce((sum, result) => sum + (1 - result.score), 0) / results.length;
+    if (!best || cost < best.cost - 0.002) best = { cost, results };
   }
-  return { text: chars.join(''), minMargin: margins.length ? Math.min(...margins) : 0 };
+  return best ? best.results : null;
+}
+
+/**
+ * Lee una zona como texto ("4/0/6", "10674"). Devuelve también el margen del carácter
+ * más dudoso.
+ */
+export function readText(image, rect, templates = GLYPH_TEMPLATES, { minHeight = 0.45 } = {}) {
+  const segment = segmentBlocks(image, rect);
+  const results = segment.blocks.flatMap(block => readBlock(block, segment, templates, minHeight) || []);
+  return {
+    text: results.map(result => result.char).join(''),
+    minMargin: results.length ? Math.min(...results.map(result => result.margin)) : 0,
+  };
 }
 
 /** Rectángulo en píxeles de una zona de texto de la fila centrada en rowY. */
@@ -272,6 +324,9 @@ export function parseKda(text) {
 export function parseGold(text) {
   return /^\d{3,6}$/.test(text) ? Number(text) : null;
 }
+
+/** Alto mínimo de captura (px) para dar por segura una lectura local. */
+export const MIN_SURE_HEIGHT = 480;
 
 /** Margen mínimo entre el mejor carácter y el segundo para considerar segura la lectura. */
 export const SURE_MARGIN = 0.04;
@@ -306,8 +361,87 @@ export function readResult(image) {
   return null;
 }
 
+/** Rectángulo en píxeles de una zona de la franja superior. */
+function topRect(width, height, region) {
+  return {
+    x: width / 2 + region.x0 * height,
+    y: (region.y - region.h / 2) * height,
+    w: (region.x1 - region.x0) * height,
+    h: region.h * height,
+  };
+}
+
+/** "12", "16" → 736 segundos; null si no es un mm:ss válido. */
+export function parseDuration(minutes, seconds) {
+  const m = Number(minutes);
+  const s = Number(seconds);
+  if (!Number.isInteger(m) || !Number.isInteger(s) || s > 59 || m < 1 || m > 90) return null;
+  return m * 60 + s;
+}
+
 /**
- * Lee K/D/A, oro y resultado del marcador para la fila del jugador.
+ * Duración de la partida, de "Wild Rift·12:16" (debajo del modo). Los separadores se
+ * reconocen por su altura, sin depender de las letras: el punto medio "·" es muy bajo
+ * (marca dónde empieza el tiempo) y los ":" son de altura intermedia. Los dígitos se
+ * comparan con las plantillas de la tipografía del texto chico (DURATION_TEMPLATES).
+ * @returns {{ seconds: number | null, minMargin: number, raw: string }}
+ */
+export function readDuration(image, templates = DURATION_TEMPLATES) {
+  const segment = segmentBlocks(image, topRect(image.width, image.height, TOP_REGIONS.duration));
+  const tokens = [];
+  for (const block of segment.blocks) {
+    const glyph = segment.makeGlyph(block.left, block.right);
+    if (!glyph) continue;
+    const relativeHeight = glyph.height / segment.textHeight;
+    if (relativeHeight < 0.4) {
+      tokens.push({ char: '·', margin: 1 });
+    } else if (relativeHeight < 0.85 && glyph.aspect < 0.7) {
+      tokens.push({ char: ':', margin: 1 });
+    } else {
+      tokens.push(...(readBlock(block, segment, templates, 0.85) || []));
+    }
+  }
+  const raw = tokens.map(token => token.char).join('');
+  const start = raw.lastIndexOf('·') + 1;
+  const time = raw.slice(start);
+  // Con ":" detectado, mm:ss; si el ":" se perdió, los 2 últimos dígitos son los segundos.
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time) || /^(\d{1,2})(\d{2})$/.exec(time);
+  const timeTokens = tokens.slice(start).filter(token => token.char !== ':');
+  return {
+    seconds: match ? parseDuration(match[1], match[2]) : null,
+    minMargin: timeTokens.length ? Math.min(...timeTokens.map(token => token.margin)) : 0,
+    raw,
+  };
+}
+
+/**
+ * Modo de juego por el ANCHO del título (no hace falta leer letra por letra):
+ * "CLASIFICATORIA" ≈ 0,27 altos de pantalla y "PVP" ≈ 0,07. Un título mucho más largo
+ * ("CLASIFICATORIA LEGENDARIA") es la legendaria.
+ * @returns {{ value: 'ranked' | 'legendary_ranked' | 'casual', confidence: 'high' | 'medium' } | null}
+ */
+export function readMode(image) {
+  const { blocks, scale } = segmentBlocks(image, topRect(image.width, image.height, TOP_REGIONS.mode));
+  if (!blocks.length) return null;
+  const width = (blocks[blocks.length - 1].right - blocks[0].left + 1) / scale / image.height;
+  if (width >= 0.4) return { value: 'legendary_ranked', confidence: 'medium' };
+  if (width >= 0.2) return { value: 'ranked', confidence: 'high' };
+  if (width <= 0.14) return { value: 'casual', confidence: 'high' };
+  return null;
+}
+
+/** Número entero de una zona (puntajes), o null. */
+function readNumber(image, rect) {
+  const read = readText(image, rect);
+  return /^\d{1,3}$/.test(read.text) ? { value: Number(read.text), minMargin: read.minMargin } : null;
+}
+
+/**
+ * Lee K/D/A, oro, resultado, modo y duración del marcador, sin IA.
+ * Control cruzado del K/D/A: la suma de los asesinatos de tu equipo tiene que dar su
+ * puntaje (arriba, en azul) y la suma de sus muertes, el puntaje rival (en rojo). Si
+ * cierra, asesinatos y muertes quedan con confianza alta aunque algún carácter haya
+ * sido dudoso; si no cierra, quedan para revisar.
  * @param {{ width: number, height: number, data: Uint8ClampedArray }} image
  * @param {number} rowY  centro vertical de la fila del jugador (barra dorada)
  */
@@ -318,13 +452,40 @@ export function readScoreboardText(image, rowY) {
   const kda = parseKda(kdaRead.text);
   const gold = parseGold(goldRead.text);
   const result = readResult(image);
-  const confidence = read => (read.minMargin >= SURE_MARGIN ? 'high' : 'medium');
+  const mode = readMode(image);
+  const duration = readDuration(image);
+  // Capturas muy chicas: los dígitos miden pocos píxeles; se lee igual pero todo queda
+  // para revisar.
+  const lowRes = height < MIN_SURE_HEIGHT;
+  const sure = read => !lowRes && read.minMargin >= SURE_MARGIN;
+
+  // Control con los puntajes: K/D/A de las 5 filas de tu equipo.
+  const blue = readNumber(image, topRect(width, height, TOP_REGIONS.blueScore));
+  const red = readNumber(image, topRect(width, height, TOP_REGIONS.redScore));
+  const rowCenters = Array.from({ length: 5 }, (_, row) => (LAYOUT.firstRowY + row * LAYOUT.rowPitch) * height);
+  const ownRow = rowCenters.reduce((best, y, row) => (Math.abs(y - rowY) < Math.abs(rowCenters[best] - rowY) ? row : best), 0);
+  const allyKdas = rowCenters.map((y, row) => (row === ownRow ? kda : parseKda(readText(image, textRect(width, height, y, TEXT_REGIONS.kda)).text)));
+  let teamCheck = null;
+  if (blue && red && allyKdas.every(Boolean)) {
+    const kills = allyKdas.reduce((sum, row) => sum + row.kills, 0);
+    const deaths = allyKdas.reduce((sum, row) => sum + row.deaths, 0);
+    teamCheck = kills === blue.value && deaths === red.value;
+  }
+  const kdaConfidence = lowRes ? 'medium' : teamCheck === true ? 'high' : teamCheck === false ? 'medium' : (sure(kdaRead) ? 'high' : 'medium');
+  // Si el control no cierra, la imagen se está leyendo mal: el oro también se revisa.
+  const goldSure = sure(goldRead) && teamCheck !== false;
+
   return {
-    kills: kda ? { value: kda.kills, confidence: confidence(kdaRead) } : null,
-    deaths: kda ? { value: kda.deaths, confidence: confidence(kdaRead) } : null,
-    assists: kda ? { value: kda.assists, confidence: confidence(kdaRead) } : null,
-    gold: gold !== null ? { value: gold, confidence: confidence(goldRead) } : null,
+    kills: kda ? { value: kda.kills, confidence: kdaConfidence } : null,
+    deaths: kda ? { value: kda.deaths, confidence: kdaConfidence } : null,
+    assists: kda ? { value: kda.assists, confidence: teamCheck === false ? 'medium' : (sure(kdaRead) ? 'high' : 'medium') } : null,
+    gold: gold !== null ? { value: gold, confidence: goldSure ? 'high' : 'medium' } : null,
     result: result ? { value: result, confidence: 'high' } : null,
-    raw: { kda: kdaRead.text, gold: goldRead.text },
+    match_type: mode,
+    // La duración leída en el celular es un respaldo (texto muy chico): siempre queda
+    // para revisar y no pisa lo que lea el modelo.
+    duration_seconds: duration.seconds !== null ? { value: duration.seconds, confidence: 'medium' } : null,
+    teamCheck,
+    raw: { kda: kdaRead.text, gold: goldRead.text, duration: duration.raw, blue: blue?.value ?? null, red: red?.value ?? null },
   };
 }

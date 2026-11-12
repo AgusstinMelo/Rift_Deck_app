@@ -79,3 +79,33 @@ export async function downscaleCapture(capture, maxSide) {
   canvas.height = 0;
   return { media_type: 'image/jpeg', data: dataUrl.split(',')[1], previewUrl: dataUrl };
 }
+
+/**
+ * Recorte AMPLIADO de la esquina superior izquierda del marcador: el modo
+ * ("CLASIFICATORIA", "PVP"...) y debajo "Wild Rift·mm:ss" con la duración. Ese texto es
+ * muy chico en la captura completa; ampliado, el modelo lo lee sin dudas, y el pedido
+ * pesa unos pocos KB. Las posiciones son las del marcador (escalan con el alto).
+ * @param {{ previewUrl: string }} capture
+ */
+export async function cropDurationCorner(capture) {
+  const image = new Image();
+  image.src = capture.previewUrl;
+  await image.decode();
+  const W = image.naturalWidth;
+  const H = image.naturalHeight;
+  const sx = Math.max(0, W / 2 - 0.93 * H);
+  const sw = 0.45 * H;
+  const sy = 0.015 * H;
+  const sh = 0.1 * H;
+  const scale = Math.min(4, Math.max(1, 220 / sh));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(sw * scale);
+  canvas.height = Math.round(sh * scale);
+  const context = canvas.getContext('2d');
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  canvas.width = 0;
+  canvas.height = 0;
+  return { media_type: 'image/jpeg', data: dataUrl.split(',')[1], previewUrl: dataUrl };
+}

@@ -13329,3 +13329,76 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* "Cargar con capturas" en pantallas bajas (celular acostado, ventanas bajas o con
+   zoom): todo entra sin scroll. Depende solo del alto disponible. El 3er paso de cada
+   captura ("Captura de la pantalla completa") ya lo dice "Cómo tienen que ser". */
+@media (max-height: 640px) {
+  .rd-page.rd-capture-page {
+    padding-top: 0.5rem;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .rd-capture-step-title {
+    margin-bottom: 0.4rem;
+    font-size: 1.3rem;
+    line-height: 1.15;
+  }
+
+  .rd-capture-step-actions {
+    padding-top: 0.5rem;
+  }
+
+  .rd-capture-thumb {
+    height: clamp(2.75rem, 13dvh, 4.25rem);
+  }
+
+  .rd-capture-review > p:first-child {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .rd-capture-guide section {
+    padding: 0.4rem 0.55rem;
+  }
+
+  .rd-capture-guide h3 {
+    margin-bottom: 0.15rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-capture-guide li {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .rd-capture-guide ol > li:last-child {
+    display: none;
+  }
+
+  .rd-capture-guide > p {
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-height: 520px) {
+  .rd-capture-guide > p {
+    display: none;
+  }
+}
+
+@media (max-height: 340px) {
+  .rd-capture-step-title {
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  .rd-capture-thumb {
+    height: 2.5rem;
+  }
+
+  .rd-capture-step-actions button {
+    min-height: 2.6rem;
+  }
+}

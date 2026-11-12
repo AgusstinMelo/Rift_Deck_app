@@ -525,3 +525,58 @@ test('la lectura local segura manda; la dudosa solo completa lo que falta', () =
   assert.equal(merged.result.value, 'win');
   assert.deepEqual(mergeLocalText(model, null), model);
 });
+
+import { readMode } from '../../src/features/matchCapture/scoreboardText.js';
+
+/** Marcador sintético con un título claro de `widthRatio` altos de pantalla, arriba a la izquierda. */
+function modeImage(widthRatio) {
+  const width = 1356; const height = 610;
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < data.length; i += 4) { data[i] = 15; data[i + 1] = 22; data[i + 2] = 45; data[i + 3] = 255; }
+  const x0 = Math.round(width / 2 - 0.885 * height);
+  const x1 = x0 + Math.round(widthRatio * height);
+  const y0 = Math.round(0.039 * height); const y1 = Math.round(0.059 * height);
+  for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) {
+    if ((x - x0) % 9 < 6) { const i = (y * width + x) * 4; data[i] = 230; data[i + 1] = 225; data[i + 2] = 215; } // "letras"
+  }
+  return { width, height, data };
+}
+
+test('el modo se deduce del ancho del título (CLASIFICATORIA vs PVP)', () => {
+  assert.deepEqual(readMode(modeImage(0.27)), { value: 'ranked', confidence: 'high' });
+  assert.deepEqual(readMode(modeImage(0.07)), { value: 'casual', confidence: 'high' });
+  assert.equal(readMode(modeImage(0.45)).value, 'legendary_ranked');
+  assert.equal(readMode(modeImage(0.17)), null); // ambiguo: lo decide el modelo o se revisa
+});
+
+test('el modo leído en el celular entra en la precarga', () => {
+  const merged = mergeLocalText({}, { match_type: { value: 'casual', confidence: 'high' } });
+  assert.equal(merged.match_type.value, 'casual');
+});
+
+import { classifyGlyph, parseDuration } from '../../src/features/matchCapture/scoreboardText.js';
+import { DURATION_TEMPLATES } from '../../src/features/matchCapture/scoreboardGlyphs.js';
+
+test('la duración mm:ss se valida (segundos 00-59, minutos razonables)', () => {
+  assert.equal(parseDuration('12', '16'), 736);
+  assert.equal(parseDuration('9', '58'), 598);
+  assert.equal(parseDuration('12', '90'), null);
+  assert.equal(parseDuration('0', '30'), null);
+  assert.equal(parseDuration('120', '00'), null);
+});
+
+test('las plantillas de la duración tienen todos los dígitos y aceptan variantes', () => {
+  for (const digit of '0123456789') assert.ok(Array.isArray(DURATION_TEMPLATES[digit]) && DURATION_TEMPLATES[digit].length >= 1, digit);
+  // Un carácter idéntico a una de las variantes se reconoce como ese dígito.
+  const variant = DURATION_TEMPLATES['8'][0];
+  const glyph = { cells: Float32Array.from(variant.cells), aspect: variant.aspect };
+  assert.equal(classifyGlyph(glyph, DURATION_TEMPLATES).char, '8');
+});
+
+test('la duración leída en el celular es respaldo: no pisa la del modelo', () => {
+  const local = { duration_seconds: { value: 735, confidence: 'medium' } };
+  assert.equal(mergeLocalText({ duration_seconds: { value: 736, confidence: 'high' } }, local).duration_seconds.value, 736);
+  const onlyLocal = mergeLocalText({}, local);
+  assert.equal(onlyLocal.duration_seconds.value, 735);
+  assert.equal(onlyLocal.duration_seconds.needsReview, true);
+});

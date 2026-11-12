@@ -157,7 +157,7 @@ type ModelCallResult =
 // frecuencia y suele resolverse en segundos. Hasta MAX_MODEL_ATTEMPTS intentos, rotando
 // las keys disponibles, con espera creciente, y pasando al modelo alternativo si el
 // principal sigue saturado o no existe (MATCH_CAPTURE_FALLBACK_MODELS, separados por coma).
-async function callGemini(images: ImageInput[], references: ImageInput[]): Promise<ModelCallResult> {
+async function callGemini(images: ImageInput[], references: ImageInput[], focus: string | null = null): Promise<ModelCallResult> {
   const apiKeys = [...new Set([
     Deno.env.get('GEMINI_API_KEY'),
     Deno.env.get('GEMINI_API_KEY_2'),
@@ -185,7 +185,9 @@ async function callGemini(images: ImageInput[], references: ImageInput[]): Promi
           { text: `Captura ${index}:` },
           { inline_data: { mime_type: image.media_type, data: image.data } },
         ]),
-        { text: `Extraé los datos de las ${images.length} capturas.` },
+        { text: focus === 'duration'
+          ? 'La captura 0 es un RECORTE AMPLIADO de la esquina superior izquierda del marcador: arriba el modo (por ejemplo CLASIFICATORIA o PVP) y debajo "Wild Rift·mm:ss", donde mm:ss es la duración de la partida. Usá screen = "scoreboard". Leé solo match_type y duration_seconds (por ejemplo "Wild Rift·12:16" = 736); todos los demás campos van como faltantes.'
+          : `Extraé los datos de las ${images.length} capturas.` },
       ],
     }],
     generationConfig: {
@@ -257,7 +259,7 @@ Deno.serve(async req => {
   const contentLength = Number(req.headers.get('content-length') || 0);
   if (contentLength > MAX_BODY_BYTES) return jsonResponse({ error: 'payload_too_large' }, 413);
 
-  let body: { images?: unknown; references?: unknown };
+  let body: { images?: unknown; references?: unknown; focus?: unknown };
   try {
     const raw = await req.text();
     if (raw.length > MAX_BODY_BYTES) return jsonResponse({ error: 'payload_too_large' }, 413);
@@ -279,7 +281,7 @@ Deno.serve(async req => {
   if (!await consumeRateLimit(user.id)) return jsonResponse({ error: 'rate_limited' }, 429);
 
   try {
-    const result = await callGemini(images, referenceValidation.images);
+    const result = await callGemini(images, referenceValidation.images, body?.focus === 'duration' ? 'duration' : null);
     if (!result.ok) return jsonResponse({ error: result.code }, result.status);
 
     let parsed: unknown;

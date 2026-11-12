@@ -16,10 +16,11 @@ export class MatchCaptureError extends Error {
  *   modelo identifique visualmente campeones, objetos, runas y hechizos.
  * @returns {Promise<{ fields: Record<string, any>, ignored_images: number[] }>}
  */
-export async function extractMatchFromCaptures(images, references = []) {
+export async function extractMatchFromCaptures(images, references = [], { focus = null } = {}) {
   const toPayload = list => list.map(({ media_type, data: base64 }) => ({ media_type, data: base64 }));
   const { data, error } = await supabase.functions.invoke('extract-match-capture', {
-    body: { images: toPayload(images), references: toPayload(references) },
+    // focus: 'duration' → la única imagen es el recorte ampliado de modo + duración.
+    body: { images: toPayload(images), references: toPayload(references), ...(focus ? { focus } : {}) },
   });
 
   if (error) {

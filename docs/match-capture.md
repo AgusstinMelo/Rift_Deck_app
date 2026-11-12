@@ -44,8 +44,8 @@ Por eso casi todo se resuelve **en el celular, sin IA** (`scoreboardLayout.js`):
 | Los 10 campeones con su línea | Se recorta cada retrato en su posición fija y se compara por píxeles con el catálogo, sin repetir campeones. | Lámina de referencia de campeones (Gemini). |
 | Tus hechizos y objetos | Posiciones fijas en tu fila y comparación por píxeles. | Cajas `box_2d` de Gemini. |
 | Runas | Nombre escrito al lado de cada runa, leído por Gemini. | Columna central de la pestaña de runas comparada por píxeles en el celular, y por último las cajas de Gemini. |
-| K/D/A, oro y resultado | **En el celular, sin IA** (`scoreboardText.js`): los dígitos de tu fila se recortan en su posición fija, se separan del fondo (umbral de Otsu) y se comparan con plantillas de la tipografía del juego (`scoreboardGlyphs.js`); el resultado sale del color del título (VICTORIA azul / DERROTA roja). | Gemini. |
-| Duración y modo | Gemini, que lee el texto. | — |
+| K/D/A, oro, resultado y modo | **En el celular, sin IA** (`scoreboardText.js`). Los números de tu fila: se recortan en su posición fija, se amplían, se separan del fondo (Otsu) y se comparan con plantillas de la tipografía del juego (`scoreboardGlyphs.js`). El resultado: color del título (VICTORIA azul / DERROTA roja). El modo: ancho del título ("CLASIFICATORIA" ≈ 4 veces "PVP"). **Control cruzado:** la suma de asesinatos y muertes de tu equipo tiene que dar los puntajes de arriba. | Gemini. |
+| Duración | Gemini lee un **recorte ampliado** de la esquina superior izquierda (modo + "Wild Rift·mm:ss"), de unos 10-20 KB: texto grande y nítido, pedido mínimo. Respaldo en el celular: el "·" y los ":" se reconocen por altura y los dígitos con plantillas de esa tipografía (reales + Tahoma); esa lectura siempre queda para revisar porque el texto original mide 9-14 px. | Lectura local (para revisar). |
 
 El celular detecta solo qué captura es el marcador (por la barra dorada) y cuál es la pestaña de runas (porque las 5 posiciones de la columna se parecen mucho a runas reales). Si Gemini falla o no hay cupo, igual se abre el formulario con lo que se reconoció en el celular, y el texto queda para completar.
 
@@ -191,9 +191,17 @@ Hoy la app no tiene service worker, así que sumarlo implica agregar uno y proba
 
 ## Lectura de texto y fallas de Gemini
 
-El plan gratuito de Gemini responde "saturado" (429/503) con frecuencia. Por eso:
-- **Sin IA en el celular:** K/D/A, oro y resultado se leen localmente. Calibración con las 3 partidas locales: 58/60 textos bien validando con una partida que no se usó para armar las plantillas, y 3/3 filas propias exactas. Si una lectura local es dudosa, el campo queda marcado para revisar.
-- **Gemini solo para lo que falta** (duración, modo y nombres de runas):
-  - recibe las capturas reducidas a 1280 px;
-  - recibe la lámina de campeones solo si no se reconoció el marcador.
-- **Reintentos:** la función hace hasta 4 intentos, rotando las keys, con espera creciente (0,6 s, 1,2 s, 2,4 s). Pasa al modelo alternativo si el principal sigue saturado o no existe (`MATCH_CAPTURE_FALLBACK_MODELS`, por defecto `gemini-3.5-flash`). Antes, con una sola key cargada no había ningún reintento.
+El plan gratuito de Gemini responde "saturado" (429/503) con frecuencia. Por eso el texto se lee en el celular, sin IA, salvo la duración.
+
+**Calibración** con las 3 partidas locales:
+- **Plantillas:** validando con una partida que no se usó para armarlas, 60/60 textos de K/D/A y oro (las 30 filas del equipo aliado, exactas).
+- **Fila propia completa** (K/D/A, oro, resultado y modo): 15/15 exactas, con las capturas reescaladas de 0,6× a 2× para simular otras resoluciones.
+- **Resguardos para no cargar datos equivocados en silencio:**
+  - capturas de menos de 480 px de alto: todo queda para revisar;
+  - si el control con los puntajes no cierra: K/D/A y oro quedan para revisar;
+  - si un carácter es dudoso: ese campo queda para revisar.
+
+**Gemini** se usa solo para la duración y los nombres de runas (respaldo de la comparación por píxeles):
+- recibe las capturas a 1280 px, y la lámina de campeones solo si no se reconoció el marcador;
+- hasta 4 intentos, rotando las keys, con espera creciente;
+- modelo alternativo `MATCH_CAPTURE_FALLBACK_MODELS` (por defecto `gemini-3.5-flash`).

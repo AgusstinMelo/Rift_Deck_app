@@ -17,7 +17,7 @@ import { useT } from '@/lib/LocaleContext';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import { Spell } from '@/api/entitiesSupabase';
 import { extractMatchFromCaptures, MatchCaptureError } from '@/api/matchCaptureSupabase';
-import { downscaleCapture, resizeCapture } from '@/features/matchCapture/imageResize';
+import { cropDurationCorner, downscaleCapture, resizeCapture } from '@/features/matchCapture/imageResize';
 import { fieldsToPrefill } from '@/features/matchCapture/captureFields';
 import { buildCodeMaps } from '@/features/matchCapture/referenceCodes';
 import { getReferenceSheets } from '@/features/matchCapture/referenceSheets';
@@ -140,9 +140,16 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
       let data = null;
       let modelError = null;
       try {
-        const references = scoreboard ? [] : await getReferenceSheets(catalog);
-        const light = await Promise.all(captures.map(capture => downscaleCapture(capture, MODEL_MAX_SIDE)));
-        data = await extractMatchFromCaptures(light, references);
+        if (scoreboard) {
+          // Todo lo demás ya se leyó en el celular: el modelo solo lee la duración (y
+          // confirma el modo) en un recorte ampliado de la esquina. Pedido de pocos KB.
+          const corner = await cropDurationCorner(captures[scoreboard.imageIndex]);
+          data = await extractMatchFromCaptures([corner], [], { focus: 'duration' });
+        } else {
+          const references = await getReferenceSheets(catalog);
+          const light = await Promise.all(captures.map(capture => downscaleCapture(capture, MODEL_MAX_SIDE)));
+          data = await extractMatchFromCaptures(light, references);
+        }
       } catch (error) {
         modelError = error;
       }

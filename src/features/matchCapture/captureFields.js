@@ -67,7 +67,7 @@ export const secondsToMinutes = seconds =>
 const pad = number => String(number).padStart(2, '0');
 
 const ICON_KINDS = ['items', 'runes', 'spells'];
-const LOCAL_TEXT_KEYS = ['kills', 'deaths', 'assists', 'gold', 'result'];
+const LOCAL_TEXT_KEYS = ['kills', 'deaths', 'assists', 'gold', 'result', 'match_type', 'duration_seconds'];
 
 /**
  * Suma la lectura local del texto del marcador (K/D/A, oro, resultado: ver

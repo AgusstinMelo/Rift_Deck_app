@@ -162,12 +162,12 @@ export async function identifyRunesIn(images, candidates) {
 export async function identifyScoreboardIn(images, candidates) {
   const sources = await Promise.all(images.map(image => loadImage(image.previewUrl)));
   let best = null;
-  for (const source of sources) {
+  for (const [imageIndex, source] of sources.entries()) {
     if (!source) continue;
     const result = identifyScoreboard(source, candidates);
     if (!result) continue;
     const score = [result.own, ...result.allies, ...result.enemies].reduce((sum, entry) => sum + (entry?.score || 0), 0);
-    if (!best || score > best.score) best = { score, result };
+    if (!best || score > best.score) best = { score, result: { ...result, imageIndex } };
   }
   return best?.result || null;
 }
