@@ -48,7 +48,7 @@ Por eso casi todo se resuelve **en el celular, sin IA** (`scoreboardLayout.js`):
 
 El celular detecta solo qué captura es el marcador (por la barra dorada) y cuál es la pestaña de runas (porque las 5 posiciones de la columna se parecen mucho a runas reales). Si Gemini falla o no hay cupo, igual se abre el formulario con lo que se reconoció en el celular, y el texto queda para completar.
 
-**Con las capturas reales de `test/fixtures/captures`** (3 partidas: Kai'Sa, Ornn y Xayah):
+**Con las capturas reales de `test/fixtures/captures`** (3 partidas: Kai'Sa, Ornn y Xayah; son locales y no están en el repo porque muestran nombres de otros jugadores):
 - 30/30 campeones;
 - 6/6 hechizos;
 - 15/15 objetos, más los slots vacíos;

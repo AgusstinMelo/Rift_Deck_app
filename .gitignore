@@ -31,3 +31,7 @@ dist-ssr
 
 .env
 .vite
+
+# Capturas reales de partidas para calibrar el reconocimiento (muestran nombres de
+# otros jugadores): solo locales, no se suben al repo.
+test/fixtures/captures/
