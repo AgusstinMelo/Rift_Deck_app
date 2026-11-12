@@ -7,6 +7,10 @@ export const PHONE_PORTRAIT_QUERY = '(orientation: portrait) and (max-width: 639
 // Mismo corte que el CSS de escritorio ajustado al viewport (index.css).
 export const DESKTOP_FIT_QUERY = '(min-width: 1024px) and (min-height: 501px)';
 
+// Carga de partidas con capturas: pantalla táctil (puntero grueso) y chica, en vertical
+// u horizontal. Por ancho/alto y tipo de puntero, nunca por user agent.
+export const MOBILE_CAPTURE_QUERY = '(pointer: coarse) and (max-width: 1023px), (pointer: coarse) and (max-height: 500px)';
+
 // ssrSafe: en páginas prerenderizadas (biblioteca pública) el primer render tiene que
 // coincidir con el HTML del servidor, así que arranca en false y se actualiza al montar.
 export function useMatchMedia(query, { ssrSafe = false } = {}) {

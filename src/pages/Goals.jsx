@@ -206,7 +206,7 @@ function NewGoal({ matches, limitReached }) {
           <Link to="/objetivos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
             <ArrowLeft size={14} /> {t('goals.goalsLink')}
           </Link>
-          <h1 className="rd-page-title font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">{t('goals.page.newGoal')}</h1>
+          <h1 className="rd-page-title rd-step-title font-rajdhani font-bold text-3xl md:text-4xl text-foreground tracking-[-0.06em] uppercase">{t('goals.page.newGoal')}</h1>
         </div>
         <p className="rd-page-subtitle text-sm text-muted-foreground">{t('goals.page.newGoalSubtitle')}</p>
       </header>

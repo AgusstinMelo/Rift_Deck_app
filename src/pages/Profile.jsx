@@ -152,12 +152,12 @@ export default function Profile() {
 
   return (
     <div className="rd-page space-y-6 rd-dashboard">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
-          <ProfileAvatar src={user?.avatar_url} alt={t('profile.imagenDePerfil')} iconSize={22} />
-        </div>
-
+      <div className="flex items-start justify-between gap-3 mb-6">
         <div>
+          <div className="rd-page-kicker flex items-center gap-2 mb-1">
+            <span className="w-8 h-px bg-primary/50" />
+            <span className="text-[10px] uppercase tracking-[0.28em] text-primary/80">{t('profile.kicker')}</span>
+          </div>
           <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
            {t('profile.miPerfil')}
           </h1>
@@ -165,6 +165,10 @@ export default function Profile() {
           <p className="rd-page-subtitle text-sm text-muted-foreground">
             {user?.email}
           </p>
+        </div>
+
+        <div className="w-12 h-12 shrink-0 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+          <ProfileAvatar src={user?.avatar_url} alt={t('profile.imagenDePerfil')} iconSize={22} />
         </div>
       </div>
 

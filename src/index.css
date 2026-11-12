@@ -612,20 +612,11 @@
 }
 
 /* Dashboard en escritorio con poco alto (notebooks, Windows con escalado al 125%):
-   encabezado más bajo para que el panel activo tenga más alto. */
+   menos margen abajo para que el panel activo tenga más alto. El encabezado (volanta,
+   título, bajada) es el común a todas las páginas: ver "Encabezado de página en escritorio". */
 @media (min-width: 1024px) and (min-height: 501px) and (max-height: 800px) {
   .rd-page.rd-dashboard-tabs {
-    padding-top: 0.75rem;
     padding-bottom: 0.75rem;
-  }
-
-  .rd-dashboard-tabs .rd-dashboard-kicker {
-    display: none;
-  }
-
-  .rd-dashboard-tabs .rd-page-title {
-    font-size: 2.5rem;
-    line-height: 1;
   }
 
   .rd-dashboard-match-list .rd-dashboard-row > :first-child {
@@ -3598,6 +3589,11 @@
     margin-top: 0 !important;
   }
 
+  /* "Cargar con capturas" en Datos de la partida: sin la aclaración, para ganar alto. */
+  .rd-match-flow .rd-match-capture-action > p {
+    display: none;
+  }
+
   .rd-match-flow > .space-y-4 > :last-child,
   .rd-match-flow > .rd-team-step > :last-child,
   .rd-match-flow > .rd-buildstep > :last-child,
@@ -4379,6 +4375,11 @@
   .rd-match-flow > .rd-statsstep > * {
     flex: none;
     margin-top: 0 !important;
+  }
+
+  /* "Cargar con capturas" en Datos de la partida: sin la aclaración, para ganar alto. */
+  .rd-match-flow .rd-match-capture-action > p {
+    display: none;
   }
 
   .rd-match-flow > .space-y-4 > :last-child,
@@ -7340,7 +7341,6 @@
 @media (min-width: 1024px) and (min-height: 501px) and (max-height: 800px) {
   .rd-library-layout:has(.rd-library-detail) {
     gap: 0.75rem;
-    padding-top: 0.75rem;
     padding-bottom: 0.75rem;
   }
 
@@ -10706,17 +10706,7 @@
 @media (min-width: 1024px) and (min-height: 501px) and (max-height: 800px) {
   .rd-page.rd-stats-layout {
     gap: 0.75rem;
-    padding-top: 0.75rem;
     padding-bottom: 0.75rem;
-  }
-
-  .rd-stats-layout .rd-page-kicker {
-    display: none;
-  }
-
-  .rd-stats-layout .rd-page-title {
-    font-size: 2.5rem;
-    line-height: 1;
   }
 
   .rd-stats-layout .rd-stats-coach {
@@ -13039,6 +13029,37 @@
   }
 }
 
+/* Encabezado de página en escritorio: mismo lugar y tamaño en todas las pestañas
+   (Dashboard, Biblioteca, Tierlist, Builds, Partidas, Estadísticas, Objetivos,
+   Sugeridor, Cómo calculamos, Perfil...). Volanta amarilla, título de 3rem y bajada,
+   con el mismo margen superior/izquierdo. !important porque algunas páginas traen
+   ajustes propios con selectores más específicos. Los títulos de pasos de un asistente
+   (por ejemplo, "Nueva meta") no son títulos de pestaña y quedan afuera. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content .rd-page:has(.rd-page-title:not(.rd-step-title)) {
+    padding-top: 1.5rem !important;
+    padding-left: 1.5rem !important;
+  }
+
+  .rd-page-kicker:not(.rd-step-title) {
+    display: flex !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .rd-page-title:not(.rd-step-title) {
+    margin-top: 0 !important;
+    font-size: 3rem !important;
+    line-height: 1 !important;
+  }
+
+  .rd-page-subtitle {
+    margin-top: 0.25rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+}
+
 /* Encabezado de página en smartphone: todas las páginas toman el del Dashboard.
    Solo queda el título (sin volanta ni bajada), con el mismo tamaño y el mismo
    margen superior/izquierdo. !important porque cada página traía sus propios
@@ -13048,6 +13069,13 @@
   .rd-main-content .rd-build-picker {
     padding-top: 0.5rem;
     padding-left: 0.75rem;
+  }
+
+  /* El título va arriba de su fila aunque al lado haya pestañas o botones más altos
+     (si la fila centra verticalmente, el título baja y queda desalineado). */
+  .rd-page .rd-page-title,
+  .rd-page :has(> .rd-page-title) {
+    align-self: flex-start !important;
   }
 
   .rd-page-kicker,
@@ -13066,6 +13094,13 @@
   .rd-main-content .rd-build-picker {
     padding-top: 0.7rem;
     padding-left: 0.75rem;
+  }
+
+  /* El título va arriba de su fila aunque al lado haya pestañas o botones más altos
+     (si la fila centra verticalmente, el título baja y queda desalineado). */
+  .rd-page .rd-page-title,
+  .rd-page :has(> .rd-page-title) {
+    align-self: flex-start !important;
   }
 
   .rd-page-kicker,
@@ -13095,4 +13130,82 @@
 .rd-library-layout .rd-champ-hero h1,
 .rd-v2-build-page .rd-v2-build-header h1 {
   padding-inline-end: 0.15em;
+}
+
+/* Carga con capturas: paso a pantalla completa (no modal). La página ocupa el alto
+   del viewport; solo scrollea el contenido del paso y las acciones quedan abajo. */
+.rd-main-content:has(.rd-capture-page) {
+  overflow: hidden;
+}
+
+.rd-page.rd-capture-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-page.rd-capture-page {
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+  }
+
+  .rd-capture-step-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .rd-capture-step-actions {
+    padding-top: 0.5rem;
+  }
+}
+
+/* Paso "Cargar con capturas": recuadros y guía compactos para entrar sin scroll. */
+.rd-capture-thumb {
+  height: clamp(3.5rem, 15dvh, 7.5rem);
+}
+
+/* Celular vertical: recuadros chicos en fila, guía más apretada y botones en una línea. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-capture-thumb {
+    height: clamp(3rem, 8.5dvh, 4.5rem);
+  }
+
+  .rd-capture-step-title {
+    margin-bottom: 0.4rem;
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .rd-capture-guide section {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .rd-capture-guide li {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .rd-capture-step-actions button {
+    padding-inline: 0.75rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
+.rd-capture-guide-cards {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (orientation: landscape), (min-width: 640px) {
+  .rd-capture-guide-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

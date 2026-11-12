@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Champion, WRItem } from '@/api/entitiesSupabase';
 import { getUserMatches, createMatch, deleteMatch, deleteMatches } from '@/api/matchesSupabase';
 import { getTierlistExecutions } from '@/api/tierlistSupabase';
-import { Plus, Swords, Search, Trophy, Shield, Skull, Trash2 } from 'lucide-react';
+import { Plus, Swords, Search, Trophy, Shield, Skull, Trash2, Camera } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import MatchForm from '@/components/matches/MatchForm';
 import MatchBuilder from '@/components/matches/MatchBuilder';
@@ -12,8 +12,12 @@ import { useAuth } from '@/lib/AuthContext';
 import { MATCH_TYPES } from '@/constants/matchTypes';
 import { toast } from '@/components/ui/use-toast';
 import { getPublishedGamePatches } from '@/api/gameCatalogSupabase';
-import { PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { MOBILE_CAPTURE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
+import { clearDraft as clearCaptureDraft, hasDraft as hasCaptureDraft } from '@/features/matchCapture/captureDraft';
 import { useT } from '@/lib/LocaleContext';
+
+// Carga con capturas: solo mobile, se descarga recién al abrirla.
+const CaptureMatchFlow = lazy(() => import('@/components/matches/capture/CaptureMatchFlow'));
 
 const showTemporaryToast = (options) => {
   const notification = toast(options);
@@ -64,6 +68,11 @@ export default function Matches() {
   const createInFlightRef = useRef(false);
   // En smartphone vertical los tres selectores comparten una fila: textos cortos.
   const compactFilters = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  // Carga con capturas: solo en dispositivos táctiles de pantalla chica (nunca en escritorio).
+  const isCaptureMobile = useMatchMedia(MOBILE_CAPTURE_QUERY);
+  const [captureSession, setCaptureSession] = useState(null); // { files } | { resume: true }
+  // Precarga leída de las capturas: abre el formulario manual ya completo.
+  const [capturePrefill, setCapturePrefill] = useState(null);
 
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
@@ -136,6 +145,43 @@ export default function Matches() {
     });
   };
 
+  const handleCaptureExtracted = (prefill) => {
+    setCaptureSession(null);
+    setShowForm(false);
+    setCapturePrefill(prefill);
+  };
+
+  // Carga con capturas (solo mobile): se ofrece en el primer paso de "Nueva partida".
+  // Si quedó una carga a medias, el mismo botón la retoma.
+  const captureDraftPending = Boolean(isCaptureMobile && user?.id && hasCaptureDraft(user.id));
+  const captureAction = isCaptureMobile && user?.id ? (
+    <button
+      type="button"
+      onClick={() => setCaptureSession(captureDraftPending ? { resume: true } : { files: [] })}
+      className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 font-semibold text-primary transition-colors hover:bg-primary/15"
+    >
+      <Camera size={18} /> {t(captureDraftPending ? 'matchCapture.actions.resume' : 'matchCapture.actions.start')}
+    </button>
+  ) : null;
+
+
+
+  const closeCapturePrefill = () => {
+    if (user?.id) clearCaptureDraft(user.id);
+    setCapturePrefill(null);
+  };
+
+  const handleCaptureSave = (record) => {
+    if (createInFlightRef.current) return;
+    createInFlightRef.current = true;
+    createMatchMutation.mutate(record, {
+      onSuccess: closeCapturePrefill,
+      onSettled: () => {
+        createInFlightRef.current = false;
+      },
+    });
+  };
+
   const deleteAllMutation = useMutation({
     mutationFn: () => deleteMatches(matches.map(m => m.id)),
     onSuccess: () => {
@@ -166,6 +212,43 @@ export default function Matches() {
       return dateB.localeCompare(dateA);
     });
 
+  if (capturePrefill && !editing) {
+    return (
+      <div className="rd-page rd-dashboard">
+        <MatchBuilder
+          key="capture-prefill"
+          champions={champions}
+          patches={gamePatches}
+          defaultPatch={latestTierlistPatch}
+          initialMatch={capturePrefill}
+          onSave={handleCaptureSave}
+          onCancel={closeCapturePrefill}
+          isSaving={createMatchMutation.isPending}
+        />
+      </div>
+    );
+  }
+
+  // Carga con capturas: paso a pantalla completa en lugar del formulario. Cancelar
+  // (o "Cargar a mano") vuelve al formulario de "Nueva partida".
+  if (isCaptureMobile && captureSession && user?.id) {
+    return (
+      <div className="rd-page rd-dashboard rd-capture-page">
+        <Suspense fallback={null}>
+          <CaptureMatchFlow
+            userId={user.id}
+            files={captureSession.files || null}
+            champions={champions}
+            defaultPatch={latestTierlistPatch}
+            onExtracted={handleCaptureExtracted}
+            onManual={() => setCaptureSession(null)}
+            onClose={() => setCaptureSession(null)}
+          />
+        </Suspense>
+      </div>
+    );
+  }
+
   if (showForm && !editing) {
     return (
       <div className="rd-page rd-dashboard">
@@ -176,6 +259,7 @@ export default function Matches() {
           onSave={handleCreateMatch}
           onCancel={() => setShowForm(false)}
           isSaving={createMatchMutation.isPending}
+          captureAction={captureAction}
         />
       </div>
     );

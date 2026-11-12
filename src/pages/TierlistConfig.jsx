@@ -86,6 +86,7 @@ export default function TierlistConfig() {
     <div className="rd-page">
       <div className="rd-tierlist-method">
         <PageHeader
+          kicker={t('tierlist.riftDeckMeta')}
           title={t('tierlist.comoCalculamosLaTierlist')}
           subtitle={t('tierlist.losPesosLasFuentes')}
         />

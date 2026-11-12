@@ -90,7 +90,7 @@ export default function Membresia() {
   if (error) {
     return (
       <div className="rd-page">
-        <PageHeader title={t('membership.membresia')} />
+        <PageHeader kicker={t('membership.kicker')} title={t('membership.membresia')} />
         <div className="rd-card p-6 text-sm text-muted-foreground">
          {t('membership.noPudimosCargarTu')}
         </div>
@@ -110,7 +110,7 @@ export default function Membresia() {
 
   return (
     <div className="rd-page space-y-6">
-      <PageHeader title={t('membership.membresia')} />
+      <PageHeader kicker={t('membership.kicker')} title={t('membership.membresia')} />
 
       <div className="rd-card p-5 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">

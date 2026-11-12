@@ -13,6 +13,7 @@ import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/ho
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import PatchSelect from '@/components/patches/PatchSelect';
+import { runeBranchesFor } from '@/features/matchCapture/captureFields';
 
 import { useSpells } from '@/hooks/useSpells';
 import { runeBranchLabel } from '@/utils/runeBranches';
@@ -148,7 +149,17 @@ export function StatInput({ label, value, onChange, placeholder = '—', autoFoc
 
 const BUILDER_STEPS = ['info', 'champion', 'allies', 'enemies', 'build', 'stats'];
 
-export default function MatchBuilder({ champions: fallbackChampions = [], patches = [], defaultPatch = '', onSave, onCancel, isSaving = false }) {
+const toInputValue = value => (value === null || value === undefined ? '' : String(value));
+
+/**
+ * initialMatch (opcional): precarga del formulario, por ejemplo desde la carga con
+ * capturas. Nombres de catálogo, no objetos: { patch, date, hour, type, lane,
+ * own_champion_name, allies: [{ name, role }], enemies: [{ name, role }], items_used,
+ * runes_used, spells_used, result, kills, deaths, assists, gold, duration_minutes,
+ * review: claves de matchCapture.fields.* a revisar }.
+ */
+/** captureAction (opcional): acción extra en "Datos de la partida" (p. ej. cargar con capturas). */
+export default function MatchBuilder({ champions: fallbackChampions = [], patches = [], defaultPatch = '', onSave, onCancel, isSaving = false, initialMatch = null, captureAction = null }) {
   const t = useT();
   const { entityName } = useCatalogText();
   const clientRequestIdRef = useRef(null);
@@ -157,7 +168,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       || `match-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const [patch, setPatch] = useState(defaultPatch);
+  const [patch, setPatch] = useState(initialMatch?.patch || defaultPatch);
   const patchWasEdited = useRef(false);
 
   const [step, setStep] = useState('info'); // info, champion, allies, enemies, build, stats
@@ -166,7 +177,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const [buildPanel, setBuildPanel] = useState('items');
-  const [lane, setLane] = useState('');
+  const [lane, setLane] = useState(initialMatch?.lane || '');
   const [myChampion, setMyChampion] = useState(null);
   const [allyChampions, setAllyChampions] = useState([]);
   const [enemyChampions, setEnemyChampions] = useState([]);
@@ -184,7 +195,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
 
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedRunes, setSelectedRunes] = useState([]);
-  const [selectedSpells, setSelectedSpells] = useState([]);
+  const [selectedSpells, setSelectedSpells] = useState(() => (initialMatch?.spells_used || []).slice(0, 2));
 
   const handleSelectAlly = (champ, role) => {
     if (champ && champ.id) {
@@ -207,21 +218,21 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       }
     }
   };
-  const [result, setResult] = useState('win');
-  const [kills, setKills] = useState('');
-  const [deaths, setDeaths] = useState('');
-  const [assists, setAssists] = useState('');
-  const [gold, setGold] = useState('');
-  const [duration, setDuration] = useState('');
+  const [result, setResult] = useState(initialMatch?.result || 'win');
+  const [kills, setKills] = useState(toInputValue(initialMatch?.kills));
+  const [deaths, setDeaths] = useState(toInputValue(initialMatch?.deaths));
+  const [assists, setAssists] = useState(toInputValue(initialMatch?.assists));
+  const [gold, setGold] = useState(toInputValue(initialMatch?.gold));
+  const [duration, setDuration] = useState(toInputValue(initialMatch?.duration_minutes));
   const [side, setSide] = useState('');
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [notes, setNotes] = useState('');
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  const [date, setDate] = useState(todayStr);
-  const [hour, setHour] = useState('');
-  const [matchType, setMatchType] = useState(DEFAULT_MATCH_TYPE);
+  const [date, setDate] = useState(initialMatch?.date || todayStr);
+  const [hour, setHour] = useState(initialMatch?.hour || '');
+  const [matchType, setMatchType] = useState(initialMatch?.type || DEFAULT_MATCH_TYPE);
 
   useEffect(() => {
     if (defaultPatch && !patch && !patchWasEdited.current) {
@@ -240,6 +251,42 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   };
   const [primaryBranch, setPrimaryBranch] = useState('Dominación');
   const [secondaryBranch, setSecondaryBranch] = useState('Precisión');
+
+  // Precarga (carga con capturas): campeones, objetos y runas necesitan el catálogo del
+  // parche, así que se resuelven una sola vez cuando llega.
+  const prefillPendingRef = useRef(Boolean(initialMatch));
+  useEffect(() => {
+    if (!prefillPendingRef.current || !catalog) return;
+    prefillPendingRef.current = false;
+    const catalogChampions = catalog.champions || [];
+    const championByName = name => catalogChampions.find(champion => champion.name === name);
+    const toSlots = slots => (slots || [])
+      .map(slot => {
+        const champion = championByName(slot.name);
+        return champion ? { ...champion, role: slot.role } : null;
+      })
+      .filter(Boolean);
+
+    const own = championByName(initialMatch.own_champion_name);
+    const allies = toSlots(initialMatch.allies);
+    if (own) {
+      setMyChampion(own);
+      setAllyChampions(initialMatch.lane
+        ? [...allies.filter(ally => ally.role !== initialMatch.lane), { ...own, role: initialMatch.lane }]
+        : allies);
+    } else {
+      setAllyChampions(allies);
+    }
+    setEnemyChampions(toSlots(initialMatch.enemies));
+
+    const resolvedItems = (initialMatch.items_used || []).map(name => (catalog.items || []).find(item => item.name === name)).filter(Boolean);
+    const resolvedRunes = (initialMatch.runes_used || []).map(name => (catalog.runes || []).find(rune => rune.name === name)).filter(Boolean);
+    setSelectedItems(resolvedItems);
+    setSelectedRunes(resolvedRunes);
+    const branches = runeBranchesFor(resolvedRunes, PRIMARY_BRANCHES);
+    setPrimaryBranch(branches.primary);
+    setSecondaryBranch(branches.secondary);
+  }, [catalog, initialMatch]);
 
   // Paso "Rol y campeón": la línea y el campeón propio se eligen juntos. Tu campeón
   // ocupa el slot de tu línea en el equipo aliado; si cambia la línea, se mueve.
@@ -507,6 +554,21 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
         ))}
       </div>
 
+      {/* Precarga desde capturas: aviso compacto con lo que conviene revisar. */}
+      {initialMatch && (
+        <p className="rd-match-prefill rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-foreground/90">
+          {t('matchCapture.prefill.notice')}
+          {initialMatch.review?.length > 0 && (
+            <span className="text-amber-300"> {t('matchCapture.prefill.review', { fields: initialMatch.review.map(key => t(`matchCapture.fields.${key}`)).join(', ') })}</span>
+          )}
+          {initialMatch.textError && (
+            <span className="mt-1 block text-red-300">
+              {t('matchCapture.prefill.textFailed', { reason: t(`matchCapture.errors.${initialMatch.textError}`) })}
+            </span>
+          )}
+        </p>
+      )}
+
       {/* Step: Info (fecha y parche) */}
       {step === 'info' && (
         <div className="space-y-4">
@@ -514,6 +576,12 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
             <h2 className="font-rajdhani font-bold text-2xl text-foreground mb-2">{t('matches.datosDeLaPartida')}</h2>
             <p className="text-muted-foreground text-sm">{t('matches.elegiCuandoJugasteEl')}</p>
           </div>
+          {captureAction && !initialMatch && (
+            <div className="rd-match-capture-action space-y-1">
+              {captureAction}
+              <p className="text-center text-xs text-muted-foreground">{t('matchCapture.actions.orManual')}</p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-muted-foreground block mb-1">{t('common.date')}</label>
@@ -540,6 +608,10 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
             </div>
           </div>
           <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onCancel}
+              className="flex-1 px-4 py-2 rounded-lg font-medium text-foreground border border-border hover:border-border/80 transition-colors">
+              {t('common.cancel')}
+            </button>
             <button onClick={() => setStep('champion')}
               className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
               {t('common.next')}

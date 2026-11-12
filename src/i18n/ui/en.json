@@ -1177,7 +1177,8 @@
       "1": "month",
       "3": "3 months",
       "12": "year"
-    }
+    },
+    "kicker": "Rift Deck Premium"
   },
   "notFound": {
     "pageNotFound": "Page Not Found",
@@ -1385,7 +1386,8 @@
       "champion": "Champions",
       "item": "Items",
       "rune": "Runes"
-    }
+    },
+    "kicker": "Rift Deck Account"
   },
   "bugReport": {
     "reportarBug": "Report a Bug",
@@ -2134,5 +2136,98 @@
     "Utilidad": "Utility",
     "Velocidad": "Speed",
     "Visión": "Vision"
+  },
+  "matchCapture": {
+    "title": "Log from screenshots",
+    "captureAlt": "Screenshot {n}",
+    "actions": {
+      "start": "Log from screenshots",
+      "resume": "Resume logging",
+      "manual": "Log manually",
+      "retry": "Try again",
+      "discard": "Discard",
+      "analyze": "Analyze screenshots",
+      "addCapture": "Add screenshot",
+      "removeCapture": "Remove screenshot {n}",
+      "viewCapture": "View screenshot {n}",
+      "changeCaptures": "Change screenshots",
+      "closePreview": "Close preview",
+      "orManual": "or fill in the details manually below",
+      "chooseCaptures": "Choose screenshots"
+    },
+    "status": {
+      "preparing": "Preparing screenshots...",
+      "processing": "Reading the match...",
+      "processingHint": "This usually takes a few seconds. If you leave the app, you'll pick up where you left off.",
+      "references": "Preparing reference champions...",
+      "icons": "Identifying items, runes and spells..."
+    },
+    "fields": {
+      "champion": "Champion",
+      "result": "Result",
+      "kills": "Kills",
+      "deaths": "Deaths",
+      "assists": "Assists",
+      "duration": "Duration (min)",
+      "gold": "Gold",
+      "lane": "Lane",
+      "items": "Items",
+      "runes": "Runes",
+      "spells": "Spells",
+      "allies": "Your team",
+      "enemies": "Enemy team",
+      "type": "Match type"
+    },
+    "errors": {
+      "network_error": "We couldn't connect. Check your connection.",
+      "model_timeout": "Reading took too long.",
+      "model_unavailable": "The reading service is unavailable right now.",
+      "model_busy": "The reading service is busy. Try again in a bit.",
+      "model_invalid_output": "We couldn't read the screenshots properly.",
+      "model_refused": "We couldn't process these screenshots.",
+      "internal_error": "Something went wrong reading the screenshots.",
+      "invalid_image": "We couldn't open one of the images.",
+      "image_too_large": "One of the screenshots is too large.",
+      "too_many_images": "You can upload up to 2 screenshots per match: the scoreboard and the rune tab.",
+      "rate_limited": "You've hit the hourly reading limit. Try again later.",
+      "unauthorized": "Your session expired. Log in again.",
+      "not_configured": "Logging from screenshots isn't available yet.",
+      "manualHint": "You can try again or log the match manually.",
+      "catalog_unavailable": "We couldn't load the champion and item catalog.",
+      "model_error": "The reading service returned an error."
+    },
+    "prefill": {
+      "notice": "We filled in the match from your screenshots. Check each step and save; only the side is left.",
+      "review": "Double-check: {fields}.",
+      "textFailed": "We couldn't read the text in your screenshots ({reason}): fill in K/D/A, gold, duration and result manually."
+    },
+    "review": {
+      "title": "Check your screenshots",
+      "hint": "Upload 2 screenshots from the same match: the scoreboard and the Stats › Rune tab.",
+      "count": "{count} of {max} screenshots"
+    },
+    "guide": {
+      "step1": {
+        "label": "Screenshot 1",
+        "title": "Scoreboard",
+        "a": "When the match ends, stay on the results screen (all 10 players with K/D/A, gold and items).",
+        "b": "Your row must be highlighted in gold: don't tap any player.",
+        "c": "Full-screen screenshot."
+      },
+      "step2": {
+        "label": "Screenshot 2",
+        "title": "Runes",
+        "a": "Tap the bar-chart icon (bottom left).",
+        "b": "Pick the RUNE tab with your player selected: your 5 runes show large in the center.",
+        "c": "Full-screen screenshot."
+      },
+      "requirements": {
+        "title": "What they must look like",
+        "a": "Full screen, with the phone in landscape.",
+        "b": "No cropping, edits, filters or anything on top (notifications, volume).",
+        "c": "Sharp: no photos of another screen or frames from a video."
+      },
+      "result": "We fill in K/D/A, gold, duration, result, match type, all 10 champions with their lane, and your items, spells and runes. You pick the side and check everything before saving. Screenshots are not stored."
+    }
   }
 }

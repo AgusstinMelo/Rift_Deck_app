@@ -1177,7 +1177,8 @@
       "1": "mes",
       "3": "3 meses",
       "12": "año"
-    }
+    },
+    "kicker": "Rift Deck Premium"
   },
   "notFound": {
     "pageNotFound": "Página no encontrada",
@@ -1385,7 +1386,8 @@
       "champion": "Campeones",
       "item": "Ítems",
       "rune": "Runas"
-    }
+    },
+    "kicker": "Rift Deck Cuenta"
   },
   "bugReport": {
     "reportarBug": "Reportar Bug",
@@ -2134,5 +2136,98 @@
     "Utilidad": "Utilidad",
     "Velocidad": "Velocidad",
     "Visión": "Visión"
+  },
+  "matchCapture": {
+    "title": "Cargar con capturas",
+    "captureAlt": "Captura {n}",
+    "actions": {
+      "start": "Cargar con capturas",
+      "resume": "Continuar carga",
+      "manual": "Cargar a mano",
+      "retry": "Reintentar",
+      "discard": "Descartar carga",
+      "analyze": "Analizar capturas",
+      "addCapture": "Agregar captura",
+      "removeCapture": "Quitar captura {n}",
+      "viewCapture": "Ver captura {n}",
+      "changeCaptures": "Cambiar capturas",
+      "closePreview": "Cerrar vista previa",
+      "orManual": "o completá los datos a mano abajo",
+      "chooseCaptures": "Elegir capturas"
+    },
+    "status": {
+      "preparing": "Preparando capturas...",
+      "processing": "Leyendo la partida...",
+      "processingHint": "Suele tardar unos segundos. Si salís de la app, al volver la carga sigue donde la dejaste.",
+      "references": "Preparando campeones de referencia...",
+      "icons": "Identificando objetos, runas y hechizos..."
+    },
+    "fields": {
+      "champion": "Campeón",
+      "result": "Resultado",
+      "kills": "Asesinatos",
+      "deaths": "Muertes",
+      "assists": "Asistencias",
+      "duration": "Duración (min)",
+      "gold": "Oro",
+      "lane": "Línea",
+      "items": "Objetos",
+      "runes": "Runas",
+      "spells": "Hechizos",
+      "allies": "Tu equipo",
+      "enemies": "Equipo rival",
+      "type": "Tipo de partida"
+    },
+    "errors": {
+      "network_error": "No pudimos conectarnos. Revisá tu conexión.",
+      "model_timeout": "La lectura tardó demasiado.",
+      "model_unavailable": "El servicio de lectura no está disponible en este momento.",
+      "model_busy": "El servicio de lectura está saturado. Probá en un rato.",
+      "model_invalid_output": "No pudimos leer bien las capturas.",
+      "model_refused": "No pudimos procesar estas capturas.",
+      "internal_error": "Algo salió mal al leer las capturas.",
+      "invalid_image": "No pudimos abrir alguna de las imágenes.",
+      "image_too_large": "Alguna captura es demasiado pesada.",
+      "too_many_images": "Podés subir hasta 2 capturas por partida: el marcador y la pestaña de runas.",
+      "rate_limited": "Llegaste al límite de lecturas por hora. Probá más tarde.",
+      "unauthorized": "Tu sesión expiró. Volvé a ingresar.",
+      "not_configured": "La carga con capturas no está disponible todavía.",
+      "manualHint": "Podés reintentar o cargar la partida a mano.",
+      "catalog_unavailable": "No pudimos cargar el catálogo de campeones y objetos.",
+      "model_error": "El servicio de lectura respondió con un error."
+    },
+    "prefill": {
+      "notice": "Completamos la partida con tus capturas. Revisá cada paso y guardá; solo falta el lado.",
+      "review": "Revisá especialmente: {fields}.",
+      "textFailed": "No pudimos leer el texto de las capturas ({reason}): completá K/D/A, oro, duración y resultado a mano."
+    },
+    "review": {
+      "title": "Revisá las capturas",
+      "hint": "Subí 2 capturas de la misma partida: el marcador y la pestaña Estadísticas › Runa.",
+      "count": "{count} de {max} capturas"
+    },
+    "guide": {
+      "step1": {
+        "label": "Captura 1",
+        "title": "Marcador",
+        "a": "Al terminar, quedate en la pantalla de resultados (los 10 jugadores con K/D/A, oro y objetos).",
+        "b": "Tu fila tiene que verse resaltada en dorado: no toques a ningún jugador.",
+        "c": "Captura de la pantalla completa."
+      },
+      "step2": {
+        "label": "Captura 2",
+        "title": "Runas",
+        "a": "Tocá el ícono de barras (abajo a la izquierda).",
+        "b": "Elegí la pestaña RUNA, con tu jugador seleccionado: tus 5 runas se ven grandes en el centro.",
+        "c": "Captura de la pantalla completa."
+      },
+      "requirements": {
+        "title": "Cómo tienen que ser",
+        "a": "Pantalla completa, con el celular en horizontal.",
+        "b": "Sin recortes, ediciones, filtros ni nada encima (notificaciones, volumen).",
+        "c": "Nítidas: no sirven fotos a otra pantalla ni capturas de video."
+      },
+      "result": "Completamos K/D/A, oro, duración, resultado, tipo, los 10 campeones con su línea, tus objetos, hechizos y runas. El lado lo elegís vos y revisás todo antes de guardar. Las capturas no se guardan."
+    }
   }
 }

@@ -830,7 +830,7 @@ export default function Stats() {
   if (allMatches.length === 0) {
     return (
       <div className="rd-page rd-dashboard flex flex-col">
-        <PageHeader title={t('stats.estadisticasPersonales')} />
+        <PageHeader kicker={t('stats.riftDeckAnalytics')} title={t('stats.estadisticasPersonales')} />
         <div className="rd-card p-6 flex flex-1 items-center justify-center">
           <EmptyState
             icon={BarChart3}
@@ -846,7 +846,7 @@ export default function Stats() {
     return (
       <div className="rd-page space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <PageHeader title={t('stats.estadisticasPersonales')} />
+          <PageHeader kicker={t('stats.riftDeckAnalytics')} title={t('stats.estadisticasPersonales')} />
           <div className="flex items-center gap-3 rd-status-pill">
             <BarChart3 size={16} className="text-primary" />
             <span className="text-xs text-muted-foreground">{t('stats.performancePersonal')}</span>
