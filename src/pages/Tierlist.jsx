@@ -167,7 +167,8 @@ export default function Tierlist() {
   useTierTileSize({
     scrollRef,
     groupsRef: tierGroupsRef,
-    enabled: isDesktopFit && viewMode === 'tier',
+    // Con todas las líneas hay demasiados campeones: queda el tamaño fijo y la lista scrollea.
+    enabled: isDesktopFit && viewMode === 'tier' && laneFilter !== 'all',
     layoutKey: `${isLoading}|${availableTiers.map(tier => filtered.filter(t => t.tier === tier).length).join(',')}`,
   });
 

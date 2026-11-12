@@ -6684,7 +6684,7 @@
   min-height: 0;
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-tierlist-layout) {
     overflow: hidden;
   }
@@ -6725,7 +6725,7 @@
   }
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px), (max-height: 500px) {
   .rd-tierlist-layout > * + * {
     margin-top: 1.5rem;
   }
@@ -10590,7 +10590,7 @@
   }
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-stats-layout) {
     overflow: hidden;
   }
@@ -10628,6 +10628,67 @@
 
   .rd-stats-layout .rd-analytics-panel .rd-card {
     height: 100%;
+  }
+
+  /* Coach: encabezado fijo y los consejos con el alto restante (scroll propio si no entran). */
+  .rd-stats-layout .rd-stats-coach {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-stats-layout .rd-stats-coach > * {
+    flex: none;
+  }
+
+  .rd-stats-layout .rd-stats-coach > .rd-stats-coach-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Estadísticas en escritorio con poco alto (notebooks, Windows con escalado al 125%):
+   encabezado, pestañas y Coach más compactos para que el panel activo tenga más alto. */
+@media (min-width: 1024px) and (min-height: 501px) and (max-height: 800px) {
+  .rd-page.rd-stats-layout {
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-page-kicker {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-page-title {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-coach {
+    padding: 1rem 1.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header img {
+    width: 3rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header h2 + p,
+  .rd-stats-layout .rd-stats-coach-header > div:last-child > p {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight {
+    padding: 1rem 1.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action {
+    height: auto;
   }
 }
 
