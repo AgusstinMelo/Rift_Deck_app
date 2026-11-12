@@ -12,7 +12,7 @@
 // hacen en el mismo formulario que la carga manual.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ImagePlus, Loader2, PencilLine, RotateCcw, ScanSearch, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ImagePlus, Loader2, PencilLine, RotateCcw, ScanSearch, Trash2 } from 'lucide-react';
 import { useT } from '@/lib/LocaleContext';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
 import { Spell } from '@/api/entitiesSupabase';
@@ -85,6 +85,9 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
   const [images, setImages] = useState([]);
   const [errorCode, setErrorCode] = useState('');
   const [preview, setPreview] = useState(null);
+  // Resultado del análisis: se muestra en este paso (qué se completó, qué revisar y,
+  // si falló la lectura de texto, por qué) antes de pasar al formulario.
+  const [result, setResult] = useState(null);
   const runRef = useRef(0);
   const addInputRef = useRef(null);
 
@@ -151,7 +154,8 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
         textError: modelError ? (KNOWN_ERRORS.has(modelError.code) ? modelError.code : 'internal_error') : null,
       };
       saveDraftState(userId, { stage: 'ready', prefill });
-      onExtracted(prefill);
+      setResult(prefill);
+      setStage('done');
     } catch (error) {
       if (run !== runRef.current) return;
       fail(error instanceof MatchCaptureError ? error.code : 'internal_error');
@@ -196,7 +200,8 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
       if (cancelled) return;
       setImages(draftImages);
       if (draft?.stage === 'ready' && draft.prefill) {
-        onExtracted(draft.prefill);
+        setResult(draft.prefill);
+        setStage('done');
       } else if (draft?.stage === 'uploading' && draftImages.length) {
         // Se cortó mientras analizaba: se vuelve a analizar con las mismas capturas.
         extract(draftImages);
@@ -259,7 +264,7 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
     <section className="rd-capture-step flex min-h-0 flex-1 flex-col" aria-label={t('matchCapture.title')}>
       <div className="rd-capture-step-inner flex min-h-0 flex-1 flex-col">
         <h1 className="rd-capture-step-title mb-3 font-rajdhani text-2xl font-bold text-foreground">
-          {stage === 'review' ? t(images.length ? 'matchCapture.review.title' : 'matchCapture.title') : t('matchCapture.title')}
+          {stage === 'done' ? t('matchCapture.review.doneTitle') : stage === 'review' ? t(images.length ? 'matchCapture.review.title' : 'matchCapture.title') : t('matchCapture.title')}
         </h1>
 
         <div className="rd-capture-step-body min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3">
@@ -300,6 +305,25 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
             </div>
           )}
 
+          {stage === 'done' && result && (
+            <div className="space-y-3" role="status">
+              <div className="flex items-start gap-3 rounded-xl border border-primary/25 bg-primary/5 p-3">
+                <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-primary" />
+                <p className="text-sm text-foreground/90">{t('matchCapture.prefill.notice')}</p>
+              </div>
+              {result.review?.length > 0 && (
+                <p className="rounded-xl border border-amber-400/30 bg-amber-500/5 p-3 text-sm text-amber-200">
+                  {t('matchCapture.prefill.review', { fields: result.review.map(key => t(`matchCapture.fields.${key}`)).join(', ') })}
+                </p>
+              )}
+              {result.textError && (
+                <p className="rounded-xl border border-red-400/30 bg-red-500/5 p-3 text-sm text-red-300">
+                  {t('matchCapture.prefill.textFailed', { reason: t(`matchCapture.errors.${result.textError}`) })}
+                </p>
+              )}
+            </div>
+          )}
+
           {stage === 'error' && (
             <div className="flex flex-col items-center gap-3 py-10 text-center" role="alert">
               <AlertTriangle size={32} className="text-red-400" />
@@ -325,6 +349,16 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
                   <ImagePlus size={18} /> {t('matchCapture.actions.chooseCaptures')}
                 </button>
               )}
+            </div>
+          )}
+          {stage === 'done' && result && (
+            <div className="flex gap-2">
+              <button type="button" onClick={handleCancel} className={secondaryButton}>
+                {t('common.cancel')}
+              </button>
+              <button type="button" onClick={() => onExtracted(result)} className={primaryButton}>
+                {t('matchCapture.actions.continueToForm')} <ArrowRight size={18} />
+              </button>
             </div>
           )}
           {stage === 'error' && (

@@ -554,21 +554,6 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
         ))}
       </div>
 
-      {/* Precarga desde capturas: aviso compacto con lo que conviene revisar. */}
-      {initialMatch && (
-        <p className="rd-match-prefill rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-foreground/90">
-          {t('matchCapture.prefill.notice')}
-          {initialMatch.review?.length > 0 && (
-            <span className="text-amber-300"> {t('matchCapture.prefill.review', { fields: initialMatch.review.map(key => t(`matchCapture.fields.${key}`)).join(', ') })}</span>
-          )}
-          {initialMatch.textError && (
-            <span className="mt-1 block text-red-300">
-              {t('matchCapture.prefill.textFailed', { reason: t(`matchCapture.errors.${initialMatch.textError}`) })}
-            </span>
-          )}
-        </p>
-      )}
-
       {/* Step: Info (fecha y parche) */}
       {step === 'info' && (
         <div className="space-y-4">

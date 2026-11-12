@@ -2153,7 +2153,8 @@
       "changeCaptures": "Trocar capturas",
       "closePreview": "Fechar pré-visualização",
       "orManual": "ou preencha os dados manualmente abaixo",
-      "chooseCaptures": "Escolher capturas"
+      "chooseCaptures": "Escolher capturas",
+      "continueToForm": "Continuar para o formulário"
     },
     "status": {
       "preparing": "Preparando capturas...",
@@ -2204,7 +2205,8 @@
     "review": {
       "title": "Revise as capturas",
       "hint": "Envie 2 capturas da mesma partida: o placar e a aba Estatísticas › Runa.",
-      "count": "{count} de {max} capturas"
+      "count": "{count} de {max} capturas",
+      "doneTitle": "Capturas analisadas"
     },
     "guide": {
       "step1": {
