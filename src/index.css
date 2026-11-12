@@ -590,7 +590,7 @@
   line-height: 1.3;
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-dashboard-tabs) {
     overflow: hidden;
   }
@@ -611,13 +611,36 @@
   }
 }
 
+/* Dashboard en escritorio con poco alto (notebooks, Windows con escalado al 125%):
+   encabezado más bajo para que el panel activo tenga más alto. */
+@media (min-width: 1024px) and (min-height: 501px) and (max-height: 800px) {
+  .rd-page.rd-dashboard-tabs {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .rd-dashboard-tabs .rd-dashboard-kicker {
+    display: none;
+  }
+
+  .rd-dashboard-tabs .rd-page-title {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .rd-dashboard-match-list .rd-dashboard-row > :first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+}
+
 @media (max-width: 1279px) {
   .rd-main-meta-layout {
     grid-template-columns: minmax(240px, 1fr) repeat(2, minmax(190px, 1fr));
   }
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px), (max-height: 500px) {
   .rd-dashboard-tabs {
     display: block;
   }
@@ -2381,7 +2404,7 @@
   margin-bottom: 1.5rem;
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-matches-layout) {
     overflow: hidden;
   }
@@ -2424,7 +2447,7 @@
   }
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px), (max-height: 500px) {
   .rd-matches-layout > * + * {
     margin-top: 1.25rem;
   }
@@ -3136,7 +3159,7 @@
 
 /* Detalle de un objetivo: encabezado y franja de tarjetas fijos; sólo scrollea la lista de partidas o check-ins.
    Se activa únicamente cuando la página contiene el detalle (no al editar una partida desde él). */
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-goal-detail) {
     overflow: hidden;
   }
@@ -3391,7 +3414,7 @@
 
 /* Creador de builds: franja del campeón arriba y tres columnas (objetos · runas y hechizos · stats)
    que llenan el alto. Desde 1280px, porque tres columnas no entran bien en menos ancho. */
-@media (min-width: 1280px) and (min-height: 700px) {
+@media (min-width: 1280px) and (min-height: 501px) {
   .rd-main-content:has(.rd-buildws) {
     overflow: hidden;
   }
@@ -3474,6 +3497,36 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+  }
+}
+
+/* Creador de builds en escritorio con poco alto (notebooks, Windows con escalado al 125%):
+   menos aire entre tarjetas para que objetos, runas y stats tengan más alto. */
+@media (min-width: 1280px) and (min-height: 501px) and (max-height: 800px) {
+  .rd-page.rd-buildws {
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .rd-buildws > .rd-buildws-body,
+  .rd-buildws-items,
+  .rd-buildws-side {
+    gap: 0.75rem;
+  }
+
+  .rd-buildws-stats {
+    gap: 0.5rem;
+  }
+
+  .rd-buildws-pool.p-4,
+  .rd-buildws-spells.p-4,
+  .rd-buildws-stats > details.p-4 {
+    padding: 0.75rem 1rem;
+  }
+
+  .rd-buildws-stats > .rd-stats-panel {
+    padding-block: 0.75rem;
   }
 }
 
@@ -5806,7 +5859,7 @@
 
 /* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
    y las acciones del paso quedan siempre visibles abajo. */
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-goal-flow) {
     overflow: hidden;
   }
@@ -5908,7 +5961,7 @@
   min-height: 0;
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-goals-layout) {
     overflow: hidden;
   }
@@ -5997,13 +6050,13 @@
   display: none;
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px), (max-height: 500px) {
   .rd-goals-carousel > * + * {
     margin-top: 0.75rem;
   }
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px), (max-height: 500px) {
   .rd-goals-layout > * + *,
   .rd-goals-panel > * + * {
     margin-top: 1.25rem;
@@ -7184,7 +7237,7 @@
   min-height: 0;
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-build-picker),
   .rd-main-content:has(.rd-saved-builds-layout) {
     overflow: hidden;
@@ -7318,7 +7371,7 @@
 
 /* Builds en mobile: en desktop la separación la da el gap de la grilla; acá la
    página es un bloque y subtítulo, buscador y lista quedaban pegados. */
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px), (max-height: 500px) {
   .rd-build-picker-header,
   .rd-build-picker .rd-build-picker-filters {
     margin-bottom: 0.75rem;
@@ -9514,7 +9567,7 @@
 
 /* El layout de dos columnas aparece en xl: a partir de ahí la página entra en el
    viewport y cada columna scrollea por separado. */
-@media (min-width: 1280px) and (min-height: 700px) {
+@media (min-width: 1280px) and (min-height: 501px) {
   .rd-main-content:has(.rd-v2-build-page) {
     overflow: hidden;
   }
@@ -9599,7 +9652,7 @@
   }
 }
 
-@media (min-width: 1280px) and (min-height: 700px) and (max-height: 820px) {
+@media (min-width: 1280px) and (min-height: 501px) and (max-height: 820px) {
   .rd-v2-build-aside-scroll > .rd-card {
     padding: 1rem;
   }
@@ -11614,7 +11667,7 @@
   }
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-dashboard-composed) {
     scroll-snap-type: y proximity;
   }
@@ -11627,7 +11680,7 @@
   }
 }
 
-@media (max-height: 699px), (max-width: 1023px) {
+@media (max-height: 500px), (max-width: 1023px) {
   .rd-viewport-section {
     scroll-snap-align: none;
   }
@@ -12845,7 +12898,7 @@
 
 /* Cómo calculamos la tierlist (escritorio): la página ocupa el alto del viewport
    y solo la lista de últimas ejecuciones scrollea por dentro. */
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-tierlist-method) {
     overflow: hidden;
   }
