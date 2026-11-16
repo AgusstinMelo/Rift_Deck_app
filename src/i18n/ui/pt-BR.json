@@ -2213,7 +2213,7 @@
         "label": "Captura 1",
         "title": "Placar",
         "a": "Ao terminar, fique na tela de resultados (os 10 jogadores com K/D/A, ouro e itens).",
-        "b": "Sua linha precisa aparecer destacada em dourado: não toque em nenhum jogador.",
+        "b": "Não toque em nenhum jogador.",
         "c": "Captura da tela inteira."
       },
       "step2": {

@@ -2213,7 +2213,7 @@
         "label": "Captura 1",
         "title": "Marcador",
         "a": "Al terminar, quédate en la pantalla de resultados (los 10 jugadores con K/D/A, oro y objetos).",
-        "b": "Tu fila tiene que verse resaltada en dorado: no toques a ningún jugador.",
+        "b": "No toques a ningún jugador.",
         "c": "Captura de la pantalla completa."
       },
       "step2": {

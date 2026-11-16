@@ -2213,7 +2213,7 @@
         "label": "Screenshot 1",
         "title": "Scoreboard",
         "a": "When the match ends, stay on the results screen (all 10 players with K/D/A, gold and items).",
-        "b": "Your row must be highlighted in gold: don't tap any player.",
+        "b": "Don't tap any player.",
         "c": "Full-screen screenshot."
       },
       "step2": {
