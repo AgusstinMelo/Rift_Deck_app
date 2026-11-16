@@ -155,7 +155,7 @@ function ScreenshotFrame({ src, mobileSrc, alt, eager = false, className = '' })
 
 // Lo que el análisis va sumando a medida que se registran partidas. Los umbrales siguen a
 // la app: la ficha de campeón deja de ser "muestra pequeña" con 5 partidas y el Coach
-// empieza a comparar tendencias desde 12 (hooks/useInsights.js).
+// empieza a encontrar patrones sólidos desde unas 12 (src/features/coach).
 const MILESTONES = [
   { games: 1, get title() { return tr('home.tuDashboard'); }, get text() { return tr('home.winrateKdaRachaY'); }, icon: LayoutDashboard },
   { games: 1, get title() { return tr('home.estadisticasPorCampeon'); }, get text() { return tr('home.dondeRindesMejorPor'); }, icon: BarChart3 },

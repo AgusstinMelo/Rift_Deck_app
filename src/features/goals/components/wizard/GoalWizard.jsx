@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { notify } from '@/features/goals/notify';
 import { detectTimeZone } from '../../engine/period';
 import { useGoalMutations } from '../../hooks/useGoals';
 import { useGoalCatalog } from '../../hooks/useGoalCatalog';
+import { hasMetric } from '../../metrics/index';
 import { blankDraft, buildSuggestions } from '../../suggestions';
 import { validateGoalInput } from '../../validation/goalSchema';
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '../goalUi';
@@ -13,6 +14,21 @@ import GoalExplanation from '../GoalExplanation';
 import GoalPreview from '../GoalPreview';
 import StepSelect from './StepSelect';
 import { useT } from '@/lib/LocaleContext';
+
+/**
+ * Borrador a partir de un consejo del Coach (Estadísticas → "Crear objetivo"):
+ * { metric, condition?, target, name }. Null si la métrica no existe.
+ */
+function draftFromCoach(coachGoal, timezone) {
+  if (!coachGoal || !hasMetric(coachGoal.metric)) return null;
+  const base = blankDraft(coachGoal.metric, { timezone });
+  return {
+    ...base,
+    name: coachGoal.name || base.name,
+    target: coachGoal.target ?? base.target,
+    filters: coachGoal.condition ? { ...base.filters, condition: { ...coachGoal.condition } } : base.filters,
+  };
+}
 
 const STEPS = [
   { id: 'select', label: 'goals.wizard.select' },
@@ -58,8 +74,10 @@ export default function GoalWizard({ matches }) {
   const { champions } = useGoalCatalog();
   const { create } = useGoalMutations();
 
-  const [step, setStep] = useState('select');
-  const [draft, setDraft] = useState(/** @type {any} */ (null));
+  const location = useLocation();
+  // Si se llega desde un consejo del Coach, se arranca en la configuración ya completa.
+  const [draft, setDraft] = useState(/** @type {any} */ (() => draftFromCoach(location.state?.coachGoal, timezone)));
+  const [step, setStep] = useState(() => (draft ? 'configure' : 'select'));
   const [validated, setValidated] = useState(/** @type {any} */ (null));
   const [errors, setErrors] = useState(/** @type {Record<string, string>} */ ({}));
 

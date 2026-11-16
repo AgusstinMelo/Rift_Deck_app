@@ -156,6 +156,7 @@ const toInputValue = value => (value === null || value === undefined ? '' : Stri
  * capturas. Nombres de catálogo, no objetos: { patch, date, hour, type, lane,
  * own_champion_name, allies: [{ name, role }], enemies: [{ name, role }], items_used,
  * runes_used, spells_used, result, kills, deaths, assists, gold, duration_minutes,
+ * team_kills, enemy_team_kills,
  * review: claves de matchCapture.fields.* a revisar }.
  */
 /** captureAction (opcional): acción extra en "Datos de la partida" (p. ej. cargar con capturas). */
@@ -224,6 +225,8 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
   const [assists, setAssists] = useState(toInputValue(initialMatch?.assists));
   const [gold, setGold] = useState(toInputValue(initialMatch?.gold));
   const [duration, setDuration] = useState(toInputValue(initialMatch?.duration_minutes));
+  const [teamKills, setTeamKills] = useState(toInputValue(initialMatch?.team_kills));
+  const [enemyTeamKills, setEnemyTeamKills] = useState(toInputValue(initialMatch?.enemy_team_kills));
   const [side, setSide] = useState('');
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
@@ -523,6 +526,8 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       assists: assists !== '' ? Number(assists) : null,
       gold: gold ? Number(gold) : null,
       duration_minutes: duration ? Number(duration) : null,
+      team_kills: teamKills !== '' ? Number(teamKills) : null,
+      enemy_team_kills: enemyTeamKills !== '' ? Number(enemyTeamKills) : null,
       side,
       date,
       hour: hour || null,
@@ -1069,6 +1074,9 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
               <div className="grid grid-cols-2 gap-3">
                 <StatInput label={t('goals.stat.oro')} value={gold} onChange={setGold} placeholder={t('matches.ej9500')} />
                 <StatInput label={t('matches.duracionMin')} value={duration} onChange={setDuration} placeholder={t('matches.ej18')} />
+                {/* Kills de cada equipo (marcador de arriba): el Coach calcula participación en kills. */}
+                <StatInput label={t('matches.teamKills')} value={teamKills} onChange={setTeamKills} />
+                <StatInput label={t('matches.enemyTeamKills')} value={enemyTeamKills} onChange={setEnemyTeamKills} />
               </div>
               <p className="mt-auto text-[11px] text-muted-foreground">
                 {t('matches.losDatosVaciosSe')}

@@ -16,7 +16,8 @@
     "test:v2": "node --experimental-specifier-resolution=node --test test/buildV2/*.test.js",
     "test:goals": "node --test test/goals/*.test.js",
     "test:capture": "node --test test/matchCapture/*.test.js",
-    "test": "npm run test:v2 && npm run test:goals && npm run test:capture"
+    "test:coach": "node --test test/coach/*.test.js",
+    "test": "npm run test:v2 && npm run test:goals && npm run test:capture && npm run test:coach"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

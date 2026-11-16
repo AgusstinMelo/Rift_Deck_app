@@ -485,6 +485,10 @@ export function readScoreboardText(image, rowY) {
     // La duración leída en el celular es un respaldo (texto muy chico): siempre queda
     // para revisar y no pisa lo que lea el modelo.
     duration_seconds: duration.seconds !== null ? { value: duration.seconds, confidence: 'medium' } : null,
+    // Puntajes de arriba: kills de tu equipo (azul) y del rival (rojo). Se guardan en la
+    // partida para que el Coach calcule participación en kills.
+    team_kills: blue ? { value: blue.value, confidence: teamCheck === true ? 'high' : 'medium' } : null,
+    enemy_team_kills: red ? { value: red.value, confidence: teamCheck === true ? 'high' : 'medium' } : null,
     teamCheck,
     raw: { kda: kdaRead.text, gold: goldRead.text, duration: duration.raw, blue: blue?.value ?? null, red: red?.value ?? null },
   };

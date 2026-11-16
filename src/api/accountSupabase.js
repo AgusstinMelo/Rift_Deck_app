@@ -8,6 +8,7 @@ const USER_TABLES = [
   { table: "builds", idColumn: "user_id", legacyEmailColumn: "created_by" },
   { table: "personal_goals", idColumn: "user_id" },
   { table: "personal_goal_checkins", idColumn: "user_id" },
+  { table: "coach_insight_log", idColumn: "user_id" },
   { table: "bug_reports", idColumn: "user_id" },
   { table: "memberships", idColumn: "user_id" },
 ];

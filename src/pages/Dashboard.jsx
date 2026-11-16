@@ -17,14 +17,14 @@ import {
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
-import { getTierlistEntries, getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
+import { getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
 import { getActivePatchVersion } from '@/api/patchesSupabase';
 import { useAuth } from '@/lib/AuthContext';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import TierBadge from '@/components/ui/TierBadge';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
-import { computeInsights } from '@/hooks/useInsights';
+import { useCoachReport } from '@/hooks/useCoachReport';
 import { filterByPatch, getPatchGroup, patchMatchesSelection } from '@/utils/patches';
 import { matchKda } from '@/domain/matchStats';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
@@ -124,16 +124,6 @@ export default function Dashboard() {
     .filter(execution => execution.status === 'success' || execution.status === 'partial')
     .filter(execution => patchMatchesSelection(execution.patch, patchFilter));
   const latestSuccessExec = successfulExecutions[0];
-  const recentSnapshotKeys = successfulExecutions
-    .filter(execution => execution.snapshot_key)
-    .slice(0, 3)
-    .map(execution => execution.snapshot_key);
-
-  const { data: tierlistHistory = [] } = useQuery({
-    queryKey: ['tierlist-all', recentSnapshotKeys],
-    queryFn: () => getTierlistEntries('-ranking_final', 2000, { snapshotKeys: recentSnapshotKeys }),
-    enabled: recentSnapshotKeys.length > 0,
-  });
   // "Meta por línea" muestra el promedio del parche; los insights usan los snapshots diarios.
   const latestPatchGroup = getPatchGroup(latestSuccessExec?.patch);
   const { data: tierlist = [] } = useQuery({
@@ -162,7 +152,7 @@ export default function Dashboard() {
   };
 
   // Los cálculos pesados se memorizan: cambiar de pestaña re-renderiza el Dashboard y,
-  // sin esto, se recalculaba todo (incluido computeInsights) en cada clic.
+  // sin esto, se recalculaba todo (incluido el Coach) en cada clic.
   const sortedMatches = useMemo(
     () => [...filterByPatch(allMatches, patchFilter)].sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a)),
     [allMatches, patchFilter],
@@ -206,18 +196,11 @@ export default function Dashboard() {
     ? (mostUsed[1].filter(match => match.result === 'win').length / mostUsed[1].length) * 100
     : null;
 
-  const topInsight = useMemo(() => computeInsights({
-    matches: sortedMatches,
-    tierlist: tierlistHistory,
-    wrItems,
-    builds,
-    champions,
-    runes,
-    spells: spellsData,
-    limit: 1,
-    minimum: 1,
+  // El Coach usa todo el historial (sus patrones no dependen del parche) y reacciona a la
+  // última partida cargada: si es reciente, su revisión es el consejo principal.
   // `t` cambia con el idioma: los textos del Coach se arman en ese idioma.
-  })[0] || null, [sortedMatches, tierlistHistory, wrItems, builds, champions, runes, spellsData, t]);
+  const coach = useCoachReport(user, { matches: allMatches, wrItems, champions, runes, limit: 1 }, [t]);
+  const topInsight = coach.insights[0] || null;
 
   const bestRecentMatch = [...recentSevenDayMatches]
     .filter(match => match.result === 'win')

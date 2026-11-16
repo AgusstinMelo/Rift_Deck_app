@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
+import { Champion, WRItem, Rune } from '@/api/entitiesSupabase';
 import { getUserMatches } from '@/api/matchesSupabase';
-import { getUserBuilds } from '@/api/buildsSupabase';
-import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
+import { getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
-import { BarChart3, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BarChart3, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight, Target } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
-import { computeInsights } from '@/hooks/useInsights';
+import { useCoachReport } from '@/hooks/useCoachReport';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { daysUntil, getMyMembership } from '@/api/membershipSupabase';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import PatchFilter from '@/components/filters/PatchFilter';
-import { filterByPatch, parsePatch, patchMatchesSelection } from '@/utils/patches';
+import { filterByPatch, parsePatch } from '@/utils/patches';
 import { matchKda, winratePct } from '@/domain/matchStats';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 import { useT } from '@/lib/LocaleContext';
@@ -763,18 +762,6 @@ export default function Stats() {
     setPatchFilter(value);
   };
 
-  const insightSnapshotKeys = tierlistExecutions
-    .filter(execution => (execution.status === 'success' || execution.status === 'partial') && execution.snapshot_key)
-    .filter(execution => patchMatchesSelection(execution.patch, patchFilter))
-    .slice(0, 5)
-    .map(execution => execution.snapshot_key);
-
-  const { data: tierlist = [] } = useQuery({
-    queryKey: ['tierlist', insightSnapshotKeys],
-    queryFn: () => getTierlistEntries('-ranking_final', 3000, { snapshotKeys: insightSnapshotKeys }),
-    enabled: insightSnapshotKeys.length > 0,
-  });
-
   const { data: champions = [] } = useQuery({
     queryKey: ['champions'],
     queryFn: () => Champion.list('name'),
@@ -785,20 +772,9 @@ export default function Stats() {
     queryFn: () => WRItem.list('name'),
   });
 
-  const { data: builds = [] } = useQuery({
-    queryKey: ['builds-insights', user?.email],
-    queryFn: () => user?.email ? getUserBuilds(user, 1000) : [],
-    enabled: !!user?.email,
-  });
-
   const { data: runes = [] } = useQuery({
     queryKey: ['runes'],
     queryFn: () => Rune.list('name'),
-  });
-
-  const { data: spells = [] } = useQuery({
-    queryKey: ['spells'],
-    queryFn: () => Spell.list('name'),
   });
 
   const getChampImg = (name) =>
@@ -813,7 +789,13 @@ export default function Stats() {
     ? allMatches
     : allMatches.filter(match => (match.type || 'ranked') === matchTypeFilter);
   const matches = filterByPatch(matchesByType, patchFilter);
-  const insightBuilds = filterByPatch(builds, patchFilter);
+  // El Coach estudia hábitos (muertes, builds contra el rival, matchups, sesiones): usa
+  // todo el historial del tipo de partida elegido, no solo el parche filtrado.
+  const coachMatches = useMemo(
+    () => (matchTypeFilter === 'all' ? allMatches : allMatches.filter(match => (match.type || 'ranked') === matchTypeFilter)),
+    [allMatches, matchTypeFilter],
+  );
+  const coach = useCoachReport(user, { matches: coachMatches, wrItems, champions, runes, limit: 8 }, [t]);
 
   if (membershipLoading || isLoading) {
     return (
@@ -1052,7 +1034,7 @@ export default function Stats() {
     .sort((a, b) => b.total - a.total || a.wr - b.wr)
     .slice(0, 10);
 
-  const insights = computeInsights({ matches, tierlist, wrItems, builds: insightBuilds, champions, runes, spells });
+  const insights = coach.insights;
   // En smartphone no entran dos consejos legibles: va uno por página.
   const insightsPerPage = isPhoneLandscape || isPhonePortrait ? 1 : 2;
   const coachPageCount = Math.max(1, Math.ceil(insights.length / insightsPerPage));
@@ -1344,6 +1326,9 @@ export default function Stats() {
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
                       {String(effectiveCoachPage * insightsPerPage + i + 1).padStart(2, '0')} · {insight.domain}
+                      {coach.historyReady && insight.isNew && (
+                        <span className="ml-2 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-semibold tracking-[0.12em] text-primary">{t('coachEngine.ui.new')}</span>
+                      )}
                     </p>
                     <h3 className="font-rajdhani text-xl font-bold leading-tight text-foreground">{insight.title}</h3>
                   </div>
@@ -1367,9 +1352,20 @@ export default function Stats() {
 
                 <div className="rd-stats-insight-spacer min-h-4 flex-1" aria-hidden="true" />
 
-                <div className="rd-stats-insight-action flex items-start gap-2 pt-4 border-t border-border/50 xl:h-[88px] xl:shrink-0">
+                <div className="rd-stats-insight-action flex items-start gap-2 pt-4 border-t border-border/50 xl:min-h-[88px] xl:shrink-0">
                   <ArrowRight size={14} className="text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">{t('coach.consejo')}</span> {insight.action}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs leading-relaxed text-muted-foreground"><span className="text-foreground font-medium">{t('coach.consejo')}</span> {insight.action}</p>
+                    {insight.goal && (
+                      <Link
+                        to="/objetivos/nuevo"
+                        state={{ coachGoal: insight.goal }}
+                        className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                      >
+                        <Target size={12} /> {t('coachEngine.ui.createGoal')}
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </article>
             ))}

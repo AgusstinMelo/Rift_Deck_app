@@ -165,6 +165,9 @@ export function fieldsToPrefill(modelFields, codeMaps, { defaultPatch = '', now 
     assists: numberOrNull('assists'),
     gold: numberOrNull('gold'),
     duration_minutes: secondsToMinutes(value('duration_seconds')),
+    // Solo de la lectura local del marcador (el modelo no los extrae).
+    team_kills: scoreboard?.text?.team_kills?.value ?? null,
+    enemy_team_kills: scoreboard?.text?.enemy_team_kills?.value ?? null,
     review,
   };
 }

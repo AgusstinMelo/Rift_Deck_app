@@ -17,6 +17,7 @@ const corsHeaders = {
 const DELETIONS: Array<[string, string, "id" | "email"]> = [
   ["personal_goal_checkins", "user_id", "id"],
   ["personal_goals", "user_id", "id"],
+  ["coach_insight_log", "user_id", "id"],
   ["matches", "user_id", "id"],
   ["matches", "created_by", "email"],
   ["builds", "user_id", "id"],

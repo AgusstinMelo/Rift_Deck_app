@@ -181,6 +181,8 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
   const [assists, setAssists] = useState(match?.assists ?? '');
   const [gold, setGold] = useState(match?.gold ?? '');
   const [duration, setDuration] = useState(match?.duration_minutes ?? '');
+  const [teamKills, setTeamKills] = useState(match?.team_kills ?? '');
+  const [enemyTeamKills, setEnemyTeamKills] = useState(match?.enemy_team_kills ?? '');
   const [side, setSide] = useState(match?.side || '');
   const [patch, setPatch] = useState(match?.patch || defaultPatch);
   const [matchType, setMatchType] = useState(match?.type || DEFAULT_MATCH_TYPE);
@@ -338,6 +340,8 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
       assists: assists !== '' ? Number(assists) : null,
       gold: gold !== '' ? Number(gold) : null,
       duration_minutes: duration !== '' ? Number(duration) : null,
+      team_kills: teamKills !== '' ? Number(teamKills) : null,
+      enemy_team_kills: enemyTeamKills !== '' ? Number(enemyTeamKills) : null,
       side: side || null,
       patch,
       type: matchType,
@@ -976,6 +980,9 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
               <div className="grid grid-cols-2 gap-3">
                 <StatInput label={t('goals.stat.oro')} value={gold} onChange={setGold} placeholder={t('matches.ej9500')} />
                 <StatInput label={t('matches.duracionMin')} value={duration} onChange={setDuration} placeholder={t('matches.ej18')} />
+                {/* Kills de cada equipo (marcador de arriba): el Coach calcula participación en kills. */}
+                <StatInput label={t('matches.teamKills')} value={teamKills} onChange={setTeamKills} />
+                <StatInput label={t('matches.enemyTeamKills')} value={enemyTeamKills} onChange={setEnemyTeamKills} />
               </div>
               <p className="mt-auto text-[11px] text-muted-foreground">
                 {t('matches.losDatosVaciosSe')}
