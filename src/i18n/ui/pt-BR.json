@@ -93,13 +93,15 @@
       "types": "tipo de partida",
       "lanes": "rota",
       "champions": "campeão",
-      "patches": "patch"
+      "patches": "patch",
+      "condition": "condição por partida"
     },
     "filterLabels": {
       "types": "Tipo de partida",
       "lanes": "Rota",
       "champions": "Campeões",
-      "patches": "Patch"
+      "patches": "Patch",
+      "condition": "Condição por partida"
     },
     "exclusion": {
       "noDate": "Não tem data de jogo nem de registro",
@@ -160,7 +162,8 @@
       "average": "Ter média de {op} {target} por partida{filters}.",
       "total": "Somar pelo menos {target} no total{filters}.",
       "best": "Conseguir uma partida com pelo menos {target}{filters}.",
-      "default": "Chegar a {op} {target}{filters}."
+      "default": "Chegar a {op} {target}{filters}.",
+      "count": "Registrar pelo menos {target} {condition}{filters}."
     },
     "calc": {
       "range": "entre {start} e {end} (ambos incluídos, fuso {timezone})",
@@ -177,7 +180,8 @@
       "noZero": "As partidas sem esse dado registrado não contam: não são consideradas como zero.",
       "poolTotal": "O total são todas as partidas válidas do período que cumprem os demais filtros, com qualquer campeão.",
       "definitiveCumulative": "É marcado como alcançado assim que você atingir a meta, mesmo com o período aberto. Se depois você apagar dados e ficar abaixo, volta a ficar em andamento.",
-      "definitivePerformance": "Enquanto o período estiver aberto o resultado é provisório. Ele é definido no fechamento de {end}: se houver menos de {minSample} partidas válidas, fica inconclusivo."
+      "definitivePerformance": "Enquanto o período estiver aberto o resultado é provisório. Ele é definido no fechamento de {end}: se houver menos de {minSample} partidas válidas, fica inconclusivo.",
+      "count": "Cada partida {condition} soma 1; as demais não somam."
     },
     "stat": {
       "partidas": "Partidas",
@@ -203,7 +207,8 @@
       "total": "Total (soma)",
       "average": "Média por partida",
       "best": "Em uma única partida",
-      "percentage": "Porcentagem de partidas"
+      "percentage": "Porcentagem de partidas",
+      "count": "Partidas que cumprem"
     },
     "metric": {
       "partidas_registradas": "Partidas registradas",
@@ -226,7 +231,12 @@
       "min_duracion": "Vitória mais rápida",
       "winrate": "Winrate",
       "porcentaje_campeones": "Porcentagem com campeões",
-      "manual": "Manual"
+      "manual": "Manual",
+      "partidas_asesinatos": "Partidas com abates",
+      "partidas_muertes": "Partidas com mortes",
+      "partidas_asistencias": "Partidas com assistências",
+      "partidas_kda": "Partidas com KDA",
+      "partidas_oro": "Partidas com ouro"
     },
     "metricDescription": {
       "partidas_registradas": "Quantidade de partidas registradas no período que cumprem os filtros.",
@@ -249,7 +259,12 @@
       "min_duracion": "É cumprido quando você vence uma partida que dura esses minutos ou menos. Só contam as vitórias.",
       "winrate": "Vitórias sobre partidas com resultado conhecido, em porcentagem.",
       "porcentaje_campeones": "Partidas jogadas com os campeões escolhidos sobre todas as partidas do período que cumprem os demais filtros.",
-      "manual": "Soma dos check-ins que você registrar manualmente."
+      "manual": "Soma dos check-ins que você registrar manualmente.",
+      "partidas_asesinatos": "Conta as partidas do período em que você chega à quantidade de abates escolhida (por exemplo, 20 partidas com 10 ou mais).",
+      "partidas_muertes": "Conta as partidas do período com essa quantidade de mortes ou menos (por exemplo, 10 partidas sem morrer).",
+      "partidas_asistencias": "Conta as partidas do período em que você chega à quantidade de assistências escolhida.",
+      "partidas_kda": "Conta as partidas do período com KDA de pelo menos o valor escolhido (por exemplo, 10 partidas com KDA 6 ou mais).",
+      "partidas_oro": "Conta as partidas do período em que você chega ao ouro escolhido."
     },
     "validation": {
       "enterNumber": "Insira um número.",
@@ -293,7 +308,10 @@
       "dateOutsidePeriod": "A data deve estar dentro do período do objetivo.",
       "dateInFuture": "A data não pode ser futura.",
       "noteMax": "A nota aceita até {max} caracteres.",
-      "invalidGoal": "Os dados do objetivo não são válidos."
+      "invalidGoal": "Os dados do objetivo não são válidos.",
+      "conditionRequired": "Escolha a condição que cada partida precisa cumprir.",
+      "conditionRange": "A condição precisa estar entre {min} e {max}.",
+      "conditionInteger": "A condição precisa ser um número inteiro."
     },
     "suggestion": {
       "registrar-20": {
@@ -343,6 +361,14 @@
       "pool-60": {
         "title": "60% das partidas com {champions}",
         "name": "Focar meu pool"
+      },
+      "sin-morir-10": {
+        "title": "10 partidas sem morrer este mês",
+        "name": "10 partidas sem morrer"
+      },
+      "kda-6-10": {
+        "title": "10 partidas com KDA de 6 ou mais",
+        "name": "10 partidas com KDA 6+"
       }
     },
     "evolution": "Evolução",
@@ -494,7 +520,10 @@
       "noFiltersHint": "Sem filtros, contam todas as suas partidas do período.",
       "targetChampions": "Campeões objetivo (obrigatório)",
       "targetChampionsHint": "As partidas com estes campeões formam a porcentagem.",
-      "championsHint": "Só contam partidas com estes campeões."
+      "championsHint": "Só contam partidas com estes campeões.",
+      "conditionOperator": "Em cada partida",
+      "conditionValue": "{stat} por partida",
+      "matchCountLabel": "Quantidade de partidas (pelo menos)"
     },
     "wizard": {
       "select": "Seleção",
@@ -511,7 +540,7 @@
       "configureGoal": "Configurar objetivo",
       "suggested": "Sugeridos",
       "customTitle": "Personalizado",
-      "customDescription": "Combine dado e cálculo (total, média, em uma única partida ou porcentagem), meta, filtros e período.",
+      "customDescription": "Combine dado e cálculo (total, média, em uma única partida, partidas que cumprem ou porcentagem), meta, filtros e período.",
       "otherOptions": "Outras opções",
       "manualHabit": "Hábito manual com check-ins",
       "categories": "Categorias de objetivos",
@@ -538,6 +567,18 @@
       "notFound": "Objetivo não encontrado",
       "notFoundDescription": "Pode ser que não exista ou que não pertença a você.",
       "newGoalSubtitle": "Escolha uma meta, configure e revise como ela vai ser medida."
+    },
+    "condition": {
+      "gte": "com {value} ou mais",
+      "lte": "com {value} ou menos",
+      "kdaGte": "com KDA de {value} ou mais",
+      "kdaLte": "com KDA de {value} ou menos",
+      "noDeaths": "sem morrer"
+    },
+    "unitOne": {
+      "asesinatos": "abate",
+      "muertes": "morte",
+      "asistencias": "assistência"
     }
   },
   "auth": {

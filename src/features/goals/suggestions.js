@@ -44,7 +44,7 @@ function draft(metricId, overrides) {
     target: metric.target.default,
     minSample: metric.defaultMinSample,
     unit: '',
-    filters: {},
+    filters: metric.condition ? { condition: { ...metric.condition.default } } : {},
     description: '',
     ...overrides,
   };
@@ -72,6 +72,12 @@ export function buildSuggestions({ timezone, now = new Date(), matches = [] }) {
     }),
     suggest('ganar-10', 'victorias', {
       target: 10, filters: { types: [DEFAULT_MATCH_TYPE] }, ...period(30),
+    }),
+    suggest('sin-morir-10', 'partidas_muertes', {
+      target: 10, filters: { condition: { op: OPERATOR.LTE, value: 0 } }, ...period(30),
+    }),
+    suggest('kda-6-10', 'partidas_kda', {
+      target: 10, filters: { condition: { op: OPERATOR.GTE, value: 6 } }, ...period(30),
     }),
     suggest('muertes-4', 'promedio_muertes', {
       target: 4, minSample: 10, ...period(14),

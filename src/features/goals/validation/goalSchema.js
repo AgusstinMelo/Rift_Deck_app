@@ -91,6 +91,28 @@ function refineFilters(input, metric, ctx) {
   }
 }
 
+/** Rango de la condición por partida ("partidas con X o más"), que depende del dato. */
+function refineCondition(input, metric, ctx) {
+  if (!metric.condition) return;
+  const value = input.filters?.condition?.value;
+  if (value === '' || value === null || value === undefined) return; // refineFilters ya avisa.
+  const number = Number(value);
+  const range = metric.condition;
+  if (!Number.isFinite(number)) return;
+  if (number < range.min || number > range.max) {
+    return issue(ctx, ['filters', 'condition'], tr('goals.validation.conditionRange', { min: range.min, max: range.max }));
+  }
+  if (range.integer && !Number.isInteger(number)) return issue(ctx, ['filters', 'condition'], tr('goals.validation.conditionInteger'));
+  if (!hasAtMostTwoDecimals(number)) issue(ctx, ['filters', 'condition'], tr('goals.validation.targetDecimals'));
+}
+
+/** Filtros listos para guardar: sin vacíos y con la condición numérica. */
+function normalizeFilters(filters) {
+  const compact = compactFilters(filters);
+  if (compact.condition) compact.condition = { op: compact.condition.op, value: Number(compact.condition.value) };
+  return compact;
+}
+
 function refinePeriod(input, ctx, { today, requireOpenEnd }) {
   const { startDate, endDate } = input;
   if (!isIsoDate(startDate)) issue(ctx, ['startDate'], tr('goals.validation.invalidStart'));
@@ -120,13 +142,14 @@ export function goalInputSchema({ now = new Date(), requireOpenEnd = true } = {}
     refineMinSample(input, metric, ctx);
     refineUnit(input, metric, ctx);
     refineFilters(input, metric, ctx);
+    refineCondition(input, metric, ctx);
     refinePeriod(input, ctx, { today, requireOpenEnd });
   }).transform(input => {
     const metric = getMetric(input.metric);
     return {
       ...input,
       operator: input.operator ?? metric.operator,
-      filters: metric.allowedFilters.length ? compactFilters(input.filters) : {},
+      filters: metric.allowedFilters.length ? normalizeFilters(input.filters) : {},
       minSample: metric.kind === METRIC_KIND.PERFORMANCE ? input.minSample : null,
       unit: metric.source === 'checkins' ? input.unit : null,
     };

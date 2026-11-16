@@ -1,6 +1,6 @@
 import { Lock } from 'lucide-react';
 import { AGGREGATION_LABELS, STATS, aggregationsFor, findMetric, getMetric, listStats } from '../../metrics/index';
-import { AGGREGATION, GOAL_LIMITS, METRIC_KIND } from '../../model/goalConstants';
+import { GOAL_LIMITS, METRIC_KIND } from '../../model/goalConstants';
 import { OPERATOR_LABELS, operatorPhrase, unitOf } from '../../texts';
 import { INPUT_CLASS } from '../goalUi';
 import Field from './Field';
@@ -11,8 +11,10 @@ import { useT } from '@/lib/LocaleContext';
 export function draftForMetric(draft, metricId) {
   const metric = getMetric(metricId);
   const filters = Object.fromEntries(
-    Object.entries(draft.filters || {}).filter(([key]) => metric.allowedFilters.includes(key)),
+    Object.entries(draft.filters || {}).filter(([key]) => key !== 'condition' && metric.allowedFilters.includes(key)),
   );
+  // La condición por partida depende del dato (rango y unidad): siempre arranca en el valor por defecto.
+  if (metric.condition) filters.condition = { ...metric.condition.default };
   return {
     ...draft,
     metric: metricId,
@@ -43,18 +45,19 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
   };
   // Cambiar el dato conserva el cálculo si aplica; si no, usa el primero disponible para ese dato.
   const changeStat = stat => applyMetric(findMetric(stat, metric.aggregation) || findMetric(stat, aggregationsFor(stat)[0]));
-  // Cambiar el cálculo conserva el dato si aplica; si no, pasa al primer dato que admite ese cálculo.
-  const changeAggregation = aggregation => applyMetric(
-    findMetric(metric.stat, aggregation)
-      || findMetric(listStats().find(stat => aggregationsFor(stat).includes(aggregation)), aggregation),
-  );
+  // El selector de cálculo solo ofrece los que admite el dato elegido: nunca cambia el dato.
+  const changeAggregation = aggregation => applyMetric(findMetric(metric.stat, aggregation));
 
   const statLabel = STATS[metric.stat]?.label || metric.stat;
-  const availableCalculations = aggregationsFor(metric.stat).map(aggregation => AGGREGATION_LABELS[aggregation]).join(', ');
-  const targetLabel = t('goals.form.valueLabel', {
-    op: operatorPhrase({ metric: value.metric, operator: value.operator }),
-    unit: unit ? ` · ${unit}` : '',
-  });
+  const targetLabel = metric.condition
+    ? t('goals.form.matchCountLabel')
+    : t('goals.form.valueLabel', {
+      op: operatorPhrase({ metric: value.metric, operator: value.operator }),
+      unit: unit ? ` · ${unit}` : '',
+    });
+  const condition = value.filters?.condition || metric.condition?.default;
+  const setCondition = patch => set('filters', { ...value.filters, condition: { ...condition, ...patch } });
+  const conditionError = errors['filters.condition'] || errors['filters.condition.value'] || errors['filters.condition.op'];
   const rangeHint = t('goals.form.range', { min: metric.target.min, max: metric.target.max });
 
   const lockNotice = configLocked && (
@@ -112,11 +115,9 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
                 value={metric.aggregation}
                 disabled={mode === 'edit'}
                 onChange={event => changeAggregation(event.target.value)}
-                title={t('goals.form.calculationsFor', { stat: statLabel, list: availableCalculations })}
                 className={INPUT_CLASS}
               >
-                {/* Todos los cálculos se pueden elegir; si el dato actual no lo admite, se cambia de dato. */}
-                {Object.values(AGGREGATION).map(aggregation => (
+                {aggregationsFor(metric.stat).map(aggregation => (
                   <option key={aggregation} value={aggregation}>{AGGREGATION_LABELS[aggregation]}</option>
                 ))}
               </select>
@@ -144,6 +145,35 @@ export default function GoalConfigForm({ value, onChange, errors, mode, canEditC
                   className={INPUT_CLASS}
                 />
               </Field>
+            )}
+
+            {metric.condition && (
+              <>
+                <Field label={t('goals.form.conditionOperator')} htmlFor="goal-condition-op" error={conditionError}>
+                  <select
+                    id="goal-condition-op"
+                    value={condition.op}
+                    onChange={event => setCondition({ op: event.target.value })}
+                    className={INPUT_CLASS}
+                  >
+                    {Object.keys(OPERATOR_LABELS).map(op => <option key={op} value={op}>{OPERATOR_LABELS[op]}</option>)}
+                  </select>
+                </Field>
+                <Field label={t('goals.form.conditionValue', { stat: statLabel })} htmlFor="goal-condition-value">
+                  <input
+                    id="goal-condition-value"
+                    type="number"
+                    inputMode="decimal"
+                    min={metric.condition.min}
+                    max={metric.condition.max}
+                    step={metric.condition.step}
+                    value={condition.value ?? ''}
+                    onChange={event => setCondition({ value: event.target.value })}
+                    title={t('goals.form.range', { min: metric.condition.min, max: metric.condition.max })}
+                    className={INPUT_CLASS}
+                  />
+                </Field>
+              </>
             )}
 
             {metric.operators.length > 1 && (

@@ -1,8 +1,8 @@
 // Textos de la sección Objetivos, armados a partir de src/i18n/ui (sección "goals").
 import { MATCH_TYPES } from '../../constants/matchTypes.js';
-import { formatLocale, labels, tr } from '../../i18n/uiI18n.js';
+import { baseMessages, formatLocale, labels, lookup, tr } from '../../i18n/uiI18n.js';
 import { AGGREGATION, EXCLUSION_REASON, LIFECYCLE, METRIC_FAMILY, METRIC_KIND, OPERATOR, OUTCOME } from './model/goalConstants.js';
-import { getMetric, operatorOf } from './metrics/index.js';
+import { STATS, getMetric, operatorOf } from './metrics/index.js';
 
 export const OUTCOME_LABELS = labels({
   [OUTCOME.SCHEDULED]: 'goals.outcome.scheduled',
@@ -30,6 +30,7 @@ export const FILTER_LABELS = labels({
   lanes: 'goals.filterNames.lanes',
   champions: 'goals.filterNames.champions',
   patches: 'goals.filterNames.patches',
+  condition: 'goals.filterNames.condition',
 });
 
 const REASON_LABELS = labels({
@@ -132,6 +133,23 @@ export function describeFilters(goal) {
   return parts.join(', ');
 }
 
+/** Condición por partida en una frase: "sin morir", "con 10 asesinatos o más", "con KDA de 6 o más". */
+export function conditionPhrase(goal) {
+  const metric = getMetric(goal.metric);
+  const condition = goal.filters?.condition;
+  if (!metric.condition || !condition) return '';
+  const value = Number(condition.value);
+  const lte = condition.op === OPERATOR.LTE;
+  if (metric.stat === 'muertes' && lte && value === 0) return tr('goals.condition.noDeaths');
+  const number = formatNumber(value, 2);
+  if (metric.stat === 'kda') return tr(lte ? 'goals.condition.kdaLte' : 'goals.condition.kdaGte', { value: number });
+  const unit = STATS[metric.stat]?.unit || '';
+  // Singular con 1 ("1 muerte o menos"); el resto usa la unidad en plural.
+  const unitKey = value === 1 && lookup(baseMessages, `goals.unitOne.${unit}`) ? `goals.unitOne.${unit}` : `goals.unit.${unit}`;
+  const unitText = unit && lookup(baseMessages, unitKey) ? tr(unitKey) : unit;
+  return tr(lte ? 'goals.condition.lte' : 'goals.condition.gte', { value: unitText ? `${number} ${unitText}` : number });
+}
+
 function objectivePhrase(goal) {
   const target = formatMetricValue(goal, Number(goal.target));
   const filters = describeFilters(goal);
@@ -165,6 +183,8 @@ function objectivePhrase(goal) {
       return tr('goals.objective.total', vars);
     case AGGREGATION.BEST:
       return tr('goals.objective.best', vars);
+    case AGGREGATION.COUNT:
+      return tr('goals.objective.count', { ...vars, condition: conditionPhrase(goal) });
     default:
       return tr('goals.objective.default', vars);
   }
@@ -207,10 +227,13 @@ export function describeGoal(goal, period) {
   if (metric.aggregation === AGGREGATION.BEST) {
     calculation.push(tr(operatorOf(goal) === OPERATOR.LTE ? 'goals.calc.bestLte' : 'goals.calc.best'));
   }
+  if (metric.aggregation === AGGREGATION.COUNT) {
+    calculation.push(tr('goals.calc.count', { condition: conditionPhrase(goal) }));
+  }
   if (goal.metric === 'min_duracion') {
     calculation.push(tr('goals.calc.winsOnly'));
   }
-  if (/** @type {string[]} */ ([AGGREGATION.AVERAGE, AGGREGATION.TOTAL, AGGREGATION.BEST]).includes(metric.aggregation)
+  if (/** @type {string[]} */ ([AGGREGATION.AVERAGE, AGGREGATION.TOTAL, AGGREGATION.BEST, AGGREGATION.COUNT]).includes(metric.aggregation)
     && !['partidas', 'victorias', 'manual'].includes(metric.stat)) {
     calculation.push(tr('goals.calc.noZero'));
   }

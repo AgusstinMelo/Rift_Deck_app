@@ -93,13 +93,15 @@
       "types": "match type",
       "lanes": "lane",
       "champions": "champion",
-      "patches": "patch"
+      "patches": "patch",
+      "condition": "per-match condition"
     },
     "filterLabels": {
       "types": "Match type",
       "lanes": "Lane",
       "champions": "Champions",
-      "patches": "Patch"
+      "patches": "Patch",
+      "condition": "Per-match condition"
     },
     "exclusion": {
       "noDate": "Has no play or log date",
@@ -160,7 +162,8 @@
       "average": "Average {op} {target} per match{filters}.",
       "total": "Add up at least {target} in total{filters}.",
       "best": "Get a match with at least {target}{filters}.",
-      "default": "Reach {op} {target}{filters}."
+      "default": "Reach {op} {target}{filters}.",
+      "count": "Log at least {target} {condition}{filters}."
     },
     "calc": {
       "range": "between {start} and {end} (both included, time zone {timezone})",
@@ -177,7 +180,8 @@
       "noZero": "Matches without that stat recorded don't count: they aren't taken as zero.",
       "poolTotal": "The total is every valid match in the period that meets the other filters, whatever champion you play.",
       "definitiveCumulative": "It's marked as achieved as soon as you reach the target, even if the period is still open. If you later delete data and drop below it, it goes back to in progress.",
-      "definitivePerformance": "While the period is open the result is provisional. It's settled when it closes on {end}: with fewer than {minSample} valid matches it's inconclusive."
+      "definitivePerformance": "While the period is open the result is provisional. It's settled when it closes on {end}: with fewer than {minSample} valid matches it's inconclusive.",
+      "count": "Each match {condition} adds 1; the rest add nothing."
     },
     "stat": {
       "partidas": "Matches",
@@ -203,7 +207,8 @@
       "total": "Total (sum)",
       "average": "Average per match",
       "best": "In a single match",
-      "percentage": "Percentage of matches"
+      "percentage": "Percentage of matches",
+      "count": "Matches that meet"
     },
     "metric": {
       "partidas_registradas": "Logged matches",
@@ -226,7 +231,12 @@
       "min_duracion": "Fastest win",
       "winrate": "Winrate",
       "porcentaje_campeones": "Percentage with champions",
-      "manual": "Manual"
+      "manual": "Manual",
+      "partidas_asesinatos": "Matches with kills",
+      "partidas_muertes": "Matches with deaths",
+      "partidas_asistencias": "Matches with assists",
+      "partidas_kda": "Matches with KDA",
+      "partidas_oro": "Matches with gold"
     },
     "metricDescription": {
       "partidas_registradas": "Number of matches logged in the period that meet the filters.",
@@ -249,7 +259,12 @@
       "min_duracion": "Completed when you win a match lasting that many minutes or less. Only wins count.",
       "winrate": "Wins over matches with a known result, as a percentage.",
       "porcentaje_campeones": "Matches played with the chosen champions over all matches in the period that meet the other filters.",
-      "manual": "Sum of the check-ins you log by hand."
+      "manual": "Sum of the check-ins you log by hand.",
+      "partidas_asesinatos": "Counts the matches in the period where you reach the number of kills you choose (for example, 20 matches with 10 or more).",
+      "partidas_muertes": "Counts the matches in the period with that many deaths or fewer (for example, 10 matches without dying).",
+      "partidas_asistencias": "Counts the matches in the period where you reach the number of assists you choose.",
+      "partidas_kda": "Counts the matches in the period with a KDA of at least the value you choose (for example, 10 matches with a KDA of 6 or more).",
+      "partidas_oro": "Counts the matches in the period where you reach the gold you choose."
     },
     "validation": {
       "enterNumber": "Enter a number.",
@@ -293,7 +308,10 @@
       "dateOutsidePeriod": "Date must be within the goal's period.",
       "dateInFuture": "Date can't be in the future.",
       "noteMax": "Note can be up to {max} characters.",
-      "invalidGoal": "The goal data isn't valid."
+      "invalidGoal": "The goal data isn't valid.",
+      "conditionRequired": "Choose the condition each match has to meet.",
+      "conditionRange": "The condition has to be between {min} and {max}.",
+      "conditionInteger": "The condition has to be a whole number."
     },
     "suggestion": {
       "registrar-20": {
@@ -343,6 +361,14 @@
       "pool-60": {
         "title": "60% of matches with {champions}",
         "name": "Focus my pool"
+      },
+      "sin-morir-10": {
+        "title": "10 deathless matches this month",
+        "name": "10 deathless matches"
+      },
+      "kda-6-10": {
+        "title": "10 matches with a KDA of 6 or more",
+        "name": "10 matches with KDA 6+"
       }
     },
     "evolution": "Progress over time",
@@ -494,7 +520,10 @@
       "noFiltersHint": "Without filters, all your matches in the period count.",
       "targetChampions": "Target champions (required)",
       "targetChampionsHint": "Matches with these champions make up the percentage.",
-      "championsHint": "Only matches with these champions count."
+      "championsHint": "Only matches with these champions count.",
+      "conditionOperator": "In each match",
+      "conditionValue": "{stat} per match",
+      "matchCountLabel": "Number of matches (at least)"
     },
     "wizard": {
       "select": "Selection",
@@ -511,7 +540,7 @@
       "configureGoal": "Configure goal",
       "suggested": "Suggested",
       "customTitle": "Custom",
-      "customDescription": "Combine a stat and calculation (total, average, single match or percentage), target, filters and period.",
+      "customDescription": "Combine a stat and calculation (total, average, single match, matches that meet or percentage), target, filters and period.",
       "otherOptions": "Other options",
       "manualHabit": "Manual habit with check-ins",
       "categories": "Goal categories",
@@ -538,6 +567,18 @@
       "notFound": "Goal not found",
       "notFoundDescription": "It may not exist or may not belong to you.",
       "newGoalSubtitle": "Pick a target, set it up and review how it'll be measured."
+    },
+    "condition": {
+      "gte": "with {value} or more",
+      "lte": "with {value} or fewer",
+      "kdaGte": "with a KDA of {value} or more",
+      "kdaLte": "with a KDA of {value} or less",
+      "noDeaths": "without dying"
+    },
+    "unitOne": {
+      "asesinatos": "kill",
+      "muertes": "death",
+      "asistencias": "assist"
     }
   },
   "auth": {

@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { MATCH_TYPES } from '../../../constants/matchTypes.js';
 import { patchMatchesSelection } from '../../../utils/patches.js';
-import { GOAL_LIMITS, LANES } from '../model/goalConstants.js';
+import { GOAL_LIMITS, LANES, OPERATOR } from '../model/goalConstants.js';
 import { tr } from '../../../i18n/uiI18n.js';
 import { championMatchesAny, championOf, laneOf, matchTypeOf, patchOf } from '../engine/matchFacts.js';
 
@@ -79,6 +79,25 @@ const FILTERS = {
         ? FILTER_RESULT.MATCH
         : FILTER_RESULT.MISMATCH;
     },
+  },
+  // Condición por partida de las métricas "partidas que cumplen": la métrica la consume para
+  // medir (cuenta 1 si la partida la cumple), nunca descarta filas. El rango depende del dato
+  // y se valida en goalSchema con `metric.condition`.
+  condition: {
+    key: 'condition',
+    get label() { return tr('goals.filterLabels.condition'); },
+    get schema() {
+      return z.object({
+        op: z.enum([OPERATOR.GTE, OPERATOR.LTE]),
+        // El formulario guarda el texto del input: se convierte a número al validar.
+        value: z.preprocess(
+          raw => (raw === '' || raw === null || raw === undefined ? undefined : Number(raw)),
+          z.number({ required_error: tr('goals.validation.enterNumber'), invalid_type_error: tr('goals.validation.enterNumber') })
+            .finite(tr('goals.validation.enterNumber')),
+        ),
+      }, { required_error: tr('goals.validation.conditionRequired') }).strict();
+    },
+    evaluate: () => FILTER_RESULT.MATCH,
   },
 };
 

@@ -41,6 +41,8 @@ export const AGGREGATION = Object.freeze({
   AVERAGE: 'promedio',
   BEST: 'mejor_partida',
   PERCENTAGE: 'porcentaje',
+  /** Cantidad de partidas que cumplen una condición por partida (por ejemplo, 10 partidas con 0 muertes). */
+  COUNT: 'partidas_que_cumplen',
 });
 
 export const PERIOD_STATUS = Object.freeze({

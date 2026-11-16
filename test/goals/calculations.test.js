@@ -27,7 +27,7 @@ test('las métricas existentes conservan su id dentro de la grilla', () => {
   assert.equal(findMetric('partidas', 'total').id, 'partidas_registradas');
   assert.equal(findMetric('muertes', 'promedio').id, 'promedio_muertes');
   assert.equal(findMetric('kda', 'total'), null, 'sumar KDA no tiene sentido y no existe');
-  assert.deepEqual(aggregationsFor('asesinatos').sort(), ['mejor_partida', 'promedio', 'total']);
+  assert.deepEqual(aggregationsFor('asesinatos').sort(), ['mejor_partida', 'partidas_que_cumplen', 'promedio', 'total']);
 });
 
 test('total: suma el dato de cada partida, excluye los ausentes y se alcanza antes del cierre', () => {

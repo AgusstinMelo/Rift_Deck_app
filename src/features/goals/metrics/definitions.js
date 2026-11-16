@@ -65,6 +65,7 @@ export const AGGREGATION_LABELS = labels({
   [AGGREGATION.AVERAGE]: 'goals.aggregation.average',
   [AGGREGATION.BEST]: 'goals.aggregation.best',
   [AGGREGATION.PERCENTAGE]: 'goals.aggregation.percentage',
+  [AGGREGATION.COUNT]: 'goals.aggregation.count',
 });
 
 /** Medición de un dato numérico: valor o motivo de exclusión. */
@@ -159,6 +160,46 @@ function bestOfStat(statId, { id, decimals, target, lowest = false, measure = nu
 }
 
 const range = (min, max, step, integer, defaultValue) => ({ min, max, step, integer, default: defaultValue });
+
+/** true si el valor de una partida cumple la condición { op, value }. */
+export function meetsCondition(value, condition) {
+  const threshold = Number(condition.value);
+  return condition.op === OPERATOR.LTE ? value <= threshold + 1e-9 : value >= threshold - 1e-9;
+}
+
+/**
+ * Partidas que cumplen una condición por partida (acumulativo): "10 partidas con 0 muertes",
+ * "20 partidas con 10 asesinatos o más". La condición se guarda en `filters.condition`
+ * ({ op, value }); el target es la cantidad de partidas.
+ * @returns {import('./registry.js').MetricDefinition}
+ */
+function countOfStat(statId, { id, condition }) {
+  const stat = STATS[statId];
+  const measure = measureStat(stat);
+  return {
+    ...base(statId, AGGREGATION.COUNT),
+    id,
+    family: METRIC_FAMILY.CUMULATIVE,
+    kind: METRIC_KIND.CUMULATIVE,
+    operator: OPERATOR.GTE,
+    operators: [OPERATOR.GTE],
+    allowedFilters: [...MATCH_FILTERS, 'condition'],
+    requiredFilters: ['condition'],
+    consumedFilters: ['condition'],
+    unit: 'partidas',
+    decimals: 0,
+    target: range(1, 500, 1, true, 10),
+    defaultMinSample: null,
+    // Rango y valor por defecto de la condición por partida, en la unidad del dato.
+    condition,
+    measure: (match, goal) => {
+      const measurement = measure(match);
+      if (measurement.reason) return measurement;
+      return { value: meetsCondition(measurement.value, goal.filters.condition) ? 1 : 0 };
+    },
+    aggregate: values => sumOf(values),
+  };
+}
 
 // ---------------------------------------------------------------- Acumulativos (total)
 
@@ -289,6 +330,30 @@ export const minDuracion = bestOfStat('duracion', {
   },
 });
 
+// ---------------------------------------------------------------- Partidas que cumplen una condición
+
+const conditionRange = (min, max, step, integer, op, value) => ({ min, max, step, integer, default: { op, value } });
+
+export const partidasAsesinatos = countOfStat('asesinatos', {
+  id: 'partidas_asesinatos', condition: conditionRange(0, 60, 1, true, OPERATOR.GTE, 10),
+});
+
+export const partidasMuertes = countOfStat('muertes', {
+  id: 'partidas_muertes', condition: conditionRange(0, 30, 1, true, OPERATOR.LTE, 0),
+});
+
+export const partidasAsistencias = countOfStat('asistencias', {
+  id: 'partidas_asistencias', condition: conditionRange(0, 80, 1, true, OPERATOR.GTE, 15),
+});
+
+export const partidasKda = countOfStat('kda', {
+  id: 'partidas_kda', condition: conditionRange(0, 100, 0.1, false, OPERATOR.GTE, 6),
+});
+
+export const partidasOro = countOfStat('oro', {
+  id: 'partidas_oro', condition: conditionRange(0, 80000, 100, true, OPERATOR.GTE, 15000),
+});
+
 // ---------------------------------------------------------------- Porcentajes
 
 /** @type {import('./registry.js').MetricDefinition} */
@@ -361,6 +426,7 @@ export const MVP_METRICS = [
   partidasRegistradas, victorias, sumaAsesinatos, sumaAsistencias, sumaOro, sumaDuracion,
   promedioMuertes, promedioKda, promedioAsesinatos, promedioAsistencias, promedioOro, promedioDuracion,
   maxAsesinatos, maxAsistencias, maxOro, maxKda, minMuertes, minDuracion,
+  partidasAsesinatos, partidasMuertes, partidasAsistencias, partidasKda, partidasOro,
   winrate, porcentajeCampeones,
   manual,
 ];

@@ -31,6 +31,8 @@ import { baseMessages, lookup, tr } from '../../../i18n/uiI18n.js';
  * @property {string[]} consumedFilters    Filtros que la métrica usa para medir, no para descartar filas.
  * @property {{ min: number, max: number, step: number, integer: boolean, default: number }} target
  * @property {number|null} defaultMinSample
+ * @property {{ min: number, max: number, step: number, integer: boolean, default: { op: string, value: number } }} [condition]
+ *           Solo en "partidas que cumplen": rango de la condición por partida guardada en filters.condition.
  * @property {(row: any, goal: any) => Measurement} measure
  * @property {(values: number[]) => number|null} aggregate
  */
@@ -62,6 +64,8 @@ function assertDefinition(def) {
     .forEach(key => errors.push(`filtro ${key}`));
   if (def.requiredFilters.some(key => !def.allowedFilters.includes(key))) errors.push('requiredFilters ⊄ allowedFilters');
   if (def.kind === METRIC_KIND.PERFORMANCE && !def.defaultMinSample) errors.push('defaultMinSample');
+  if ((def.aggregation === AGGREGATION.COUNT) !== Boolean(def.condition)) errors.push('condition');
+  if (def.condition && !def.requiredFilters.includes('condition')) errors.push('condition requerida');
   if (errors.length) throw new Error(`Definición de métrica inválida (${def.id}): ${errors.join(', ')}`);
 }
 
