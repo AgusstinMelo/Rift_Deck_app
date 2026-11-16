@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Champion, WRItem } from '@/api/entitiesSupabase';
 import { Search, ArrowLeft, Coins, Sword, CheckCircle2, Ban } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
-import ReactMarkdown from 'react-markdown';
+import SimpleMarkdown from '@/components/ui/SimpleMarkdown';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
@@ -255,14 +255,14 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   ));
 
   const itemDescription = selected?.description && (
-    <ReactMarkdown
+    <SimpleMarkdown
       components={{
         p: ({ children }) => <p className="my-1.5">{children}</p>,
         strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
       }}
     >
       {entityDescription(selected)}
-    </ReactMarkdown>
+    </SimpleMarkdown>
   );
 
   // En smartphone (vertical u horizontal) y en escritorio la ficha es un "dossier" como la

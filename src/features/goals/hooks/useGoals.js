@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
-import { getUserMatches } from '@/api/matchesSupabase';
+import { MAX_USER_MATCHES, userMatchesQuery } from '@/api/matchesSupabase';
 import {
   createCheckin, createGoal, deleteCheckin, listGoals, listUserCheckins, setGoalLifecycle, updateCheckin, updateGoal,
 } from '@/api/goalsSupabase';
@@ -11,7 +11,7 @@ import { periodDates } from '../engine/period';
 import { getMetric } from '../metrics/index';
 
 /** Límite con el que la app ya carga las partidas del usuario (getUserMatches). */
-export const MATCH_FETCH_LIMIT = 1000;
+export const MATCH_FETCH_LIMIT = MAX_USER_MATCHES;
 
 export const goalKeys = {
   goals: userId => ['goals', userId],
@@ -31,11 +31,7 @@ export function useNow(intervalMs = 60_000) {
 /** Partidas del usuario con la misma query (y por lo tanto la misma invalidación) que el resto de la app. */
 export function useUserMatches() {
   const { user } = useAuth();
-  return useQuery({
-    queryKey: ['matches', user?.email],
-    queryFn: () => (user?.email ? getUserMatches(user, MATCH_FETCH_LIMIT) : []),
-    enabled: !!user?.email,
-  });
+  return useQuery(userMatchesQuery(user));
 }
 
 export function useGoalsList() {

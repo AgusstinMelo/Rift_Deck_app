@@ -1,0 +1,570 @@
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-dashboard-composed) {
+    scroll-snap-type: y proximity;
+  }
+
+  .rd-viewport-intro {
+    display: flex;
+    min-height: calc(100dvh - 3rem);
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+
+@media (max-height: 500px), (max-width: 1023px) {
+  .rd-viewport-section {
+    scroll-snap-align: none;
+  }
+}
+
+.rd-dashboard > * {
+  min-width: 0;
+  scroll-margin-block: clamp(1rem, 3vh, 2rem);
+}
+
+@media (max-width: 639px) {
+  .rd-dashboard {
+    padding-inline: 1rem;
+    padding-top: 1rem;
+  }
+
+  .rd-dashboard > .rd-card,
+  .rd-dashboard > [class*="grid"] > .rd-card {
+    break-inside: avoid;
+  }
+}
+
+/* Sidebar en escritorio: logo, márgenes e ítems escalan con el alto de la ventana
+   (topes en el tamaño original) para que todo entre sin scroll. */
+@media (min-width: 1024px) {
+  .rd-sidebar > .rd-sidebar-brand {
+    padding-block: clamp(8px, 2dvh, 18px) clamp(8px, 1.8dvh, 16px);
+  }
+
+  .rd-sidebar .rd-sidebar-brand img.h-20 {
+    height: clamp(3rem, 9dvh, 5rem);
+  }
+
+  .rd-sidebar .rd-sidebar-tools {
+    margin-top: clamp(0.25rem, 1.2dvh, 0.75rem);
+  }
+
+  /* Los ítems se reparten el alto libre de la navegación: crecen hasta 3.25rem y
+     se achican hasta 32px; si ni así entran, queda el scroll de respaldo. */
+  .rd-sidebar > .rd-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding-block: clamp(0.5rem, 1.8dvh, 1.25rem);
+  }
+
+  .rd-sidebar > .rd-sidebar-nav > * {
+    flex: none;
+  }
+
+  .rd-sidebar > .rd-sidebar-nav > .rd-nav-item {
+    flex: 1 1 0;
+    max-height: 3.25rem;
+  }
+
+  .rd-sidebar > .rd-sidebar-footer {
+    padding-block: clamp(8px, 1.8dvh, 16px);
+  }
+
+  .rd-sidebar .rd-nav-item {
+    min-height: 32px;
+    padding-block: 0;
+    margin-bottom: clamp(1px, 0.4dvh, 4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rd-main-content {
+    scroll-behavior: auto;
+  }
+
+  .rd-app-shell *,
+  .rd-app-shell *::before,
+  .rd-app-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.rd-sidebar {
+  background:
+    linear-gradient(180deg, rgba(11, 15, 26, 1) 0%, rgba(15, 21, 36, 1) 100%);
+  border-right: 1px solid rgba(212, 175, 55, 0.12);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.02),
+    20px 0 50px rgba(0, 0, 0, 0.2);
+}
+
+.rd-sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.rd-sidebar-brand {
+  padding: 18px 12px 16px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+  background:
+    radial-gradient(circle at center top, rgba(77, 166, 255, 0.12), transparent 60%);
+}
+
+.rd-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(212, 175, 55, 0.12);
+  background:
+    linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.03));
+}
+
+.rd-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 10px 14px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  transition: all 160ms ease;
+}
+
+.rd-nav-item-idle {
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-nav-item-idle:hover {
+  color: hsl(var(--foreground));
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.rd-nav-item-active {
+  color: hsl(var(--foreground));
+  background:
+    linear-gradient(90deg, rgba(212, 175, 55, 0.18), rgba(212, 175, 55, 0.04));
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  box-shadow:
+    0 0 24px rgba(212, 175, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.rd-nav-active-bar {
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 3px;
+  height: 24px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, #f7d774, #d4af37);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.55);
+}
+
+.rd-status-pill {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 38, 0.95), rgba(11, 15, 26, 0.95));
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.rd-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.11);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 38, 0.96) 0%, rgba(11, 15, 26, 0.98) 100%);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.rd-card-overflow-visible {
+  overflow: visible;
+}
+
+.rd-card-overflow-visible:focus-within {
+  z-index: 70;
+}
+
+.rd-card-overflow-visible:has([aria-expanded="true"]) {
+  z-index: 70;
+}
+
+.rd-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(77, 166, 255, 0.08), transparent 36%),
+    radial-gradient(circle at 0% 100%, rgba(212, 175, 55, 0.045), transparent 34%);
+  opacity: 0.75;
+}
+
+.rd-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.rd-card:hover {
+  border-color: rgba(212, 175, 55, 0.24);
+  box-shadow:
+    0 14px 46px rgba(0, 0, 0, 0.34),
+    0 0 26px rgba(77, 166, 255, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.rd-card-watermark::after,
+.rd-dashboard-stat::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 0;
+  width: 52px;
+  height: 52px;
+  background-image: url('../assets/riftdeck-watermark.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.rd-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+}
+
+.rd-section-kicker {
+  font-size: 12px;
+  color: hsl(var(--primary));
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.rd-card-title {
+  font-family: var(--font-rajdhani);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground));
+}
+
+.rd-link {
+  font-size: 12px;
+  color: hsl(var(--primary));
+  transition: color 160ms ease;
+}
+
+.rd-link:hover {
+  color: #f7d774;
+  text-decoration: underline;
+}
+
+.rd-mini-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.rd-list-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 7px 8px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.035);
+}
+
+.rd-list-row:hover {
+  background: rgba(212, 175, 55, 0.055);
+  border-color: rgba(212, 175, 55, 0.12);
+}
+
+.rd-matchup-row {
+  min-height: 0;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.rd-matchup-row > div:first-child {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.rd-matchup-row-positive {
+  border-color: rgba(74, 222, 128, 0.16);
+  background: rgba(74, 222, 128, 0.075);
+}
+
+.rd-matchup-row-negative {
+  border-color: rgba(248, 113, 113, 0.18);
+  background: rgba(248, 113, 113, 0.085);
+}
+
+.rd-action-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.11);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 38, 0.96), rgba(11, 15, 26, 0.98));
+  transition: all 160ms ease;
+}
+
+.rd-action-card:hover {
+  border-color: rgba(212, 175, 55, 0.28);
+  background:
+    linear-gradient(180deg, rgba(24, 31, 48, 0.98), rgba(11, 15, 26, 0.98));
+  box-shadow: 0 0 28px rgba(212, 175, 55, 0.07);
+}
+
+/* Accesos compactos de "A medida" (paso 1 de nuevo objetivo). */
+.rd-action-card.rd-goal-shortcut {
+  gap: 8px;
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+
+.rd-mini-action {
+  text-align: center;
+  border-radius: 16px;
+  padding: 14px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 38, 0.92), rgba(11, 15, 26, 0.96));
+  transition: all 160ms ease;
+}
+
+.rd-mini-action:hover {
+  border-color: rgba(212, 175, 55, 0.26);
+  box-shadow: 0 0 24px rgba(77, 166, 255, 0.055);
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 20px hsla(43, 65%, 58%, 0.15);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px hsla(195, 90%, 48%, 0.15);
+}
+
+/* Tier badge styles - hot to cold */
+.tier-splus {
+  background: linear-gradient(135deg, hsl(0, 88%, 58%), hsl(12, 95%, 52%));
+}
+
+.tier-s {
+  background: linear-gradient(135deg, hsl(24, 95%, 56%), hsl(38, 92%, 52%));
+}
+
+.tier-a {
+  background: linear-gradient(135deg, hsl(48, 90%, 55%), hsl(75, 70%, 48%));
+}
+
+.tier-b {
+  background: linear-gradient(135deg, hsl(160, 65%, 46%), hsl(190, 78%, 50%));
+}
+
+.tier-c {
+  background: linear-gradient(135deg, hsl(215, 78%, 58%), hsl(235, 68%, 55%));
+}
+
+/* Gradient card border */
+.card-gradient-border {
+  background:
+    linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+    linear-gradient(135deg, hsla(43, 65%, 58%, 0.3), hsla(195, 90%, 48%, 0.1)) border-box;
+  border: 1px solid transparent;
+}
+
+/* Landing: compacta la pantalla de acceso para que entre en el viewport en mobile. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-landing-shell.rd-landing-shell {
+    padding-block: 1rem;
+  }
+
+  .rd-landing-shell .rd-landing-brand {
+    margin-bottom: 1rem;
+  }
+
+  .rd-landing-shell .rd-landing-logo {
+    height: 3.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .rd-landing-shell .rd-landing-title {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .rd-landing-shell .rd-landing-desc,
+  .rd-landing-shell .rd-landing-footer {
+    display: none;
+  }
+
+  .rd-landing-shell .rd-landing-library {
+    margin-top: 0.75rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-landing-shell .rd-landing-card {
+    padding: 1.25rem;
+  }
+
+  .rd-landing-card .mb-6 {
+    margin-bottom: 1rem;
+  }
+
+  .rd-landing-card .mb-5 {
+    margin-bottom: 0.85rem;
+  }
+
+  .rd-landing-card .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.75rem;
+  }
+
+  .rd-landing-shell .rd-landing-showcase {
+    margin-top: 1rem;
+    margin-bottom: 0;
+  }
+
+  .rd-landing-shell .rd-landing-showcase-label {
+    margin-bottom: 0.5rem;
+  }
+
+  .rd-landing-shell .rd-landing-thumb {
+    width: 4.5rem;
+    height: 3rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-landing-shell.rd-landing-shell {
+    display: grid;
+    max-width: 52rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    align-items: center;
+    align-content: center;
+    column-gap: 1.75rem;
+    padding-block: 0.5rem;
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+  }
+
+  .rd-landing-shell .rd-landing-brand {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 0;
+  }
+
+  .rd-landing-shell .rd-landing-card {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    padding: 0.7rem 0.9rem;
+  }
+
+  .rd-landing-shell .rd-landing-showcase {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+  }
+
+  .rd-landing-shell .rd-landing-logo {
+    height: 3rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-landing-shell .rd-landing-title {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+
+  .rd-landing-shell .rd-landing-desc,
+  .rd-landing-shell .rd-landing-footer {
+    display: none;
+  }
+
+  .rd-landing-shell .rd-landing-library {
+    margin-top: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.75rem;
+  }
+
+  .rd-landing-card .mb-6 {
+    margin-bottom: 0.5rem;
+  }
+
+  .rd-landing-card .mb-5 {
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-landing-card .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.4rem;
+  }
+
+  .rd-landing-card .py-2\.5 {
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .rd-landing-card .py-3 {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .rd-landing-card .text-sm {
+    font-size: 0.78rem;
+    line-height: 1.1rem;
+  }
+
+  .rd-landing-card .rd-label {
+    margin-bottom: 0.15rem;
+    font-size: 9.5px;
+  }
+
+  .rd-landing-card .mb-1\.5 {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-landing-card .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  .rd-landing-card .text-xs {
+    font-size: 10px;
+    line-height: 1rem;
+  }
+
+  .rd-landing-shell .rd-landing-showcase-label {
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-landing-shell .rd-landing-thumb {
+    width: 4rem;
+    height: 2.6rem;
+  }
+}

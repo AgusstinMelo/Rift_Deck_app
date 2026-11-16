@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Champion } from '@/api/entitiesSupabase';
-import { getUserMatches } from '@/api/matchesSupabase';
+import { userMatchesQuery } from '@/api/matchesSupabase';
 import { getCurrentTierlist } from '@/api/tierlistSupabase';
 import { suggestWithAI } from '@/api/aiSupabase';
 import { useAuth } from '@/lib/AuthContext';
@@ -41,6 +41,9 @@ import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 import { useT } from '@/lib/LocaleContext';
 import { labels, responseLanguage, tr } from '@/i18n/uiI18n';
+
+// Recorte propio de esta pantalla sobre la query compartida de partidas.
+const recentMatches100 = matches => matches.slice(0, 100);
 
 const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
@@ -644,13 +647,8 @@ const LEGACY_RESULT_STEP = LEGACY_STEPS.length;
     queryFn: getCurrentTierlist,
   });
 
-  const { data: matches = [] } = useQuery({
-    queryKey: ['matches', user?.email],
-    queryFn: () => user?.email
-      ? getUserMatches(user, 100)
-      : [],
-    enabled: !!user?.email,
-  });
+  // El análisis local usa las últimas 100 partidas.
+  const { data: matches = [] } = useQuery(userMatchesQuery(user, { select: recentMatches100 }));
 
   const localAnalysis = useMemo(() => {
     return buildLocalPoolAnalysis({

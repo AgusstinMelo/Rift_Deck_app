@@ -1,0 +1,1061 @@
+/* Fichas de campeón, objeto y runa (Biblioteca) en escritorio: el mismo "dossier"
+   que en smartphone horizontal, sin scroll de página.
+   - Izquierda: "Volver" y la identidad (arte de fondo en campeón; póster con el
+     ícono en objeto y runa).
+   - Derecha: pestañas de sección y una sección a la vez con todo el alto; si el
+     contenido no entra, scrollea dentro de su tarjeta.
+   El interior de las secciones lo comparte con smartphone (bloques "Interior del
+   dossier"); acá se reubica la grilla y se devuelven tamaños de escritorio. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-library-detail:has(.rd-champ-detail, .rd-entity-detail) {
+    overflow: hidden;
+    padding-right: 0;
+    scrollbar-gutter: auto;
+  }
+
+  /* Grilla del dossier de campeón */
+  .rd-library-layout .rd-champ-detail {
+    display: grid;
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: clamp(16rem, 22vw, 20rem) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.85rem 1rem;
+  }
+
+  /* Mismo selector que space-y-6 de Tailwind, para anular sus márgenes. */
+  .rd-library-layout .rd-champ-detail > :not([hidden]) ~ :not([hidden]),
+  .rd-library-layout .rd-champ-sections > * > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .rd-library-layout .rd-champ-detail > button:first-child {
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .rd-library-layout .rd-champ-tabs {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-library-layout .rd-champ-tabs .rd-panel-tab {
+    white-space: nowrap;
+  }
+
+  /* Identidad: el arte es el fondo de toda la tarjeta (tenue y con un degradé
+     hacia abajo) y el contenido se apoya abajo, sobre él. */
+  .rd-library-layout .rd-champ-hero {
+    grid-row: 2;
+    grid-column: 1;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative {
+    height: 100%;
+    padding: 1.1rem;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div {
+    height: 100%;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :first-child {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :first-child img {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    object-position: center 15%;
+    opacity: 0.4;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :first-child::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(222 36% 9% / 0.35) 45%,
+      hsl(222 36% 9% / 0.9) 100%
+    );
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :last-child {
+    position: relative;
+    z-index: 1;
+    flex: none;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :last-child > div:first-child {
+    gap: 0.35rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-library-layout .rd-champ-hero > .relative > div > :last-child > div:first-child img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .rd-library-layout .rd-champ-hero .rd-status-pill {
+    padding: 0.12rem 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    font-size: 11px;
+  }
+
+  .rd-library-layout .rd-champ-hero h1 {
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .rd-library-layout .rd-champ-hero h1 + p {
+    margin-top: 0.25rem;
+    font-size: 13px;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t {
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+  }
+
+  .rd-library-layout .rd-champ-hero .border-t > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+  }
+
+  /* Secciones: tamaños de escritorio sobre el interior compartido. */
+  .rd-library-layout .rd-champ-sections .rd-card {
+    padding: 1.1rem 1.25rem;
+    scrollbar-color: hsl(var(--primary) / 0.5) transparent;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-card > div:first-child,
+  .rd-library-layout .rd-champ-profile-main > div:first-child {
+    margin-bottom: 0.9rem;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-card-title {
+    font-size: 15px;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-mini-action {
+    padding: 0.75rem 0.9rem;
+  }
+
+  .rd-library-layout .rd-champ-profile-main > .grid {
+    gap: 0.75rem;
+  }
+
+  .rd-library-layout .rd-champ-profile .text-\[11px\] {
+    font-size: 11px;
+  }
+
+  .rd-library-layout .rd-champ-profile .h-2 {
+    height: 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-profile-main > .mt-5,
+  .rd-library-layout .rd-champ-profile > .rd-champ-profile-notes {
+    margin-top: 0.9rem;
+  }
+
+  .rd-library-layout .rd-champ-profile .rd-label {
+    margin-bottom: 0.4rem;
+    font-size: 10.5px;
+  }
+
+  .rd-library-layout .rd-champ-profile .rd-status-pill {
+    padding: 0.25rem 0.65rem;
+    font-size: 12.5px;
+  }
+
+  .rd-library-layout .rd-champ-profile .flex-wrap.gap-2 {
+    gap: 0.45rem;
+  }
+
+  .rd-library-layout .rd-champ-profile .rd-mini-action > .text-sm {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* En escritorio las notas entran debajo de barras y tags: sin la "primera
+     pantalla" a todo el alto ni la pista "Notas estratégicas ↓"; vuelve su título. */
+  .rd-library-layout .rd-champ-profile > .rd-champ-profile-main {
+    min-height: 0;
+  }
+
+  .rd-library-layout .rd-champ-profile:has(> .rd-champ-profile-notes) .rd-champ-profile-main::after {
+    content: none;
+  }
+
+  .rd-library-layout .rd-champ-profile-notes > .rd-label {
+    display: block;
+  }
+
+  .rd-library-layout .rd-champ-stats > .grid {
+    column-gap: 2.5rem;
+  }
+
+  .rd-library-layout .rd-champ-stats .py-2 {
+    padding-block: 0.55rem;
+  }
+
+  .rd-library-layout .rd-champ-stats .text-sm {
+    font-size: 14px;
+  }
+
+  .rd-library-layout .rd-champ-matchups > .grid {
+    gap: 0.85rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action {
+    padding: 0.85rem 1rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:first-child p {
+    font-size: 11.5px;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child img,
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child > div > div {
+    width: 2.9rem;
+    height: 2.9rem;
+  }
+
+  .rd-library-layout .rd-champ-matchups .rd-mini-action > div:last-child .text-xs {
+    font-size: 14px;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-champ-personal {
+    column-gap: 1rem;
+    padding: 1.1rem 1.25rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(2) .text-5xl {
+    font-size: 2.6rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(2) p {
+    font-size: 12px;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) {
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) > div {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) .rd-label {
+    font-size: 10px;
+  }
+
+  .rd-library-layout .rd-champ-personal > :nth-child(3) .text-lg {
+    font-size: 1.05rem;
+  }
+
+  .rd-library-layout .rd-champ-personal-insight {
+    padding: 0.85rem 1rem;
+  }
+
+  .rd-library-layout .rd-champ-personal-insight .rd-label {
+    margin-bottom: 0.4rem;
+    font-size: 10px;
+  }
+
+  .rd-library-layout .rd-champ-personal-insight .text-sm {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .rd-library-layout .rd-champ-personal-warning {
+    margin-top: 0.6rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .rd-library-layout .rd-champ-personal-warning p {
+    font-size: 12px;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-champ-meta {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .rd-library-layout .rd-champ-sections .rd-champ-meta > div:first-child {
+    margin-bottom: 0.75rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list {
+    gap: 0.85rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.7rem 1rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div > div:first-child {
+    gap: 0.55rem;
+    padding-right: 1rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div > div:first-child > span:last-child {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.7rem;
+    font-size: 1.35rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list > div > div:first-child > span:first-child {
+    font-size: 11.5px;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 {
+    gap: 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 > div {
+    padding: 0.5rem 0.65rem 0.75rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-label {
+    font-size: 9.5px;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .grid-cols-3 p + p {
+    font-size: 15px;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:first-child {
+    font-size: 9.5px;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:first-child > span {
+    font-size: 1rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-list .rd-champ-meta-footer > p:last-child {
+    padding: 0.15rem 0.6rem;
+    font-size: 11px;
+  }
+
+  .rd-library-layout .rd-champ-meta-nav > button {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-nav > span {
+    font-size: 11.5px;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution {
+    gap: 0.3rem;
+    padding: 0.6rem 0.8rem 0.5rem;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-head .text-xs {
+    font-size: 12px;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-patches > li {
+    gap: 0.3rem;
+    font-size: 11px;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-patches > li > span:nth-child(3) {
+    font-size: 10.5px;
+  }
+
+  .rd-library-layout .rd-champ-meta-evolution-patches > li > span:first-child {
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: 11px;
+  }
+
+  /* Dossier de objeto y runa */
+  .rd-entity-detail {
+    display: grid;
+    grid-template-columns: clamp(16rem, 22vw, 20rem) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.85rem 1rem;
+  }
+
+  .rd-entity-back {
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    font-size: 13px;
+  }
+
+  .rd-entity-tabs {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-entity-tabs .rd-panel-tab {
+    flex: 0 1 auto;
+    min-height: 2.25rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-entity-detail .rd-entity-hero {
+    grid-row: 2;
+    grid-column: 1;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem 1.1rem;
+    text-align: center;
+  }
+
+  .rd-entity-detail .rd-entity-hero-img,
+  .rd-entity-detail:not(:has(.rd-entity-tabs)) .rd-entity-hero-img {
+    width: clamp(7rem, 16dvh, 9.5rem);
+    height: clamp(7rem, 16dvh, 9.5rem);
+  }
+
+  .rd-entity-detail .rd-entity-hero-pills {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .rd-entity-pill {
+    font-size: 11px;
+  }
+
+  .rd-entity-hero .rd-status-pill {
+    font-size: 12px;
+  }
+
+  .rd-entity-detail .rd-entity-hero h1,
+  .rd-entity-detail:not(:has(.rd-entity-tabs)) .rd-entity-hero h1 {
+    font-size: clamp(1.75rem, 1.75vw, 2.3rem);
+  }
+
+  .rd-entity-section {
+    grid-row: 2;
+    grid-column: 2;
+    padding: 1.1rem 1.25rem;
+  }
+
+  /* Runa: sin pestañas, la descripción usa toda la columna derecha. */
+  .rd-entity-detail:not(:has(.rd-entity-tabs)) .rd-entity-section {
+    grid-row: 1 / -1;
+  }
+
+  .rd-entity-section-head {
+    margin-bottom: 0.9rem;
+  }
+
+  .rd-entity-section .rd-card-title {
+    font-size: 15px;
+  }
+
+  .rd-entity-desc,
+  .rd-entity-detail:not(:has(.rd-entity-tabs)) .rd-entity-desc {
+    max-width: 75ch;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .rd-entity-tags .rd-status-pill {
+    font-size: 12.5px;
+  }
+
+  .rd-entity-stats {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .rd-entity-stat {
+    max-width: 9.5rem;
+    gap: 0.25rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .rd-entity-stat-label {
+    font-size: 9.5px;
+  }
+
+  .rd-entity-stat strong {
+    font-size: 1.05rem;
+  }
+
+  /* Enfrentamientos: las dos franjas lado a lado. */
+  .rd-entity-matchups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.85rem;
+  }
+
+  .rd-entity-matchups > div.rd-mini-action {
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+  }
+
+  .rd-entity-matchups h3 {
+    font-size: 12px;
+  }
+
+  .rd-entity-matchup-list {
+    justify-content: flex-start;
+    gap: 0.9rem 0.75rem;
+  }
+
+  .rd-entity-matchup-list > div {
+    flex: 0 1 5rem;
+  }
+
+  .rd-entity-matchup-list img,
+  .rd-entity-matchup-fallback {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .rd-entity-matchup-list span:last-child {
+    font-size: 13px;
+  }
+}
+
+/* Tierlist "Por Tier" en escritorio: cada tier es una fila con un riel compacto
+   a la izquierda (badge a un lado; título, cantidad y promedios de WR / PR al
+   otro, teñido con el color del tier: --rd-tier-color viene del JSX) que mide
+   lo mismo que una fila de fichas, y a la derecha una grilla de imágenes de
+   campeón con borde del color del rol. --rd-tile (useTierTileSize) agranda las
+   imágenes hasta que la tierlist completa llena el alto disponible. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-tierlist-layout .rd-tier-groups > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group {
+    display: grid;
+    grid-template-columns: 11.5rem minmax(0, 1fr);
+    box-shadow: inset 3px 0 0 hsl(var(--rd-tier-color, var(--primary)) / 0.75);
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    column-gap: 0.65rem;
+    row-gap: 0.15rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 0;
+    border-right: 1px solid hsl(var(--border) / 0.7);
+    background:
+      linear-gradient(90deg, hsl(var(--rd-tier-color, var(--primary)) / 0.14), transparent 85%),
+      hsl(var(--secondary) / 0.2);
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head > :first-child {
+    grid-row: span 2;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 15px;
+    box-shadow: 0 0 18px hsl(var(--rd-tier-color, var(--primary)) / 0.35);
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head .rd-card-title {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-head .text-xs {
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-stats {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-stats > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.2rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-stats dt {
+    color: hsl(var(--muted-foreground));
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-stats dd {
+    color: hsl(var(--foreground));
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rd-tierlist-layout .rd-tier-group-grid {
+    grid-template-columns: repeat(auto-fill, var(--rd-tile, 3rem));
+    align-content: center;
+    gap: 0.35rem;
+    padding: 0.45rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-tile {
+    width: var(--rd-tile, 3rem);
+    height: var(--rd-tile, 3rem);
+    border-radius: calc(var(--rd-tile, 3rem) * 0.16);
+  }
+}
+
+/* Dashboard en smartphone: números y nombres de campeón alineados entre las
+   tarjetas de una misma fila. Cada tarjeta ocupa tres filas de la grilla
+   (título / valor / pie) y las comparte con subgrid: un título en dos líneas o
+   un pie oculto ya no corren el valor de lugar. El valor va centrado en su fila. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-dashboard-summary > div.rd-dashboard-stats {
+    grid-template-rows:
+      auto minmax(0, 1fr) auto
+      auto minmax(0, 1fr) auto;
+  }
+
+  .rd-dashboard-stats > .rd-dashboard-stat {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    row-gap: 0.2rem;
+  }
+
+  .rd-dashboard-stats > .rd-dashboard-stat > :nth-child(2) {
+    align-self: center;
+  }
+
+  /* Pie apoyado abajo: textos de una, dos o tres líneas terminan a la misma altura. */
+  .rd-dashboard-stats > .rd-dashboard-stat > :nth-child(3) {
+    align-self: end;
+  }
+
+  /* Estadísticas: el anillo no deja lugar al porcentaje; queda solo el número. */
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > div {
+    width: auto;
+    height: auto;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > div > svg {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child span {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+}
+
+/* En vertical, las dos tarjetas con campeón (3.ª y 8.ª) van abajo a todo el
+   ancho con su propia grilla; las seis métricas comparten filas en 3x2. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-dashboard-summary > div.rd-dashboard-stats {
+    grid-template-rows:
+      auto minmax(0, 1fr) auto
+      auto minmax(0, 1fr) auto
+      auto auto;
+  }
+
+  .rd-dashboard-stats > .rd-dashboard-stat:not(:nth-child(3)):not(:nth-child(8)) {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    row-gap: 0.2rem;
+  }
+
+  .rd-dashboard-stats > .rd-dashboard-stat:not(:nth-child(3)):not(:nth-child(8)) > :nth-child(2) {
+    align-self: center;
+  }
+}
+
+/* Cómo calculamos la tierlist (escritorio): la página ocupa el alto del viewport
+   y solo la lista de últimas ejecuciones scrollea por dentro. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-tierlist-method) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-tierlist-method) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .rd-tierlist-method {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .rd-tierlist-method > :first-child {
+    margin-bottom: 1rem;
+  }
+
+  .rd-tierlist-method-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-tierlist-method-grid > div {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-tierlist-method-runs {
+    flex: 1 1 auto;
+  }
+
+  .rd-tierlist-method-runlist {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+/* Home pública: cada sección ocupa el alto visible debajo de la nav fija, y las
+   anclas de la nav dejan la sección justo debajo de ella. */
+.rd-home {
+  --home-nav-h: 4rem;
+}
+
+.rd-home-nav {
+  height: var(--home-nav-h);
+}
+
+.rd-home-section {
+  display: flex;
+  min-height: calc(100svh - var(--home-nav-h));
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(1.5rem, 5svh, 3.5rem);
+  scroll-margin-top: var(--home-nav-h);
+}
+
+/* Captura del Dashboard: toma todo el alto que queda en su pantalla, sin pasarse
+   del viewport. 2rem = barra del marco tipo ventana. */
+.rd-home-hero-shot {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 11rem;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.rd-home-hero-frame {
+  position: relative;
+  width: min(100cqw, calc((100cqh - 2rem) * 1910 / 915));
+}
+
+.rd-home-closing {
+  justify-content: space-between;
+  padding-bottom: 0;
+}
+
+/* Smartphone vertical: se muestra la captura del Dashboard mobile (360×800) entera,
+   tan grande como permita el alto, sin la barra de ventana. */
+@media (orientation: portrait) and (max-width: 767px) {
+  .rd-home-hero-frame {
+    width: min(100cqw, 100cqh * 360 / 800, 24rem);
+  }
+
+  .rd-home-shot-bar {
+    display: none;
+  }
+}
+
+/* Smartphone horizontal: nav más baja y menos aire vertical. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-home {
+    --home-nav-h: 3.25rem;
+  }
+
+  .rd-home-section {
+    padding-block: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.rd-home) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Encabezado de página en escritorio: mismo lugar y tamaño en todas las pestañas
+   (Dashboard, Biblioteca, Tierlist, Builds, Partidas, Estadísticas, Objetivos,
+   Sugeridor, Cómo calculamos, Perfil...). Volanta amarilla, título de 3rem y bajada,
+   con el mismo margen superior/izquierdo. !important porque algunas páginas traen
+   ajustes propios con selectores más específicos. Los títulos de pasos de un asistente
+   (por ejemplo, "Nueva meta") no son títulos de pestaña y quedan afuera. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content .rd-page:has(.rd-page-title:not(.rd-step-title)) {
+    padding-top: 1.5rem !important;
+    padding-left: 1.5rem !important;
+  }
+
+  .rd-page-kicker:not(.rd-step-title) {
+    display: flex !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .rd-page-title:not(.rd-step-title) {
+    margin-top: 0 !important;
+    font-size: 3rem !important;
+    line-height: 1 !important;
+  }
+
+  .rd-page-subtitle {
+    margin-top: 0.25rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+}
+
+/* Encabezado de página en smartphone: todas las páginas toman el del Dashboard.
+   Solo queda el título (sin volanta ni bajada), con el mismo tamaño y el mismo
+   margen superior/izquierdo. !important porque cada página traía sus propios
+   ajustes de encabezado con selectores más específicos. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content .rd-page:has(.rd-page-title),
+  .rd-main-content .rd-build-picker {
+    padding-top: 0.5rem;
+    padding-left: 0.75rem;
+  }
+
+  /* El título va arriba de su fila aunque al lado haya pestañas o botones más altos
+     (si la fila centra verticalmente, el título baja y queda desalineado). */
+  .rd-page .rd-page-title,
+  .rd-page :has(> .rd-page-title) {
+    align-self: flex-start !important;
+  }
+
+  .rd-page-kicker,
+  .rd-page-subtitle {
+    display: none !important;
+  }
+
+  .rd-page-title {
+    font-size: 1.40rem !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-main-content .rd-page:has(.rd-page-title),
+  .rd-main-content .rd-build-picker {
+    padding-top: 0.7rem;
+    padding-left: 0.75rem;
+  }
+
+  /* El título va arriba de su fila aunque al lado haya pestañas o botones más altos
+     (si la fila centra verticalmente, el título baja y queda desalineado). */
+  .rd-page .rd-page-title,
+  .rd-page :has(> .rd-page-title) {
+    align-self: flex-start !important;
+  }
+
+  .rd-page-kicker,
+  .rd-page-subtitle {
+    display: none !important;
+  }
+
+  .rd-page-title {
+    font-size: 1.35rem !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px) and (max-height: 700px) {
+  .rd-page-title {
+    font-size: 1.45rem !important;
+  }
+}
+
+/* Con letter-spacing negativo la caja del texto termina antes que la última letra.
+   Si además el texto se recorta (truncate, ellipsis, line-clamp), esa letra queda
+   cortada. El padding final le devuelve ese espacio. */
+.truncate[class*="tracking-[-"],
+.truncate[class*="tracking-tight"],
+[class*="line-clamp"][class*="tracking-[-"],
+[class*="line-clamp"][class*="tracking-tight"],
+.rd-library-layout .rd-champ-hero h1,
+.rd-v2-build-page .rd-v2-build-header h1 {
+  padding-inline-end: 0.15em;
+}
+
+/* Carga con capturas: paso a pantalla completa (no modal). La página ocupa el alto
+   del viewport; solo scrollea el contenido del paso y las acciones quedan abajo. */
+.rd-main-content:has(.rd-capture-page) {
+  overflow: hidden;
+}
+
+.rd-page.rd-capture-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-page.rd-capture-page {
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+  }
+
+  .rd-capture-step-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .rd-capture-step-actions {
+    padding-top: 0.5rem;
+  }
+}
+
+/* Paso "Cargar con capturas": recuadros y guía compactos para entrar sin scroll. */
+.rd-capture-thumb {
+  height: clamp(3.5rem, 15dvh, 7.5rem);
+}
+
+/* Celular vertical: recuadros chicos en fila, guía más apretada y botones en una línea. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-capture-thumb {
+    height: clamp(3rem, 8.5dvh, 4.5rem);
+  }
+
+  .rd-capture-step-title {
+    margin-bottom: 0.4rem;
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .rd-capture-guide section {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .rd-capture-guide li {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .rd-capture-step-actions button {
+    padding-inline: 0.75rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
+.rd-capture-guide-cards {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (orientation: landscape), (min-width: 640px) {
+  .rd-capture-guide-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* "Cargar con capturas" en pantallas bajas (celular acostado, ventanas bajas o con
+   zoom): todo entra sin scroll. Depende solo del alto disponible. El 3er paso de cada
+   captura ("Captura de la pantalla completa") ya lo dice "Cómo tienen que ser". */
+@media (max-height: 640px) {
+  .rd-page.rd-capture-page {
+    padding-top: 0.5rem;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .rd-capture-step-title {
+    margin-bottom: 0.4rem;
+    font-size: 1.3rem;
+    line-height: 1.15;
+  }
+
+  .rd-capture-step-actions {
+    padding-top: 0.5rem;
+  }
+
+  .rd-capture-thumb {
+    height: clamp(2.75rem, 13dvh, 4.25rem);
+  }
+
+  .rd-capture-review > p:first-child {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .rd-capture-guide section {
+    padding: 0.4rem 0.55rem;
+  }
+
+  .rd-capture-guide h3 {
+    margin-bottom: 0.15rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-capture-guide li {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .rd-capture-guide ol > li:last-child {
+    display: none;
+  }
+
+  .rd-capture-guide > p {
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-height: 520px) {
+  .rd-capture-guide > p {
+    display: none;
+  }
+}
+
+@media (max-height: 340px) {
+  .rd-capture-step-title {
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  .rd-capture-thumb {
+    height: 2.5rem;
+  }
+
+  .rd-capture-step-actions button {
+    min-height: 2.6rem;
+  }
+}

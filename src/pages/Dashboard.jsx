@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { Champion, WRItem, Rune, Spell } from '@/api/entitiesSupabase';
-import { getUserMatches } from '@/api/matchesSupabase';
+import { userMatchesQuery } from '@/api/matchesSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
 import { getTierlistExecutions, getTierlistPatchAverages } from '@/api/tierlistSupabase';
 import { getActivePatchVersion } from '@/api/patchesSupabase';
@@ -101,11 +101,7 @@ export default function Dashboard() {
   const [activitySlide, setActivitySlide] = useState(0);
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
 
-  const { data: allMatches = [] } = useQuery({
-    queryKey: ['matches', user?.email],
-    queryFn: () => user?.email ? getUserMatches(user, 1000) : [],
-    enabled: !!user?.email,
-  });
+  const { data: allMatches = [] } = useQuery(userMatchesQuery(user));
   const { data: allBuilds = [] } = useQuery({
     queryKey: ['builds-dashboard', user?.email],
     queryFn: () => user?.email ? getUserBuilds(user, 1000) : [],

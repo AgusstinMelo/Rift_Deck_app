@@ -1,35 +1,53 @@
 import { supabase } from "@/lib/supabaseClient";
 
-export async function getUserMatches(user, limit = 1000) {
-  if (!user) return [];
+// PostgREST devuelve como máximo 1000 filas por pedido: las partidas se piden por páginas.
+const MATCH_PAGE_SIZE = 1000;
+/** Tope de partidas que carga la app por usuario (protege de cuentas anómalas). */
+export const MAX_USER_MATCHES = 10000;
 
-  let data = [];
+/**
+ * Todas las partidas del usuario usan esta query (Dashboard, Partidas, Estadísticas,
+ * Objetivos, Sugeridor, Biblioteca): una sola descarga y una sola invalidación. Quien
+ * necesite menos partidas las recorta con `select`, sin tocar la caché compartida.
+ */
+export const matchesQueryKey = user => ["matches", user?.id];
 
-  if (user.id) {
-    const { data: userMatches, error } = await supabase
+export function userMatchesQuery(user, { enabled = true, select } = {}) {
+  return {
+    queryKey: matchesQueryKey(user),
+    queryFn: () => getUserMatches(user),
+    enabled: enabled && Boolean(user?.id),
+    ...(select ? { select } : {}),
+  };
+}
+
+async function fetchMatchPages(column, value, limit) {
+  const rows = [];
+  while (rows.length < limit) {
+    const from = rows.length;
+    const to = Math.min(from + MATCH_PAGE_SIZE, limit) - 1;
+    const { data, error } = await supabase
       .from("matches")
       .select("*")
-      .eq("user_id", user.id)
+      .eq(column, value)
       .order("date", { ascending: false })
-      .limit(limit);
+      // Desempate estable: sin él, las partidas del mismo día podrían repetirse o
+      // saltearse entre páginas.
+      .order("id", { ascending: true })
+      .range(from, to);
 
     if (error) throw error;
-    data = userMatches || [];
+    rows.push(...(data || []));
+    if (!data || data.length < to - from + 1) break;
   }
+  return rows;
+}
 
-  if (data.length === 0 && user.email) {
-    const { data: legacyMatches, error } = await supabase
-      .from("matches")
-      .select("*")
-      .eq("created_by", user.email)
-      .order("date", { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    data = legacyMatches || [];
-  }
-
-  return data;
+// Todas las partidas tienen user_id (las viejas, guardadas solo con email, se completaron
+// en 202611170001_backfill_matches_user_id.sql): ya no se busca por created_by.
+export async function getUserMatches(user, limit = MAX_USER_MATCHES) {
+  if (!user?.id) return [];
+  return fetchMatchPages("user_id", user.id, limit);
 }
 
 // Columnas agregadas por 202611160002_coach_history_and_team_kills.sql. Si la migración

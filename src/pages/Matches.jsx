@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Champion, WRItem } from '@/api/entitiesSupabase';
-import { getUserMatches, createMatch, deleteMatch, deleteMatches } from '@/api/matchesSupabase';
+import { createMatch, deleteMatch, deleteMatches, matchesQueryKey, userMatchesQuery } from '@/api/matchesSupabase';
 import { getTierlistExecutions } from '@/api/tierlistSupabase';
 import { Plus, Swords, Search, Trophy, Shield, Skull, Trash2, Camera } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
@@ -84,13 +84,7 @@ export default function Matches() {
     queryFn: () => WRItem.list('name'),
   });
 
-  const { data: matches = [], isLoading } = useQuery({
-    queryKey: ['matches', user?.email],
-    queryFn: () => user?.email
-      ? getUserMatches(user, 1000)
-      : [],
-    enabled: !!user?.email,
-  });
+  const { data: matches = [], isLoading } = useQuery(userMatchesQuery(user));
 
   const { data: tierlistExecutions = [] } = useQuery({
     queryKey: ['executions'],
@@ -110,7 +104,7 @@ export default function Matches() {
     mutationFn: (data) => createMatch(user, data),
     onSuccess: () => {
       setShowForm(false);
-      qc.invalidateQueries({ queryKey: ['matches', user?.email] });
+      qc.invalidateQueries({ queryKey: matchesQueryKey(user) });
       showTemporaryToast({
         title: 'Partida guardada',
         description: 'La partida se agregó correctamente a tu historial.',

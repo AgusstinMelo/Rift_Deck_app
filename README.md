@@ -66,7 +66,6 @@ The objective is not simply to return a predefined build, but to generate recomm
 - TanStack Query
 - Radix UI
 - Recharts
-- Framer Motion
 
 ### Backend & Data
 

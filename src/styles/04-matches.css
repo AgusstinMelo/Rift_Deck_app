@@ -1,0 +1,872 @@
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-matches-layout) {
+    overflow: hidden;
+  }
+
+  .rd-matches-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-matches-header,
+  .rd-matches-metrics,
+  .rd-matches-filters {
+    flex: none;
+  }
+
+  .rd-matches-scroll {
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-gutter: stable;
+  }
+
+  /* Sin partidas: la tarjeta vacía ocupa todo el alto restante. */
+  .rd-matches-scroll:has(> .rd-matches-empty) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-matches-empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1023px), (max-height: 500px) {
+  .rd-matches-layout > * + * {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Partidas en pantallas apaisadas de poco alto (501-600 px: celulares grandes y
+   tablets acostados, ventanas bajas): encabezado en UNA fila a lo ancho para no
+   desperdiciar alto: título | Partidas | Winrate | Récord | Eliminar todas | Nueva
+   partida. Encabezado, acciones y métricas se "disuelven" en la grilla de la página. */
+@media (min-width: 1024px) and (min-height: 501px) and (max-height: 600px) {
+  .rd-matches-layout {
+    display: grid;
+    grid-template-columns: auto repeat(5, minmax(0, 1fr));
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .rd-matches-header,
+  .rd-matches-header > div:nth-child(2),
+  .rd-matches-metrics {
+    display: contents;
+  }
+
+  .rd-matches-header > div:first-child {
+    grid-row: 1;
+    grid-column: 1;
+    padding-right: 0.5rem;
+  }
+
+  .rd-matches-metrics > :nth-child(1) { grid-row: 1; grid-column: 2; }
+  .rd-matches-metrics > :nth-child(2) { grid-row: 1; grid-column: 3; }
+  .rd-matches-metrics > :nth-child(3) { grid-row: 1; grid-column: 4; }
+
+  .rd-matches-header > div:nth-child(2) > button:first-child:not(:last-child) {
+    grid-row: 1;
+    grid-column: 5;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:last-child {
+    grid-row: 1;
+    grid-column: 6;
+  }
+
+  /* Sin partidas no hay métricas ni "Eliminar todas": "Nueva partida" va a la derecha. */
+  .rd-matches-header > div:nth-child(2) > button:only-child {
+    grid-column: 2 / -1;
+    justify-self: end;
+  }
+
+  .rd-matches-layout > .rd-matches-filters,
+  .rd-matches-layout > .rd-matches-scroll {
+    grid-column: 1 / -1;
+  }
+
+  .rd-matches-layout > .rd-matches-scroll {
+    min-height: 0;
+  }
+
+  /* Tarjetas compactas, todas del mismo alto. */
+  .rd-matches-header .rd-action-card {
+    min-width: 0;
+    gap: 0.55rem;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .rd-matches-header .rd-action-card > div:first-child {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .rd-matches-header .rd-action-card p:first-child {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-matches-header .rd-action-card p + p {
+    font-size: 10px;
+  }
+
+  .rd-matches-metrics > .rd-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .rd-matches-metrics > .rd-card > div:first-child {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-matches-metrics > .rd-card .text-3xl {
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  /* Solo lo esencial para que las tarjetas queden bajas: el total ya está en
+     "Partidas" y las aclaraciones de cada tarjeta sobran. */
+  .rd-matches-header .rd-page-subtitle,
+  .rd-matches-header .rd-action-card p + p,
+  .rd-matches-metrics > .rd-card p + p {
+    display: none !important;
+  }
+}
+
+/* Partidas en smartphone horizontal: título a la izquierda y un 2x2 a la derecha
+   (Eliminar todas | Nueva partida / Partidas | Record; sin Winrate). Encabezado,
+   acciones y métricas se "disuelven" (display: contents) en la grilla de la página. */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Encabezado en UNA fila a lo ancho: título | Partidas | Récord | Eliminar todas |
+     Nueva partida. El título toma su ancho y las 4 tarjetas se reparten el resto. */
+  .rd-matches-layout {
+    display: grid;
+    grid-template-columns: auto repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .rd-matches-layout > * {
+    margin-top: 0;
+  }
+
+  .rd-matches-header,
+  .rd-matches-header > div:nth-child(2),
+  .rd-matches-metrics {
+    display: contents;
+  }
+
+  .rd-matches-header > div:first-child {
+    grid-row: 1;
+    grid-column: 1;
+    padding-right: 0.25rem;
+  }
+
+  /* Más específico que ".rd-matches-metrics > .rd-card" (display: flex) de abajo. */
+  .rd-matches-metrics > .rd-card:nth-child(2) {
+    display: none;
+  }
+
+  .rd-matches-metrics > :first-child {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .rd-matches-metrics > :last-child {
+    grid-row: 1;
+    grid-column: 3;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:first-child:not(:last-child) {
+    grid-row: 1;
+    grid-column: 4;
+  }
+
+  .rd-matches-header > div:nth-child(2) > button:last-child {
+    grid-row: 1;
+    grid-column: 5;
+  }
+
+  /* Sin partidas no hay "Eliminar todas" ni métricas: "Nueva partida" ocupa ese lugar. */
+  .rd-matches-header > div:nth-child(2) > button:only-child {
+    grid-column: 2 / -1;
+    justify-self: end;
+  }
+
+  .rd-matches-header .rd-action-card {
+    min-width: 0;
+  }
+
+  .rd-matches-layout > .rd-matches-filters,
+  .rd-matches-layout > .rd-matches-scroll {
+    grid-column: 1 / -1;
+  }
+
+  /* Filtros en una sola línea compacta: el buscador toma el ancho que sobra. */
+  .rd-matches-layout > .rd-matches-filters {
+    margin-top: 0.25rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .rd-matches-filters > div {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .rd-matches-filters > div > div:first-child {
+    min-width: 0;
+  }
+
+  .rd-matches-filters input {
+    padding-block: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-matches-filters select {
+    flex-shrink: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* Tarjeta de cada partida, resumida para entrar en el ancho: sólo "V/D", info en una
+     línea, build en 2 filas de 3 y equipos sin etiquetas (aliados en azul, enemigos en rojo).
+     Los selectores llevan .rd-matches-scroll porque las variantes md: de Tailwind se
+     emiten al final de la hoja y, con la misma especificidad, ganarían. */
+  /* Alto fijo: todas las tarjetas miden lo mismo, tengan o no tags. */
+  .rd-matches-scroll .rd-match-card-grid {
+    display: grid;
+    height: 5.25rem;
+    grid-template-columns: minmax(0, 1fr) 1px auto 1px auto auto;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem 0.45rem 0.75rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-grid > div:nth-child(2) {
+    display: block;
+  }
+
+  .rd-matches-scroll .rd-match-card-main {
+    gap: 0.5rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result {
+    width: 1.1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > p:first-child {
+    font-size: 1.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > :not(:first-child) {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-champ {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.6rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info {
+    gap: 0.25rem;
+  }
+
+  /* Línea 1: campeón, rol, lado y tipo (el tipo se abrevia si no entra).
+     Línea 2: tags en una línea, abreviadas si no entran; existe aunque no haya tags. */
+  .rd-matches-scroll .rd-match-card-info > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line,
+  .rd-matches-scroll .rd-match-card-tags {
+    display: flex;
+    min-width: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    overflow: hidden;
+  }
+
+  .rd-matches-scroll .rd-match-card-tags {
+    height: 1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > * {
+    flex-shrink: 0;
+  }
+
+  .rd-matches-scroll .rd-match-card-info h2 {
+    flex-shrink: 1;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 8.5px;
+    white-space: nowrap;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span:last-child,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* KDA, oro, parche y fecha en una línea, con su referencia chica arriba. */
+  .rd-matches-scroll .rd-match-card-info > div:last-child {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.7rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:first-child {
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:last-child {
+    font-size: 11px;
+  }
+
+  .rd-matches-scroll .rd-match-card-build,
+  .rd-matches-scroll .rd-match-card-teams {
+    width: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* "Build" arriba de la primera fila de ítems; la segunda etiqueta (invisible, sólo
+     para alinear en desktop) no hace falta. Entra sin sumar alto a la tarjeta. */
+  .rd-matches-scroll .rd-match-card-build p {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-build > div:first-child p {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  /* "Tu equipo" / "Enemigos" a la izquierda de cada fila, para no sumar alto. */
+  .rd-matches-scroll .rd-match-card-teams > div {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-label-wide {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-label-compact {
+    display: inline;
+  }
+
+  /* Ancho fijo que entra "ENEMIGO": si no, esa fila se ensanchaba y los íconos
+     quedaban desalineados con los de "Tu equipo". */
+  .rd-matches-scroll .rd-match-card-teams p {
+    flex: 0 0 3.3rem;
+    width: 3.3rem;
+    margin: 0;
+    font-size: 7.5px;
+    letter-spacing: 0.1em;
+    line-height: 1.15;
+  }
+
+  .rd-matches-scroll .rd-match-card-build {
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams {
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid {
+    grid-template-columns: repeat(3, 1.4rem);
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams .grid {
+    grid-template-columns: repeat(5, 1.4rem);
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid > *,
+  .rd-matches-scroll .rd-match-card-teams .grid > * {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:first-child .grid > :not([class*="border-primary"]) {
+    border-color: rgb(96 165 250 / 0.4);
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:last-child .grid > * {
+    border-color: rgb(248 113 113 / 0.4);
+  }
+
+  .rd-matches-scroll .rd-match-card-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions button {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* El selector de tipo tomaba el ancho de "Clasificatoria Legendaria": queda justo
+     para "Todos los tipos" y el resto pasa al buscador. */
+  .rd-matches-filters select:last-child {
+    width: 8.25rem;
+  }
+
+  /* En una fila las tarjetas son angostas: solo el texto principal (las
+     aclaraciones partían el texto en varias líneas y agrandaban la fila). */
+  .rd-matches-header .rd-action-card p + p,
+  .rd-matches-metrics > .rd-card p + p {
+    display: none !important;
+  }
+
+  /* Tarjetas compactas: acciones y métricas con el mismo alto. */
+  .rd-matches-header .rd-action-card {
+    gap: 0.55rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-matches-header .rd-action-card > div:first-child {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-matches-header .rd-action-card svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .rd-matches-header .rd-action-card p:first-child {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .rd-matches-header .rd-action-card p + p {
+    font-size: 10px;
+  }
+
+  .rd-matches-metrics > .rd-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-matches-metrics > .rd-card > div:first-child {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-matches-metrics > .rd-card .text-3xl {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .rd-matches-metrics > .rd-card p + p {
+    margin-top: 0.15rem;
+    font-size: 10px;
+  }
+}
+
+/* Partidas en smartphone vertical: la página entra en la pantalla y solo
+   scrollea la lista.
+   - Encabezado: título y las acciones (Eliminar todas / Nueva partida, solo
+     ícono) en una fila.
+   - Métricas en 3 columnas compactas; filtros: buscador arriba y los tres
+     selectores (textos cortos desde el JSX) repartiéndose la fila de abajo.
+   - Cada partida en tres filas: resultado, campeón, datos y acciones; la build
+     (6 ítems) en una fila; los dos equipos en otra (aliados en azul, enemigos en
+     rojo). Los selectores llevan .rd-matches-scroll por la misma razón que en
+     horizontal (las variantes md: de Tailwind van al final de la hoja). */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-main-content:has(.rd-matches-layout) {
+    overflow: hidden;
+  }
+
+  .rd-matches-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.7rem 0.75rem 0;
+    overflow: hidden;
+  }
+
+  .rd-matches-layout > * + * {
+    margin-top: 0;
+  }
+
+  .rd-matches-header,
+  .rd-matches-metrics,
+  .rd-matches-filters {
+    flex: none;
+  }
+
+  /* Encabezado */
+  .rd-matches-header {
+    align-items: center;
+  }
+
+  .rd-matches-header > div:first-child > :first-child {
+    display: none;
+  }
+
+  .rd-matches-header h1 {
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  /* El total ya está en la métrica "Partidas". */
+  .rd-matches-header h1 + p {
+    display: none;
+  }
+
+  .rd-matches-header .rd-action-card {
+    padding: 0.4rem;
+    border-radius: 0.8rem;
+  }
+
+  .rd-matches-header .rd-action-card > div:first-child {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Métricas en 3 columnas */
+  .rd-matches-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .rd-matches-metrics > .rd-card {
+    padding: 0.45rem 0.35rem;
+  }
+
+  .rd-matches-metrics > .rd-card > div:first-child {
+    gap: 0.3rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-matches-metrics > .rd-card svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .rd-matches-metrics > .rd-card .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-matches-metrics > .rd-card .text-3xl {
+    font-size: 1.3rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .rd-matches-metrics > .rd-card p + p {
+    display: none;
+  }
+
+  /* Filtros: buscador a todo el ancho y los tres selectores debajo. */
+  .rd-matches-filters {
+    padding: 0.4rem;
+  }
+
+  .rd-matches-filters > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-matches-filters > div > div:first-child {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .rd-matches-filters input {
+    padding-block: 0.45rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-matches-filters select {
+    min-width: 0;
+    padding: 0.4rem 0.45rem;
+    border-radius: 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  /* Lista: único scroll de la página. */
+  .rd-matches-scroll {
+    min-height: 0;
+    flex: 1 1 auto;
+    margin-inline: -0.75rem;
+    padding: 0 0.75rem max(0.75rem, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rd-matches-scroll > .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.4rem;
+  }
+
+  /* Tarjeta de partida */
+  .rd-matches-scroll .rd-match-card-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "main actions"
+      "build build"
+      "teams teams";
+    gap: 0.35rem 0.5rem;
+    padding: 0.5rem 0.6rem 0.5rem 0.75rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-grid > div:nth-child(2),
+  .rd-matches-scroll .rd-match-card-grid > div:nth-child(4) {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-main {
+    min-width: 0;
+    grid-area: main;
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+
+  .rd-matches-scroll .rd-match-card-result {
+    width: 1.1rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > p:first-child {
+    font-size: 1.5rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-result > :not(:first-child) {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-champ {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.65rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info {
+    gap: 0.3rem;
+  }
+
+  /* Campeón, línea, lado y tipo en una línea; tags (si hay) en otra. */
+  .rd-matches-scroll .rd-match-card-info > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-line,
+  .rd-matches-scroll .rd-match-card-tags {
+    display: flex;
+    min-width: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    overflow: hidden;
+  }
+
+  .rd-matches-scroll .rd-match-card-tags:empty {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > * {
+    flex-shrink: 0;
+  }
+
+  .rd-matches-scroll .rd-match-card-info h2 {
+    flex-shrink: 1;
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 8.5px;
+    white-space: nowrap;
+  }
+
+  .rd-matches-scroll .rd-match-card-line > span:last-child,
+  .rd-matches-scroll .rd-match-card-tags > span {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* KDA, parche y fecha en una línea; el oro no entra en este ancho. */
+  .rd-matches-scroll .rd-match-card-info > div:last-child {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.65rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child > :nth-child(2) {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:first-child {
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+
+  .rd-matches-scroll .rd-match-card-info > div:last-child span:last-child {
+    font-size: 11.5px;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions {
+    grid-area: actions;
+    flex-direction: column;
+    align-self: start;
+    gap: 0.3rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions button {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-actions svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* Build y equipos: franjas finas sin caja. */
+  .rd-matches-scroll .rd-match-card-build,
+  .rd-matches-scroll .rd-match-card-teams {
+    display: flex;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .rd-matches-scroll .rd-match-card-build {
+    grid-area: build;
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build > div {
+    display: contents;
+  }
+
+  .rd-matches-scroll .rd-match-card-build p {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-build > div:first-child p {
+    display: block;
+    flex: none;
+    width: 2.4rem;
+    margin: 0;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-align: left;
+  }
+
+  /* Separador fino entre la cabecera de la tarjeta y build + equipos. */
+  .rd-matches-scroll .rd-match-card-build {
+    padding-top: 0.4rem;
+    border-top: 1px solid hsl(var(--border) / 0.45);
+  }
+
+  .rd-matches-scroll .rd-match-card-teams {
+    grid-area: teams;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams p {
+    display: none;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid,
+  .rd-matches-scroll .rd-match-card-teams .grid {
+    display: flex;
+    width: auto;
+    gap: 0.2rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-build .grid > * {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.4rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams .grid > * {
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 0.35rem;
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:first-child .grid > :not([class*="border-primary"]) {
+    border-color: rgb(96 165 250 / 0.45);
+  }
+
+  .rd-matches-scroll .rd-match-card-teams > div:last-child .grid > * {
+    border-color: rgb(248 113 113 / 0.45);
+  }
+}

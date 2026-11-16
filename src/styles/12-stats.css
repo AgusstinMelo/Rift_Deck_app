@@ -1,0 +1,1013 @@
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-stats-layout) {
+    overflow: hidden;
+  }
+
+  .rd-stats-layout {
+    height: 100%;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    padding-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .rd-stats-overview {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-panel-tabs {
+    overflow: hidden;
+  }
+
+  .rd-stats-layout .rd-panel-tab {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-analytics-panel {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-stats-layout .rd-analytics-panel > div {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-analytics-panel .rd-card {
+    height: 100%;
+  }
+
+  /* Coach: encabezado fijo y los consejos con el alto restante (scroll propio si no entran). */
+  .rd-stats-layout .rd-stats-coach {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-stats-layout .rd-stats-coach > * {
+    flex: none;
+  }
+
+  .rd-stats-layout .rd-stats-coach > .rd-stats-coach-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Estadísticas en escritorio con poco alto (notebooks, Windows con escalado al 125%):
+   encabezado, pestañas y Coach más compactos para que el panel activo tenga más alto. */
+@media (min-width: 1024px) and (min-height: 501px) and (max-height: 800px) {
+  .rd-page.rd-stats-layout {
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach {
+    padding: 1rem 1.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header img {
+    width: 3rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header h2 + p,
+  .rd-stats-layout .rd-stats-coach-header > div:last-child > p {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight {
+    padding: 1rem 1.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action {
+    height: auto;
+  }
+}
+
+/* Pool de campeones: el lienzo de burbujas escala con la tarjeta (posiciones en %). */
+.rd-pool-bubbles {
+  width: min(100%, 380px);
+}
+
+/* Flechas del carril de Rendimiento: solo existen en smartphone. */
+.rd-stats-track-arrow {
+  display: none;
+}
+
+/* Detalle por línea bajo el radar y más jugados bajo el pool: solo en smartphone vertical. */
+.rd-stats-lane-list,
+.rd-stats-pool-list {
+  display: none;
+}
+
+/* Estadísticas en smartphone (horizontal; vertical lo reubica en el bloque siguiente): todo entra en el viewport.
+   Fila 1: título + "Basado en…" en línea y filtros compactos a la derecha.
+   Fila 2: pestañas. Debajo, el panel activo con el alto restante:
+   - Rendimiento: hero en una columna (splash de fondo, winrate arriba y 2x2 de
+     KDA / lados / pool) y un carril horizontal con las tres tarjetas.
+   - Matchups y sinergias: las dos listas lado a lado, cada una con scroll propio.
+   - Coach: encabezado en una franja fina y un consejo por página, a lo ancho.
+   Los selectores llevan .rd-stats-layout porque las variantes md:/lg:/xl: de
+   Tailwind se emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px), (orientation: portrait) and (max-width: 639px) {
+  .rd-main-content:has(.rd-stats-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-stats-layout {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  /* Encabezado */
+  .rd-stats-layout .rd-stats-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-title {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-title > div:first-child {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-title h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-title p {
+    margin-top: 0;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-stats-filters {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    gap: 0.4rem;
+  }
+
+  /* El texto del label queda para lectores de pantalla; visualmente sobra. */
+  .rd-stats-layout .rd-stats-filter {
+    width: 8.25rem;
+    min-width: 0;
+    font-size: 0;
+  }
+
+  .rd-stats-layout .rd-stats-filter-patch {
+    width: 7.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-filter select {
+    height: 1.85rem;
+    margin-top: 0;
+    padding: 0 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  /* Pestañas */
+  .rd-stats-layout > .rd-panel-tabs {
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-stats-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-analytics-panel {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-stats-layout .rd-card-title {
+    font-size: 12px;
+  }
+
+  /* Rendimiento: carril 1x4 (hero, campeón, línea y pool) con dos tarjetas por
+     vista; se navega con swipe o con las flechas, que van en una fila propia
+     entre las pestañas y el carril (superpuestas a las tarjetas tapaban datos y
+     en vertical quedaban fuera de la vista). El carril toma el resto del alto. */
+  .rd-stats-layout .rd-stats-overview-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+
+  .rd-stats-layout .rd-stats-overview-panel::before {
+    content: "Deslizá o usá las flechas";
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    color: hsl(var(--muted-foreground));
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .rd-stats-layout .rd-stats-overview-panel > .rd-stats-track {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+
+  .rd-stats-layout .rd-stats-track {
+    height: 100%;
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-cards {
+    display: contents;
+  }
+
+  .rd-stats-layout .rd-stats-track > .rd-stats-hero,
+  .rd-stats-layout .rd-stats-cards > * {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex: 0 0 calc((100% - 0.5rem) / 2);
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+
+  /* Estilo de .rd-arrow; al llegar a un extremo quedan atenuadas. */
+  .rd-stats-layout .rd-stats-track-arrow {
+    display: flex;
+    grid-row: 1;
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow-prev {
+    grid-column: 2;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow-next {
+    grid-column: 3;
+  }
+
+  .rd-stats-layout .rd-stats-hero {
+    min-height: 0;
+  }
+
+  /* Splash a tamaño completo, con una sombra que se cierra hacia los datos. */
+  .rd-stats-layout .rd-stats-hero-art {
+    inset: 0;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art > div {
+    width: 100%;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 18%;
+    filter: brightness(0.62) saturate(1.12) !important;
+  }
+
+  .rd-stats-layout .rd-stats-hero-art img + div {
+    inset: 0;
+    width: auto;
+    background: linear-gradient(
+      180deg,
+      hsl(222 36% 9% / 0.15) 0%,
+      hsl(222 36% 9% / 0.55) 38%,
+      hsl(222 36% 9% / 0.92) 62%,
+      hsl(222 36% 9% / 0.96) 100%
+    );
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid {
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child {
+    grid-column: 1 / -1;
+    padding: 0.35rem 0.5rem;
+    transform: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > div {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child span {
+    font-size: 0.75rem;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > p:last-child {
+    margin-top: 0.2rem;
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents > * {
+    min-width: 0;
+    padding: 0.3rem 0.35rem;
+    border-bottom: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    transform: none;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents > :nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid .rd-label {
+    margin-bottom: 0.15rem;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-4xl {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-xs {
+    margin-top: 0.1rem;
+    font-size: 9.5px;
+    line-height: 1.2;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card {
+    height: 100%;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child {
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:last-child {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child p {
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-cards .rd-card > div:first-child p + p {
+    font-size: 9px;
+  }
+
+  /* Winrate por campeón: lista con scroll propio. */
+  .rd-stats-layout .rd-stats-champ-list {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 1fr);
+    /* max-content: con "auto" y el min-h-0 de cada fila, la grilla comprimía las
+       filas para que entraran en el alto y se pisaban; así la lista scrollea. */
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-champ-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Filas sin borde, para que el solape no dibuje líneas cruzadas. */
+  .rd-stats-layout .rd-stats-champ-list > * {
+    min-height: auto;
+    padding: 0.3rem 0.45rem;
+    border: 0;
+  }
+
+  /* Solape leve entre filas: los retratos apenas se tocan. */
+  .rd-stats-layout .rd-stats-champ-list > * + * {
+    margin-top: -0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list > * > div:first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-lane-chart {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Pool: el lienzo se ajusta al alto y al ancho disponibles. */
+  .rd-stats-layout .rd-pool-frame {
+    min-height: 0;
+    container-type: size;
+  }
+
+  .rd-stats-layout .rd-pool-bubbles {
+    width: min(100cqw, 172.7cqh);
+  }
+
+  /* Matchups y sinergias: dos columnas con scroll propio. */
+  .rd-stats-layout .rd-stats-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-pair > * {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-stats-pair .rd-card {
+    height: 100%;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-pair .rd-card > div:last-child {
+    min-height: 0;
+  }
+
+  .rd-stats-layout .rd-matchup-list {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-matchup-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-matchup-list > * + * {
+    margin-top: 0.3rem;
+  }
+
+  .rd-stats-layout .rd-matchup-list .text-\[13px\] {
+    font-size: 12px;
+  }
+
+  .rd-stats-layout .rd-matchup-list .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  /* Coach: encabezado en una franja fina y un consejo por página, a lo ancho.
+     Izquierda: dominio, título, tesis (con scroll propio) y evidencia.
+     Derecha: el consejo como panel destacado, siempre visible entero. */
+  .rd-stats-layout .rd-stats-coach {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.75rem 0.6rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header img {
+    width: 1.9rem;
+  }
+
+  /* Kicker, descripción y nota de confianza sobran: el chip de cada consejo ya
+     indica su respaldo. */
+  .rd-stats-layout .rd-stats-coach-header > div:first-child > div > div,
+  .rd-stats-layout .rd-stats-coach-header h2 + p,
+  .rd-stats-layout .rd-stats-coach-header > div:last-child > p {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-coach-header h2 {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .rd-stats-layout .rd-stats-coach-grid {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .rd-stats-layout .rd-stats-insight {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 0.85rem;
+    padding: 0.65rem 0.75rem 0.65rem 1rem;
+    border-radius: 0.9rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) p {
+    margin-bottom: 0.2rem;
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-insight h3 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .rd-stats-layout .rd-stats-insight > div:nth-child(2) > span {
+    padding: 0.15rem 0.4rem;
+    font-size: 9px;
+  }
+
+  /* Tesis: ocupa el alto que sobra y scrollea si es larga. */
+  .rd-stats-layout .rd-stats-insight-body {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+    margin-top: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p:first-child {
+    margin-bottom: 0.25rem;
+    font-size: 9px;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p + p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .rd-stats-layout .rd-stats-insight-evidence {
+    grid-column: 1;
+    grid-row: 3;
+    flex-wrap: nowrap;
+    gap: 0.3rem;
+    margin-top: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-evidence::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-evidence > span {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .rd-stats-layout .rd-stats-insight-spacer {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 0.8rem;
+    overflow-y: auto;
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 0.75rem;
+    background: rgba(212, 175, 55, 0.06);
+    scrollbar-width: none;
+  }
+
+  .rd-stats-insight-action::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action svg {
+    display: none;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* "Consejo:" pasa a ser el título del panel. */
+  .rd-stats-layout .rd-stats-insight-action p > span:first-child {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: hsl(var(--primary));
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+}
+
+/* Estadísticas en smartphone vertical: comparte el bloque anterior (encaje en el
+   viewport, carril de Rendimiento, listas con scroll propio y coach paginado) y
+   reubica lo que cambia con la orientación:
+   - Encabezado: título y "Basado en…" arriba; los dos filtros en una fila debajo.
+   - Pestañas: las cinco en una fila (nombres cortos desde el JSX).
+   - Rendimiento: una tarjeta por vista (resumen, campeones, líneas, pool) con
+     flechas y swipe; el resumen reparte el winrate y el 2x2 en todo el alto.
+   - Matchups y sinergias: las dos listas apiladas, cada una con la mitad del alto.
+   - Coach: un consejo por página en una columna (tesis con scroll, evidencia y
+     el consejo destacado al pie). */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-page.rd-stats-layout {
+    gap: 0.55rem;
+    padding: 0.7rem 0.75rem max(0.6rem, env(safe-area-inset-bottom));
+  }
+
+  /* Encabezado en dos filas. */
+  .rd-stats-layout .rd-stats-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-title h1 {
+    font-size: 1.65rem;
+  }
+
+  .rd-stats-layout .rd-stats-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .rd-stats-layout .rd-stats-filter,
+  .rd-stats-layout .rd-stats-filter-patch {
+    width: auto;
+  }
+
+  .rd-stats-layout .rd-stats-filter select {
+    height: 2.2rem;
+    font-size: 0.78rem;
+  }
+
+  /* Pestañas: las cinco reparten el ancho. */
+  .rd-stats-layout > .rd-panel-tabs {
+    padding: 0.25rem;
+  }
+
+  .rd-stats-layout > .rd-panel-tabs .rd-panel-tab {
+    min-width: 0;
+    min-height: 2.2rem;
+    flex: 1 1 auto;
+    padding: 0.3rem 0.35rem;
+    font-size: 0.7rem;
+  }
+
+  /* Rendimiento: una tarjeta por vista. */
+  .rd-stats-layout .rd-stats-track > .rd-stats-hero,
+  .rd-stats-layout .rd-stats-cards > * {
+    flex-basis: 100%;
+  }
+
+  .rd-stats-layout .rd-stats-track-arrow {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  /* Resumen: winrate grande arriba y KDA / lados / pool en 2x2 debajo. */
+  .rd-stats-layout .rd-stats-hero-grid {
+    grid-template-rows: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > .rd-label {
+    font-size: 10px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > div {
+    width: clamp(5rem, 15dvh, 7rem);
+    height: clamp(5rem, 15dvh, 7rem);
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child span {
+    font-size: clamp(0.95rem, 2.3dvh, 1.2rem);
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > :first-child > p:last-child {
+    font-size: 12px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid .rd-label {
+    font-size: 9.5px;
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-4xl {
+    font-size: clamp(1.4rem, 3.8dvh, 2rem);
+  }
+
+  .rd-stats-layout .rd-stats-hero-grid > .contents .text-xs {
+    font-size: 11px;
+  }
+
+  /* Campeones: filas más altas, la lista scrollea dentro de la tarjeta. */
+  .rd-stats-layout .rd-stats-champ-list > * {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list > * + * {
+    margin-top: -0.35rem;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list > * > div:first-child {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .rd-stats-layout .rd-stats-champ-list .text-xs {
+    font-size: 13px;
+  }
+
+  /* Winrate por línea: el radar usa el ancho completo (los márgenes laterales
+     del dibujo sobran) y se centra en el alto. */
+  .rd-stats-layout .rd-stats-lane {
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: 0.5rem;
+  }
+
+  .rd-stats-layout .rd-stats-lane-chart {
+    width: 112%;
+    height: auto;
+    min-height: 0;
+    flex: 0 1 auto;
+    margin-inline: -6%;
+  }
+
+  /* Lista por línea: nombre | barra de WR | WR | partidas, en el color de la línea. */
+  .rd-stats-layout .rd-stats-lane-list {
+    display: grid;
+    width: 100%;
+    flex: none;
+    gap: 0.35rem;
+    padding: 0 0.15rem 0.15rem;
+  }
+
+  .rd-stats-lane-list > li {
+    display: grid;
+    grid-template-columns: 3.4rem minmax(0, 1fr) 2.6rem 2.3rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.55rem;
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-left: 3px solid var(--rd-lane);
+    border-radius: 0.6rem;
+    background: hsl(var(--secondary) / 0.25);
+    font-size: 12px;
+  }
+
+  .rd-stats-lane-list > li > span:first-child {
+    font-weight: 700;
+  }
+
+  .rd-stats-lane-bar {
+    height: 0.4rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: hsl(var(--secondary));
+  }
+
+  .rd-stats-lane-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--rd-lane);
+  }
+
+  .rd-stats-lane-list strong {
+    color: var(--rd-lane);
+    text-align: right;
+  }
+
+  .rd-stats-lane-list em {
+    color: hsl(var(--muted-foreground));
+    font-size: 11px;
+    font-style: normal;
+    text-align: right;
+  }
+
+  /* Pool: las burbujas arriba y los cinco más jugados debajo, para no dejar
+     media tarjeta vacía (el lienzo es apaisado y en vertical sobra alto).
+     Fila: retrato | nombre | barra con su parte del total | partidas | WR. */
+  .rd-stats-layout .rd-pool-frame {
+    flex: 1 1 0;
+  }
+
+  .rd-stats-layout .rd-stats-pool-list {
+    display: grid;
+    flex: none;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    padding: 0 0.15rem 0.15rem;
+  }
+
+  .rd-stats-pool-list > li {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) 3.5rem 2.2rem 2.4rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.55rem 0.3rem 0.4rem;
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 0.6rem;
+    background: hsl(var(--secondary) / 0.25);
+    font-size: 12px;
+  }
+
+  .rd-stats-pool-list > li > img,
+  .rd-stats-pool-list > li > span:first-child {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    background: hsl(var(--secondary));
+    object-fit: cover;
+  }
+
+  .rd-stats-pool-list > li > span:nth-child(2) {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-stats-pool-bar {
+    height: 0.35rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: hsl(var(--secondary));
+  }
+
+  .rd-stats-pool-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: hsl(var(--primary));
+  }
+
+  .rd-stats-pool-list em {
+    color: hsl(var(--muted-foreground));
+    font-size: 11px;
+    font-style: normal;
+    text-align: right;
+  }
+
+  .rd-stats-pool-list strong {
+    text-align: right;
+  }
+
+  /* Matchups y sinergias: listas apiladas que se reparten el alto; una lista
+     vacía queda solo con su mensaje y le deja el resto a la otra. */
+  .rd-stats-layout .rd-stats-pair {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-stats-layout .rd-stats-pair > * {
+    min-height: 0;
+    flex: 1 1 0;
+  }
+
+  .rd-stats-layout .rd-stats-pair > :has(.rd-card > div:last-child > p:only-child) {
+    flex: none;
+  }
+
+  /* Fila de matchup en dos líneas: retrato | nombre y respaldo | partidas | WR. */
+  .rd-stats-layout .rd-matchup-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 0.6rem;
+    row-gap: 0.15rem;
+  }
+
+  .rd-stats-layout .rd-matchup-row > :first-child {
+    grid-row: 1 / 3;
+  }
+
+  .rd-stats-layout .rd-matchup-row > :nth-child(2) {
+    grid-row: 1;
+    grid-column: 2;
+    font-weight: 600;
+  }
+
+  .rd-stats-layout .rd-matchup-row > :nth-child(3) {
+    grid-row: 2;
+    grid-column: 2;
+    justify-self: start;
+    padding: 0.05rem 0.4rem;
+  }
+
+  .rd-stats-layout .rd-matchup-row > :nth-child(4) {
+    grid-row: 1 / 3;
+    grid-column: 3;
+  }
+
+  .rd-stats-layout .rd-matchup-row > :nth-child(5) {
+    grid-row: 1 / 3;
+    grid-column: 4;
+    font-size: 15px;
+  }
+
+  /* Coach: consejo en una columna. */
+  .rd-stats-layout .rd-stats-coach-header {
+    justify-content: space-between;
+  }
+
+  .rd-stats-layout .rd-stats-insight {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    padding: 0.7rem 0.75rem 0.7rem 0.95rem;
+  }
+
+  /* El consejo se ve entero al pie (con "Consejo" como título); la tesis toma
+     el alto que queda y scrollea si es larga. */
+  .rd-stats-layout .rd-stats-insight-action {
+    grid-column: 1;
+    grid-row: 4;
+    justify-content: flex-start;
+    margin-top: 0.6rem;
+    padding: 0.6rem 0.7rem;
+    overflow: visible;
+  }
+
+  .rd-stats-layout .rd-stats-insight-action p {
+    font-size: 12.5px;
+  }
+
+  .rd-stats-layout .rd-stats-insight h3 {
+    font-size: 1.1rem;
+  }
+
+  .rd-stats-layout .rd-stats-insight-body > p + p {
+    font-size: 13px;
+  }
+}

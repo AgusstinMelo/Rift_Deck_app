@@ -14,7 +14,7 @@ import { editPermissions } from '../validation/goalSchema';
 import { describeGoal, formatPeriod } from '../texts';
 import ConfirmDialog from './ConfirmDialog';
 import GoalCheckinsPanel from './GoalCheckinsPanel';
-import GoalEvolutionChart from './GoalEvolutionChart';
+import GoalEvolutionChart from './LazyGoalEvolutionChart';
 import GoalExplanation from './GoalExplanation';
 import GoalMatchesPanel from './GoalMatchesPanel';
 import GoalOutcomeBadge from './GoalOutcomeBadge';

@@ -1,0 +1,908 @@
+/* Crear / editar objetivo: encabezado y pasos fijos; cada columna o panel scrollea por su cuenta
+   y las acciones del paso quedan siempre visibles abajo. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-goal-flow) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-goal-flow) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goal-flow {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .rd-goal-flow > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  .rd-goal-flow > .rd-goal-flow-body,
+  .rd-goal-flow-body > .rd-goal-step,
+  .rd-goal-flow-body > .rd-goal-step-fill {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-goal-flow-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-goal-flow-body > * {
+    flex: none;
+  }
+
+  /* Paso 1: el carril de categorías ocupa todo el alto restante. */
+  .rd-goal-step-fill {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-goal-choice {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Paso 1 en escritorio: las cinco categorías entran juntas y se estiran al alto restante. */
+  .rd-goal-choice-grid {
+    display: grid;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.75rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-goal-choice-cell {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .rd-goal-choice-cell > .rd-goal-choice {
+    height: 100%;
+  }
+
+  .rd-goal-choice > :not(.rd-goal-choice-body) {
+    flex: none;
+  }
+
+  .rd-goal-choice-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
+  }
+
+  /* Pasos 2 y 3 y edición: contenido en dos paneles con scroll propio y acciones fijas. */
+  .rd-goal-step {
+    overflow: hidden;
+  }
+
+  .rd-goal-step > * {
+    flex: none;
+  }
+
+  .rd-goal-step > .rd-goal-step-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .rd-goal-step-content > .rd-goal-form,
+  .rd-goal-step-content.rd-goal-form {
+    height: 100%;
+  }
+
+  .rd-goal-form-pane {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.5rem;
+  }
+
+  .rd-goal-form-filters {
+    border-left: 1px solid hsl(var(--border) / 0.6);
+    padding-left: 1.25rem;
+  }
+}
+
+/* Objetivos: encabezado, pestañas y resumen fijos; los objetivos se recorren en un carril horizontal. */
+.rd-goals-layout,
+.rd-goals-panel {
+  min-height: 0;
+}
+
+/* Escritorio angosto: cinco columnas no entran, así que van tres arriba y dos abajo. */
+@media (min-width: 1024px) and (max-width: 1365px) and (min-height: 501px) {
+  .rd-goal-choice-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-goal-choice-cell {
+    grid-column: span 2;
+  }
+
+  .rd-goal-choice-cell:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+}
+
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-goals-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: hidden;
+    padding-bottom: 1.25rem;
+  }
+
+  .rd-goals-header {
+    flex: none;
+  }
+
+  .rd-goals-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .rd-goals-panel > :not(.rd-goals-carousel) {
+    flex: none;
+  }
+
+  /* Sin objetivos activos: la tarjeta vacía ocupa el alto restante, como el carril. */
+  .rd-goals-panel > .rd-goals-empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* El carril horizontal ocupa el alto restante y cada tarjeta se estira a ese alto. */
+  .rd-goals-carousel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-track {
+    flex: 1 1 auto;
+    min-height: 0;
+    overscroll-behavior-x: contain;
+  }
+
+  .rd-goals-track > * {
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* La tarjeta nunca supera el alto del carril: el gráfico cede espacio si hace falta. */
+  .rd-goals-track .rd-goal-card {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goals-track .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
+  .rd-goals-track .rd-goal-card-chart,
+  .rd-goals-track .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+}
+
+.rd-goals-carousel {
+  min-height: 0;
+}
+
+/* Se navega con las flechas, swipe o teclado: sin barra de scroll visible. */
+.rd-goals-track {
+  scrollbar-width: none;
+}
+
+.rd-goals-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1023px), (max-height: 500px) {
+  .rd-goals-carousel > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 1023px), (max-height: 500px) {
+  .rd-goals-layout > * + *,
+  .rd-goals-panel > * + * {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Objetivos (vista general) en smartphone horizontal: todo entra en el viewport.
+   Fila 1: título compacto, pestañas y "Nuevo objetivo". Debajo, los 5 contadores en
+   una columna y el carril de objetivos (2 por vista) con el alto restante.
+   Los selectores llevan .rd-goals-layout porque las variantes lg:/sm: de Tailwind se
+   emiten al final de la hoja y, con la misma especificidad, ganarían. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-goals-layout {
+    display: grid;
+    height: 100%;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout > *,
+  .rd-goals-panel > * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout > header.rd-goals-header {
+    display: contents;
+  }
+
+  .rd-goals-layout > header > div:first-child {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .rd-goals-layout > header > div:first-child > div:first-child,
+  .rd-goals-layout > header > div:first-child > p {
+    display: none;
+  }
+
+  .rd-goals-layout > header h1 {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout > header > a {
+    grid-row: 1;
+    grid-column: 3;
+    gap: 0.5rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.35rem;
+    border-radius: 0.7rem;
+  }
+
+  .rd-goals-layout > header > a > div:first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-goals-layout > header > a svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-goals-layout > header > a p:first-child {
+    font-size: 12px;
+  }
+
+  .rd-goals-layout > header > a p + p {
+    display: none;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: center;
+    padding: 0.2rem;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.7rem;
+  }
+
+  /* Panel: contadores en una columna a la izquierda y carril a la derecha. */
+  .rd-goals-layout > .rd-goals-panel {
+    display: grid;
+    height: 100%;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.5rem;
+    align-self: stretch;
+  }
+
+  /* Historial: los filtros Finalizados / Archivados ocupan la columna izquierda. */
+  .rd-goals-layout > .rd-goals-panel > [role="tablist"] {
+    flex-direction: column;
+    align-self: start;
+  }
+
+  .rd-goals-layout .rd-goals-summary {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary > div:last-child {
+    grid-column: auto;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-card {
+    height: 100%;
+    gap: 0.45rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label + p {
+    font-size: 1.2rem;
+  }
+
+  /* Carril: navegación compacta y tarjetas que ocupan todo el alto restante. */
+  .rd-goals-layout .rd-goals-carousel {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > * + * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child button {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child p {
+    font-size: 11px;
+  }
+
+  .rd-goals-layout .rd-goals-track {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.5rem;
+  }
+
+  /* Ancho fijo: sin min-width 0, una tarjeta con pie largo (Historial: fechas +
+     Finalizado + Alcanzado) se ensanchaba y la segunda quedaba cortada. */
+  .rd-goals-layout .rd-goals-track > * {
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex-basis: calc((100% - 0.5rem) / 2);
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Tarjeta compacta: sin la descripción larga; el gráfico usa el espacio que sobra. */
+  .rd-goals-layout .rd-goal-card {
+    min-height: 0;
+    gap: 0.3rem;
+    padding: 0.5rem 0.65rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card .rd-label {
+    font-size: 9px;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 {
+    font-size: 0.8rem;
+    line-height: 1.1;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 + p {
+    display: none;
+  }
+
+  /* Aviso de evidencia insuficiente: la "Muestra x/y" ya lo indica. */
+  .rd-goals-layout .rd-goal-card > p[class*="border-amber"] {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card > .border-t {
+    padding-top: 0.3rem;
+  }
+
+  .rd-goals-layout .rd-goal-card .space-y-2 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card .text-2xl {
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout .rd-goal-card .text-xs,
+  .rd-goals-layout .rd-goal-card .text-\[11px\] {
+    font-size: 10px;
+  }
+
+  .rd-goals-layout .rd-goal-card [role="progressbar"] {
+    height: 0.35rem;
+  }
+
+  /* El gráfico conserva un alto mínimo; su etiqueta sobra (la línea de meta lo explica). */
+  .rd-goals-layout .rd-goal-card-chart {
+    min-height: 4.5rem;
+    gap: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > .rd-label {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+
+  /* Pie en una sola línea: período (sin ícono) y estados, más chicos. */
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child {
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child svg {
+    display: none;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child > span {
+    padding: 0.05rem 0.3rem;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+}
+
+/* Objetivos en smartphone vertical: todo entra en la pantalla.
+   - Vista general: título y "Nuevo" en una fila, pestañas, los 5 contadores en una
+     fila compacta y el carril de objetivos (1 tarjeta por vista, ancho completo)
+     con el alto restante; el gráfico de cada tarjeta usa el espacio que sobra.
+   - Crear / editar: encabezado compacto, pasos, el contenido con scroll propio y
+     las acciones siempre visibles al pie.
+   Los selectores llevan .rd-goals-layout por las variantes lg:/sm: de Tailwind. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-main-content:has(.rd-goals-layout) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-goals-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.7rem 0.75rem max(0.6rem, env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  .rd-goals-layout > *,
+  .rd-goals-panel > * {
+    margin-top: 0 !important;
+  }
+
+  /* Encabezado: título a la izquierda, "Nuevo objetivo" compacto a la derecha. */
+  .rd-goals-layout > header.rd-goals-header {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .rd-goals-layout > header > div:first-child > div:first-child,
+  .rd-goals-layout > header > div:first-child > p {
+    display: none;
+  }
+
+  .rd-goals-layout > header h1 {
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  .rd-goals-layout > header > a {
+    gap: 0.5rem;
+    padding: 0.4rem 0.7rem 0.4rem 0.4rem;
+    border-radius: 0.8rem;
+  }
+
+  .rd-goals-layout > header > a > div:first-child {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .rd-goals-layout > header > a p:first-child {
+    font-size: 13px;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs {
+    flex: none;
+    padding: 0.25rem;
+  }
+
+  .rd-goals-layout > .rd-panel-tabs .rd-panel-tab {
+    min-height: 2.2rem;
+    flex: 1 1 0;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  .rd-goals-layout > .rd-goals-panel {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rd-goals-layout > .rd-goals-panel > :not(.rd-goals-carousel) {
+    flex: none;
+  }
+
+  /* Contadores: cinco fichas en una fila, valor arriba y etiqueta abajo. */
+  .rd-goals-layout .rd-goals-summary {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+
+  .rd-goals-layout .rd-goals-summary > div:last-child {
+    grid-column: auto;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-card {
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.4rem 0.2rem;
+    text-align: center;
+  }
+
+  .rd-goals-layout .rd-goals-summary svg {
+    display: none;
+  }
+
+  /* Etiqueta completa ("Programados", "Alcanzados"), sin "…". */
+  .rd-goals-layout .rd-goals-summary .rd-label {
+    order: 2;
+    flex: none;
+    width: 100%;
+    overflow: visible;
+    font-size: 7px;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-goals-layout .rd-goals-summary .rd-label + p {
+    font-size: 1.3rem;
+  }
+
+  /* Historial: sub-pestañas a todo el ancho. */
+  .rd-goals-layout > .rd-goals-panel > [role="tablist"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  /* Carril: una tarjeta por vista con todo el alto restante. */
+  .rd-goals-layout .rd-goals-carousel {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > * + * {
+    margin-top: 0;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goals-layout .rd-goals-carousel > :first-child button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .rd-goals-layout .rd-goals-track {
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 0.5rem;
+    overscroll-behavior-x: contain;
+  }
+
+  .rd-goals-layout .rd-goals-track > * {
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex-basis: 100%;
+  }
+
+  .rd-goals-layout .rd-goal-card {
+    min-height: 0;
+    gap: 0.6rem;
+    padding: 0.8rem 0.85rem;
+    overflow: hidden;
+  }
+
+  .rd-goals-layout .rd-goal-card > :not(.rd-goal-card-chart) {
+    flex-shrink: 0;
+  }
+
+  .rd-goals-layout .rd-goal-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart {
+    min-height: 6rem;
+  }
+
+  .rd-goals-layout .rd-goal-card-chart > div {
+    min-height: 0;
+  }
+
+  /* Pie: período a la izquierda y estados a la derecha; si no entran, los
+     estados bajan a una segunda línea en vez de cortarse. */
+  .rd-goals-layout .rd-goal-card > .mt-auto {
+    min-width: 0;
+    gap: 0.35rem 0.4rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:first-child {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child {
+    margin-left: auto;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-goals-layout .rd-goal-card > .mt-auto > span:last-child > span {
+    padding: 0.1rem 0.4rem;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Crear / editar objetivo ---------- */
+  .rd-main-content:has(.rd-goal-flow) {
+    overflow: hidden;
+  }
+
+  .rd-page:has(> .rd-goal-flow) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    padding: 0.7rem 0.75rem max(0.6rem, env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  .rd-goal-flow {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .rd-goal-flow > * {
+    flex: none;
+    margin-top: 0 !important;
+  }
+
+  /* Encabezado: "Volver" arriba y el título; la bajada sobra. */
+  .rd-goal-flow > header > p,
+  .rd-goal-flow > header + * > p {
+    display: none;
+  }
+
+  .rd-goal-flow h1 {
+    font-size: 1.6rem;
+    line-height: 1.05;
+  }
+
+  .rd-goal-flow > .rd-goal-flow-body,
+  .rd-goal-flow-body > .rd-goal-step,
+  .rd-goal-flow-body > .rd-goal-step-fill {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-goal-flow-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .rd-goal-flow-body > * {
+    flex: none;
+  }
+
+  .rd-goal-flow-body > ol p {
+    margin-top: 0.3rem;
+    font-size: 10px;
+  }
+
+  /* Paso 1: el carril de categorías con todo el alto; una categoría por vista. */
+  .rd-goal-step-fill {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rd-goal-step-fill > .rd-goals-carousel {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .rd-goal-step-fill > .rd-goals-carousel > * + * {
+    margin-top: 0;
+  }
+
+  .rd-goal-step-fill > .rd-goals-carousel > :first-child {
+    flex: none;
+  }
+
+  .rd-goal-step-fill .rd-goals-carousel > :first-child button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .rd-goal-step-fill .rd-goals-track {
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 0.5rem;
+  }
+
+  .rd-goal-step-fill .rd-goals-track > * {
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex-basis: 100%;
+  }
+
+  .rd-goal-choice {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-goal-choice > :not(.rd-goal-choice-body) {
+    flex: none;
+  }
+
+  .rd-goal-choice-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rd-goal-choice .rd-action-card {
+    min-height: 2.75rem;
+  }
+
+  /* Pasos 2 y 3 y edición: el formulario scrollea dentro de la tarjeta y las
+     acciones quedan en una fila al pie. */
+  .rd-goal-step {
+    gap: 0.6rem;
+    padding: 0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-goal-step > * {
+    flex: none;
+  }
+
+  .rd-goal-step > .rd-goal-step-content {
+    min-height: 0;
+    flex: 1 1 auto;
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rd-goal-step > .rd-goal-step-content .rd-goal-form-filters {
+    padding-top: 0.75rem;
+    border-top: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  /* Formulario en dos columnas (nombre | descripción, dato | cálculo, meta | valor,
+     fechas) y campos más bajos: menos scroll dentro de la tarjeta. */
+  .rd-goal-step .rd-goal-form-pane .grid.gap-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem 0.5rem;
+  }
+
+  .rd-goal-step .rd-goal-form-pane .grid.gap-3 > :only-child {
+    grid-column: 1 / -1;
+  }
+
+  .rd-goal-step .rd-goal-form-pane > :not([hidden]) ~ :not([hidden]),
+  .rd-goal-step .rd-goal-form-pane fieldset > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.6rem;
+  }
+
+  .rd-goal-step .rd-goal-form input,
+  .rd-goal-step .rd-goal-form select {
+    padding-block: 0.45rem;
+    font-size: 13px;
+  }
+
+  .rd-goal-step .rd-goal-form label {
+    font-size: 11.5px;
+  }
+
+  .rd-goal-step > :last-child {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding-top: 0.6rem;
+  }
+
+  .rd-goal-step > :last-child > * {
+    min-height: 2.6rem;
+    flex: 1 1 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+}

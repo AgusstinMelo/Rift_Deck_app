@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import ReactMarkdown from 'react-markdown';
 import { X } from 'lucide-react';
 import { tr } from '@/i18n/uiI18n';
 import { useT } from '@/lib/LocaleContext';
 import { SITE_URL } from '@/seo/publicSeo';
+
+// react-markdown se carga recién al abrir un documento.
+const LegalMarkdown = lazy(() => import('@/components/LegalMarkdown'));
 
 // Datos del titular (LSSI-CE art. 10). Actualizar acá si cambian.
 // TODO: completar código postal y ciudad del domicilio.
@@ -298,31 +300,9 @@ export default function LegalInfoModal({ type, onClose }) {
               {t('legal.spanishOnly')}
             </p>
           )}
-          <ReactMarkdown
-            components={{
-              h2: ({ children }) => (
-                <h3 className="font-rajdhani text-primary text-base font-bold uppercase tracking-wide mt-6 first:mt-0 mb-3">
-                  {children}
-                </h3>
-              ),
-              p: ({ children }) => (
-                <p className="text-sm leading-6 text-muted-foreground mb-4">
-                  {children}
-                </p>
-              ),
-              ul: ({ children }) => (
-                <ul className="list-disc pl-5 mb-4 space-y-2 text-sm leading-6 text-muted-foreground">
-                  {children}
-                </ul>
-              ),
-              li: ({ children }) => <li>{children}</li>,
-              strong: ({ children }) => (
-                <strong className="font-semibold text-foreground">{children}</strong>
-              ),
-            }}
-          >
-            {content.markdown}
-          </ReactMarkdown>
+          <Suspense fallback={null}>
+            <LegalMarkdown>{content.markdown}</LegalMarkdown>
+          </Suspense>
         </div>
 
         {isLegalDocument && (

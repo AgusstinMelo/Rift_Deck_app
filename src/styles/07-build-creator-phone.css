@@ -1,0 +1,857 @@
+/* Creador de builds en smartphone horizontal: "taller" sin scroll de página.
+   - Fila 1: volver, retrato, nombre + tier y los controles (parche, nombre,
+     línea, limpiar, guardar) en una sola línea.
+   - Izquierda (14rem), "tu build" siempre visible: los 6 slots de objetos (3x2)
+     y los hechizos (5 por fila) para elegirlos directo.
+   - Derecha: pestañas Objetos / Runas / Stats (las agrega el JSX) y un panel por
+     vez con todo el alto. Los paneles inactivos se ocultan, no se desmontan.
+   Este bloque lo comparte smartphone vertical, que reubica la estructura en el
+   bloque siguiente (encabezado, "tu build", pestañas y panel apilados). */
+@media (orientation: landscape) and (max-height: 500px), (orientation: portrait) and (max-width: 639px) {
+  .rd-main-content:has(.rd-buildws) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-buildws {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-buildws > * {
+    flex: none;
+  }
+
+  /* Encabezado en una línea */
+  .rd-buildws .rd-buildws-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.85rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child > button {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child > div:nth-child(2) {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .rd-buildws .rd-buildws-header h2 {
+    font-size: 1.15rem;
+  }
+
+  /* Líneas, tipo de daño, rol y WR/PR/BR sobran acá: queda nombre + tier. */
+  .rd-buildws .rd-buildws-header h2 ~ span:not([class*="tier-"]),
+  .rd-buildws .rd-buildws-header > div:first-child p {
+    display: none;
+  }
+
+  .rd-buildws .rd-buildws-header h2 ~ span[class*="tier-"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child select,
+  .rd-buildws .rd-buildws-header > div:last-child input {
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.6rem;
+    font-size: 12px;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > select:first-child {
+    width: 7rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > input {
+    width: 8.5rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > select:nth-of-type(2) {
+    width: 5.5rem;
+  }
+
+  /* "Limpiar" solo con el ícono (el texto queda para lectores de pantalla). */
+  .rd-buildws .rd-buildws-header > div:last-child > button:not(:last-child) {
+    gap: 0;
+    padding: 0.4rem;
+    font-size: 0;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > button:last-child {
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.6rem;
+    font-size: 12px;
+  }
+
+  /* Cuerpo: "tu build" a la izquierda, pestañas y panel a la derecha. */
+  .rd-buildws > .rd-buildws-body {
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-buildws-items,
+  .rd-buildws .rd-buildws-side {
+    display: contents;
+  }
+
+  .rd-buildws .rd-buildws-tabs {
+    grid-row: 1;
+    grid-column: 2;
+    padding: 0.2rem;
+    border-radius: 12px;
+  }
+
+  .rd-buildws .rd-buildws-tabs .rd-panel-tab {
+    min-height: 1.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.72rem;
+  }
+
+  .rd-buildws .rd-card-title {
+    font-size: 11px;
+  }
+
+  /* Objetos elegidos: 3x2 centrado. */
+  .rd-buildws .rd-buildws-pool {
+    display: flex;
+    min-height: 0;
+    grid-row: 1 / 3;
+    grid-column: 1;
+    flex-direction: column;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > div:first-child {
+    margin-bottom: 0.25rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div {
+    display: grid;
+    grid-template-columns: repeat(3, 2.1rem);
+    gap: 0.35rem 0.55rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.5rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > img {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  /* Badge de botas sobre el encantamiento y textos del slot vacío. */
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > div {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > span {
+    font-size: 8px;
+  }
+
+  .rd-buildws .rd-buildws-recommended {
+    display: none;
+  }
+
+  /* Hechizos: 5 por fila. */
+  .rd-buildws .rd-buildws-spells {
+    grid-row: 3;
+    grid-column: 1;
+    padding: 0.4rem 0.55rem 0.45rem;
+  }
+
+  .rd-buildws .rd-buildws-spells > p {
+    margin-bottom: 0.25rem;
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid {
+    align-items: center;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid button {
+    max-width: 1.65rem;
+  }
+
+  /* Paneles: uno por vez, con todo el alto de la derecha. */
+  .rd-buildws .rd-item-browser,
+  .rd-buildws .rd-rune-picker,
+  .rd-buildws .rd-buildws-stats {
+    height: 100%;
+    min-height: 0;
+    grid-row: 2 / 4;
+    grid-column: 2;
+  }
+
+  .rd-buildws .rd-buildws-body:not([data-panel="items"]) .rd-item-browser,
+  .rd-buildws .rd-buildws-body:not([data-panel="runes"]) .rd-rune-picker,
+  .rd-buildws .rd-buildws-body:not([data-panel="stats"]) .rd-buildws-stats {
+    display: none;
+  }
+
+  /* Objetos: filtros en una línea y la grilla llena el resto con scroll propio. */
+  .rd-buildws .rd-item-browser {
+    display: flex;
+    flex-direction: column;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .rd-buildws .rd-item-browser > * {
+    flex: none;
+  }
+
+  .rd-buildws .rd-item-browser > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:first-child {
+    min-width: 3.5rem;
+    flex: 1 1 4rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) input,
+  .rd-buildws .rd-item-browser > div:nth-child(2) select {
+    padding-block: 0.3rem;
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) select {
+    width: 7.25rem;
+    min-width: 5.5rem;
+    flex: 0 1 auto;
+    padding-inline: 0.4rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    flex: none;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) button {
+    padding: 0.2rem 0.4rem;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  .rd-buildws .rd-item-browser > .rd-item-browser-results {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-buildws .rd-item-browser-results > .rd-item-browser-grid {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+    align-content: start;
+    gap: 0.35rem;
+    overscroll-behavior: contain;
+  }
+
+  .rd-buildws .rd-item-browser-grid .w-12 {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .rd-buildws .rd-item-browser-grid .w-12 > img {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  /* Runas: clave en una fila y las dos ramas compactas. */
+  .rd-buildws .rd-rune-picker {
+    padding: 0.45rem 0.6rem;
+    overflow: hidden;
+  }
+
+  .rd-buildws .rd-rune-picker > div:first-child {
+    margin-bottom: 0.2rem;
+  }
+
+  .rd-buildws .rd-rune-picker .mb-3 {
+    margin-bottom: 0.3rem;
+  }
+
+  .rd-buildws .rd-rune-picker .mb-2 {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-buildws .rd-rune-picker .text-xs.font-semibold {
+    font-size: 10.5px;
+  }
+
+  /* "Clave" y sus runas en la misma línea. */
+  .rd-buildws .rd-rune-picker > .mb-3:has(.max-w-11) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .mb-3:has(.max-w-11) > p {
+    flex: none;
+    margin-bottom: 0;
+  }
+
+  .rd-buildws .rd-rune-picker > .mb-3:has(.max-w-11) > .grid {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-buildws .rd-rune-picker .max-w-11 {
+    max-width: 1.6rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid {
+    min-height: 0;
+    gap: 0.75rem;
+  }
+
+  .rd-buildws .rd-rune-picker select {
+    margin-bottom: 0.2rem;
+    padding-block: 0.15rem;
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-rune-picker .justify-evenly {
+    min-height: 0;
+    gap: 0.15rem;
+  }
+
+  .rd-buildws .rd-rune-picker .justify-around {
+    gap: 0.25rem;
+  }
+
+  .rd-buildws .rd-rune-picker .w-9.h-9 {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+
+  /* Cada rama: etiqueta y selector en la misma línea, las runas debajo. */
+  .rd-buildws .rd-rune-picker > .grid > div {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.5rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid > div > label {
+    margin-bottom: 0.2rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid > div > .justify-evenly {
+    grid-column: 1 / -1;
+    align-self: stretch;
+  }
+
+  /* Stats: la lista en dos columnas, notas y aclaración compactas al pie. */
+  .rd-buildws .rd-buildws-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rd-buildws .rd-buildws-stats > .rd-stats-panel {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 0.55rem 0 0.5rem 0.65rem;
+  }
+
+  .rd-buildws .rd-stats-panel > * {
+    flex: none;
+  }
+
+  .rd-buildws .rd-stats-panel > .rd-stats-panel-rows {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    column-gap: 1.25rem;
+    overflow-y: auto;
+    padding-right: 0.65rem;
+    scrollbar-width: none;
+  }
+
+  .rd-stats-panel-rows::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rd-buildws .rd-stats-panel-rows > div {
+    padding-block: 0.15rem;
+  }
+
+  /* El borde inferior "last:border-0" queda solo en la última; en dos columnas
+     la penúltima también cierra su columna. */
+  .rd-buildws .rd-stats-panel-rows > div:nth-last-child(2):nth-child(odd) {
+    border-bottom: 0;
+  }
+
+  .rd-buildws .rd-stats-panel-rows .text-xs {
+    font-size: 11px;
+  }
+
+  .rd-buildws .rd-stats-panel-rows .text-sm {
+    font-size: 12.5px;
+  }
+
+  .rd-buildws .rd-stats-panel > p {
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
+    font-size: 10px;
+  }
+
+  .rd-buildws .rd-buildws-stats > details {
+    flex: none;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .rd-buildws .rd-buildws-stats > details p {
+    max-height: 5rem;
+    overflow-y: auto;
+  }
+
+  .rd-buildws .rd-buildws-stats > p {
+    flex: none;
+    font-size: 10px;
+  }
+}
+
+/* Creador de builds en smartphone vertical: la misma estructura apilada.
+   - Encabezado: volver, retrato, nombre + tier; debajo el nombre de la build a
+     todo el ancho y luego parche, línea, limpiar y guardar.
+   - "Tu build": los 6 slots de objetos en una fila y los 5 hechizos debajo.
+   - Pestañas Objetos / Runas / Stats y el panel activo con el resto del alto. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-page.rd-buildws {
+    padding: 0.6rem 0.75rem max(0.6rem, env(safe-area-inset-bottom));
+  }
+
+  /* Encabezado en grilla: campeón y "Guardar" arriba; el nombre de la build a
+     todo el ancho; parche, línea y "Limpiar" (solo ícono) abajo. Los controles
+     se "disuelven" (display: contents) para ubicarlos en la grilla. */
+  /* Grilla de 6 columnas: fila 1 campeón (4) + Guardar (2); fila 2 el nombre (6);
+     fila 3 parche (3) + línea (2) + Limpiar (1), o línea (3) si no hay Limpiar. */
+  .rd-buildws .rd-buildws-header {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.4rem 0.35rem;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .rd-buildws .rd-buildws-header > div:first-child {
+    grid-row: 1;
+    grid-column: 1 / 5;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child {
+    display: contents;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > * {
+    min-width: 0;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > button:last-child {
+    grid-row: 1;
+    grid-column: 5 / 7;
+    justify-content: center;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > input {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    width: auto;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > select:first-child {
+    grid-row: 3;
+    grid-column: 1 / 4;
+    width: auto;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > select:nth-of-type(2) {
+    grid-row: 3;
+    grid-column: 4 / 6;
+    width: auto;
+  }
+
+  .rd-buildws .rd-buildws-header > div:last-child > button:not(:last-child) {
+    grid-row: 3;
+    grid-column: 6;
+    justify-self: center;
+  }
+
+  /* Sin objetos elegidos no hay "Limpiar": la línea ocupa también esa columna. */
+  .rd-buildws .rd-buildws-header > div:last-child > select:nth-of-type(2):nth-last-child(2) {
+    grid-column: 4 / -1;
+  }
+
+  /* Objetos: buscador y tipo en una fila; las categorías a todo el ancho debajo. */
+  .rd-buildws .rd-item-browser > div:nth-child(2) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:first-child {
+    min-width: 0;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:nth-child(2) {
+    display: grid;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) > div:nth-child(2) > button {
+    padding-inline: 0.2rem;
+  }
+
+  .rd-buildws .rd-item-browser > div:nth-child(2) select {
+    width: 8.5rem;
+  }
+
+  /* Runas: en cada rama, la etiqueta arriba y el selector a todo el ancho. */
+  .rd-buildws .rd-rune-picker > .grid > div {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .rd-buildws .rd-rune-picker > .grid > div > label {
+    margin-bottom: 0.15rem;
+  }
+
+  .rd-buildws .rd-rune-picker > .grid > div > select {
+    width: 100%;
+  }
+
+  /* Cuerpo apilado: "tu build", hechizos, pestañas y panel. */
+  .rd-buildws > .rd-buildws-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+  }
+
+  .rd-buildws .rd-buildws-pool {
+    grid-row: 1;
+    grid-column: 1;
+    padding: 0.45rem 0.6rem 0.55rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div {
+    width: 100%;
+    grid-template-columns: repeat(6, minmax(0, 2.6rem));
+    justify-content: space-between;
+    gap: 0.35rem;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div {
+    width: 100%;
+    max-width: 2.6rem;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .rd-buildws .rd-buildws-pool > .space-y-2 > div > div > img {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rd-buildws .rd-buildws-spells {
+    grid-row: 2;
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .rd-buildws .rd-buildws-spells > p {
+    flex: none;
+    margin-bottom: 0;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-buildws .rd-buildws-spells > .grid button {
+    max-width: 1.9rem;
+  }
+
+  .rd-buildws .rd-buildws-tabs {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  .rd-buildws .rd-buildws-tabs .rd-panel-tab {
+    min-height: 2.2rem;
+    flex: 1 1 0;
+  }
+
+  .rd-buildws .rd-item-browser,
+  .rd-buildws .rd-rune-picker,
+  .rd-buildws .rd-buildws-stats {
+    grid-row: 4;
+    grid-column: 1;
+  }
+}
+
+/* Comparar builds en smartphone horizontal: todo entra en el viewport.
+   - Fila 1: "Volver" y el título compacto (sin kicker ni descripción).
+   - Izquierda (15.5rem): los dos selectores y, debajo, las dos builds enfrentadas
+     (A · VS · B) apiladas.
+   - Derecha: la tabla comparativa con todo el alto, encabezado fijo y scroll
+     propio. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-buildcmp) {
+    overflow: hidden;
+  }
+
+  .rd-page.rd-buildcmp {
+    display: grid;
+    height: 100%;
+    grid-template-columns: 15.5rem minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 0.5rem 0.75rem;
+    padding:
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      0.75rem;
+    overflow: hidden;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-back {
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    margin-bottom: 0;
+    font-size: 12px;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-kicker,
+  .rd-buildcmp > .rd-buildcmp-desc {
+    display: none;
+  }
+
+  .rd-buildcmp > h1 {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: center;
+    margin-bottom: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  /* Selectores apilados y compactos. */
+  .rd-buildcmp > .rd-buildcmp-selectors {
+    grid-row: 2;
+    grid-column: 1;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+    margin-bottom: 0;
+  }
+
+  .rd-buildcmp-selectors > div > button {
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.65rem;
+    font-size: 12px;
+  }
+
+  .rd-buildcmp-selectors > div > button img {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .rd-buildcmp-selectors .max-h-72 {
+    max-height: 55dvh;
+  }
+
+  /* A · VS · B apilados. */
+  .rd-buildcmp > .rd-buildcmp-heads {
+    min-height: 0;
+    grid-row: 3;
+    grid-column: 1;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0;
+  }
+
+  .rd-buildcmp-heads > .flex-1 {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    align-items: center;
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.8rem;
+  }
+
+  .rd-buildcmp-heads > .flex-1 > div {
+    width: 100%;
+    gap: 0.6rem;
+  }
+
+  .rd-buildcmp-heads .w-16.h-16 {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .rd-buildcmp-heads h3 {
+    font-size: 0.9rem;
+  }
+
+  .rd-buildcmp-heads .mt-1 {
+    margin-top: 0.15rem;
+  }
+
+  .rd-buildcmp-heads .mt-1 > span {
+    padding: 0 0.35rem;
+    font-size: 10px;
+  }
+
+  .rd-buildcmp-heads .mt-2 {
+    gap: 0.5rem;
+    margin-top: 0.15rem;
+    font-size: 10px;
+  }
+
+  /* Sin build: tarjeta punteada baja. */
+  .rd-buildcmp-heads > .min-h-28 {
+    min-height: 0;
+    padding: 0.5rem;
+  }
+
+  .rd-buildcmp-heads > .shrink-0 > div {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .rd-buildcmp-heads > .shrink-0 span {
+    font-size: 0.72rem;
+  }
+
+  /* Tabla: todo el alto, encabezado fijo y scroll propio. */
+  .rd-buildcmp > .rd-buildcmp-table,
+  .rd-buildcmp > .rd-buildcmp-empty {
+    min-height: 0;
+    grid-row: 2 / 4;
+    grid-column: 2;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-table {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .rd-buildcmp > .rd-buildcmp-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .rd-buildcmp-table > div {
+    grid-template-columns: minmax(5.5rem, 1fr) minmax(0, 1fr) 5rem minmax(0, 1fr);
+    padding: 0.28rem 0.65rem;
+  }
+
+  /* z-index 2: .rd-card > * deja todas las filas en z-index 1 y, al venir
+     después, se pintaban encima del encabezado al scrollear. */
+  .rd-buildcmp-table > div:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-block: 0.4rem;
+    background: hsl(222 36% 12%);
+    box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.7);
+  }
+
+  .rd-buildcmp-table .pr-10 {
+    padding-right: 0.75rem;
+  }
+
+  .rd-buildcmp-table .pl-10 {
+    padding-left: 0.75rem;
+  }
+
+  .rd-buildcmp-table > div:first-child .text-sm {
+    font-size: 12px;
+  }
+
+  .rd-buildcmp-table > div:first-child .text-xs {
+    font-size: 9.5px;
+  }
+
+  .rd-buildcmp-table > div:not(:first-child) > span {
+    font-size: 11px;
+  }
+
+  .rd-buildcmp-table > div:not(:first-child) .text-sm {
+    font-size: 12.5px;
+  }
+
+  .rd-buildcmp-table > div:not(:first-child) .text-xs {
+    font-size: 11px;
+  }
+}

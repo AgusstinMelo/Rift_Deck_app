@@ -4,7 +4,7 @@ import { CalendarDays, ChevronRight } from 'lucide-react';
 import { getMetric } from '../metrics/index';
 import { evolutionSeries } from '../engine/evolution';
 import { describeGoal, formatPeriod } from '../texts';
-import GoalEvolutionChart from './GoalEvolutionChart';
+import GoalEvolutionChart from './LazyGoalEvolutionChart';
 import GoalOutcomeBadge from './GoalOutcomeBadge';
 import GoalProgress from './GoalProgress';
 import InsufficientSampleNotice from './InsufficientSampleNotice';

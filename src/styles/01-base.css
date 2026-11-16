@@ -1,0 +1,134 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 224 41% 7%;
+    --foreground: 40 53% 94%;
+
+    --card: 222 36% 11%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 220 18% 9%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 43 65% 58%;
+    --primary-foreground: 220 20% 6%;
+
+    --secondary: 220 15% 14%;
+    --secondary-foreground: 210 40% 80%;
+
+    --muted: 220 15% 12%;
+    --muted-foreground: 215 20% 56%;
+
+    --accent: 195 90% 48%;
+    --accent-foreground: 220 20% 6%;
+
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 210 40% 96%;
+
+    --border: 220 18% 18%;
+    --input: 220 15% 12%;
+    --ring: 43 65% 58%;
+
+    --radius: 0.75rem;
+
+    /* Fuentes alojadas en el propio sitio (@fontsource-variable, importadas en main.jsx). */
+    --font-inter: 'Inter Variable', 'Inter', sans-serif;
+    --font-rajdhani: 'Unbounded Variable', 'Unbounded', sans-serif;
+    --font-rajdhani-weight: 500;
+
+    --tier-splus: 45 100% 60%;
+    --tier-s: 30 90% 55%;
+    --tier-a: 120 60% 45%;
+    --tier-b: 200 80% 55%;
+    --tier-c: 220 30% 55%;
+
+    --lane-top: 30 80% 55%;
+    --lane-jungler: 120 55% 45%;
+    --lane-mid: 260 70% 60%;
+    --lane-adc: 195 85% 50%;
+    --lane-support: 340 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    background: hsl(var(--background));
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter;
+    min-width: 320px;
+    min-height: 100%;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 25% 0%, rgba(77, 166, 255, 0.08), transparent 32%),
+      radial-gradient(circle at 90% 10%, rgba(212, 175, 55, 0.06), transparent 28%),
+      hsl(var(--background));
+  }
+
+  #root {
+    min-height: 100%;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-rajdhani;
+  }
+
+  /* Unbounded es muy pesada: fija el eje de peso para todos los usos de la fuente display,
+     sin importar font-bold / font-weight, y evita el bold sintético del navegador. */
+  h1,
+  h2,
+  h3,
+  .font-rajdhani,
+  .rd-card-title,
+  .rd-dashboard-stat-value,
+  .rd-dashboard-row p,
+  .rd-dashboard-row span,
+  .rd-dashboard-meta strong,
+  .rd-dashboard-meta .tabular-nums,
+  .rd-dashboard-meta [class*="text-[9px]"],
+  .rd-dashboard-meta [class*="text-[10px]"],
+  .rd-dashboard-meta [class*="text-xs"],
+  .rd-main-stat-group strong {
+    font-variation-settings: "wght" var(--font-rajdhani-weight);
+    font-synthesis: none;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(43, 65%, 58%, 0.24);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(43, 65%, 58%, 0.42);
+}
+
+/* Firefox: misma barra dorada con las propiedades estándar (Chrome/Edge usan las reglas webkit de arriba). */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsla(43, 65%, 58%, 0.35) transparent;
+  }
+}

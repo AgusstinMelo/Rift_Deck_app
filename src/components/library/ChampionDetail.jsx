@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Champion } from '@/api/entitiesSupabase';
-import { getUserMatches } from '@/api/matchesSupabase';
+import { userMatchesQuery } from '@/api/matchesSupabase';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -23,6 +23,9 @@ import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { labels, tr } from '@/i18n/uiI18n';
 import { championTagLabel } from '@/utils/itemLabels';
+
+// Recorte propio de esta pantalla sobre la query compartida de partidas.
+const recentMatches200 = matches => matches.slice(0, 200);
 
 const SCALING_LABEL = labels({
   earlygame: 'champion.scalingShort.earlygame',
@@ -467,13 +470,8 @@ export default function ChampionDetail({
     return champByExternalId[str] || champByName[str.toLowerCase()] || null;
   };
 
-  const { data: matches = [] } = useQuery({
-    queryKey: ['matches', user?.email],
-    queryFn: () => user?.email
-      ? getUserMatches(user, 200)
-      : [],
-    enabled: !publicMode && !!user?.email,
-  });
+  // La ficha usa las últimas 200 partidas.
+  const { data: matches = [] } = useQuery(userMatchesQuery(user, { enabled: !publicMode, select: recentMatches200 }));
 
   const champMatches = matches.filter(
     m => m.own_champion_name?.toLowerCase() === champion.name?.toLowerCase()
