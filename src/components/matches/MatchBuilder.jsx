@@ -1055,28 +1055,31 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
                 </div>
               </div>
 
-              <div>
-                <div className="mb-2 flex items-baseline justify-between gap-3">
-                  <p className="text-sm font-semibold text-foreground">K / D / A</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t('goals.stat.kda')} <span className="font-semibold text-primary">{kdaPreview}</span>
-                  </p>
+              {/* Fila 1: tu rendimiento (K / D / A y oro). */}
+              <div className="rd-statsstep-kda-row grid grid-cols-[minmax(0,3fr)_minmax(0,1fr)] items-end gap-3">
+                <div className="rd-statsstep-kda">
+                  <div className="mb-2 flex items-baseline justify-between gap-3">
+                    <p className="text-sm font-semibold text-foreground">K / D / A</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('goals.stat.kda')} <span className="font-semibold text-primary">{kdaPreview}</span>
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-end gap-2">
+                    <StatInput label={t('goals.stat.asesinatos')} value={kills} onChange={setKills} autoFocus />
+                    <span className="pb-2 text-lg text-muted-foreground">/</span>
+                    <StatInput label={t('goals.stat.muertes')} value={deaths} onChange={setDeaths} />
+                    <span className="pb-2 text-lg text-muted-foreground">/</span>
+                    <StatInput label={t('goals.stat.asistencias')} value={assists} onChange={setAssists} />
+                  </div>
                 </div>
-                <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-end gap-2">
-                  <StatInput label={t('goals.stat.asesinatos')} value={kills} onChange={setKills} autoFocus />
-                  <span className="pb-2 text-lg text-muted-foreground">/</span>
-                  <StatInput label={t('goals.stat.muertes')} value={deaths} onChange={setDeaths} />
-                  <span className="pb-2 text-lg text-muted-foreground">/</span>
-                  <StatInput label={t('goals.stat.asistencias')} value={assists} onChange={setAssists} />
-                </div>
+                <StatInput label={t('goals.stat.oro')} value={gold} onChange={setGold} placeholder={t('matches.ej9500')} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <StatInput label={t('goals.stat.oro')} value={gold} onChange={setGold} placeholder={t('matches.ej9500')} />
-                <StatInput label={t('matches.duracionMin')} value={duration} onChange={setDuration} placeholder={t('matches.ej18')} />
-                {/* Kills de cada equipo (marcador de arriba): el Coach calcula participación en kills. */}
+              {/* Fila 2: la partida (kills de cada equipo, para la participación en kills del Coach, y duración). */}
+              <div className="rd-statsstep-totals grid grid-cols-3 gap-3">
                 <StatInput label={t('matches.teamKills')} value={teamKills} onChange={setTeamKills} />
                 <StatInput label={t('matches.enemyTeamKills')} value={enemyTeamKills} onChange={setEnemyTeamKills} />
+                <StatInput label={t('matches.duracionMin')} value={duration} onChange={setDuration} placeholder={t('matches.ej18')} />
               </div>
               <p className="mt-auto text-[11px] text-muted-foreground">
                 {t('matches.losDatosVaciosSe')}
