@@ -13,6 +13,7 @@ import {
 } from './detectors/performance.js';
 import { detectFollowUps } from './followUp.js';
 import { detectChampionPlan, detectRivalPrep, detectStrength } from './detectors/profile.js';
+import { detectWeeklyPicks } from './detectors/weekly.js';
 import { normalizeMatches } from './normalize.js';
 import { fixed, pct, summarize } from './stats.js';
 
@@ -22,7 +23,7 @@ const FAMILY_CAP = { [FAMILY.BUILD]: 2, [FAMILY.PREP]: 2 };
  * No cuentan para la diversidad por entidad: la última partida y el seguimiento hablan de
  * algo puntual, y el plan y la fortaleza son, por definición, sobre tu campeón principal.
  */
-const ENTITY_EXEMPT = new Set([FAMILY.LAST_MATCH, FAMILY.FOLLOW_UP, FAMILY.PLAN, FAMILY.STRENGTH]);
+const ENTITY_EXEMPT = new Set([FAMILY.LAST_MATCH, FAMILY.FOLLOW_UP, FAMILY.PLAN, FAMILY.STRENGTH, FAMILY.WEEKLY_PICKS]);
 const ENTITY_CAP = 3;
 
 function selectEditorially(candidates, limit) {
@@ -61,14 +62,15 @@ function warmUpCard(ctx) {
 
 /**
  * @param {{
- *   matches?: any[], champions?: any[], items?: any[], runes?: any[], builds?: any[],
+ *   matches?: any[], champions?: any[], items?: any[], runes?: any[], builds?: any[], tierlist?: any[],
  *   history?: { insight_key: string, track: any, first_seen_at: string }[],
  *   championNotes?: (champion: any) => string, now?: Date, limit?: number,
  * }} input  `championNotes`: nota estratégica del campeón en el idioma activo.
  *   `builds`: builds guardadas del jugador (para comparar las vinculadas a sus partidas).
+ *   `tierlist`: tierlist del parche (tier, tendencia y banrate) para el pool de la semana.
  */
 export function computeCoachReport({
-  matches = [], champions = [], items = [], runes = [], builds = [], history = [], championNotes = null, now = new Date(), limit = 8,
+  matches = [], champions = [], items = [], runes = [], builds = [], tierlist = [], history = [], championNotes = null, now = new Date(), limit = 8,
 } = {}) {
   const catalog = buildCatalog({ champions, items, runes });
   const rows = normalizeMatches(matches, catalog);
@@ -81,7 +83,7 @@ export function computeCoachReport({
   };
   if (!rows.length) return { insights: [], coverage, generatedAt: now.toISOString() };
 
-  const ctx = { matches: rows, base: summarize(rows), catalog, buildHabits: buildHabitsOf(rows), builds, championNotes, now };
+  const ctx = { matches: rows, base: summarize(rows), catalog, buildHabits: buildHabitsOf(rows), builds, tierlist, championNotes, now };
   const candidates = [
     ...detectLastMatch(ctx),
     ...detectDeathCeiling(ctx),
@@ -98,7 +100,7 @@ export function computeCoachReport({
   // Preparación (prioridad baja): rivales frecuentes que no tengan ya tarjeta de matchup,
   // plan con el main y fortaleza.
   const coveredEnemies = new Set(candidates.filter(card => card.track?.kind === 'matchup').map(card => card.track.enemy));
-  candidates.push(...detectRivalPrep(ctx, coveredEnemies), ...detectChampionPlan(ctx), ...detectStrength(ctx));
+  candidates.push(...detectRivalPrep(ctx, coveredEnemies), ...detectChampionPlan(ctx), ...detectStrength(ctx), ...detectWeeklyPicks(ctx));
   const byKey = new Map(candidates.map(card => [card.id, card]));
   candidates.push(...detectFollowUps(ctx, history, byKey));
 

@@ -91,11 +91,12 @@ test('última partida recién cargada: va primero, es nueva y explica qué se sa
     ...many(10, { deaths: 2, result: 'win' }),
     ...many(8, { deaths: 7, result: 'loss' }, 11),
     match({
-      id: 'latest', date: '2026-11-16', created_at: '2026-11-16T10:00:00Z', result: 'loss',
+      id: 'latest', date: '2026-11-17', created_at: '2026-11-17T10:00:00Z', result: 'loss',
       deaths: 9, enemy_champions: HEALERS,
     }),
   ];
-  const { insights } = report(matches);
+  // Un martes: los lunes el primer lugar es del pool de la semana (ver weekly.test.js).
+  const { insights } = report(matches, { now: new Date('2026-11-17T12:00:00Z') });
   assert.equal(insights[0].id, 'last-latest');
   assert.equal(insights[0].isNew, true);
   assert.match(insights[0].title, /Garen vs Darius · derrota 5\/9\/5/);

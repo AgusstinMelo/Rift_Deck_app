@@ -2048,7 +2048,8 @@
       "prep": "Preparation",
       "plan": "Game plan",
       "strength": "Strength",
-      "savedBuild": "Your builds"
+      "savedBuild": "Your builds",
+      "weeklyPicks": "Weekly pool"
     },
     "or": " or ",
     "and": " and ",
@@ -2382,6 +2383,21 @@
       "diff": " The difference: “{best}” builds {onlyBest}; “{worst}”, {onlyWorst}.",
       "action": "Use “{best}” as your base build with {champion}. Before going back to “{worst}”, check what changes: if it is an adjustment for a specific enemy, save it for that matchup.",
       "evidence": "“{name}”: {wr} · {games}"
+    },
+    "weekly": {
+      "titleTwo": "This week, play {first} and {second}",
+      "titleOne": "This week, play {first}",
+      "thesis": "In {lane}, {picks}.",
+      "pickLine": "you win {wr} with {champion} ({games} matches){meta}",
+      "joiner": "; ",
+      "tier": ", and they are {tier} tier this patch",
+      "tierRising": ", and they are climbing the tier list ({tier} tier)",
+      "tierShort": "{tier} tier",
+      "actionTwo": "Start the week in ranked with {first}; if they are not available, go {second}.",
+      "actionOne": "Start the week in ranked with {first} in {lane}.",
+      "banNote": "Heads up: {champion} is banned in {ban} of matches, so have a plan B ready.",
+      "avoid": "Leave {champion} ({wr} in {games}) for normals until you figure them out.",
+      "evidence": "{champion}: {wr} · {games}{tier}"
     }
   },
   "share": {

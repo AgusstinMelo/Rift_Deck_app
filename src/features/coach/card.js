@@ -17,6 +17,8 @@ export const FAMILY = Object.freeze({
   RUNES: 'runes',
   // Tus builds guardadas comparadas entre sí (partidas vinculadas con matches.build_id).
   SAVED_BUILD: 'savedBuild',
+  // Pool de la semana ("esta semana jugá X e Y"): insight del día los lunes.
+  WEEKLY_PICKS: 'weeklyPicks',
   // Preparación: no dependen de un problema detectado, completan el informe.
   PREP: 'prep',
   PLAN: 'plan',

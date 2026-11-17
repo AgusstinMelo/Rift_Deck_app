@@ -5,15 +5,18 @@ import { getUserBuilds } from '@/api/buildsSupabase';
 import { computeInsightReport } from '@/hooks/useInsights';
 import { useCatalogText } from '@/lib/LocaleContext';
 
+// Referencia estable para el valor por defecto (evita recalcular el informe en cada render).
+const EMPTY = [];
+
 /**
  * Informe del Coach con historial: marca lo nuevo, arma el seguimiento y registra los
  * consejos nuevos. El registro no invalida la consulta a propósito: así la etiqueta
  * "Nuevo" se mantiene durante la visita y desaparece en la próxima.
  * @param {any} user
- * @param {{ matches: any[], wrItems: any[], champions: any[], runes: any[], limit?: number }} input
+ * @param {{ matches: any[], wrItems: any[], champions: any[], runes: any[], tierlist?: any[], limit?: number }} input
  * @param {any[]} deps  Dependencias extra del cálculo (por ejemplo, el idioma).
  */
-export function useCoachReport(user, { matches, wrItems, champions, runes, limit = 8 }, deps = []) {
+export function useCoachReport(user, { matches, wrItems, champions, runes, tierlist = EMPTY, limit = 8 }, deps = []) {
   const { data: history = [], isFetched } = useQuery({
     queryKey: ['coach-history', user?.id],
     queryFn: () => getCoachHistory(user),
@@ -32,8 +35,8 @@ export function useCoachReport(user, { matches, wrItems, champions, runes, limit
   const { championNotes } = useCatalogText();
 
   const report = useMemo(
-    () => computeInsightReport({ matches, wrItems, champions, runes, builds, history, championNotes, limit }),
-    [matches, wrItems, champions, runes, builds, history, championNotes, limit, ...deps],
+    () => computeInsightReport({ matches, wrItems, champions, runes, builds, tierlist, history, championNotes, limit }),
+    [matches, wrItems, champions, runes, builds, tierlist, history, championNotes, limit, ...deps],
   );
 
   const logged = useRef(new Set());

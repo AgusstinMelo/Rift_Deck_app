@@ -231,7 +231,7 @@ export default function Dashboard() {
   // El Coach usa todo el historial (sus patrones no dependen del parche) y reacciona a la
   // última partida cargada: si es reciente, su revisión es el consejo principal.
   // `t` cambia con el idioma: los textos del Coach se arman en ese idioma.
-  const coach = useCoachReport(user, { matches: allMatches, wrItems, champions, runes, limit: 1 }, [t]);
+  const coach = useCoachReport(user, { matches: allMatches, wrItems, champions, runes, tierlist, limit: 1 }, [t]);
   const topInsight = coach.insights[0] || null;
 
   const bestRecentMatch = [...recentSevenDayMatches]

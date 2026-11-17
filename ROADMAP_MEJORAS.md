@@ -8,9 +8,9 @@ Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. La
 | Etapa | Hecho |
 |---|---|
 | Corto plazo | 13 de 21 |
-| Mediano plazo | 1 de 15 |
-| Largo plazo | 1 de 7 |
-| **Total** | **15 de 43** |
+| Mediano plazo | 2 de 15 |
+| Largo plazo | 1 de 6 |
+| **Total** | **16 de 42** |
 
 Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 <!-- avance:fin -->
@@ -90,7 +90,7 @@ Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 ### Antes de jugar
 
 - [ ] **Preparar partida:** elegís tu campeón y el rival, y ves en una pantalla tu historial en ese matchup, el plan del Coach, la build del sugeridor y las runas que mejor te funcionaron. Junta piezas que ya existen (Coach, Sugeridor, Library).
-- [ ] **Recomendación de pool:** "esta semana jugá X e Y". Se calcula con tu rendimiento, la tierlist y el parche.
+- [x] **Recomendación de pool semanal:** "esta semana jugá X e Y" con tu rendimiento en tu línea principal, tu forma reciente y la tierlist del parche (tier, tendencia y banrate). Es el insight del día del Dashboard los lunes.
 
 ### Durante la sesión
 

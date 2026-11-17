@@ -2048,7 +2048,8 @@
       "prep": "Preparación",
       "plan": "Plan de juego",
       "strength": "Fortaleza",
-      "savedBuild": "Tus builds"
+      "savedBuild": "Tus builds",
+      "weeklyPicks": "Pool de la semana"
     },
     "or": " o ",
     "and": " y ",
@@ -2382,6 +2383,21 @@
       "diff": " La diferencia: «{best}» arma {onlyBest}; «{worst}», {onlyWorst}.",
       "action": "Usa «{best}» como build base con {champion}. Antes de volver a «{worst}», fíjate qué cambia: si es una adaptación a un rival, guárdala para ese matchup.",
       "evidence": "«{name}»: {wr} · {games}"
+    },
+    "weekly": {
+      "titleTwo": "Esta semana juega {first} y {second}",
+      "titleOne": "Esta semana juega {first}",
+      "thesis": "En {lane}, {picks}.",
+      "pickLine": "con {champion} ganas el {wr} ({games} partidas){meta}",
+      "joiner": "; ",
+      "tier": ", y está en tier {tier} este parche",
+      "tierRising": ", y viene subiendo en la tierlist (tier {tier})",
+      "tierShort": "tier {tier}",
+      "actionTwo": "Empieza la semana en ranked con {first}; si no está disponible, {second}.",
+      "actionOne": "Empieza la semana en ranked con {first} en {lane}.",
+      "banNote": "Ojo: en el {ban} de las partidas banean a {champion}, así que ten el plan B listo.",
+      "avoid": "Deja {champion} ({wr} en {games}) para normales hasta encontrarle el truco.",
+      "evidence": "{champion}: {wr} · {games}{tier}"
     }
   },
   "share": {
