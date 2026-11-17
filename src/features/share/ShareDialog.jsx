@@ -1,6 +1,6 @@
 // Diálogo "Compartí tu semana": elige período y formato, muestra la tarjeta y la
 // comparte (menú nativo del celular) o la descarga como PNG.
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Download, Share2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatLocale } from '@/i18n/uiI18n';
@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/LocaleContext';
 import ShareCard, { CARD_SIZES } from './ShareCard';
 import { SHARE_PERIODS, summarizePeriod } from './periodSummary';
+import { championArtId, loadChampionIds, splashUrl } from './championArt';
 
 /** Título de la tarjeta según el winrate del período. */
 const tierOf = winrate => (winrate >= 65 ? 'legend' : winrate >= 58 ? 'unstoppable' : winrate >= 52 ? 'onFire' : winrate >= 45 ? 'inForm' : 'comeback');
@@ -68,6 +69,18 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
   const champion = summary?.topChampion
     ? champions.find(row => row.name === summary.topChampion.name)
     : null;
+
+  // Splash en alta resolución (Data Dragon); mientras carga o si no existe, el arte del catálogo.
+  const [artIds, setArtIds] = useState(null);
+  useEffect(() => {
+    if (!open || artIds) return undefined;
+    let cancelled = false;
+    loadChampionIds().then(ids => { if (!cancelled) setArtIds(ids); });
+    return () => { cancelled = true; };
+  }, [open, artIds]);
+  const catalogArt = champion?.image_url_card || champion?.image_url;
+  const artId = artIds ? championArtId(artIds, champion) : null;
+  const championArt = artId ? splashUrl(artId) : catalogArt;
 
   const periodText = !summary ? '' : period === 'patch'
     ? t('share.card.periodPatch', { patch: getPatchGroup(patch) || patch })
@@ -144,7 +157,8 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
                     ref={cardRef}
                     summary={summary}
                     format={format}
-                    championArt={champion?.image_url_card || champion?.image_url}
+                    championArt={championArt}
+                    fallbackArt={catalogArt}
                     playerName={user?.visible_name || user?.full_name || ''}
                     texts={texts}
                     locale={formatLocale()}

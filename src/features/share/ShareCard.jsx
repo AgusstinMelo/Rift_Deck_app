@@ -3,7 +3,7 @@
 // Estilos en línea a propósito: la imagen tiene que salir igual en cualquier pantalla,
 // sin depender de los breakpoints de la app. Look de carta de juego: marco dorado con
 // esquinas, destellos, título según el winrate y badges.
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { Crown, Crosshair, Flame, Skull, Swords, Trophy } from 'lucide-react';
 import logo from '@/assets/riftdeck-logo-horizontal.png';
 
@@ -134,7 +134,10 @@ function StatsPanel({ metrics, totals, totalsLabel, compact }) {
  *   texts: Record<string, string>, locale?: string,
  * }} props  `texts`: textos ya traducidos (período, rótulos, título según winrate, racha y pie).
  */
-const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, playerName, texts, locale = 'es-AR' }, ref) {
+const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, fallbackArt, playerName, texts, locale = 'es-AR' }, ref) {
+  // Si el splash en alta no carga, se usa el arte del catálogo.
+  const [failedArt, setFailedArt] = useState(null);
+  const art = championArt && championArt !== failedArt ? championArt : fallbackArt;
   const { width, height } = CARD_SIZES[format];
   const story = format === 'story';
   // El arte del campeón ocupa el alto que dejan los demás bloques (con un mínimo): así
@@ -179,8 +182,15 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
           border: `3px solid rgba(212,175,55,0.75)`, background: '#141A29',
           boxShadow: '0 0 40px rgba(212,175,55,0.10), inset 0 0 0 2px rgba(255,255,255,0.05)',
         }}>
-          {championArt && (
-            <img src={championArt} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />
+          {art && (
+            <img
+              key={art}
+              src={art}
+              alt=""
+              crossOrigin="anonymous"
+              onError={() => setFailedArt(art)}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 25%' }}
+            />
           )}
           {/* Brillo diagonal y degradé para que el texto se lea. */}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.10) 48%, transparent 58%)' }} />
