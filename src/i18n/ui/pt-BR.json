@@ -2423,7 +2423,7 @@
       "winrate": "Winrate",
       "games": "Partidas",
       "kda": "KDA",
-      "streak": "Melhor sequência",
+      "championsUsed": "Campeões usados",
       "deaths": "Mortes/partida",
       "bestMatch": "Melhor partida",
       "winsShort": "{wins}V",
@@ -2447,11 +2447,55 @@
     "periodLabel": "Período",
     "formatLabel": "Formato",
     "typeLabel": "Tipo de partida",
+    "championLabel": "Campeão",
     "type": {
       "ranked": "Ranqueada",
       "legendary_ranked": "Lendária",
       "casual": "Casual"
     },
     "ready": "Sua semana está pronta para compartilhar!"
+  },
+  "publicProfile": {
+    "settings": {
+      "title": "Perfil público",
+      "description": "Compartilhe um link com seu winrate, seus campeões e rotas e as builds que você marcar como públicas. Só vê quem tiver o link: não aparece no Google nem em rankings.",
+      "toggle": "Mostrar meu perfil público",
+      "linkLabel": "Nome do link",
+      "linkHint": "Minúsculas, números e hifens, de 3 a 24 caracteres.",
+      "save": "Salvar",
+      "saved": "Perfil público atualizado.",
+      "taken": "Esse nome já é usado por outra pessoa. Tente outro.",
+      "invalid": "Use de 3 a 24 caracteres: minúsculas, números e hifens (sem hífen no começo nem no fim).",
+      "copy": "Copiar link",
+      "copied": "Link copiado!",
+      "open": "Ver meu perfil",
+      "buildsHint": "Para mostrar uma build, marque-a como pública em Builds.",
+      "error": "Não foi possível salvar o perfil público."
+    },
+    "page": {
+      "kicker": "Perfil no Rift Deck",
+      "notFoundTitle": "Perfil indisponível",
+      "notFoundText": "Este perfil não existe ou o dono o deixou privado.",
+      "loading": "Carregando perfil…",
+      "typeLabel": "Tipo de partida",
+      "games": "Partidas",
+      "winrate": "Winrate",
+      "record": "Recorde",
+      "champions": "Campeões",
+      "lanes": "Rotas",
+      "builds": "Builds públicas",
+      "noBuilds": "Ainda não há builds públicas.",
+      "noMatches": "Não há partidas deste tipo.",
+      "gamesCount": "{count} partidas",
+      "gamesCountOne": "1 partida",
+      "ctaTitle": "Você joga Wild Rift?",
+      "ctaText": "Registre suas partidas, acompanhe seu winrate e monte suas builds com o Rift Deck.",
+      "ctaButton": "Criar conta grátis"
+    },
+    "builds": {
+      "makePublic": "Mostrar no meu perfil público",
+      "makePrivate": "Ocultar do meu perfil público",
+      "publicTag": "Pública"
+    }
   }
 }

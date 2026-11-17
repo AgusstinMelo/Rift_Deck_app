@@ -24,7 +24,7 @@ import {
   ChampionAvatar, LaneBarChart, MatchupList, OverviewTrack, PoolChampionsCard, SectionCard, StatsHeroCard, WRBar,
 } from '@/components/stats/StatsSections';
 
-const STATS_MEMBERSHIP_GATE_ENABLED = true;
+const STATS_MEMBERSHIP_GATE_ENABLED = false;
 
 export default function Stats() {
   const t = useT();

@@ -27,7 +27,11 @@ export function useTierTileSize({ scrollRef, groupsRef, enabled, layoutKey }) {
       const gridStyle = getComputedStyle(grids[0]);
       const gap = parseFloat(gridStyle.columnGap) || 0;
       const padY = parseFloat(gridStyle.paddingTop) + parseFloat(gridStyle.paddingBottom);
-      const width = grids[0].clientWidth - parseFloat(gridStyle.paddingLeft) - parseFloat(gridStyle.paddingRight);
+      // Ancho real con decimales (clientWidth redondea): con el entero, en el límite se
+      // calculaba una columna más de las que entran y una tier pasaba a dos filas.
+      const width = grids[0].getBoundingClientRect().width
+        - parseFloat(gridStyle.borderLeftWidth || 0) - parseFloat(gridStyle.borderRightWidth || 0)
+        - parseFloat(gridStyle.paddingLeft) - parseFloat(gridStyle.paddingRight) - 0.5;
       const groupGap = groupEls.length > 1 ? parseFloat(getComputedStyle(groupEls[1]).marginTop) || 0 : 0;
 
       // Alto mínimo de cada tier: el de su riel (badge al lado de título + promedios) más los bordes.
@@ -60,11 +64,24 @@ export function useTierTileSize({ scrollRef, groupsRef, enabled, layoutKey }) {
       }
 
       groups.style.setProperty('--rd-tile', `${size}px`);
+
+      // Verificación con el layout real: si igual hay que scrollear (redondeos, estilos que
+      // cambiaron), se achica de a 1 px hasta que entre todo.
+      while (size > MIN_TILE && scroll.scrollHeight > scroll.clientHeight + 1) {
+        size -= 1;
+        groups.style.setProperty('--rd-tile', `${size}px`);
+      }
     };
 
     fit();
     const observer = new ResizeObserver(fit);
     observer.observe(scroll);
-    return () => observer.disconnect();
+    // Las fuentes cambian el alto de los rótulos de cada tier: se recalcula cuando cargan.
+    let active = true;
+    document.fonts?.ready.then(() => active && fit());
+    return () => {
+      active = false;
+      observer.disconnect();
+    };
   }, [scrollRef, groupsRef, enabled, layoutKey]);
 }

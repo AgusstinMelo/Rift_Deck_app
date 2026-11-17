@@ -4,7 +4,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { getBuildsForChampion, deleteBuild } from '@/api/buildsSupabase';
 import { userMatchesQuery } from '@/api/matchesSupabase';
 import { recordsByBuild, winratePct } from '@/domain/matchStats';
-import { Plus, Trash2, Wrench, ChevronRight, GitCompare, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Wrench, ChevronRight, GitCompare, ArrowLeft, Globe, Lock } from 'lucide-react';
+import { setBuildPublic } from '@/api/publicProfileSupabase';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 
@@ -60,6 +61,12 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
       setBuildToDelete(null);
       qc.invalidateQueries(['builds', champion.id]);
     },
+  });
+
+  // Mostrar u ocultar la build en el perfil público (/p/<nombre>).
+  const visibilityMutation = useMutation({
+    mutationFn: ({ id, isPublic }) => setBuildPublic(id, isPublic),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['builds'] }),
   });
 
   return (
@@ -125,12 +132,31 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
                   {build.lane && <LaneBadge lane={build.lane} />}
                   {build.patch && <span className="text-xs text-muted-foreground bg-secondary/60 border border-border/50 px-2 py-0.5 rounded-md">{t('goals.filterLabels.patches')} {build.patch}</span>}
                   <BuildRecord record={records.get(String(build.id))} />
+                  {build.is_public && (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary border border-primary/30 bg-primary/10 px-2 py-0.5 rounded-md">
+                      <Globe size={11} /> {t('publicProfile.builds.publicTag')}
+                    </span>
+                  )}
                 </div>
                 {build.items?.length > 0 && (
                   <p className="text-xs text-muted-foreground truncate">{build.items.map(itemLabel).join(' · ')}</p>
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); visibilityMutation.mutate({ id: build.id, isPublic: !build.is_public }); }}
+                  disabled={visibilityMutation.isPending}
+                  title={t(build.is_public ? 'publicProfile.builds.makePrivate' : 'publicProfile.builds.makePublic')}
+                  aria-label={t(build.is_public ? 'publicProfile.builds.makePrivate' : 'publicProfile.builds.makePublic')}
+                  aria-pressed={Boolean(build.is_public)}
+                  className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-all disabled:opacity-50 ${
+                    build.is_public
+                      ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/15'
+                      : 'bg-secondary/50 border-border/40 text-muted-foreground hover:text-primary hover:border-primary/30'
+                  }`}>
+                  {build.is_public ? <Globe size={14} /> : <Lock size={14} />}
+                </button>
                 <button onClick={(e) => { e.stopPropagation(); setBuildToDelete(build); }}
                   className="w-8 h-8 rounded-lg bg-secondary/50 border border-border/40 flex items-center justify-center text-muted-foreground hover:text-red-400 hover:border-red-500/30 transition-all">
                   <Trash2 size={14} />

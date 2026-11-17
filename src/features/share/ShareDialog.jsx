@@ -66,9 +66,17 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
     () => (open ? summarizePeriod(matches, { period, patch, types: matchTypes, now: new Date() }) : null),
     [open, matches, period, patch, matchTypes],
   );
-  const champion = summary?.topChampion
-    ? champions.find(row => row.name === summary.topChampion.name)
+  // Campeón de la tarjeta: uno de los 3 más jugados del período (por defecto, el primero).
+  // Si cambia el período o los tipos y el elegido ya no está entre los 3, vuelve al primero.
+  const [pickedChampion, setPickedChampion] = useState(null);
+  const topChampions = summary?.champions || [];
+  const featured = topChampions.find(entry => entry.name === pickedChampion) || topChampions[0] || null;
+  const featuredChampion = featured
+    ? { ...featured, winrate: Math.round((featured.wins / featured.games) * 100) }
     : null;
+  const cardSummary = summary ? { ...summary, topChampion: featuredChampion } : null;
+  const championRow = name => champions.find(row => row.name === name) || null;
+  const champion = featuredChampion ? championRow(featuredChampion.name) : null;
 
   // Arte del campeón, de mejor a peor: el splash guardado en la base (image_url_splash),
   // el de Data Dragon si todavía no se cargó y, por último, la imagen card del catálogo.
@@ -91,8 +99,8 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
   const texts = summary ? {
     period: periodText,
     featured: t('share.card.featured'),
-    featuredRecord: t(summary.topChampion?.games === 1 ? 'share.card.featuredRecordOne' : 'share.card.featuredRecord', {
-      games: summary.topChampion?.games, winrate: summary.topChampion?.winrate,
+    featuredRecord: t(featuredChampion?.games === 1 ? 'share.card.featuredRecordOne' : 'share.card.featuredRecord', {
+      games: featuredChampion?.games, winrate: featuredChampion?.winrate,
     }),
     winrate: t('share.card.winrate'),
     winsShort: t('share.card.winsShort', { wins: summary.wins }),
@@ -101,7 +109,7 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
     streakBadge: summary.winStreak >= 3 ? t('share.card.streakBadge', { count: summary.winStreak }) : '',
     games: t('share.card.games'),
     kda: t('share.card.kda'),
-    streak: t('share.card.streak'),
+    championsUsed: t('share.card.championsUsed'),
     deaths: t('share.card.deaths'),
     kdaTotal: t('share.card.kdaTotal'),
     bestMatch: t('share.card.bestMatch'),
@@ -157,7 +165,7 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
                 <div style={{ width, height, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
                   <ShareCard
                     ref={cardRef}
-                    summary={summary}
+                    summary={cardSummary}
                     format={format}
                     championArt={championArt}
                     fallbackArt={catalogArt}
@@ -215,6 +223,31 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
                 })}
               </div>
             </div>
+
+            {topChampions.length > 1 && (
+              <div className="space-y-2">
+                <p className="rd-label">{t('share.championLabel')}</p>
+                <div className="rd-panel-tabs w-full" role="tablist" aria-label={t('share.championLabel')}>
+                  {topChampions.map(entry => {
+                    const active = entry.name === featured?.name;
+                    const icon = championRow(entry.name)?.image_url;
+                    return (
+                      <button
+                        key={entry.name}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setPickedChampion(entry.name)}
+                        className={`rd-panel-tab inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 ${active ? 'rd-panel-tab-active' : ''}`}
+                      >
+                        {icon && <img src={icon} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" />}
+                        <span className="truncate">{entry.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <p className="rd-label">{t('share.formatLabel')}</p>

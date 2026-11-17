@@ -503,3 +503,50 @@
 .rd-saved-builds-layout {
   min-height: 0;
 }
+
+/* Tierlist en smartphone horizontal: encabezado y filtros fijos arriba; solo scrollea la
+   tierlist o la tabla (como en escritorio y en vertical). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-tierlist-layout) {
+    overflow: hidden;
+  }
+
+  .rd-tierlist-layout {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .rd-tierlist-layout > * + * {
+    margin-top: 0;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-header,
+  .rd-tierlist-layout .rd-tierlist-filters {
+    flex: none;
+  }
+
+  .rd-tierlist-layout .rd-tierlist-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* overflow: clip para que el encabezado de la tabla quede pegado arriba al scrollear. */
+  .rd-tierlist-table {
+    overflow: clip;
+  }
+
+  .rd-tierlist-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: hsl(var(--card));
+  }
+}

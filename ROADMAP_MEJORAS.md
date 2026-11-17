@@ -7,10 +7,10 @@ Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. La
 
 | Etapa | Hecho |
 |---|---|
-| Corto plazo | 13 de 21 |
-| Mediano plazo | 2 de 15 |
-| Largo plazo | 1 de 6 |
-| **Total** | **16 de 42** |
+| Corto plazo | 17 de 22 |
+| Mediano plazo | 2 de 13 |
+| Largo plazo | 2 de 6 |
+| **Total** | **21 de 41** |
 
 Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 <!-- avance:fin -->
@@ -56,11 +56,10 @@ Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 
 - [x] **Partidas por `user_id`:** una sola query compartida (`userMatchesQuery`). Todas las partidas tienen `user_id`, así que se quitó la búsqueda por email.
 - [x] **Partidas sin corte en 1000:** se piden por páginas (tope de 10 000). Sugeridor y Biblioteca recortan con `select` sin achicar la caché compartida.
-- [ ] **Pedir solo las columnas necesarias** en vez de `select('*')` (requiere revisar qué campos usa cada pantalla).
 - [x] **Bundle:** `index` bajó de 844 a 728 KB y `Goals` de 448 a 64 KB (recharts y react-markdown se cargan aparte). Se sacaron 11 dependencias sin uso.
-- [ ] **Bundle, siguiente paso:** cargar las páginas públicas (home y biblioteca) de forma diferida para los usuarios logueados, cuidando la hidratación del prerender.
-  - Cargar los gráficos (recharts) y `@hello-pangea/dnd` solo donde se usan.
-  - Revisar qué componentes de `ui/` no se usan.
+- [x] **Páginas públicas aparte:** la home y la biblioteca pública van en su propio archivo; `index` bajó de 736 a 560 KB. Las rutas de la app ya no hidratan el prerender de la home (sin errores de hidratación en /login, /stats, etc.).
+- [x] **Gráficos y drag & drop solo donde se usan:** recharts se carga al ver el gráfico de Objetivos y `@hello-pangea/dnd` se quitó.
+- [x] **Limpieza de `ui/`:** se borraron 37 componentes sin uso y 32 dependencias (quedan 23).
 
 ### Código
 
@@ -69,7 +68,7 @@ Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 - [x] **`index.css` dividido** en 14 archivos en `src/styles/`, importados en el mismo orden (el CSS compilado es idéntico).
 - [ ] **Reemplazar en el CSS las reglas que dependen del orden de los elementos** (`:nth-child`) por clases.
 - [x] **Smoke e2e de las páginas públicas** con Playwright (`npm run test:e2e`).
-- [ ] **Corregir la hidratación del prerender:** el HTML prerenderizado no coincide con el primer render del cliente (errores de React #418/#423). Ya estaba así; el test marcado con `test.fail()` lo sigue.
+- [x] **Corregir la hidratación del prerender:** el prerender y el navegador renderizan el mismo árbol (`AppShell` en App.jsx). Las páginas públicas hidratan sin errores; el e2e lo verifica en /, /campeones, una ficha, /objetos y /runas.
 - [ ] **E2e con login** (cargar partida → ver Coach), con una cuenta de prueba en un proyecto de Supabase aparte.
 
 ### Coach (iterar con datos reales)
@@ -105,8 +104,6 @@ Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 
 ### Captura y datos
 
-- [ ] **Cargar varias partidas de una vez** (subir 5 o 10 marcadores seguidos).
-- [ ] **Captura también en escritorio** (hoy es solo mobile).
 - [ ] **Compartir al instalar como PWA** (share target): mandar la captura desde la galería directo a Rift Deck. Ya hay `manifest.json`; falta el service worker.
 - [ ] **Investigar si la pestaña Estadísticas** muestra daño infligido y recibido o daño a torres. Si se puede leer, el Coach gana mucho (aporte de daño, tanqueo).
 - [x] **Build guardada vinculada a la partida** (`build_id`): al aplicarla queda vinculada, cada build muestra su récord en Builds y el Coach avisa cuál rinde más con cada campeón.
@@ -124,7 +121,7 @@ Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
 - [ ] **Datos agregados anónimos y opt-in:** "jugadores de Rift Deck con Kai'Sa contra Draven ganan X %". Hace falta mucho volumen y corregir el sesgo de autocarga; no prometer antes de tener los números.
 - [ ] **Modo coach/equipo:** un coach real (o un dúo/equipo) ve las partidas y consejos de sus alumnos y deja notas. Es la monetización natural.
 - [x] **Tarjeta compartible** ("Mi resumen en Rift Deck"): semana, 30 días o parche, en formato historia o post; se comparte con el menú del celular o se descarga como PNG. Botón en el Dashboard.
-- [ ] **Perfil público opcional** en `/p/<nombre>`: gratis, solo con el link (no indexado), con winrate y récord, campeones y líneas, y builds públicas. Sin rankings entre usuarios.
+- [x] **Perfil público opcional** en `/p/<nombre>`: gratis, apagado por defecto, solo con el link (noindex), con winrate y récord por tipo de partida, campeones, líneas y builds marcadas como públicas. Se activa en Mi perfil; cada build se muestra u oculta desde Builds. Sin rankings.
 jnmw3- [ ] **App nativa o PWA completa,** con notificaciones de tilt, informe semanal y objetivos.
 - [ ] **Asistente de draft** con sinergias y counters de tu pool contra la composición rival, usando el catálogo y tu historial.
 - [ ] **Redacción con IA opcional** sobre el informe del Coach. Los datos y el consejo los sigue decidiendo el motor; la IA solo escribe.

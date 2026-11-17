@@ -2279,3 +2279,93 @@
   min-width: 0;
   animation: rd-panel-in 180ms ease-out;
 }
+
+/* Smartphone (vertical y horizontal): título y filtros fijos arriba; solo scrollea la
+   lista, como en escritorio.
+   - Builds, selector de campeón: encabezado y buscador fijos, scrollea la grilla.
+   - Biblioteca (catálogo): encabezado y pestañas fijos; dentro del catálogo el bloque de
+     filtros queda pegado arriba (sticky) y scrollea la lista. Las fichas tienen sus reglas. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-main-content:has(.rd-build-picker),
+  .rd-main-content:has(.rd-library-catalog) {
+    overflow: hidden;
+  }
+
+  .rd-build-picker {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .rd-build-picker-header,
+  .rd-build-picker .rd-build-picker-filters {
+    flex: none;
+  }
+
+  .rd-build-picker-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rd-library-layout:has(.rd-library-catalog) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .rd-library-layout:has(.rd-library-catalog) > .rd-library-header,
+  .rd-library-layout:has(.rd-library-catalog) > .rd-library-tabs {
+    flex: none;
+  }
+
+  .rd-library-layout > .rd-library-catalog {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rd-library-catalog > div > :first-child {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+}
+
+/* Vertical: la separación la da el gap (sin los márgenes de abajo del bloque mobile, que
+   se sumaban y dejaban huecos grandes entre título, pestañas y filtros). */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-library-layout:has(.rd-library-catalog) {
+    gap: 0.6rem;
+  }
+
+  .rd-library-layout:has(.rd-library-catalog) > .rd-library-header,
+  .rd-library-layout:has(.rd-library-catalog) > .rd-library-tabs {
+    margin-bottom: 0;
+  }
+}
+
+/* Horizontal: la biblioteca es una grilla (pestañas al lado del título); el catálogo toma
+   el alto que sobra. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-library-layout:has(.rd-library-catalog) {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  /* La grilla centra sus filas (align-items: center): sin esto el catálogo toma el alto de
+     su contenido y se sale por arriba en vez de scrollear. */
+  .rd-library-layout > .rd-library-catalog {
+    align-self: stretch;
+  }
+}

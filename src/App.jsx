@@ -7,7 +7,8 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LocaleProvider } from '@/lib/LocaleContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Seo from '@/components/Seo';
-import PublicRoutes from '@/components/public/PublicRoutes';
+// Las páginas públicas se cargan aparte (ver publicRoutesLoader).
+import PublicRoutes from '@/components/public/publicRoutesLoader';
 
 const PageNotFound = lazy(() => import('./lib/PageNotFound'));
 const Layout = lazy(() => import('@/components/Layout'));
@@ -25,6 +26,7 @@ const Profile = lazy(() => import('@/pages/Profile'));
 const Membresia = lazy(() => import('@/pages/Membresia'));
 const MembresiaResultado = lazy(() => import('@/pages/MembresiaResultado'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const PublicProfile = lazy(() => import('@/pages/PublicProfile'));
 
 const RouteFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -32,14 +34,24 @@ const RouteFallback = () => (
   </div>
 );
 
-const AuthenticatedApp = () => {
+const AuthenticatedApp = ({ publicData }) => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
   const location = useLocation();
   const usesPageSeo = ['/campeones', '/objetos', '/runas'].some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
-  const publicData = typeof window !== 'undefined' ? window.__RIFTDECK_PUBLIC_DATA__ : undefined;
 
   if (usesPageSeo) {
     return <PublicRoutes publicData={publicData} />;
+  }
+
+  // Perfil público (/p/<nombre>): igual con o sin sesión, sin esperar al login.
+  if (location.pathname.startsWith('/p/')) {
+    return (
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/p/:slug" element={<PublicProfile />} />
+        </Routes>
+      </Suspense>
+    );
   }
 
   if (location.pathname === '/' && (isLoadingPublicSettings || isLoadingAuth || !isAuthenticated)) {
@@ -99,18 +111,33 @@ const AuthenticatedApp = () => {
   );
 };
 
-function App() {
+/**
+ * Árbol completo de la app, compartido por el navegador y el prerender (entry-server.jsx).
+ * Tiene que ser el mismo en los dos lados: si cambia un proveedor o un hermano (Toaster),
+ * cambian los ids internos de React (useId) y la hidratación de las páginas públicas falla.
+ */
+export function AppShell({ router: RouterComponent, routerProps, queryClient, publicData }) {
   return (
     <AuthProvider>
       <LocaleProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <AuthenticatedApp />
-          </Router>
+        <QueryClientProvider client={queryClient}>
+          <RouterComponent {...routerProps}>
+            <AuthenticatedApp publicData={publicData} />
+          </RouterComponent>
           <Toaster />
         </QueryClientProvider>
       </LocaleProvider>
     </AuthProvider>
+  )
+}
+
+function App() {
+  return (
+    <AppShell
+      router={Router}
+      queryClient={queryClientInstance}
+      publicData={typeof window !== 'undefined' ? window.__RIFTDECK_PUBLIC_DATA__ : undefined}
+    />
   )
 }
 

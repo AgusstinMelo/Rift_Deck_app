@@ -1,5 +1,28 @@
 import { supabase } from "@/lib/supabaseClient";
-import { normalizePatchAverage, normalizeTierlistSnapshotRecord } from '@/utils/tierlist';
+import { normalizePatchAverage, normalizeTierlistSnapshotRecord, withCatalogIcons } from '@/utils/tierlist';
+
+let catalogIconsPromise = null;
+
+/**
+ * Íconos del catálogo (external_id, nombre e imagen) para reemplazar los avatares de
+ * Tencent de la tierlist. Se piden una vez por sesión; si falla, la tierlist usa los suyos.
+ */
+function catalogIcons() {
+  if (!catalogIconsPromise) {
+    catalogIconsPromise = supabase
+      .from("current_champions")
+      .select("external_id, name, image_url")
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return data || [];
+      })
+      .catch(() => {
+        catalogIconsPromise = null;
+        return [];
+      });
+  }
+  return catalogIconsPromise;
+}
 
 export async function getTierlistEntries(order = "-ranking_final", limit = 1000, filters = {}) {
   const orderConfig = order === "-updated_at"
@@ -57,7 +80,7 @@ export async function getTierlistEntries(order = "-ranking_final", limit = 1000,
     normalized = normalized.filter(entry => entry.snapshot_date === filters.snapshotDate);
   }
 
-  return normalized;
+  return withCatalogIcons(normalized, await catalogIcons());
 }
 
 export async function getTierlistExecutions(limit = 10) {
@@ -141,7 +164,7 @@ export async function getTierlistPatchAverages(patchGroups = []) {
     .limit(1000 * groups.length);
 
   if (error) throw error;
-  return (data || []).map(normalizePatchAverage);
+  return withCatalogIcons((data || []).map(normalizePatchAverage), await catalogIcons());
 }
 
 export async function getCurrentTierlist() {

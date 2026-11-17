@@ -1,9 +1,8 @@
 // Smoke de las páginas públicas: cargan, navegan y no tiran errores de JavaScript.
 import { expect, test } from '@playwright/test';
 
-// Errores de hidratación de React (#418 texto distinto, #423 re-render en cliente, #425).
-// Ya estaban antes de estos tests: el HTML prerenderizado no coincide con el primer render
-// del cliente. Se siguen en el test marcado con test.fail() al final.
+// Errores de hidratación de React (#418 HTML distinto, #423 re-render en cliente, #425 texto).
+// El prerender (entry-server.jsx) y el navegador renderizan el mismo árbol (AppShell).
 const HYDRATION_ERROR = /Minified React error #(418|423|425)\b|Hydration|hydrat/i;
 
 /** Errores de página y de consola de React, separando los de hidratación. */
@@ -53,12 +52,15 @@ test('login muestra el formulario', async ({ page }) => {
   expect(errors.other).toEqual([]);
 });
 
-// Falla esperada: documenta el problema de hidratación. Cuando se corrija, Playwright avisa
-// que este test "pasó inesperadamente": ahí hay que sacar el test.fail().
-test('las páginas prerenderizadas hidratan sin diferencias', async ({ page }) => {
-  test.fail();
-  const errors = collectErrors(page);
-  await page.goto('/campeones');
-  await expect(page.locator('a[href^="/campeones/"]').first()).toBeVisible();
-  expect(errors.hydration).toEqual([]);
-});
+// Las páginas prerenderizadas (home, listas y fichas) hidratan sin diferencias con el servidor.
+for (const path of ['/', '/campeones', '/campeones/akali', '/objetos', '/runas']) {
+  test(`hidrata sin diferencias: ${path}`, async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto(path);
+    await expect(page.locator('h1:visible').first()).toBeVisible();
+    // La hidratación termina después de cargar las páginas públicas (main.jsx).
+    await page.waitForLoadState('networkidle');
+    expect(errors.hydration).toEqual([]);
+    expect(errors.other).toEqual([]);
+  });
+}

@@ -13,6 +13,7 @@ import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import LanguageSelect from '@/components/LanguageSelect';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import { useCatalogImagePreload } from '@/hooks/useCatalogImagePreload';
 import logoUrl from '@/assets/riftdeck-logo.png';
 import markUrl from '@/assets/riftdeck-mark.png';
 import logoHorizontalUrl from '@/assets/riftdeck-logo-horizontal.png';
@@ -216,6 +217,8 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const t = useT();
   const visibleName = user?.visible_name || user?.full_name || user?.email || t('common.user');
+  // Íconos del catálogo precargados en segundo plano: las páginas los muestran al instante.
+  useCatalogImagePreload();
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';

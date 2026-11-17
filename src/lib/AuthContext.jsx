@@ -170,6 +170,15 @@ export const AuthProvider = ({ children }) => {
       profileUpdates.avatar_url = avatarUrl || null;
     }
 
+    // Perfil público (/p/<nombre>): la base valida el formato y que el nombre no esté
+    // tomado (error 23505).
+    if (Object.prototype.hasOwnProperty.call(data || {}, 'public_profile')) {
+      profileUpdates.public_profile = Boolean(data.public_profile);
+    }
+    if (Object.prototype.hasOwnProperty.call(data || {}, 'public_slug')) {
+      profileUpdates.public_slug = data.public_slug || null;
+    }
+
     if (Object.keys(profileUpdates).length === 0) {
       throw new Error('Nombre de usuario requerido.');
     }

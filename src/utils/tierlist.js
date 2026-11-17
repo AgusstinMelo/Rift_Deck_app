@@ -5,6 +5,28 @@ export const normalizeChampionName = (name) =>
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '');
 
+/**
+ * Reemplaza la imagen de cada fila de la tierlist (avatar de Tencent, lento y pesado) por
+ * el ícono del campeón en el catálogo, buscándolo por external_id (o por nombre). Si no lo
+ * encuentra, deja la imagen original.
+ * @param {any[]} rows  Filas de tierlist_entries o tierlist_patch_averages.
+ * @param {{ external_id?: any, name?: string, image_url?: string }[]} champions  Catálogo.
+ */
+export function withCatalogIcons(rows, champions) {
+  if (!rows?.length || !champions?.length) return rows || [];
+  const byId = new Map();
+  const byName = new Map();
+  champions.forEach(champion => {
+    if (!champion?.image_url) return;
+    if (champion.external_id != null && champion.external_id !== '') byId.set(String(champion.external_id), champion.image_url);
+    if (champion.name) byName.set(normalizeChampionName(champion.name), champion.image_url);
+  });
+  return rows.map(row => {
+    const icon = byId.get(String(row.external_id ?? '')) || byName.get(normalizeChampionName(row.champion_name));
+    return icon && icon !== row.image_url ? { ...row, image_url: icon } : row;
+  });
+}
+
 export const normalizeTierlistSnapshotRecord = (record = {}) => {
   const rawPatch = String(record.patch || '').trim();
   const legacyDateMatch = rawPatch.match(/\s+(\d{2})-(\d{2})-(\d{4})\s*$/);

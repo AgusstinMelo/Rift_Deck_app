@@ -3,8 +3,8 @@
 // Estilos en línea a propósito: la imagen tiene que salir igual en cualquier pantalla,
 // sin depender de los breakpoints de la app. Look de carta de juego: marco dorado con
 // esquinas, destellos, título según el winrate y badges.
-import { forwardRef, useState } from 'react';
-import { Crown, Crosshair, Flame, Skull, Swords, Trophy } from 'lucide-react';
+import { forwardRef, useLayoutEffect, useRef, useState } from 'react';
+import { Crown, Crosshair, Flame, Skull, Swords, Trophy, Users } from 'lucide-react';
 import logo from '@/assets/riftdeck-logo-horizontal.png';
 
 export const CARD_SIZES = {
@@ -66,15 +66,22 @@ function Frame() {
   );
 }
 
-function Badge({ icon: Icon, children, background, color, size }) {
+const BADGE_SIZES = {
+  lg: { padding: '14px 26px', fontSize: 28, icon: 34, gap: 12 },
+  md: { padding: '12px 22px', fontSize: 24, icon: 28, gap: 12 },
+  sm: { padding: '10px 18px', fontSize: 20, icon: 24, gap: 10 },
+};
+
+function Badge({ icon: Icon, children, background, color, size = 'md' }) {
+  const metrics = BADGE_SIZES[size];
   return (
     <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 12, padding: size === 'lg' ? '14px 26px' : '12px 22px',
+      display: 'inline-flex', alignItems: 'center', gap: metrics.gap, padding: metrics.padding,
       borderRadius: 999, background, color, fontFamily: TITLE_FONT, fontWeight: 700,
-      fontSize: size === 'lg' ? 28 : 24, textTransform: 'uppercase', letterSpacing: 1,
+      fontSize: metrics.fontSize, textTransform: 'uppercase', letterSpacing: 1,
       boxShadow: '0 10px 30px rgba(0,0,0,0.45)', whiteSpace: 'nowrap',
     }}>
-      <Icon size={size === 'lg' ? 34 : 28} strokeWidth={2.6} />
+      <Icon size={metrics.icon} strokeWidth={2.6} />
       {children}
     </div>
   );
@@ -157,6 +164,30 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
   const kda = value => (value === null || value === undefined ? '—' : twoDecimals.format(value));
   const winShare = summary.games ? (summary.wins / summary.games) * 100 : 0;
 
+  // Fila del winrate: número, récord y etiquetas en una línea. El número arranca grande y
+  // se achica de a poco hasta que la fila entra (100%, títulos largos en otros idiomas).
+  const winrateRow = useRef(null);
+  const maxWinrateSize = summary.winrate >= 100 ? (story ? 128 : 104) : (story ? 160 : 124);
+  const [winrateSize, setWinrateSize] = useState(maxWinrateSize);
+  useLayoutEffect(() => {
+    const row = winrateRow.current;
+    if (!row) return undefined;
+    const fit = () => {
+      let size = maxWinrateSize;
+      row.firstChild.style.fontSize = `${size}px`;
+      while (size > 72 && row.scrollWidth > row.clientWidth) {
+        size -= 4;
+        row.firstChild.style.fontSize = `${size}px`;
+      }
+      setWinrateSize(size);
+    };
+    fit();
+    // Con las fuentes cargadas cambian los anchos: se vuelve a medir.
+    let active = true;
+    document.fonts?.ready.then(() => active && fit());
+    return () => { active = false; };
+  }, [maxWinrateSize, texts.tier, texts.streakBadge, texts.winsShort, texts.lossesShort, texts.winrate]);
+
   return (
     <div
       ref={ref}
@@ -201,13 +232,6 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.10) 48%, transparent 58%)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(11,15,26,0.35) 0%, rgba(11,15,26,0) 25%, rgba(11,15,26,0) 45%, rgba(11,15,26,0.95) 100%)' }} />
 
-          <div style={{ position: 'absolute', top: 30, left: 30, right: 30, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-            <Badge icon={Crown} background={GOLD_GRADIENT} color="#1A1405" size={story ? 'lg' : 'md'}>{texts.tier}</Badge>
-            {texts.streakBadge && (
-              <Badge icon={Flame} background="linear-gradient(135deg, #FB923C 0%, #EF4444 100%)" color="#FFF7ED" size={story ? 'lg' : 'md'}>{texts.streakBadge}</Badge>
-            )}
-          </div>
-
           <div style={{ position: 'absolute', left: 48, right: 48, bottom: 40 }}>
             <div style={{ fontSize: story ? 28 : 24, color: GOLD_LIGHT, letterSpacing: 4, textTransform: 'uppercase' }}>{texts.featured}</div>
             <div style={{ fontFamily: TITLE_FONT, fontSize: story ? 108 : 78, fontWeight: 800, lineHeight: 1.02, textTransform: 'uppercase', letterSpacing: -2, marginTop: 8, textShadow: '0 6px 30px rgba(0,0,0,0.6)' }}>
@@ -221,17 +245,25 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
 
         {/* Winrate con resplandor, récord y barra de victorias / derrotas. */}
         <div style={{ flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 36 }}>
-            <div style={{ fontFamily: TITLE_FONT, fontSize: story ? 190 : 124, fontWeight: 800, lineHeight: 0.9, color: GOLD_LIGHT, letterSpacing: -6, textShadow: GLOW }}>
+          <div ref={winrateRow} style={{ display: 'flex', alignItems: 'flex-end', gap: story ? 30 : 36 }}>
+            <div style={{ flexShrink: 0, fontFamily: TITLE_FONT, fontSize: winrateSize, fontWeight: 800, lineHeight: 0.9, color: GOLD_LIGHT, letterSpacing: -6, textShadow: GLOW }}>
               {summary.winrate}%
             </div>
-            <div style={{ paddingBottom: story ? 18 : 10 }}>
-              <div style={{ fontSize: story ? 30 : 24, color: MUTED, textTransform: 'uppercase', letterSpacing: 4 }}>{texts.winrate}</div>
-              <div style={{ fontFamily: TITLE_FONT, fontSize: story ? 52 : 40, fontWeight: 700, marginTop: 8 }}>
+            <div style={{ flexShrink: 0, paddingBottom: story ? 14 : 10 }}>
+              <div style={{ fontSize: story ? 28 : 24, color: MUTED, textTransform: 'uppercase', letterSpacing: 4 }}>{texts.winrate}</div>
+              <div style={{ fontFamily: TITLE_FONT, fontSize: story ? 46 : 40, fontWeight: 700, marginTop: 8, whiteSpace: 'nowrap' }}>
                 <span style={{ color: WIN }}>{texts.winsShort}</span>
                 <span style={{ color: MUTED }}> · </span>
                 <span style={{ color: LOSS }}>{texts.lossesShort}</span>
               </div>
+            </div>
+            {/* Título según el winrate y racha, apilados a la derecha: acá y no sobre el arte,
+                donde tapaban la cara del campeón. */}
+            <div style={{ marginLeft: 'auto', alignSelf: 'center', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: story ? 14 : 12, flexShrink: 0 }}>
+              <Badge icon={Crown} background={GOLD_GRADIENT} color="#1A1405" size="sm">{texts.tier}</Badge>
+              {texts.streakBadge && (
+                <Badge icon={Flame} background="linear-gradient(135deg, #FB923C 0%, #EF4444 100%)" color="#FFF7ED" size="sm">{texts.streakBadge}</Badge>
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', height: story ? 18 : 14, marginTop: story ? 28 : 20, borderRadius: 999, overflow: 'hidden', background: 'rgba(255,255,255,0.06)', boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.05)' }}>
@@ -246,7 +278,7 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
           metrics={[
             { icon: Swords, label: texts.games, value: summary.games },
             { icon: Crosshair, label: texts.kda, value: kda(summary.kda) },
-            { icon: Flame, label: texts.streak, value: summary.winStreak },
+            { icon: Users, label: texts.championsUsed, value: summary.championCount ?? '—' },
             { icon: Skull, label: texts.deaths, value: fixed(summary.avgDeaths) },
           ]}
           totals={summary.totals}

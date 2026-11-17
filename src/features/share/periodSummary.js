@@ -102,6 +102,8 @@ export function summarizePeriod(matches, options) {
     avgAssists: kdaRows.length ? assists / kdaRows.length : null,
     topChampion: top ? { name: top.key, games: top.games, wins: top.wins, winrate: Math.round((top.wins / top.games) * 100) } : null,
     champions: champions.slice(0, 3).map(entry => ({ name: entry.key, games: entry.games, wins: entry.wins })),
+    // Cuántos campeones distintos se jugaron en el período.
+    championCount: champions.length,
     lanes: tally(rows, match => match.lane).slice(0, 2).map(entry => entry.key),
     bestMatch: best ? {
       champion: best.match.own_champion_name,

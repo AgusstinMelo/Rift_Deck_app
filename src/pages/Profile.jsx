@@ -16,8 +16,13 @@ import {
   Image,
   Download,
   ShieldCheck,
+  Globe,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { useT } from '@/lib/LocaleContext';
+import { isValidSlug, toSlug, toSlugDraft, SLUG_MAX } from '@/features/publicProfile/publicProfile';
+import { publicProfileUrl } from '@/api/publicProfileSupabase';
 
 const AVATAR_TYPES = [
   { id: 'all', label: 'profile.avatarTypes.all' },
@@ -49,6 +54,56 @@ export default function Profile() {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
   const [legalModal, setLegalModal] = useState(null);
+
+  // Perfil público (/p/<nombre>): apagado por defecto; el nombre del link se propone a
+  // partir del nombre visible.
+  const [publicOn, setPublicOn] = useState(false);
+  const [publicSlug, setPublicSlug] = useState('');
+  const [publicSaving, setPublicSaving] = useState(false);
+  const [publicMessage, setPublicMessage] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const savedSlug = user?.public_slug || '';
+  const publicDirty = publicOn !== Boolean(user?.public_profile) || publicSlug !== savedSlug;
+  const slugValid = isValidSlug(publicSlug);
+
+  useEffect(() => {
+    if (!user) return;
+    setPublicOn(Boolean(user.public_profile));
+    setPublicSlug(user.public_slug || toSlug(user.visible_name || user.full_name || ''));
+  }, [user]);
+
+  const savePublicProfile = async (event) => {
+    event.preventDefault();
+    if (publicOn && !slugValid) {
+      setPublicMessage({ type: 'error', text: t('publicProfile.settings.invalid') });
+      return;
+    }
+    setPublicSaving(true);
+    setPublicMessage(null);
+    try {
+      await updateUser({ public_profile: publicOn, public_slug: slugValid ? publicSlug : (savedSlug || null) });
+      setPublicMessage({ type: 'success', text: t('publicProfile.settings.saved') });
+    } catch (err) {
+      const taken = err?.code === '23505' || /duplicate|unique/i.test(err?.message || '');
+      const invalid = err?.code === '23514';
+      setPublicMessage({
+        type: 'error',
+        text: t(taken ? 'publicProfile.settings.taken' : invalid ? 'publicProfile.settings.invalid' : 'publicProfile.settings.error'),
+      });
+    } finally {
+      setPublicSaving(false);
+    }
+  };
+
+  const copyPublicLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicProfileUrl(savedSlug));
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Sin permiso para el portapapeles: el link igual se ve en pantalla.
+    }
+  };
 
   const DELETE_CONFIRM_TEXT = t('profile.eliminarMiCuenta');
 
@@ -232,6 +287,86 @@ export default function Profile() {
             </button>
           </form>
         )}
+      </div>
+
+      <div className="rd-card p-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Globe size={15} className="text-primary" />
+          <h2 className="rd-card-title">{t('publicProfile.settings.title')}</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">{t('publicProfile.settings.description')}</p>
+
+        <form onSubmit={savePublicProfile} className="space-y-4">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={publicOn}
+              onClick={() => { setPublicOn(value => !value); setPublicMessage(null); }}
+              className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors ${publicOn ? 'bg-primary border-primary' : 'bg-secondary border-border'}`}
+            >
+              <span className={`absolute top-0.5 h-[18px] w-[18px] rounded-full bg-background shadow transition-all ${publicOn ? 'left-[22px]' : 'left-0.5'}`} />
+            </button>
+            <span className="text-sm text-foreground">{t('publicProfile.settings.toggle')}</span>
+          </label>
+
+          <div>
+            <label htmlFor="public-slug" className="rd-label mb-1.5 block">{t('publicProfile.settings.linkLabel')}</label>
+            <div className="flex items-center rounded-xl border border-border bg-secondary/70 focus-within:border-primary/50 transition-all">
+              <span className="pl-4 text-sm text-muted-foreground whitespace-nowrap">riftdeckapp.com/p/</span>
+              <input
+                id="public-slug"
+                type="text"
+                value={publicSlug}
+                maxLength={SLUG_MAX}
+                onChange={event => { setPublicSlug(toSlugDraft(event.target.value)); setPublicMessage(null); }}
+                className="min-w-0 flex-1 bg-transparent py-2.5 pr-4 text-sm text-foreground outline-none"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">{t('publicProfile.settings.linkHint')}</p>
+          </div>
+
+          {publicMessage && (
+            <p className={`text-sm rounded-xl px-3 py-2 border flex items-center gap-2 ${publicMessage.type === 'success' ? 'text-green-400 bg-green-500/10 border-green-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+              {publicMessage.type === 'success' && <CheckCircle size={14} />}
+              {publicMessage.text}
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="submit"
+              disabled={publicSaving || !publicDirty || (publicOn && !slugValid)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {publicSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              {t('publicProfile.settings.save')}
+            </button>
+            {user?.public_profile && savedSlug && !publicDirty && (
+              <>
+                <button
+                  type="button"
+                  onClick={copyPublicLink}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border text-sm text-foreground hover:border-primary/40 transition-all"
+                >
+                  {linkCopied ? <CheckCircle size={14} className="text-green-400" /> : <Copy size={14} />}
+                  {t(linkCopied ? 'publicProfile.settings.copied' : 'publicProfile.settings.copy')}
+                </button>
+                <a
+                  href={`/p/${savedSlug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border text-sm text-foreground hover:border-primary/40 transition-all"
+                >
+                  <ExternalLink size={14} /> {t('publicProfile.settings.open')}
+                </a>
+              </>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">{t('publicProfile.settings.buildsHint')}</p>
+        </form>
       </div>
 
       <div className="rd-card p-6">

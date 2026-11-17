@@ -6,6 +6,7 @@ import { SITE_URL } from '../src/seo/publicSeo.js';
 import {
   getCurrentTierlistEntries,
   normalizePatchAverage,
+  withCatalogIcons,
 } from '../src/utils/tierlist.js';
 
 const readLocalEnv = async () => {
@@ -112,6 +113,7 @@ ${paths.map(path => `  <url>\n    <loc>${SITE_URL}${path}</loc>\n  </url>`).join
 
 await writeFile(resolve('public/sitemap.xml'), sitemap, 'utf8');
 await mkdir(resolve('.prerender'), { recursive: true });
-const currentTierlist = getCurrentTierlistEntries(tierlist);
+// Íconos del catálogo en lugar de los avatares de Tencent (más livianos y rápidos).
+const currentTierlist = withCatalogIcons(getCurrentTierlistEntries(tierlist), champions);
 await writeFile(resolve('.prerender/public-data.json'), JSON.stringify({ champions, items, runes, tierlist: currentTierlist }), 'utf8');
 console.log(`Sitemap generado con ${paths.length} URLs públicas.`);

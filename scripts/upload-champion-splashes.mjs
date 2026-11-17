@@ -92,7 +92,8 @@ async function main() {
       const body = Buffer.from(await response.arrayBuffer());
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, body, {
         contentType: 'image/jpeg',
-        cacheControl: '31536000',
+        // 1 día, igual que el resto de las imágenes del catálogo (optimize-catalog-images.mjs).
+        cacheControl: '86400',
         upsert: true,
       });
       if (uploadError) throw uploadError;

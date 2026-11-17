@@ -71,3 +71,11 @@ test('tipo de partida: filtra como Estadísticas (sin tipo cargado cuenta como C
   assert.equal(matchesInPeriod(matches, { period: 'week', now: NOW, types: ['ranked', 'casual'] }).rows.length, 3);
   assert.equal(matchesInPeriod(matches, { period: 'week', now: NOW }).rows.length, 3);
 });
+
+test('campeones usados: cuenta los distintos del período; los 3 más jugados van en champions', () => {
+  const now = new Date(2026, 10, 17);
+  const rows = ['Ahri', 'Ahri', 'Jinx', 'Garen', 'Lux', 'Lux', 'Lux'].map(name => m('2026-11-16', 'win', { own_champion_name: name }));
+  const summary = summarizePeriod(rows, { period: 'week', now });
+  assert.equal(summary.championCount, 4);
+  assert.deepEqual(summary.champions.map(entry => entry.name), ['Lux', 'Ahri', 'Jinx']);
+});
