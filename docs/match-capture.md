@@ -57,6 +57,40 @@ El celular detecta solo qué captura es el marcador (por la barra dorada) y cuá
 
 La identificación local tarda unos 1,2 s por marcador.
 
+## Los 10 jugadores (para el Coach)
+
+Además de tus datos, la carga con capturas lee a **los 10 jugadores** y los guarda en la tabla `match_participants` (migración `202611190001`). Sale de las mismas 2 capturas, sin IA y sin pedir nada extra al usuario.
+
+| Dato | De dónde sale |
+|---|---|
+| Campeón, línea, K/D/A y oro | Marcador. El equipo enemigo es el aliado corrido `LAYOUT.enemyShift` (0,922 altos) a la derecha. |
+| Hechizos y objetos | Marcador, mismas posiciones que tu fila, para las 10 filas. |
+| Runas | Costados de la pestaña Runa: 5 íconos chicos por jugador, la clave primero (`SIDE_RUNES_LAYOUT`). |
+
+- **Control cruzado de los enemigos:** la suma de sus asesinatos tiene que dar el puntaje rojo y la de sus muertes, el azul. Si no cierra, sus números quedan con confianza media; con lectura dudosa (confianza baja) no se guardan.
+- **Al guardar, el formulario manda:** si el usuario corrigió un campeón (por equipo y línea) o su K/D/A y oro, se guarda lo corregido.
+- **Sin nombres de jugadores:** solo campeones y números.
+- **Si falla el guardado de los jugadores** (por ejemplo, migración pendiente), la partida se guarda igual.
+- **Medidas:** tomadas comparando contra el catálogo en las capturas de `test/fixtures/captures`. Con esas 3 partidas, los 30 K/D/A y oros cierran con los puntajes, y las runas de tu fila leídas en el costado coinciden con las de la columna central.
+- **Tiempo:** la lectura local pasa de unos 1,2 s a unos 1,7-2 s por marcador. Las filas de los demás usan una búsqueda de recortes más acotada.
+
+### Pestaña DATOS (tercera captura, opcional)
+
+Estadísticas › Comparación de estadísticas, vista **General**, primera página. Por jugador: daño infligido (y % del equipo), daño recibido, curación y escudos (y %), participación en peleas (%) y oro (y %). Filas en el mismo orden que el marcador (top, jungla, mid, ADC, soporte). Se lee en el celular, sin IA (`datosScreen.js`), y no se manda al modelo.
+
+| Pieza | Detalle |
+|---|---|
+| Posiciones | `DATOS_LAYOUT`: celdas con x fija desde el centro; los enemigos, corridos 0,956 altos. El recorte de cada celda se ajusta a la línea de números: con más margen, la barra de abajo (larga en el valor más alto) se confundía con el texto. |
+| Lectura | `readWords` separa número y porcentaje por el espacio (el de miles es más angosto). Dígitos con las plantillas del marcador y "%" con `PERCENT_TEMPLATE` (promedio de 160 porcentajes reales). |
+| Control | Por equipo y columna (daño, curación, oro), el % de cada fila tiene que coincidir con su número sobre el total del equipo (±1,5). Si no cierra, ese valor queda con confianza media. |
+| Qué se guarda | Solo los valores con confianza alta, en las columnas de `match_participants` (migración `202611190002`). |
+| Detección | La captura es DATOS si se lee al menos el 70% de las celdas. Ningún marcador ni pestaña Runa de prueba pasa ese corte. |
+
+**Con 4 capturas reales** (`test/fixtures/captures/*-datos.jpg`, valores esperados en `datos-expected.json`):
+- 200 de 200 valores leídos a tamaño original, a 2048 px (el tamaño de la app) y en el navegador.
+- A 1220 px de ancho, 198 de 200; los 2 restantes quedan con confianza media, no con un valor equivocado.
+- Unos 20-45 ms por captura.
+
 **Límite conocido:** las medidas salen de capturas con relación 2,22:1. En pantallas con otra proporción, la interfaz del juego podría acomodarse distinto. En ese caso no se encuentra la barra o las comparaciones dan parecidos bajos: se usa el respaldo de Gemini y esos datos quedan marcados para revisar. Con capturas de esos teléfonos se pueden ajustar las constantes de `LAYOUT`.
 
 Detalles de la comparación por píxeles:

@@ -1985,7 +1985,7 @@
       "internal_error": "Algo salió mal al leer las capturas.",
       "invalid_image": "No pudimos abrir alguna de las imágenes.",
       "image_too_large": "Alguna captura es demasiado pesada.",
-      "too_many_images": "Podés subir hasta 2 capturas por partida: el marcador y la pestaña de runas.",
+      "too_many_images": "Podés subir hasta 3 capturas por partida: el marcador, la pestaña de runas y, opcional, DATOS.",
       "rate_limited": "Llegaste al límite de lecturas por hora. Probá más tarde.",
       "unauthorized": "Tu sesión expiró. Volvé a ingresar.",
       "not_configured": "La carga con capturas no está disponible todavía.",
@@ -2000,7 +2000,7 @@
     },
     "review": {
       "title": "Revisá las capturas",
-      "hint": "Subí 2 capturas de la misma partida: el marcador y la pestaña Estadísticas › Runa.",
+      "hint": "Subí 2 capturas de la misma partida (el marcador y la pestaña Estadísticas › Runa) y, si querés, una tercera de DATOS.",
       "count": "{count} de {max} capturas",
       "doneTitle": "Capturas analizadas"
     },
@@ -2019,13 +2019,20 @@
         "b": "Elegí la pestaña RUNA, con tu jugador seleccionado: tus 5 runas se ven grandes en el centro.",
         "c": "Captura de la pantalla completa."
       },
+      "step3": {
+        "label": "Captura 3 · opcional",
+        "title": "Datos",
+        "a": "En la misma pantalla de estadísticas, elegí la pestaña DATOS.",
+        "b": "Dejá la vista \"General\" y la primera página (el primer puntito de abajo).",
+        "c": "Captura de la pantalla completa. Suma daño, daño recibido, curación, participación y oro de los 10 para el Coach."
+      },
       "requirements": {
         "title": "Cómo tienen que ser",
         "a": "Pantalla completa, con el celular en horizontal.",
         "b": "Sin recortes, ediciones, filtros ni nada encima (notificaciones, volumen).",
         "c": "Nítidas: no sirven fotos a otra pantalla ni capturas de video."
       },
-      "result": "Completamos K/D/A, oro, duración, resultado, tipo, los 10 campeones con su línea, tus objetos, hechizos y runas. El lado lo elegís vos y revisás todo antes de guardar. Las capturas no se guardan."
+      "result": "Completamos K/D/A, oro, duración, resultado, tipo, los 10 campeones con su línea, tus objetos, hechizos y runas, y guardamos la build, las runas y los números de los otros 9 para el Coach. El lado lo elegís vos y revisás todo antes de guardar. Las capturas no se guardan."
     }
   },
   "coachEngine": {
@@ -2049,7 +2056,9 @@
       "plan": "Plan de juego",
       "strength": "Fortaleza",
       "savedBuild": "Tus builds",
-      "weeklyPicks": "Pool de la semana"
+      "weeklyPicks": "Pool de la semana",
+      "impact": "Tu impacto",
+      "laneEdge": "Tu línea"
     },
     "or": " o ",
     "and": " y ",
@@ -2108,7 +2117,10 @@
       },
       "evidenceKp": "Participación: {kp} (esperado {expected})",
       "evidenceShare": "Tus muertes: {share} del equipo",
-      "evidenceGames": "{games} partidas con kills de equipo"
+      "evidenceGames": "{games} partidas con kills de equipo",
+      "presenceTitle": "En las derrotas no estás en las peleas",
+      "presenceThesis": "Según el juego, participás en el {win} de las peleas cuando ganás y en el {loss} cuando perdés ({games} partidas con DATOS).",
+      "presenceEvidence": "Participación en peleas: {win} en victorias y {loss} en derrotas"
     },
     "session": {
       "streakTitle": "Después de dos derrotas seguidas, tu nivel cae",
@@ -2398,6 +2410,74 @@
       "banNote": "Ojo: en el {ban} de las partidas banean a {champion}, así que tené el plan B listo.",
       "avoid": "Dejá {champion} ({wr} en {games}) para normales hasta encontrarle la vuelta.",
       "evidence": "{champion}: {wr} · {games}{tier}"
+    },
+    "impact": {
+      "damageShare": {
+        "title": "Con {champion}, tu daño se apaga en las derrotas",
+        "thesis": "Con {champion} hacés el {win} del daño de tu equipo cuando ganás y el {loss} cuando perdés ({games} partidas con DATOS).",
+        "action": {
+          "carry": "En las derrotas no llegás a pegar: ubicate detrás de tu primera línea y entrá cuando el rival haya gastado su control. Si vas atrás en oro, farmeá las oleadas laterales en vez de forzar peleas que no podés ganar.",
+          "fighter": "En las derrotas tu daño no aparece: elegí un blanco que puedas alcanzar (el que tenga flash o defensivo usados) y entrá junto con tu equipo, no antes. Si vas atrás, presioná una línea lateral para obligar al rival a responder."
+        },
+        "evidenceWin": "Victorias: {share} del daño del equipo ({games} partidas)",
+        "evidenceLoss": "Derrotas: {share} del daño del equipo ({games} partidas)"
+      },
+      "role": {
+        "tank": {
+          "title": "Como tanque, recibís poco del daño de tu equipo",
+          "thesis": "Con {champion} recibís el {share} del daño de tu equipo en {games} partidas: tu tarea es absorber, y lo esperable es más de un cuarto.",
+          "action": "Ponete adelante en cada pelea: sé el primero que ve el rival y obligalo a gastar su daño en vos. Si entrás después que tus carries, ellos absorben lo que te tocaba a vos.",
+          "evidence": "Daño recibido: {share} del total del equipo ({games} partidas)"
+        },
+        "enchanter": {
+          "title": "Tu curación y tus escudos rinden poco",
+          "thesis": "Con {champion} das el {share} de la curación y los escudos de tu equipo en {games} partidas: como encantador, tendrías que ser el que más protege.",
+          "action": "Guardá tus escudos y curaciones para el momento en que el rival se lance sobre tu carry, no los gastes antes de la pelea. Y quedate cerca de quien más daño hace: lejos de tu equipo no protegés a nadie.",
+          "evidence": "Curación y escudos: {share} del total del equipo ({games} partidas)"
+        },
+        "carry": {
+          "title": "Sacás menos daño por oro que tu rival de línea",
+          "thesis": "Con {champion} hacés el {ratio} del daño por cada mil de oro que hace tu rival de línea ({mine} contra {theirs}, en {games} partidas).",
+          "action": "Tenés los objetos pero no los estás usando en la pelea: buscá pegar desde el borde de la pelea al que tengas más cerca, en lugar de esperar el blanco perfecto, y llegá a cada objetivo con tu equipo.",
+          "evidence": "Daño por cada mil de oro: {mine} contra {theirs} de tu rival ({games} partidas)"
+        }
+      }
+    },
+    "laneEdge": {
+      "title": "Las derrotas se arman en tu línea",
+      "thesis": "En tus derrotas terminás con {loss}k de oro menos que tu rival de línea; en las victorias, {win} ({games} partidas con los 10 jugadores).",
+      "action": {
+        "top": "Cuidá las oleadas antes que los intercambios: cada oleada perdida es oro que el rival suma sin pelear. Si no podés ganar el intercambio, juntá la oleada bajo tu torre y farmeá seguro.",
+        "jungler": "Tu rival saca más de la jungla que vos: limpiá tus campamentos en una ruta fija y robale los suyos cuando aparezca del otro lado del mapa.",
+        "mid": "Empujá tu oleada antes de moverte: rotar con la oleada del lado del rival te hace perder oro y experiencia aunque ganes la pelea.",
+        "adc": "Priorizá cada súbdito en los primeros minutos: si el intercambio no te conviene, cedé la pelea y no la oleada. Volvé a la base con la oleada empujada, no a mitad.",
+        "any": "Priorizá el oro en la línea antes que las peleas: farmeá seguro cuando no puedas ganar el intercambio y volvé a la base con la oleada empujada."
+      },
+      "evidenceLoss": "Derrotas: {gold} de oro contra tu rival ({games} partidas)",
+      "evidenceWin": "Victorias: {gold} de oro contra tu rival ({games} partidas)"
+    },
+    "enemyItems": {
+      "withAnswer": " Cuando sí respondiste, ganaste el {wr} ({games} partidas).",
+      "evidenceMissed": "Sin respuesta: {wr} de victorias ({games} partidas)",
+      "evidenceAnswered": "Con respuesta: {wr} de victorias ({games} partidas)",
+      "armor": {
+        "title": "El rival se llenó de armadura y no compraste penetración",
+        "thesis": "En {games} partidas el rival armó 5 o más objetos con armadura; en {missed} no compraste penetración y ganaste el {wr}.{withAnswer}",
+        "action": "Cuando veas dos o más rivales con armadura en el marcador, cambiá tu tercer o cuarto objeto por {items}.",
+        "actionGeneric": "Cuando veas dos o más rivales con armadura en el marcador, sumá un objeto de penetración de armadura a tu build."
+      },
+      "magicRes": {
+        "title": "El rival se llenó de resistencia mágica y no compraste penetración",
+        "thesis": "En {games} partidas el rival armó 5 o más objetos con resistencia mágica; en {missed} no compraste penetración mágica y ganaste el {wr}.{withAnswer}",
+        "action": "Cuando veas dos o más rivales con resistencia mágica en el marcador, sumá {items} a tu build.",
+        "actionGeneric": "Cuando veas dos o más rivales con resistencia mágica en el marcador, sumá un objeto de penetración mágica a tu build."
+      },
+      "healing": {
+        "title": "El rival se curaba y no armaste antiheal",
+        "thesis": "En {games} partidas el rival armó 3 o más objetos de curación o robo de vida; en {missed} no armaste antiheal y ganaste el {wr}.{withAnswer}",
+        "action": "Si en el marcador ves robo de vida o curación en dos rivales, comprá {items} antes de tu tercer objeto.",
+        "actionGeneric": "Si en el marcador ves robo de vida o curación en dos rivales, comprá un objeto antiheal antes de tu tercer objeto."
+      }
     }
   },
   "share": {

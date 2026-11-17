@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCoachHistory, logCoachInsights } from '@/api/coachSupabase';
 import { getUserBuilds } from '@/api/buildsSupabase';
+import { getUserMatchParticipants } from '@/api/matchesSupabase';
 import { computeInsightReport } from '@/hooks/useInsights';
 import { useCatalogText } from '@/lib/LocaleContext';
 
@@ -31,12 +32,19 @@ export function useCoachReport(user, { matches, wrItems, champions, runes, tierl
     enabled: Boolean(user?.id),
     staleTime: 5 * 60 * 1000,
   });
+  // Los 10 jugadores de las partidas cargadas con capturas (daño, oro, builds rivales).
+  const { data: participants = EMPTY } = useQuery({
+    queryKey: ['coach-participants', user?.id, matches?.length || 0],
+    queryFn: () => getUserMatchParticipants(user),
+    enabled: Boolean(user?.id),
+    staleTime: 5 * 60 * 1000,
+  });
   // Notas estratégicas de los campeones en el idioma activo (plan de juego con tu main).
   const { championNotes } = useCatalogText();
 
   const report = useMemo(
-    () => computeInsightReport({ matches, wrItems, champions, runes, builds, tierlist, history, championNotes, limit }),
-    [matches, wrItems, champions, runes, builds, tierlist, history, championNotes, limit, ...deps],
+    () => computeInsightReport({ matches, wrItems, champions, runes, builds, tierlist, participants, history, championNotes, limit }),
+    [matches, wrItems, champions, runes, builds, tierlist, participants, history, championNotes, limit, ...deps],
   );
 
   const logged = useRef(new Set());

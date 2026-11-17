@@ -103,7 +103,7 @@ export function mergeLocalText(modelFields, localText) {
  *   scoreboard: lectura local del marcador (identifyScoreboard). Si está, manda sobre lo
  *   que leyó el modelo para campeones, líneas, objetos y hechizos (es más precisa).
  */
-export function fieldsToPrefill(modelFields, codeMaps, { defaultPatch = '', now = new Date(), icons: modelIcons = {}, scoreboard = null } = {}) {
+export function fieldsToPrefill(modelFields, codeMaps, { defaultPatch = '', now = new Date(), icons: modelIcons = {}, scoreboard = null, playerRunes = null, datos = null } = {}) {
   const fields = mergeLocalText(modelFields, scoreboard?.text);
   const value = key => fields?.[key]?.value ?? null;
   const known = list => (list || []).filter(entry => entry && !entry.empty && entry.name);
@@ -168,8 +168,73 @@ export function fieldsToPrefill(modelFields, codeMaps, { defaultPatch = '', now 
     // Solo de la lectura local del marcador (el modelo no los extrae).
     team_kills: scoreboard?.text?.team_kills?.value ?? null,
     enemy_team_kills: scoreboard?.text?.enemy_team_kills?.value ?? null,
+    // Los 10 jugadores para el Coach (tabla match_participants): solo con la lectura local.
+    participants: participantsFromCapture(scoreboard, playerRunes, datos),
     review,
   };
+}
+
+const LOW = 'low';
+const namesOf = list => (list || []).filter(entry => entry && !entry.empty && entry.name).map(entry => entry.name);
+
+/**
+ * Los 10 jugadores leídos en el celular (marcador + costados de la pestaña Runa):
+ * equipo, línea, campeón, K/D/A, oro, hechizos, objetos y runas. Sin nombres de
+ * jugadores: solo campeones y números. [] si no se leyó el marcador.
+ * @param {any} scoreboard  resultado de identifyScoreboardIn
+ * @param {Array<{ team: string, lane: string, runes: Array<{ name: string }> }> | null} playerRunes
+ */
+export function participantsFromCapture(scoreboard, playerRunes = null, datos = null) {
+  if (!scoreboard?.players?.length) return [];
+  return scoreboard.players.map(player => {
+    const runes = (playerRunes || []).find(entry => entry.team === player.team && entry.lane === player.lane)?.runes || [];
+    const statsKnown = player.statsConfidence !== LOW;
+    // Pestaña DATOS (opcional): solo los valores con confianza alta (el % cierra con el
+    // total del equipo o la lectura es limpia).
+    const datosRow = datos?.players?.find(entry => entry.team === player.team && entry.lane === player.lane) || null;
+    const sure = key => (datosRow?.[key]?.confidence === 'high' ? datosRow[key].value : null);
+    return {
+      damage_dealt: sure('damage_dealt'),
+      damage_taken: sure('damage_taken'),
+      healing_shielding: sure('healing_shielding'),
+      teamfight_participation: sure('teamfight_participation'),
+      team: player.team,
+      lane: player.lane,
+      is_self: Boolean(player.own),
+      champion: player.champion || null,
+      kills: statsKnown ? player.kills : null,
+      deaths: statsKnown ? player.deaths : null,
+      assists: statsKnown ? player.assists : null,
+      // El oro está en el marcador y en DATOS: si el marcador no se leyó bien, vale el de DATOS.
+      gold: (statsKnown ? player.gold : null) ?? sure('gold'),
+      spells: [...new Set(namesOf(player.spells))].slice(0, 2),
+      // Objetos en el orden del marcador, sin los slots vacíos (puede haber repetidos).
+      items: namesOf(player.items),
+      runes: namesOf(runes),
+    };
+  });
+}
+
+/**
+ * Al guardar, el formulario manda: los campeones que el usuario corrigió (por equipo y
+ * línea) y su propio K/D/A y oro reemplazan a lo leído en la captura.
+ * @param {ReturnType<typeof participantsFromCapture>} participants
+ * @param {{ allies: Array<{ name: string, role: string }>, enemies: Array<{ name: string, role: string }>, own?: { kills: any, deaths: any, assists: any, gold: any } }} form
+ */
+export function reconcileParticipants(participants, { allies = [], enemies = [], own = null } = {}) {
+  const toNumber = value => (value === '' || value === null || value === undefined || Number.isNaN(Number(value)) ? null : Number(value));
+  return (participants || []).map(player => {
+    const slots = player.team === 'ally' ? allies : enemies;
+    const fromForm = slots.find(slot => slot.role === player.lane)?.name;
+    const next = { ...player, champion: fromForm || player.champion };
+    if (player.is_self && own) {
+      next.kills = toNumber(own.kills) ?? player.kills;
+      next.deaths = toNumber(own.deaths) ?? player.deaths;
+      next.assists = toNumber(own.assists) ?? player.assists;
+      next.gold = toNumber(own.gold) ?? player.gold;
+    }
+    return next;
+  });
 }
 
 /**

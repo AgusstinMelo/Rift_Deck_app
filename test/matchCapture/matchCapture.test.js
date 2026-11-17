@@ -580,3 +580,108 @@ test('la duración leída en el celular es respaldo: no pisa la del modelo', () 
   assert.equal(onlyLocal.duration_seconds.value, 735);
   assert.equal(onlyLocal.duration_seconds.needsReview, true);
 });
+
+import { SIDE_RUNES_LAYOUT, sideRuneSlots } from '../../src/features/matchCapture/scoreboardLayout.js';
+import { participantsFromCapture, reconcileParticipants } from '../../src/features/matchCapture/captureFields.js';
+
+test('marcador: los 10 jugadores, con los enemigos corridos a la derecha', () => {
+  const height = 921;
+  const width = 2048;
+  const bar = { x: 0, top: (LAYOUT.firstRowY + 3 * LAYOUT.rowPitch) * height - 40, length: 80 };
+  const slots = scoreboardSlots(width, height, bar);
+  assert.equal(slots.rows.length, 10);
+  assert.deepEqual(slots.rows.map(row => `${row.team}-${row.lane}`).slice(0, 2), ['ally-top', 'ally-jungler']);
+  assert.equal(slots.rows.filter(row => row.own).length, 1);
+  assert.equal(slots.rows.find(row => row.own).lane, 'adc');
+  const allyTop = slots.rows[0];
+  const enemyTop = slots.rows[5];
+  assert.equal(enemyTop.team, 'enemy');
+  assert.ok(Math.abs((enemyTop.items[0].x - allyTop.items[0].x) - LAYOUT.enemyShift * height) < 1e-6);
+  assert.equal(enemyTop.items.length, 6);
+  assert.equal(enemyTop.spells.length, 2);
+  // La fila propia usa las mismas posiciones que la lectura de siempre.
+  assert.deepEqual(slots.rows.find(row => row.own).items, slots.items);
+});
+
+test('pestaña Runa: 5 runas por jugador en los costados, escaladas con el alto', () => {
+  const players = sideRuneSlots(2048, 921);
+  assert.equal(players.length, 10);
+  assert.ok(players.every(player => player.slots.length === SIDE_RUNES_LAYOUT.count));
+  assert.ok(players[0].slots[0].x < 1024 && players[5].slots[0].x > 1024);
+  const small = sideRuneSlots(1024, 460.5);
+  assert.ok(Math.abs(small[7].slots[2].y * 2 - players[7].slots[2].y) < 1e-6);
+});
+
+test('jugadores de la captura: sin slots vacíos, con runas por equipo y línea, y el formulario manda', () => {
+  const item = name => ({ name, confidence: 'high', empty: false });
+  const scoreboard = {
+    players: [
+      { team: 'ally', lane: 'adc', own: true, champion: "Kai'Sa", kills: 4, deaths: 0, assists: 6, gold: 10674, statsConfidence: 'high',
+        spells: [item('Fantasma'), item('Destello')], items: [item('Matakrakens'), { empty: true }, item('Grebas del Berserker')] },
+      { team: 'enemy', lane: 'adc', own: false, champion: 'Jhin', kills: 3, deaths: 4, assists: 0, gold: 10024, statsConfidence: 'low',
+        spells: [item('Destello'), item('Destello')], items: [] },
+    ],
+  };
+  const runes = [{ team: 'enemy', lane: 'adc', runes: [{ name: 'Cosecha Oscura' }] }];
+  const players = participantsFromCapture(scoreboard, runes);
+  assert.deepEqual(players[0].items, ['Matakrakens', 'Grebas del Berserker']);
+  assert.equal(players[0].is_self, true);
+  assert.deepEqual(players[1].runes, ['Cosecha Oscura']);
+  assert.deepEqual(players[1].spells, ['Destello']);
+  assert.equal(players[1].kills, null, 'con lectura dudosa los números no se guardan');
+  assert.deepEqual(participantsFromCapture(null), []);
+
+  const fixed = reconcileParticipants(players, {
+    allies: [{ name: 'Xayah', role: 'adc' }],
+    enemies: [{ name: 'Ezreal', role: 'adc' }],
+    own: { kills: 5, deaths: '', assists: 6, gold: null },
+  });
+  assert.equal(fixed[0].champion, 'Xayah');
+  assert.equal(fixed[0].kills, 5);
+  assert.equal(fixed[0].deaths, 0, 'un campo vacío en el formulario no borra lo leído');
+  assert.equal(fixed[1].champion, 'Ezreal');
+});
+
+import { checkPercents, parseCell } from '../../src/features/matchCapture/datosScreen.js';
+
+test('DATOS: interpreta cada celda (número y %, solo número o solo %) y descarta formas raras', () => {
+  const words = (...texts) => texts.map(text => ({ text, minMargin: 0.1 }));
+  assert.deepEqual(parseCell(words('22306', '23%'), { percent: true }), { value: 22306, percent: 23 });
+  assert.deepEqual(parseCell(words('0', '0%'), { percent: true }), { value: 0, percent: 0 });
+  assert.deepEqual(parseCell(words('20415'), {}), { value: 20415 });
+  assert.deepEqual(parseCell(words('43%'), { percentOnly: true }), { value: 43 });
+  assert.equal(parseCell(words('22306'), { percent: true }), null, 'falta el porcentaje');
+  assert.equal(parseCell(words('2%306', '23%'), { percent: true }), null);
+  assert.equal(parseCell(words('143%'), { percentOnly: true }), null);
+  assert.equal(parseCell(words('20', '415'), {}), null, 'un número partido en dos no vale');
+});
+
+test('DATOS: el % de cada fila tiene que cerrar con su número sobre el total del equipo', () => {
+  const row = (team, index, damage, percent) => ({ team, row: index, cells: { damage: { value: damage, percent }, healing: null, gold: null } });
+  const rows = [
+    row('ally', 0, 22306, 23), row('ally', 1, 13205, 13), row('ally', 2, 29273, 30), row('ally', 3, 18287, 18), row('ally', 4, 15887, 16),
+    // Enemigos con una lectura mala: 12514 leído como 72514.
+    row('enemy', 0, 21489, 22), row('enemy', 1, 18629, 19), row('enemy', 2, 22528, 23), row('enemy', 3, 22780, 23), row('enemy', 4, 72514, 13),
+  ];
+  const checks = checkPercents(rows);
+  assert.equal(checks.get('ally:2:damage'), true);
+  assert.equal(checks.get('enemy:4:damage'), false);
+  assert.equal(checks.has('ally:0:healing'), false, 'sin todas las celdas del equipo no se controla');
+});
+
+test('jugadores: suman los datos de DATOS con confianza alta y el oro de DATOS cubre al del marcador', () => {
+  const scoreboard = { players: [{ team: 'ally', lane: 'mid', own: true, champion: 'Ahri', kills: 1, deaths: 1, assists: 1, gold: null, statsConfidence: 'high', spells: [], items: [] }] };
+  const datos = { players: [{
+    team: 'ally', lane: 'mid',
+    damage_dealt: { value: 29273, confidence: 'high' },
+    damage_taken: { value: 19455, confidence: 'medium' },
+    healing_shielding: { value: 6446, confidence: 'high' },
+    teamfight_participation: { value: 43, confidence: 'high' },
+    gold: { value: 14829, confidence: 'high' },
+  }] };
+  const [player] = participantsFromCapture(scoreboard, null, datos);
+  assert.equal(player.damage_dealt, 29273);
+  assert.equal(player.damage_taken, null, 'la confianza media no se guarda');
+  assert.equal(player.teamfight_participation, 43);
+  assert.equal(player.gold, 14829);
+});

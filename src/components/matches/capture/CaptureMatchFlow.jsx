@@ -21,11 +21,14 @@ import { cropDurationCorner, downscaleCapture, resizeCapture } from '@/features/
 import { fieldsToPrefill } from '@/features/matchCapture/captureFields';
 import { buildCodeMaps } from '@/features/matchCapture/referenceCodes';
 import { getReferenceSheets } from '@/features/matchCapture/referenceSheets';
-import { identifyRunesIn, identifyScoreboardIn, loadIconCandidates, runesFromModelNames } from '@/features/matchCapture/iconIdentify';
+import { identifyDatosIn, identifyRunesTab, identifyScoreboardIn, loadIconCandidates, runesFromModelNames } from '@/features/matchCapture/iconIdentify';
 import { clearDraft, loadDraftImages, loadDraftState, saveDraftImages, saveDraftState } from '@/features/matchCapture/captureDraft';
 
 // Alcanza con 2: el marcador y la pestaña Estadísticas › Runa.
-export const MAX_CAPTURE_FILES = 2;
+// El modelo acepta hasta 2 capturas (marcador y Runa); DATOS se lee solo en el celular.
+const MODEL_MAX_CAPTURES = 2;
+// Marcador, pestaña Runa y, opcional, pestaña DATOS (Comparación de estadísticas).
+export const MAX_CAPTURE_FILES = 3;
 // Para leer texto alcanza con 1280 px: el pedido al modelo es más liviano y rápido.
 const MODEL_MAX_SIDE = 1280;
 
@@ -34,7 +37,7 @@ const RETRYABLE = new Set(['network_error', 'model_timeout', 'model_unavailable'
 const KNOWN_ERRORS = new Set([...RETRYABLE, 'invalid_image', 'image_too_large', 'too_many_images', 'rate_limited', 'model_refused', 'model_error', 'unauthorized', 'not_configured']);
 
 /**
- * Guía de carga compacta: qué 2 capturas sacar, cómo llegar a cada pantalla y cómo
+ * Guía de carga compacta: qué capturas sacar (2 y una opcional), cómo llegar a cada pantalla y cómo
  * deben ser. Pensada para entrar sin scroll en el celular (3 columnas acostado).
  */
 function CaptureGuide() {
@@ -42,6 +45,7 @@ function CaptureGuide() {
   const cards = [
     { key: 'step1', ordered: true },
     { key: 'step2', ordered: true },
+    { key: 'step3', ordered: true },
     { key: 'requirements', ordered: false },
   ];
   return (
@@ -130,7 +134,13 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
       setStage('icons');
       const candidates = await loadIconCandidates(catalog);
       const scoreboard = await identifyScoreboardIn(captures, candidates);
-      const localRunes = await identifyRunesIn(captures, candidates);
+      // Pestaña Runa: tus runas (columna central) y las de los 10 jugadores (costados).
+      const runesTab = await identifyRunesTab(captures, candidates);
+      const localRunes = runesTab?.runes || null;
+      // Pestaña DATOS (opcional): daño, daño recibido, curación, participación y oro de los
+      // 10 jugadores. Se lee en el celular; no va al modelo.
+      const datos = await identifyDatosIn(captures);
+      const forModel = datos ? captures.filter((_, index) => index !== datos.imageIndex) : captures;
       if (run !== runRef.current) return;
 
       // 2) El modelo, solo para lo que falta (duración, tipo de partida, nombres de
@@ -147,7 +157,7 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
           data = await extractMatchFromCaptures([corner], [], { focus: 'duration' });
         } else {
           const references = await getReferenceSheets(catalog);
-          const light = await Promise.all(captures.map(capture => downscaleCapture(capture, MODEL_MAX_SIDE)));
+          const light = await Promise.all(forModel.slice(0, MODEL_MAX_CAPTURES).map(capture => downscaleCapture(capture, MODEL_MAX_SIDE)));
           data = await extractMatchFromCaptures(light, references);
         }
       } catch (error) {
@@ -162,7 +172,7 @@ export default function CaptureMatchFlow({ userId, files, champions: fallbackCha
       if (run !== runRef.current) return;
 
       const prefill = {
-        ...fieldsToPrefill(data?.fields || {}, buildCodeMaps(catalog), { defaultPatch, icons, scoreboard }),
+        ...fieldsToPrefill(data?.fields || {}, buildCodeMaps(catalog), { defaultPatch, icons, scoreboard, playerRunes: runesTab?.players || null, datos }),
         // Si el modelo falló, el resultado lo avisa (lo que falte se completa a mano).
         textError: modelError ? (KNOWN_ERRORS.has(modelError.code) ? modelError.code : 'internal_error') : null,
       };

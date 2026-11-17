@@ -977,13 +977,15 @@
   }
 }
 
+/* Guía: marcador, Runa, DATOS (opcional) y requisitos. En vertical, 2 x 2 para no crecer
+   en alto; acostado o en pantallas anchas, las 4 en una fila. */
 .rd-capture-guide-cards {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (orientation: landscape), (min-width: 640px) {
   .rd-capture-guide-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

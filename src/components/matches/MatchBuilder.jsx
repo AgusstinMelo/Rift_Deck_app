@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import ChampionGrid from '@/components/matches/ChampionGrid';
 import { DEFAULT_MATCH_TYPE } from '@/constants/matchTypes';
 import { getGamePatchCatalog } from '@/api/gameCatalogSupabase';
-import { runeBranchesFor } from '@/features/matchCapture/captureFields';
+import { reconcileParticipants, runeBranchesFor } from '@/features/matchCapture/captureFields';
 import { useSpells } from '@/hooks/useSpells';
 import {
   BuildStep,
@@ -160,6 +160,16 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
     if (isSaving) return;
 
     const directEnemy = enemyChampions.find(e => e.role === lane);
+    const statsPayload = stats.payload();
+    // Carga con capturas: los 10 jugadores (para el Coach), con las correcciones del
+    // formulario (campeones y tu K/D/A y oro) por encima de lo leído.
+    const participants = initialMatch?.participants?.length
+      ? reconcileParticipants(initialMatch.participants, {
+        allies: allyChampions,
+        enemies: enemyChampions,
+        own: statsPayload,
+      })
+      : undefined;
     onSave({
       client_request_id: clientRequestIdRef.current,
       lane,
@@ -170,7 +180,8 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       enemy_champion_name: directEnemy?.name || '',
       enemy_champion_id: directEnemy?.id || '',
       ...build.payload(myChampion),
-      ...stats.payload(),
+      ...statsPayload,
+      ...(participants ? { participants } : {}),
       side: stats.side,
       date,
       hour: hour || null,

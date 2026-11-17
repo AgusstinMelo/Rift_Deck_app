@@ -1985,7 +1985,7 @@
       "internal_error": "Something went wrong reading the screenshots.",
       "invalid_image": "We couldn't open one of the images.",
       "image_too_large": "One of the screenshots is too large.",
-      "too_many_images": "You can upload up to 2 screenshots per match: the scoreboard and the rune tab.",
+      "too_many_images": "You can upload up to 3 screenshots per match: the scoreboard, the rune tab and, optionally, DATA.",
       "rate_limited": "You've hit the hourly reading limit. Try again later.",
       "unauthorized": "Your session expired. Log in again.",
       "not_configured": "Logging from screenshots isn't available yet.",
@@ -2000,7 +2000,7 @@
     },
     "review": {
       "title": "Check your screenshots",
-      "hint": "Upload 2 screenshots from the same match: the scoreboard and the Stats › Rune tab.",
+      "hint": "Upload 2 screenshots from the same match (the scoreboard and the Stats › Rune tab) and, if you want, a third one of DATA.",
       "count": "{count} of {max} screenshots",
       "doneTitle": "Screenshots analyzed"
     },
@@ -2019,13 +2019,20 @@
         "b": "Pick the RUNE tab with your player selected: your 5 runes show large in the center.",
         "c": "Full-screen screenshot."
       },
+      "step3": {
+        "label": "Screenshot 3 · optional",
+        "title": "Data",
+        "a": "On the same stats screen, pick the DATA tab.",
+        "b": "Keep the \"General\" view and the first page (the first dot at the bottom).",
+        "c": "Full-screen screenshot. Adds damage, damage taken, healing, participation and gold of all 10 for the Coach."
+      },
       "requirements": {
         "title": "What they must look like",
         "a": "Full screen, with the phone in landscape.",
         "b": "No cropping, edits, filters or anything on top (notifications, volume).",
         "c": "Sharp: no photos of another screen or frames from a video."
       },
-      "result": "We fill in K/D/A, gold, duration, result, match type, all 10 champions with their lane, and your items, spells and runes. You pick the side and check everything before saving. Screenshots are not stored."
+      "result": "We fill in K/D/A, gold, duration, result, match type, all 10 champions with their lane, and your items, spells and runes, and we save the build, runes and numbers of the other 9 for the Coach. You pick the side and check everything before saving. Screenshots are not stored."
     }
   },
   "coachEngine": {
@@ -2049,7 +2056,9 @@
       "plan": "Game plan",
       "strength": "Strength",
       "savedBuild": "Your builds",
-      "weeklyPicks": "Weekly pool"
+      "weeklyPicks": "Weekly pool",
+      "impact": "Your impact",
+      "laneEdge": "Your lane"
     },
     "or": " or ",
     "and": " and ",
@@ -2108,7 +2117,10 @@
       },
       "evidenceKp": "Kill participation: {kp} (expected {expected})",
       "evidenceShare": "Your deaths: {share} of the team's",
-      "evidenceGames": "{games} matches with team kills"
+      "evidenceGames": "{games} matches with team kills",
+      "presenceTitle": "In your losses you are not in the fights",
+      "presenceThesis": "According to the game, you take part in {win} of the fights when you win and {loss} when you lose ({games} games with DATA).",
+      "presenceEvidence": "Teamfight participation: {win} in wins and {loss} in losses"
     },
     "session": {
       "streakTitle": "After two losses in a row, your level drops",
@@ -2398,6 +2410,74 @@
       "banNote": "Heads up: {champion} is banned in {ban} of matches, so have a plan B ready.",
       "avoid": "Leave {champion} ({wr} in {games}) for normals until you figure them out.",
       "evidence": "{champion}: {wr} · {games}{tier}"
+    },
+    "impact": {
+      "damageShare": {
+        "title": "With {champion}, your damage fades in losses",
+        "thesis": "With {champion} you deal {win} of your team's damage when you win and {loss} when you lose ({games} games with DATA).",
+        "action": {
+          "carry": "In losses you never get to hit: stay behind your frontline and step in once the enemy has used their crowd control. If you are behind on gold, farm the side waves instead of forcing fights you cannot win.",
+          "fighter": "In losses your damage does not show up: pick a target you can reach (one whose flash or defensive is down) and go in with your team, not before. If you are behind, push a side lane to force the enemy to answer."
+        },
+        "evidenceWin": "Wins: {share} of team damage ({games} games)",
+        "evidenceLoss": "Losses: {share} of team damage ({games} games)"
+      },
+      "role": {
+        "tank": {
+          "title": "As a tank, you take little of your team's damage",
+          "thesis": "With {champion} you take {share} of your team's damage over {games} games: your job is to soak it, and you should be above a quarter.",
+          "action": "Stand in front in every fight: be the first thing the enemy sees and make them spend their damage on you. If you go in after your carries, they take the hits that were yours.",
+          "evidence": "Damage taken: {share} of the team total ({games} games)"
+        },
+        "enchanter": {
+          "title": "Your healing and shields fall short",
+          "thesis": "With {champion} you provide {share} of your team's healing and shielding over {games} games: as an enchanter, you should be the one protecting the most.",
+          "action": "Save your shields and heals for the moment the enemy dives your carry, do not spend them before the fight. And stay close to your main damage dealer: away from your team you protect no one.",
+          "evidence": "Healing and shields: {share} of the team total ({games} games)"
+        },
+        "carry": {
+          "title": "You get less damage out of your gold than your lane opponent",
+          "thesis": "With {champion} you deal {ratio} of your lane opponent's damage per thousand gold ({mine} vs {theirs}, over {games} games).",
+          "action": "You have the items but are not using them in fights: hit whoever is closest from the edge of the fight instead of waiting for the perfect target, and show up to every objective with your team.",
+          "evidence": "Damage per thousand gold: {mine} vs {theirs} for your opponent ({games} games)"
+        }
+      }
+    },
+    "laneEdge": {
+      "title": "Your losses start in your lane",
+      "thesis": "In your losses you end {loss}k gold behind your lane opponent; in your wins, {win} ({games} games with all 10 players).",
+      "action": {
+        "top": "Protect your waves before your trades: every lost wave is gold the enemy gets without fighting. If you cannot win the trade, let the wave come under your tower and farm safely.",
+        "jungler": "Your opponent gets more out of the jungle than you: clear your camps on a set route and take theirs when they show up on the other side of the map.",
+        "mid": "Push your wave before you move: roaming with the wave on the enemy side costs you gold and experience even if you win the fight.",
+        "adc": "Prioritize every minion in the first minutes: if the trade is bad, give up the fight, not the wave. Recall with the wave pushed, not halfway.",
+        "any": "Prioritize lane gold over fights: farm safely when you cannot win the trade and recall with your wave pushed."
+      },
+      "evidenceLoss": "Losses: {gold} gold vs your opponent ({games} games)",
+      "evidenceWin": "Wins: {gold} gold vs your opponent ({games} games)"
+    },
+    "enemyItems": {
+      "withAnswer": " When you did answer, you won {wr} ({games} games).",
+      "evidenceMissed": "Without an answer: {wr} win rate ({games} games)",
+      "evidenceAnswered": "With an answer: {wr} win rate ({games} games)",
+      "armor": {
+        "title": "The enemy stacked armor and you did not buy penetration",
+        "thesis": "In {games} games the enemy built 5 or more armor items; in {missed} of them you had no penetration and won {wr}.{withAnswer}",
+        "action": "When you see two or more enemies with armor on the scoreboard, swap your third or fourth item for {items}.",
+        "actionGeneric": "When you see two or more enemies with armor on the scoreboard, add an armor penetration item to your build."
+      },
+      "magicRes": {
+        "title": "The enemy stacked magic resist and you did not buy penetration",
+        "thesis": "In {games} games the enemy built 5 or more magic resist items; in {missed} of them you had no magic penetration and won {wr}.{withAnswer}",
+        "action": "When you see two or more enemies with magic resist on the scoreboard, add {items} to your build.",
+        "actionGeneric": "When you see two or more enemies with magic resist on the scoreboard, add a magic penetration item to your build."
+      },
+      "healing": {
+        "title": "The enemy healed and you did not build anti-heal",
+        "thesis": "In {games} games the enemy built 3 or more healing or lifesteal items; in {missed} of them you had no anti-heal and won {wr}.{withAnswer}",
+        "action": "If the scoreboard shows lifesteal or healing on two enemies, buy {items} before your third item.",
+        "actionGeneric": "If the scoreboard shows lifesteal or healing on two enemies, buy an anti-heal item before your third item."
+      }
     }
   },
   "share": {

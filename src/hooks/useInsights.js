@@ -11,9 +11,9 @@ import { computeCoachReport } from '../features/coach/engine.js';
  * }} input
  */
 export function computeInsightReport({
-  matches = [], wrItems = [], champions = [], runes = [], builds = [], tierlist = [], history = [], championNotes = null, limit = 8, now,
+  matches = [], wrItems = [], champions = [], runes = [], builds = [], tierlist = [], participants = [], history = [], championNotes = null, limit = 8, now,
 } = {}) {
-  return computeCoachReport({ matches, champions, items: wrItems, runes, builds, tierlist, history, championNotes, limit, now });
+  return computeCoachReport({ matches, champions, items: wrItems, runes, builds, tierlist, participants, history, championNotes, limit, now });
 }
 
 export function computeInsights(input) {

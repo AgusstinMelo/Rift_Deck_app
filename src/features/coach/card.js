@@ -19,6 +19,10 @@ export const FAMILY = Object.freeze({
   SAVED_BUILD: 'savedBuild',
   // Pool de la semana ("esta semana jugá X e Y"): insight del día los lunes.
   WEEKLY_PICKS: 'weeklyPicks',
+  // Con los 10 jugadores de la partida (carga con capturas): tu parte del daño y los
+  // números de tu rol (impacto), y el oro contra tu rival de línea.
+  IMPACT: 'impact',
+  LANE_EDGE: 'laneEdge',
   // Preparación: no dependen de un problema detectado, completan el informe.
   PREP: 'prep',
   PLAN: 'plan',

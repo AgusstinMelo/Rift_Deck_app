@@ -4,8 +4,9 @@
 // compara por píxeles contra los íconos del catálogo (iconMatcher.js).
 import { bestMatch, buildMask, matchConfidence, searchWindows, SHAPES, toFeature } from './iconMatcher.js';
 import { catalogSignature } from './referenceCodes.js';
-import { findHighlightBar, runeSlots, scoreboardSlots } from './scoreboardLayout.js';
+import { findHighlightBar, runeSlots, scoreboardSlots, sideRuneSlots } from './scoreboardLayout.js';
 import { readScoreboardText } from './scoreboardText.js';
+import { readDatosScreen } from './datosScreen.js';
 
 const candidateCache = new Map();
 
@@ -73,11 +74,11 @@ export async function loadIconCandidates(catalog) {
 }
 
 /** Compara cuadrados ya calculados (en píxeles) contra una lista de candidatos. */
-function matchSquares(source, squares, candidates, shape) {
+function matchSquares(source, squares, candidates, shape, { shift } = {}) {
   const mask = buildMask(shape);
   const sample = createSampler(shape);
   return squares.map(square => {
-    const windows = searchWindows(square).map(({ sx, sy, side }) => toFeature(sample(source, sx, sy, side, side), mask));
+    const windows = searchWindows(square, shift === undefined ? undefined : { shift }).map(({ sx, sy, side }) => toFeature(sample(source, sx, sy, side, side), mask));
     const match = bestMatch(windows, candidates);
     return { name: match.key, confidence: matchConfidence(match), score: match.score, empty: match.empty, ranking: match.ranking };
   });
@@ -111,15 +112,40 @@ export function identifyScoreboard(source, candidates) {
   const champions = assignUnique(matchSquares(source, [...slots.allies, ...slots.enemies], candidates.champions, 'circle'));
   const allies = champions.slice(0, 5).map((match, row) => ({ ...match, lane: slots.allies[row].lane }));
   const enemies = champions.slice(5).map((match, row) => ({ ...match, lane: slots.enemies[row].lane }));
+  // K/D/A, oro y resultado leídos en el celular (sin IA).
+  const text = readScoreboardText(image, bar.top + bar.length / 2);
+  const spells = matchSquares(source, slots.spells, candidates.spells, 'circle');
+  const items = matchSquares(source, slots.items, candidates.items, 'square');
+  // Los 10 jugadores para el Coach: campeón, línea, K/D/A, oro, hechizos y objetos. La
+  // fila propia reutiliza su lectura completa; las demás usan una búsqueda más acotada
+  // (las posiciones están medidas) para que la identificación siga siendo rápida.
+  const players = slots.rows.map((row, index) => {
+    const champion = champions[index];
+    const read = text.players?.find(entry => entry.team === row.team && entry.row === row.row) || null;
+    return {
+      team: row.team,
+      lane: row.lane,
+      own: row.own,
+      champion: champion?.empty ? null : champion?.name || null,
+      championConfidence: champion?.confidence || 'low',
+      kills: read?.kills ?? null,
+      deaths: read?.deaths ?? null,
+      assists: read?.assists ?? null,
+      gold: read?.gold ?? null,
+      statsConfidence: read?.confidence || 'low',
+      spells: row.own ? spells : matchSquares(source, row.spells, candidates.spells, 'circle', { shift: 1 }),
+      items: row.own ? items : matchSquares(source, row.items, candidates.items, 'square', { shift: 1 }),
+    };
+  });
   return {
-    // K/D/A, oro y resultado leídos en el celular (sin IA).
-    text: readScoreboardText(image, bar.top + bar.length / 2),
+    text,
+    players,
     ownLane: slots.ownLane,
     own: allies[slots.ownRow],
     allies: allies.filter((_, row) => row !== slots.ownRow),
     enemies,
-    spells: matchSquares(source, slots.spells, candidates.spells, 'circle'),
-    items: matchSquares(source, slots.items, candidates.items, 'square'),
+    spells,
+    items,
   };
 }
 
@@ -140,11 +166,29 @@ export function identifyRunesScreen(source, candidates) {
   const runes = assignUnique([...keystone, ...minor]);
   const average = runes.reduce((sum, rune) => sum + (rune.empty ? 0 : rune.score), 0) / runes.length;
   if (average < RUNES_SCREEN_MIN_SCORE) return null;
-  return { runes: runes.filter(rune => !rune.empty && rune.name), score: average };
+  return { runes: runes.filter(rune => !rune.empty && rune.name), score: average, source };
 }
 
-/** Busca la pestaña de runas en las capturas (la de mejor parecido) o null. */
-export async function identifyRunesIn(images, candidates) {
+/**
+ * Runas de los 10 jugadores (costados de la pestaña Runa): por jugador, la clave contra
+ * las runas clave y el resto contra las secundarias, sin repetir dentro de su página.
+ */
+export function identifySideRunes(source, candidates) {
+  const width = source.naturalWidth || source.width;
+  const height = source.naturalHeight || source.height;
+  return sideRuneSlots(width, height).map(({ team, lane, slots }) => {
+    const keystone = matchSquares(source, slots.slice(0, 1), candidates.keystones, 'circle', { shift: 1 });
+    const minor = matchSquares(source, slots.slice(1), candidates.minorRunes, 'circle', { shift: 1 });
+    const runes = assignUnique([...keystone, ...minor]).filter(rune => !rune.empty && rune.name);
+    return { team, lane, runes: runes.map(rune => ({ name: rune.name, confidence: rune.confidence })) };
+  });
+}
+
+/**
+ * Pestaña de runas en las capturas (la de mejor parecido): tus runas (columna central)
+ * y las de los 10 jugadores (costados). null si no está.
+ */
+export async function identifyRunesTab(images, candidates) {
   const sources = await Promise.all(images.map(image => loadImage(image.previewUrl)));
   let best = null;
   for (const source of sources) {
@@ -152,7 +196,13 @@ export async function identifyRunesIn(images, candidates) {
     const result = identifyRunesScreen(source, candidates);
     if (result && (!best || result.score > best.score)) best = result;
   }
-  return best?.runes || null;
+  if (!best) return null;
+  return { runes: best.runes, players: identifySideRunes(best.source, candidates) };
+}
+
+/** Busca la pestaña de runas en las capturas y devuelve tus runas (o null). */
+export async function identifyRunesIn(images, candidates) {
+  return (await identifyRunesTab(images, candidates))?.runes || null;
 }
 
 /**
@@ -170,6 +220,24 @@ export async function identifyScoreboardIn(images, candidates) {
     if (!best || score > best.score) best = { score, result: { ...result, imageIndex } };
   }
   return best?.result || null;
+}
+
+/**
+ * Pestaña DATOS (Comparación de estadísticas, vista General) en las capturas: daño,
+ * daño recibido, curación y escudos, participación y oro de los 10 jugadores, leídos en
+ * el celular sin IA (datosScreen.js). Devuelve la mejor lectura y el índice de la
+ * captura, o null si ninguna es esa pestaña.
+ * @param {Array<{ previewUrl: string }>} images
+ */
+export async function identifyDatosIn(images) {
+  const sources = await Promise.all(images.map(image => loadImage(image.previewUrl)));
+  let best = null;
+  for (const [imageIndex, source] of sources.entries()) {
+    if (!source) continue;
+    const result = readDatosScreen(imageDataOf(source));
+    if (result && (!best || result.checkedShare > best.checkedShare)) best = { ...result, imageIndex };
+  }
+  return best;
 }
 
 const normalizeName = value => String(value || '')

@@ -236,23 +236,12 @@
   flex-direction: column;
   padding: 0.9rem 1rem;
   overflow: hidden;
-  border: 1px solid rgba(212, 175, 55, 0.22);
+  /* Misma estética que las tarjetas de la app (variables --rd-card-* en 13-shell-misc.css):
+     fondo azul noche, borde dorado, línea dorada arriba, resplandores y grilla triangular. */
+  border: 1px solid var(--rd-card-border);
   border-radius: 1.25rem;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.012) 100%),
-    hsl(var(--card) / 0.88);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-.rd-pp-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 1.25rem;
-  right: 1.25rem;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(226, 196, 106, 0.8) 50%, rgba(212, 175, 55, 0) 100%);
+  background: var(--rd-card-decor), var(--rd-card-bg);
+  box-shadow: var(--rd-card-shadow);
 }
 
 .rd-pp-panel-head {
@@ -780,7 +769,6 @@
     align-items: flex-end;
     padding: 1rem 1.1rem;
     overflow: hidden;
-    background: #141A29;
   }
 
   .rd-pp-focus-splash {
@@ -790,7 +778,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 22%;
+    /* Anclado arriba: el borde superior del splash coincide con el de la tarjeta (antes
+       se recortaba la parte de arriba cuando la imagen es más alta que el banner). */
+    object-position: center top;
+    /* Degradé hacia abajo: el splash se funde con el fondo del panel. */
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
   }
 
   .rd-pp-focus-head::after {
@@ -798,13 +791,21 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(180deg, rgba(11, 15, 26, 0.1) 0%, rgba(11, 15, 26, 0) 35%, rgba(11, 15, 26, 0.92) 100%),
+      linear-gradient(180deg, rgba(11, 15, 26, 0.1) 0%, rgba(11, 15, 26, 0) 35%, rgba(11, 15, 26, 0) 60%, rgba(11, 15, 26, 0.45) 100%),
       linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.07) 50%, transparent 60%);
+    /* Que el brillo y la sombra también se desvanezcan con el splash. */
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 60%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 60%, transparent 100%);
   }
 
   .rd-pp-focus-head > :not(.rd-pp-focus-splash) {
     position: relative;
     z-index: 1;
+  }
+
+  /* Con el splash de fondo, el ícono del campeón sobra: queda solo el nombre. */
+  .rd-pp-focus-head:has(.rd-pp-focus-splash) .rd-pp-focus-avatar {
+    display: none;
   }
 
   .rd-pp-focus-name {

@@ -7,6 +7,7 @@ import { FAMILY, makeInsight } from './card.js';
 import { buildCatalog } from './catalog.js';
 import { buildHabitsOf, detectRuneFit, detectSavedBuilds, detectThreatGaps } from './detectors/build.js';
 import { detectLastMatch } from './detectors/lastMatch.js';
+import { detectParticipantInsights } from './detectors/participants.js';
 import { detectMatchups, detectPool } from './detectors/matchups.js';
 import {
   detectDeathCeiling, detectPowerCurve, detectRecentTrend, detectSession, detectTeamplay, mainLaneOf, mainOwnOf, survivalTip,
@@ -68,9 +69,10 @@ function warmUpCard(ctx) {
  * }} input  `championNotes`: nota estratégica del campeón en el idioma activo.
  *   `builds`: builds guardadas del jugador (para comparar las vinculadas a sus partidas).
  *   `tierlist`: tierlist del parche (tier, tendencia y banrate) para el pool de la semana.
+ *   `participants`: los 10 jugadores de las partidas cargadas con capturas (match_participants).
  */
 export function computeCoachReport({
-  matches = [], champions = [], items = [], runes = [], builds = [], tierlist = [], history = [], championNotes = null, now = new Date(), limit = 8,
+  matches = [], champions = [], items = [], runes = [], builds = [], tierlist = [], participants = [], history = [], championNotes = null, now = new Date(), limit = 8,
 } = {}) {
   const catalog = buildCatalog({ champions, items, runes });
   const rows = normalizeMatches(matches, catalog);
@@ -80,10 +82,11 @@ export function computeCoachReport({
     withBuild: rows.filter(row => row.buildKnown).length,
     withKda: rows.filter(row => row.hasKda).length,
     withTeamKills: rows.filter(row => row.killParticipation !== null).length,
+    withParticipants: new Set((participants || []).map(player => String(player.match_id))).size,
   };
   if (!rows.length) return { insights: [], coverage, generatedAt: now.toISOString() };
 
-  const ctx = { matches: rows, base: summarize(rows), catalog, buildHabits: buildHabitsOf(rows), builds, tierlist, championNotes, now };
+  const ctx = { matches: rows, base: summarize(rows), catalog, buildHabits: buildHabitsOf(rows), builds, tierlist, participants, championNotes, now };
   const candidates = [
     ...detectLastMatch(ctx),
     ...detectDeathCeiling(ctx),
@@ -96,6 +99,8 @@ export function computeCoachReport({
     ...detectTeamplay(ctx),
     ...detectRuneFit(ctx),
     ...detectSavedBuilds(ctx),
+    // Con los 10 jugadores (solo partidas cargadas con capturas).
+    ...detectParticipantInsights(ctx),
   ];
   // Preparación (prioridad baja): rivales frecuentes que no tengan ya tarjeta de matchup,
   // plan con el main y fortaleza.

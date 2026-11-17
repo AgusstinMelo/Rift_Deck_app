@@ -28,6 +28,10 @@ import { LaneBarChart } from '@/components/stats/StatsSections';
 
 const TYPE_ORDER = MATCH_TYPES.map(option => option.value);
 const POOL_SIZE = 14;
+// Pool: espacio entre burbujas y margen del dibujo, en unidades de la burbuja más chica
+// (radio 18). Más espacio = burbujas más chicas en el mismo panel.
+const POOL_GAP = 16;
+const POOL_PAD = 26;
 // "Últimas partidas": cada fila ocupa RECENT_ROW (alto + espacio), para calcular cuántas entran.
 const RECENT_GAP = 6;
 const RECENT_ROW = 46;
@@ -118,11 +122,13 @@ function ChampionPool({ champions, selected, onSelect, imageOf, labelOf }) {
     return () => observer.disconnect();
   }, []);
   const { bubbles, bounds } = useMemo(
-    () => packBubbles(champions, { minRadius: 18, maxRadius: 58, gap: 6, aspect }),
+    // Más espacio entre burbujas y alrededor (POOL_GAP / POOL_PAD): el gráfico ocupa el
+    // mismo lugar, pero las burbujas se ven más chicas.
+    () => packBubbles(champions, { minRadius: 18, maxRadius: 58, gap: POOL_GAP, aspect }),
     [champions, aspect],
   );
   if (!bubbles.length) return null;
-  const pad = 6;
+  const pad = POOL_PAD;
   return (
     <div ref={boxRef} className="rd-pp-pool-box">
     <svg

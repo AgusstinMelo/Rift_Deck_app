@@ -63,7 +63,7 @@ export async function createMatch(user, payload) {
     throw new Error("User id is required to create a match.");
   }
 
-  const { client_request_id: _clientRequestId, ...matchPayload } = payload;
+  const { client_request_id: _clientRequestId, participants, ...matchPayload } = payload;
 
   const insert = row => supabase
     .from("matches")
@@ -77,7 +77,75 @@ export async function createMatch(user, payload) {
   }
 
   if (error) throw error;
+  if (participants?.length) await saveParticipants(user, data.id, participants);
   return data;
+}
+
+/**
+ * Los 10 jugadores de una partida cargada con capturas (match_participants), para el
+ * Coach. Es un extra: si falla (por ejemplo, la tabla todavía no existe) la partida ya
+ * quedó guardada y solo se avisa en la consola.
+ */
+async function saveParticipants(user, matchId, participants) {
+  const rows = participants.map(player => ({
+    match_id: matchId,
+    user_id: user.id,
+    team: player.team,
+    lane: player.lane || null,
+    is_self: Boolean(player.is_self),
+    champion: player.champion || null,
+    kills: player.kills ?? null,
+    deaths: player.deaths ?? null,
+    assists: player.assists ?? null,
+    gold: player.gold ?? null,
+    spells: player.spells || [],
+    items: player.items || [],
+    runes: player.runes || [],
+    // Pestaña DATOS (opcional).
+    damage_dealt: player.damage_dealt ?? null,
+    damage_taken: player.damage_taken ?? null,
+    healing_shielding: player.healing_shielding ?? null,
+    teamfight_participation: player.teamfight_participation ?? null,
+  }));
+  let { error } = await supabase.from("match_participants").insert(rows);
+  // Sin la migración de DATOS (columnas nuevas) se guarda igual lo del marcador y las runas.
+  if (error && isMissingColumn(error)) {
+    const DATOS_COLUMNS = ["damage_dealt", "damage_taken", "healing_shielding", "teamfight_participation"];
+    ({ error } = await supabase.from("match_participants").insert(rows.map(row => Object.fromEntries(Object.entries(row).filter(([key]) => !DATOS_COLUMNS.includes(key))))));
+  }
+  if (error) console.warn("No se guardaron los jugadores de la partida:", error.message || error);
+}
+
+const PARTICIPANT_COLUMNS = "match_id, team, lane, is_self, champion, kills, deaths, assists, gold, spells, items, runes, damage_dealt, damage_taken, healing_shielding, teamfight_participation";
+
+/**
+ * Jugadores guardados de las partidas del usuario (para el Coach), de a páginas de
+ * MATCH_PAGE_SIZE filas. Si la tabla o las columnas de DATOS todavía no existen
+ * (migración pendiente), devuelve lo que pueda o [] y el Coach sigue sin estos datos.
+ */
+export async function getUserMatchParticipants(user) {
+  if (!user?.id) return [];
+  const rows = [];
+  for (let from = 0; from < MAX_USER_MATCHES * 10; from += MATCH_PAGE_SIZE) {
+    let { data, error } = await supabase
+      .from("match_participants")
+      .select(PARTICIPANT_COLUMNS)
+      .eq("user_id", user.id)
+      .order("id", { ascending: true })
+      .range(from, from + MATCH_PAGE_SIZE - 1);
+    if (error && isMissingColumn(error)) {
+      ({ data, error } = await supabase
+        .from("match_participants")
+        .select("match_id, team, lane, is_self, champion, kills, deaths, assists, gold, spells, items, runes")
+        .eq("user_id", user.id)
+        .order("id", { ascending: true })
+        .range(from, from + MATCH_PAGE_SIZE - 1));
+    }
+    if (error) return rows;
+    rows.push(...(data || []));
+    if (!data || data.length < MATCH_PAGE_SIZE) break;
+  }
+  return rows;
 }
 
 export async function updateMatch(id, payload) {

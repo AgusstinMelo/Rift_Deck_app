@@ -415,8 +415,12 @@
     grid-auto-rows: max-content;
     align-content: start;
     gap: 0;
+    /* Solo scroll vertical: con overflow-x en auto y overscroll en ambos ejes, la lista se
+       quedaba con el deslizamiento hacia los costados y el carrusel no se movía. */
+    overflow-x: hidden;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
   }
 
@@ -479,8 +483,9 @@
   .rd-stats-layout .rd-matchup-list {
     min-height: 0;
     flex: 1 1 0;
+    overflow-x: hidden;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
   }
 
@@ -583,8 +588,9 @@
     grid-row: 2;
     min-height: 0;
     margin-top: 0;
+    overflow-x: hidden;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
     scrollbar-width: none;
   }
 

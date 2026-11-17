@@ -17,6 +17,9 @@ export const LAYOUT = {
   spells: [{ dx: -0.5066, dy: -0.023 }, { dx: -0.5066, dy: 0.026 }],
   spellSize: 0.035,
   items: { dx: -0.457, step: 0.0423, dy: 0.026, size: 0.0377, count: 6 },
+  // El equipo enemigo (derecha) es el aliado corrido esta distancia: retratos, hechizos,
+  // objetos y textos (medido con capturas reales: hechizos +0,9226, objetos +0,921).
+  enemyShift: 0.922,
 };
 
 const isGold = (r, g, b) => r > 170 && g > 120 && b < 110 && r - b > 90;
@@ -73,12 +76,54 @@ export function scoreboardSlots(width, height, bar) {
     enemies: ROW_LANES.map((lane, row) => ({ lane, row, ...at(portrait.enemyX, portrait.dy, portrait.size, rowCenter(row)) })),
     spells: LAYOUT.spells.map(spell => at(spell.dx, spell.dy, LAYOUT.spellSize, ownY)),
     items: Array.from({ length: items.count }, (_, index) => at(items.dx + index * items.step, items.dy, items.size, ownY)),
+    // Los 10 jugadores: hechizos y objetos de cada fila (aliados a la izquierda, enemigos
+    // a la derecha), y el centro vertical de la fila para leer sus textos.
+    rows: ['ally', 'enemy'].flatMap(team => ROW_LANES.map((lane, row) => {
+      const shift = team === 'enemy' ? LAYOUT.enemyShift : 0;
+      const y = team === 'ally' && row === ownRow ? ownY : rowCenter(row);
+      return {
+        team,
+        lane,
+        row,
+        y,
+        own: team === 'ally' && row === ownRow,
+        spells: LAYOUT.spells.map(spell => at(spell.dx + shift, spell.dy, LAYOUT.spellSize, y)),
+        items: Array.from({ length: items.count }, (_, index) => at(items.dx + shift + index * items.step, items.dy, items.size, y)),
+      };
+    })),
   };
 }
 
 // Pestaña "Estadísticas › Runa": columna central con las 5 runas grandes del jugador
 // (la clave arriba). Mismo criterio: x desde el centro y todo en altos de pantalla.
 export const RUNES_LAYOUT = { x: -0.349, firstY: 0.204, pitch: 0.138, size: 0.105, count: 5 };
+
+// Misma pestaña, costados: las 5 runas de cada jugador en íconos chicos (la clave
+// primero), aliados a la izquierda y enemigos a la derecha, en el orden del marcador.
+// Medido con capturas reales comparando contra el catálogo.
+export const SIDE_RUNES_LAYOUT = {
+  ally: { x: -0.813, step: 0.044 },
+  enemy: { x: 0.764, step: 0.043 },
+  firstY: 0.226,
+  pitch: 0.139,
+  size: 0.036,
+  count: 5,
+};
+
+/** Runas de los 10 jugadores en los costados: { team, lane, slots: [5 cuadrados] }. */
+export function sideRuneSlots(width, height) {
+  const { firstY, pitch, size, count } = SIDE_RUNES_LAYOUT;
+  return ['ally', 'enemy'].flatMap(team => ROW_LANES.map((lane, row) => ({
+    team,
+    lane,
+    row,
+    slots: Array.from({ length: count }, (_, index) => ({
+      x: width / 2 + (SIDE_RUNES_LAYOUT[team].x + index * SIDE_RUNES_LAYOUT[team].step) * height,
+      y: (firstY + row * pitch) * height,
+      size: size * height,
+    })),
+  })));
+}
 
 /** Posiciones de las 5 runas de la columna central (cuadrados en píxeles). */
 export function runeSlots(width, height) {

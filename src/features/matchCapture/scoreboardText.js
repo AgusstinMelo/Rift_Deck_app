@@ -304,6 +304,36 @@ export function readText(image, rect, templates = GLYPH_TEMPLATES, { minHeight =
   };
 }
 
+/**
+ * Lee una zona separándola en "palabras" por los espacios grandes: en la pestaña DATOS
+ * cada celda es "22 306   23%" y el separador de miles es mucho más angosto que el
+ * espacio entre el número y su porcentaje. `wordGap`: espacio mínimo entre palabras, en
+ * altos de texto.
+ * @returns {Array<{ text: string, minMargin: number }>}
+ */
+export function readWords(image, rect, templates = GLYPH_TEMPLATES, { wordGap = 0.75, minHeight = 0.45 } = {}) {
+  const segment = segmentBlocks(image, rect);
+  if (!segment.blocks.length) return [];
+  const words = [];
+  let current = [];
+  segment.blocks.forEach((block, index) => {
+    const previous = segment.blocks[index - 1];
+    if (previous && block.left - previous.right - 1 > segment.textHeight * wordGap) {
+      words.push(current);
+      current = [];
+    }
+    current.push(block);
+  });
+  words.push(current);
+  return words.map(blocks => {
+    const results = blocks.flatMap(block => readBlock(block, segment, templates, minHeight) || []);
+    return {
+      text: results.map(result => result.char).join(''),
+      minMargin: results.length ? Math.min(...results.map(result => result.margin)) : 0,
+    };
+  }).filter(word => word.text);
+}
+
 /** Rectángulo en píxeles de una zona de texto de la fila centrada en rowY. */
 export function textRect(width, height, rowY, region) {
   return {
@@ -471,6 +501,36 @@ export function readScoreboardText(image, rowY) {
     const deaths = allyKdas.reduce((sum, row) => sum + row.deaths, 0);
     teamCheck = kills === blue.value && deaths === red.value;
   }
+  // Los 10 jugadores (Coach): K/D/A y oro de cada fila. Los enemigos están a la derecha,
+  // corridos LAYOUT.enemyShift; su control es el inverso (sus asesinatos dan el puntaje
+  // rojo y sus muertes, el azul).
+  const shifted = (region, shift) => ({ ...region, x0: region.x0 + shift, x1: region.x1 + shift });
+  const readRow = (y, shift) => {
+    const kdaText = readText(image, textRect(width, height, y, shifted(TEXT_REGIONS.kda, shift)));
+    const goldText = readText(image, textRect(width, height, y, shifted(TEXT_REGIONS.gold, shift)));
+    return { kda: parseKda(kdaText.text), gold: parseGold(goldText.text), sure: sure(kdaText) && sure(goldText) };
+  };
+  const enemyRows = rowCenters.map(y => readRow(y, LAYOUT.enemyShift));
+  let enemyCheck = null;
+  if (blue && red && enemyRows.every(row => row.kda)) {
+    enemyCheck = enemyRows.reduce((sum, row) => sum + row.kda.kills, 0) === red.value
+      && enemyRows.reduce((sum, row) => sum + row.kda.deaths, 0) === blue.value;
+  }
+  const rowConfidence = (check, rowSure) => (lowRes || check === false ? 'medium' : check === true || rowSure ? 'high' : 'medium');
+  const allyRows = rowCenters.map((y, row) => (row === ownRow ? { kda, gold, sure: sure(kdaRead) && sure(goldRead) } : readRow(y, 0)));
+  const players = [
+    ...allyRows.map((entry, row) => ({ team: 'ally', row, ...entry, confidence: rowConfidence(teamCheck, entry.sure) })),
+    ...enemyRows.map((entry, row) => ({ team: 'enemy', row, ...entry, confidence: rowConfidence(enemyCheck, entry.sure) })),
+  ].map(({ team, row, kda: rowKda, gold: rowGold, confidence }) => ({
+    team,
+    row,
+    kills: rowKda?.kills ?? null,
+    deaths: rowKda?.deaths ?? null,
+    assists: rowKda?.assists ?? null,
+    gold: rowGold,
+    confidence,
+  }));
+
   const kdaConfidence = lowRes ? 'medium' : teamCheck === true ? 'high' : teamCheck === false ? 'medium' : (sure(kdaRead) ? 'high' : 'medium');
   // Si el control no cierra, la imagen se está leyendo mal: el oro también se revisa.
   const goldSure = sure(goldRead) && teamCheck !== false;
@@ -490,6 +550,8 @@ export function readScoreboardText(image, rowY) {
     team_kills: blue ? { value: blue.value, confidence: teamCheck === true ? 'high' : 'medium' } : null,
     enemy_team_kills: red ? { value: red.value, confidence: teamCheck === true ? 'high' : 'medium' } : null,
     teamCheck,
+    enemyCheck,
+    players,
     raw: { kda: kdaRead.text, gold: goldRead.text, duration: duration.raw, blue: blue?.value ?? null, red: red?.value ?? null },
   };
 }

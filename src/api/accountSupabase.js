@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 const USER_TABLES = [
   { table: "profiles", idColumn: "id" },
   { table: "matches", idColumn: "user_id", legacyEmailColumn: "created_by" },
+  { table: "match_participants", idColumn: "user_id" },
   { table: "builds", idColumn: "user_id", legacyEmailColumn: "created_by" },
   { table: "personal_goals", idColumn: "user_id" },
   { table: "personal_goal_checkins", idColumn: "user_id" },
