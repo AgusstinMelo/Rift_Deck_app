@@ -1,10 +1,29 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { getBuildsForChampion, deleteBuild } from '@/api/buildsSupabase';
+import { userMatchesQuery } from '@/api/matchesSupabase';
+import { recordsByBuild, winratePct } from '@/domain/matchStats';
 import { Plus, Trash2, Wrench, ChevronRight, GitCompare, ArrowLeft } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
+
+/** Récord de la build en las partidas vinculadas: partidas y winrate (o "sin partidas"). */
+function BuildRecord({ record }) {
+  const t = useT();
+  if (!record?.games) {
+    return <span className="text-xs text-muted-foreground/70" title={t('builds.recordSinPartidasAyuda')}>{t('builds.recordSinPartidas')}</span>;
+  }
+  const wr = Math.round(winratePct(record.wins, record.games));
+  const tone = record.games >= 3 && wr >= 55 ? 'text-green-400 border-green-500/30 bg-green-500/10'
+    : record.games >= 3 && wr <= 45 ? 'text-red-400 border-red-500/30 bg-red-500/10'
+    : 'text-muted-foreground border-border/50 bg-secondary/60';
+  return (
+    <span className={`text-xs font-semibold border px-2 py-0.5 rounded-md ${tone}`} title={t('builds.recordAyuda', { wins: record.wins, losses: record.losses })}>
+      {t(record.games === 1 ? 'builds.recordUna' : 'builds.recordVarias', { games: record.games, wins: record.wins, losses: record.losses, wr: `${wr}%` })}
+    </span>
+  );
+}
 
 export default function ChampionBuilds({ champion, items = [], onNewBuild, onEditBuild, onBack, onCompare }) {
   const t = useT();
@@ -30,6 +49,10 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
     (b.champion_id === champion.id ||
     b.champion_name?.toLowerCase() === champion.name?.toLowerCase())
   );
+
+  // Récord de cada build con las partidas que se cargaron aplicándola.
+  const { data: matches = [] } = useQuery(userMatchesQuery(user));
+  const records = useMemo(() => recordsByBuild(matches), [matches]);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteBuild(id),
@@ -101,6 +124,7 @@ export default function ChampionBuilds({ champion, items = [], onNewBuild, onEdi
                   <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{build.name}</p>
                   {build.lane && <LaneBadge lane={build.lane} />}
                   {build.patch && <span className="text-xs text-muted-foreground bg-secondary/60 border border-border/50 px-2 py-0.5 rounded-md">{t('goals.filterLabels.patches')} {build.patch}</span>}
+                  <BuildRecord record={records.get(String(build.id))} />
                 </div>
                 {build.items?.length > 0 && (
                   <p className="text-xs text-muted-foreground truncate">{build.items.map(itemLabel).join(' · ')}</p>

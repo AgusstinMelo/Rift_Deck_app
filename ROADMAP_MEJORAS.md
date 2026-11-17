@@ -2,6 +2,19 @@
 
 Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. Largo: más adelante.
 
+<!-- avance:inicio -->
+## Avance
+
+| Etapa | Hecho |
+|---|---|
+| Corto plazo | 13 de 21 |
+| Mediano plazo | 1 de 15 |
+| Largo plazo | 1 de 7 |
+| **Total** | **15 de 43** |
+
+Tildado = hecho. Al terminar algo, se tilda y se actualiza esta tabla.
+<!-- avance:fin -->
+
 ---
 
 ## Dónde estamos
@@ -36,7 +49,7 @@ Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. La
 
 - [x] **Historial de migraciones reparado** (16/11/2026): local y remoto coinciden y las migraciones se aplican con `db push --remote`. Ver [docs/migraciones.md](docs/migraciones.md).
 - [x] **Migraciones `202611160001`, `202611160002` y `202611170001` aplicadas.**
-- [ ] **Redeployar `delete-account`** (`npx supabase functions deploy delete-account`) para que borre también `coach_insight_log`.
+- [x] **Redeployar `delete-account`** (`npx supabase functions deploy delete-account`) para que borre también `coach_insight_log`.
 - [x] **CI** en [.github/workflows/ci.yml](.github/workflows/ci.yml): `lint`, `i18n:ui`, `test`, `build` y e2e en cada push a main. Necesita los secretos `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
 
 ### Rendimiento
@@ -62,8 +75,8 @@ Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. La
 ### Coach (iterar con datos reales)
 
 - [ ] **Botón "¿te sirvió?"** en cada consejo, guardado en `coach_insight_log`. Es la única forma de saber qué familias aportan.
-- [ ] **Revisar consejos con cuentas reales** de distintos roles (tirador, tanque, soporte, jungla) y ajustar umbrales y textos, como se hizo con Kai'Sa.
-- [ ] **Usar la participación en kills** una vez que haya partidas con kills de equipo: rol de soporte/jungla, "jugás aislado" y similares.
+- [x] **Consejos revisados por rol** (tanque, support engage / encantador / mago, jungla, mid, tirador, luchador) con cuentas simuladas sobre el catálogo real. El Coach tiene en cuenta la línea y lo que armás (Leona support arma como support, Soraka mid como maga, Malphite mid full AP como carry), sugiere botas contra control y daño, y detecta runas que no encajan.
+- [x] **Participación en kills en el Coach:** con las kills de equipo cargadas, el Coach compara tu participación y tu parte de las muertes del equipo entre victorias y derrotas (familia "teamplay").
 
 ### Captura
 
@@ -96,7 +109,7 @@ Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. La
 - [ ] **Captura también en escritorio** (hoy es solo mobile).
 - [ ] **Compartir al instalar como PWA** (share target): mandar la captura desde la galería directo a Rift Deck. Ya hay `manifest.json`; falta el service worker.
 - [ ] **Investigar si la pestaña Estadísticas** muestra daño infligido y recibido o daño a torres. Si se puede leer, el Coach gana mucho (aporte de daño, tanqueo).
-- [ ] **Vincular la build guardada a la partida** (`build_id`). Hoy `SavedBuildPicker` solo precarga la build. Con el vínculo se mide qué build tuya rinde más.
+- [x] **Build guardada vinculada a la partida** (`build_id`): al aplicarla queda vinculada, cada build muestra su récord en Builds y el Coach avisa cuál rinde más con cada campeón.
 - [ ] **Importar desde CSV** (exportar en JSON ya existe).
 
 ### Producto
@@ -110,8 +123,9 @@ Revisado el 16/11/2026. Corto plazo: próximas semanas. Mediano: 1 a 3 meses. La
 
 - [ ] **Datos agregados anónimos y opt-in:** "jugadores de Rift Deck con Kai'Sa contra Draven ganan X %". Hace falta mucho volumen y corregir el sesgo de autocarga; no prometer antes de tener los números.
 - [ ] **Modo coach/equipo:** un coach real (o un dúo/equipo) ve las partidas y consejos de sus alumnos y deja notas. Es la monetización natural.
-- [ ] **Perfil público opcional** y tarjetas compartibles ("mi semana en Rift Deck"). Sin rankings entre usuarios.
-- [ ] **App nativa o PWA completa,** con notificaciones de tilt, informe semanal y objetivos.
+- [x] **Tarjeta compartible** ("Mi resumen en Rift Deck"): semana, 30 días o parche, en formato historia o post; se comparte con el menú del celular o se descarga como PNG. Botón en el Dashboard.
+- [ ] **Perfil público opcional** en `/p/<nombre>`: gratis, solo con el link (no indexado), con winrate y récord, campeones y líneas, y builds públicas. Sin rankings entre usuarios.
+jnmw3- [ ] **App nativa o PWA completa,** con notificaciones de tilt, informe semanal y objetivos.
 - [ ] **Asistente de draft** con sinergias y counters de tu pool contra la composición rival, usando el catálogo y tu historial.
 - [ ] **Redacción con IA opcional** sobre el informe del Coach. Los datos y el consejo los sigue decidiendo el motor; la IA solo escribe.
 

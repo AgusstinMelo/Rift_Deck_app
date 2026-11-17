@@ -1,6 +1,6 @@
 // Cálculos y tonos de la página de Estadísticas (sin React).
 import { parsePatch } from '@/utils/patches';
-import { matchKda, winratePct } from '@/domain/matchStats';
+import { matchRowKda, winratePct } from '@/domain/matchStats';
 import { tr } from '@/i18n/uiI18n';
 
 export function calcWR(matches) {
@@ -9,7 +9,7 @@ export function calcWR(matches) {
 }
 
 export function calcMatchKDA(match) {
-  return matchKda(Number(match.kills || 0), Number(match.deaths || 0), Number(match.assists || 0));
+  return matchRowKda(match);
 }
 
 export function getKdaTone(avgKDA) {

@@ -169,7 +169,7 @@ export default function MatchBuilder({ champions: fallbackChampions = [], patche
       enemy_champions: getChampionNamesByRole(enemyChampions),
       enemy_champion_name: directEnemy?.name || '',
       enemy_champion_id: directEnemy?.id || '',
-      ...build.payload(),
+      ...build.payload(myChampion),
       ...stats.payload(),
       side: stats.side,
       date,

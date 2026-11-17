@@ -90,16 +90,16 @@ export default function Profile() {
     }
   };
 
-  useEffect(() => {
-    if (!user) return;
-    loadVisibleName();
-  }, [user]);
-
   const loadVisibleName = async () => {
     setLoadingData(true);
     setVisibleName(user?.visible_name || user?.full_name || '');
     setLoadingData(false);
   };
+
+  useEffect(() => {
+    if (!user) return;
+    loadVisibleName();
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

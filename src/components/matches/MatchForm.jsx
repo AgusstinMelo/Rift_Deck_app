@@ -105,7 +105,10 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
   const items = catalog?.items || [];
   const runes = catalog?.runes || [];
 
-  const build = useMatchBuild({ items, runes, initialSpells: match?.spells_used || [] });
+  const build = useMatchBuild({ items, runes, initialSpells: match?.spells_used || [], initialBuild: match?.build_id != null
+    ? { id: match.build_id, championId: match.own_champion_id, championName: match.own_champion_name }
+    : null,
+  });
 
   // Initialize champion/items/runes from match data once data is loaded
   const [initialized, setInitialized] = useState(false);
@@ -201,7 +204,7 @@ export default function MatchForm({ match, patches = [], defaultPatch = '', onCl
         : (match?.enemy_champions || []),
       enemy_champion_name: directEnemy?.name || '',
       enemy_champion_id: directEnemy?.id || '',
-      ...build.payload(),
+      ...build.payload(ownChampion || { id: match?.own_champion_id, name: match?.own_champion_name }),
       ...stats.payload(),
       side: stats.side || null,
       patch,

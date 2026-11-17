@@ -60,7 +60,8 @@ function poolAnswer(ctx, enemyKey, excludeKey, lane) {
       const versus = summarize(rows.filter(row => row.enemyKey === enemyKey));
       const catalogSays = own?.strongAgainst.includes(enemyKey);
       const historySays = versus.games >= 2 && versus.wr > 0.5;
-      if (shrunk < ctx.base.wr - 0.03 || (!catalogSays && !historySays)) return;
+      // Nunca recomendar como "mejor respuesta" un campeón que pierde más de lo que gana.
+      if (shrunk < ctx.base.wr || stats.wr < 0.5 || (!catalogSays && !historySays)) return;
       candidates.push({ name: rows[0].champion, stats, versus, score: shrunk + (catalogSays ? 0.1 : 0) + (historySays ? 0.1 : 0) });
     });
   return candidates.sort((a, b) => b.score - a.score)[0] || null;

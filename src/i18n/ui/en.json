@@ -775,7 +775,12 @@
     "items3": "Items",
     "buscarItem": "Search item...",
     "oro": "gold",
-    "noSeEncontraronItems": "No items found"
+    "noSeEncontraronItems": "No items found",
+    "recordUna": "1 match · {wr}",
+    "recordVarias": "{games} matches · {wr}",
+    "recordSinPartidas": "No linked matches",
+    "recordAyuda": "Matches logged with this build applied (record {wins}-{losses}).",
+    "recordSinPartidasAyuda": "Apply this build when logging a match to see how it performs."
   },
   "coach": {
     "queMuestranLosDatos": "What the data shows",
@@ -1045,7 +1050,7 @@
     "aplicarBuild": "Apply build",
     "buscandoBuildsGuardadas": "Looking for saved builds...",
     "noTenesBuildsGuardadas": "You have no saved builds for {name}.",
-    "precargaObjetosRunasY": "Preloads items, runes and spells. You can change any selection afterwards.",
+    "precargaObjetosRunasY": "Preloads items, runes and spells, and links the match to that build to measure how it performs. You can change any selection afterwards.",
     "buildGuardada": "Saved build",
     "usarUnaBuildGuardada": "Use a saved build",
     "kda": "KDA {value}/{value2}/{value3}",
@@ -1132,7 +1137,10 @@
     "completaLosDatosDe": "Fill in your performance data",
     "guardarPartida": "Save Match",
     "teamKills": "Your team kills",
-    "enemyTeamKills": "Enemy team kills"
+    "enemyTeamKills": "Enemy team kills",
+    "buildVinculada": "Linked",
+    "buildVinculadaAyuda": "The match is linked to this build: Builds and the Coach will show how it performs for you.",
+    "desvincularBuild": "Unlink the build"
   },
   "membership": {
     "confirmandoTuPago": "Confirming your payment",
@@ -2039,7 +2047,8 @@
       "runes": "Runes",
       "prep": "Preparation",
       "plan": "Game plan",
-      "strength": "Strength"
+      "strength": "Strength",
+      "savedBuild": "Your builds"
     },
     "or": " or ",
     "and": " and ",
@@ -2049,7 +2058,8 @@
       "mid": "In mid, don't step into the river or the enemy jungle without knowing where their jungler is; if you can't see them, push the wave and back off before roaming.",
       "adc": "As a marksman, hit whatever is closest and never be the first one in: stay behind your frontline and save Flash to escape, not to chase.",
       "support": "As a support, don't go warding alone ahead of your team: do it with lane priority or with company, and don't engage if your marksman can't follow.",
-      "any": "Before every fight, count how many enemies you can see on the map: if two or more are missing, don't go in first or drift away from your team."
+      "any": "Before every fight, count how many enemies you can see on the map: if two or more are missing, don't go in first or drift away from your team.",
+      "supportEnchanter": "As a support, stay behind your marksman and don't go warding alone: save your shields and heals for when the enemy goes in, not for lane trades."
     },
     "deaths": {
       "title": "Dying {next} times costs you the game",
@@ -2122,35 +2132,44 @@
         "title": "You're missing anti-heal against teams that heal",
         "present": "2 or more champions that heal",
         "answer": "anti-heal",
-        "timing": "Build it as your 2nd item as soon as you see 2 healers in draft; in fights, hold your damage until the healer uses their ability."
+        "timing": "Build it as your 2nd item as soon as you see 2 healers in draft; in fights, hold your damage until the healer uses their ability.",
+        "timingTank": "Build it as your 2nd or 3rd item as soon as you see 2 healers in draft and stay in front during fights: the anti-heal applies to whoever hits you.",
+        "timingSupport": "Build it as your 2nd or 3rd item as soon as you see 2 healers, and get your marksman to bring anti-heal too: together you cut their healing."
       },
       "magic": {
         "title": "You're not defending against magic damage",
         "present": "3 or more magic damage champions",
         "answer": "magic resist",
         "timing": "Make it your 2nd or 3rd item and don't line up with their mages: wait for them to use their abilities before going in.",
-        "timingCarry": "As a carry, don't trade damage for a tank item: pick a damage item with magic resist or a shield as your 4th or 5th item when their mages are bursting you, and wait for them to use their abilities before going in."
+        "timingCarry": "As a carry, don't trade damage for a tank item: pick a damage item with magic resist or a shield as your 4th or 5th item when their mages are bursting you, and wait for them to use their abilities before going in.",
+        "timingTank": "Make it your 2nd or 3rd item: with magic resist you can go in first and soak their abilities so your carries fight freely.",
+        "timingSupport": "Get magic resist from a support item that also protects your team, and don't walk ahead to ward while their mages are out of sight."
       },
       "physical": {
         "title": "You're not defending against physical damage",
         "present": "3 or more physical damage champions",
         "answer": "armor",
         "timing": "Make it your 2nd or 3rd item; against marksmen and fighters, armor is worth more than health alone.",
-        "timingCarry": "As a carry, don't trade damage for a tank item: pick a damage item that also defends as your 4th or 5th item when enemy physical damage is shredding you, and stay behind your frontline."
+        "timingCarry": "As a carry, don't trade damage for a tank item: pick a damage item that also defends as your 4th or 5th item when enemy physical damage is shredding you, and stay behind your frontline.",
+        "timingTank": "Make it your 2nd or 3rd item: against marksmen and fighters, armor is worth more than raw health, and it lets you take the first burst so your team can answer.",
+        "timingSupport": "Get armor from a support item that also protects your team, and in fights look after your marksman instead of chasing damage."
       },
       "cc": {
         "title": "Enemy crowd control catches you without tenacity",
         "present": "3 or more champions with hard CC",
         "answer": "tenacity or a CC cleanse",
         "timing": "Get it with your boots or as your 3rd item, and don't go in first: let them waste their CC on your frontline.",
-        "timingCarry": "Get tenacity from your boots or a damage item with a CC cleanse, and don’t go in until they waste their CC on your frontline."
+        "timingCarry": "Get tenacity from your boots or a damage item with a CC cleanse, and don’t go in until they waste their CC on your frontline.",
+        "timingTank": "Get it with your boots or as your 3rd item: as the frontline, go in first so they waste their CC on you and your carries fight freely.",
+        "timingSupport": "Get tenacity from your boots; if their CC lands on your marksman, an item that cleanses your ally saves them more than your own tenacity."
       },
       "burst": {
         "title": "Assassins delete you without an anti-burst item",
         "present": "2 or more assassins or burst champions",
         "answer": "an anti-burst item",
         "timing": "Build it when the enemy assassin gets ahead and save its active for the moment they jump on you.",
-        "timingCarry": "Build it after your core damage items when the enemy assassin gets ahead, and save its effect for the moment they jump on you."
+        "timingCarry": "Build it after your core damage items when the enemy assassin gets ahead, and save its effect for the moment they jump on you.",
+        "timingSupport": "Build it when the enemy assassin gets ahead: an item that shields your team saves your marksman as well as you."
       },
       "tanks": {
         "title": "You're missing penetration against tank teams",
@@ -2180,8 +2199,8 @@
       "weakTo": "{enemy} struggles against {list}.",
       "hasTools": "{champion} has the tools to punish that.",
       "noTools": "{champion} doesn't have natural tools for that: the answer is in the build.",
-      "itemsBought": "The catalog lists {items} as good against {enemy}.",
-      "itemsNotBought": "The catalog lists {items} as good against {enemy}, and you didn't build them in any of those matches.",
+      "itemsBought": "Catalog items that work against {enemy}: {items}.",
+      "itemsNotBought": "Catalog items that work against {enemy}: {items}, and you didn't build any of them in those matches.",
       "buyAction": "Build {item} early when you face {enemy}.",
       "counterAction": "If you can pick after them, {counter} is a better answer ({wr} in {games} matches).",
       "fallbackAction": "Against {enemy}, spend the first minutes farming safely and ask your jungler for help before fighting: the matchup punishes you if you trade alone.",
@@ -2335,7 +2354,7 @@
       "hasTools": "{champion} has the tools to exploit that.",
       "noTools": "{champion} doesn't have natural tools for that: lean on your build and your team.",
       "itemsKeep": "Keep building {items} when you face {enemy}.",
-      "itemsTry": "The catalog lists {items} as good against {enemy}: keep them in mind when you face them.",
+      "itemsTry": "If you face {enemy}, the catalog recommends: {items}.",
       "evidenceRecord": "{enemy}: {wins}-{losses}",
       "evidenceChampion": "With {champion}: {games} matches"
     },
@@ -2356,6 +2375,67 @@
       "deaths": " You also die less: {deaths} per game versus your {base} average.",
       "action": "When you have to pick first or don't know what the enemy will bring, pick {champion} in {lane}: it's your safest ranked pick.",
       "evidence": "{champion}: {wr} · {games}"
+    },
+    "savedBuild": {
+      "title": "With {champion}, your “{best}” build performs better",
+      "thesis": "With {champion}, the “{best}” build won {wrBest} of its matches ({gamesBest}) and “{worst}” won {wrWorst} ({gamesWorst}).{diff}",
+      "diff": " The difference: “{best}” builds {onlyBest}; “{worst}”, {onlyWorst}.",
+      "action": "Use “{best}” as your base build with {champion}. Before going back to “{worst}”, check what changes: if it is an adjustment for a specific enemy, save it for that matchup.",
+      "evidence": "“{name}”: {wr} · {games}"
     }
+  },
+  "share": {
+    "button": "Share",
+    "title": "Share your recap",
+    "description": "An image with your numbers for stories or posts.",
+    "period": {
+      "week": "Week",
+      "month": "30 days",
+      "patch": "Patch"
+    },
+    "format": {
+      "story": "Story",
+      "square": "Post"
+    },
+    "card": {
+      "periodWeek": "Week · {from} to {to}",
+      "periodMonth": "{from} to {to}",
+      "periodPatch": "Patch {patch}",
+      "featured": "Featured champion",
+      "featuredRecord": "{games} matches · {winrate}% win rate",
+      "featuredRecordOne": "1 match · {winrate}% win rate",
+      "winrate": "Win rate",
+      "games": "Matches",
+      "kda": "KDA",
+      "streak": "Best streak",
+      "deaths": "Deaths/game",
+      "bestMatch": "Best match",
+      "winsShort": "{wins}W",
+      "lossesShort": "{losses}L",
+      "streakBadge": "{count}-win streak",
+      "tier": {
+        "legend": "Legend mode",
+        "unstoppable": "Unstoppable",
+        "onFire": "On fire",
+        "inForm": "In form",
+        "comeback": "Comeback mode"
+      },
+      "kdaTotal": "Total K/D/A"
+    },
+    "share": "Share image",
+    "download": "Download",
+    "generating": "Generating…",
+    "empty": "There are no matches of that type in this period.",
+    "error": "The image couldn’t be generated. Try again.",
+    "shareText": "My recap on Rift Deck · riftdeckapp.com",
+    "periodLabel": "Period",
+    "formatLabel": "Format",
+    "typeLabel": "Match type",
+    "type": {
+      "ranked": "Ranked",
+      "legendary_ranked": "Legendary",
+      "casual": "Casual"
+    },
+    "ready": "Your week is ready to share!"
   }
 }

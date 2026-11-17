@@ -55,6 +55,9 @@ export default [
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      // Usar una variable antes de declararla (const/let) rompe el render con un error de
+      // inicialización: la página queda en blanco. Las funciones declaradas se pueden usar antes.
+      "no-use-before-define": ["error", { functions: false, classes: true, variables: true }],
     },
   },
 ];

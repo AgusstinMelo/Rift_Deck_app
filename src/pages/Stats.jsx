@@ -9,6 +9,7 @@ import { BarChart3, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { useCoachReport } from '@/hooks/useCoachReport';
+import { averageMatchKda } from '@/domain/matchStats';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { daysUntil, getMyMembership } from '@/api/membershipSupabase';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
@@ -17,7 +18,7 @@ import { filterByPatch } from '@/utils/patches';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 import { useT } from '@/lib/LocaleContext';
 import {
-  COACH_BOOK_URL, calcMatchKDA, calcWR, calculatePoolScore, getPatchFilterValue, insightAccent, insightTone,
+  COACH_BOOK_URL, calcWR, calculatePoolScore, getPatchFilterValue, insightAccent, insightTone,
 } from '@/components/stats/statsHelpers';
 import {
   ChampionAvatar, LaneBarChart, MatchupList, OverviewTrack, PoolChampionsCard, SectionCard, StatsHeroCard, WRBar,
@@ -208,9 +209,7 @@ export default function Stats() {
   const totalDeaths = matches.reduce((s, m) => s + (m.deaths || 0), 0);
   const totalAssists = matches.reduce((s, m) => s + (m.assists || 0), 0);
 
-  const avgKDA = (
-    matches.reduce((sum, match) => sum + calcMatchKDA(match), 0) / totalMatches
-  ).toFixed(2);
+  const avgKDA = (averageMatchKda(matches) ?? 0).toFixed(2);
 
   const blueMatches = matches.filter(m => m.side === 'blue');
   const redMatches = matches.filter(m => m.side === 'red');

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCoachHistory, logCoachInsights } from '@/api/coachSupabase';
+import { getUserBuilds } from '@/api/buildsSupabase';
 import { computeInsightReport } from '@/hooks/useInsights';
 import { useCatalogText } from '@/lib/LocaleContext';
 
@@ -20,12 +21,19 @@ export function useCoachReport(user, { matches, wrItems, champions, runes, limit
     staleTime: 5 * 60 * 1000,
   });
   const historyReady = isFetched || !user?.id;
+  // Builds guardadas: el Coach compara las que tienen partidas vinculadas.
+  const { data: builds = [] } = useQuery({
+    queryKey: ['coach-builds', user?.id],
+    queryFn: () => getUserBuilds(user),
+    enabled: Boolean(user?.id),
+    staleTime: 5 * 60 * 1000,
+  });
   // Notas estratégicas de los campeones en el idioma activo (plan de juego con tu main).
   const { championNotes } = useCatalogText();
 
   const report = useMemo(
-    () => computeInsightReport({ matches, wrItems, champions, runes, history, championNotes, limit }),
-    [matches, wrItems, champions, runes, history, championNotes, limit, ...deps],
+    () => computeInsightReport({ matches, wrItems, champions, runes, builds, history, championNotes, limit }),
+    [matches, wrItems, champions, runes, builds, history, championNotes, limit, ...deps],
   );
 
   const logged = useRef(new Set());

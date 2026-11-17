@@ -13,8 +13,26 @@ export function mainLaneOf(rows) {
   return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] || null;
 }
 
-/** Consejo para no morir según la línea (texto genérico si no se conoce). */
-export const survivalTip = lane => tr(`coachEngine.laneSurvival.${['top', 'jungler', 'mid', 'adc', 'support'].includes(lane) ? lane : 'any'}`);
+/** Perfil del campeón más jugado de un grupo de partidas (opcionalmente, en una línea). */
+export function mainOwnOf(rows, lane = null) {
+  const counts = new Map();
+  rows.forEach(row => {
+    if (!row.own || (lane && row.lane !== lane)) return;
+    const entry = counts.get(row.championKey) || { own: row.own, games: 0 };
+    entry.games += 1;
+    counts.set(row.championKey, entry);
+  });
+  return [...counts.values()].sort((a, b) => b.games - a.games)[0]?.own || null;
+}
+
+/**
+ * Consejo para no morir según la línea (texto genérico si no se conoce). En support, el
+ * encantador tiene el suyo: no inicia, protege.
+ */
+export const survivalTip = (lane, own = null) => {
+  if (lane === 'support' && own?.supportStyle === 'enchanter') return tr('coachEngine.laneSurvival.supportEnchanter');
+  return tr(`coachEngine.laneSurvival.${['top', 'jungler', 'mid', 'adc', 'support'].includes(lane) ? lane : 'any'}`);
+};
 
 /**
  * Busca la cantidad de muertes a partir de la cual el jugador deja de ganar:
@@ -55,7 +73,7 @@ export function detectDeathCeiling(ctx) {
       wrLow: pct(low.wr), gamesLow: low.games, wrHigh: pct(high.wr), gamesHigh: high.games,
       winDeaths: fixed(wins.avgDeaths), lossDeaths: fixed(losses.avgDeaths),
     }),
-    action: tr('coachEngine.deaths.action', { ceiling, tip: survivalTip(lane) }),
+    action: tr('coachEngine.deaths.action', { ceiling, tip: survivalTip(lane, mainOwnOf(highRows, lane)) }),
     evidence: [
       tr('coachEngine.deaths.evidenceLow', { ceiling, wr: pct(low.wr), games: low.games }),
       tr('coachEngine.deaths.evidenceHigh', { next: ceiling + 1, wr: pct(high.wr), games: high.games }),
@@ -134,7 +152,7 @@ export function detectRecentTrend(ctx) {
         games: recent.games, recent: fixed(recent.avgDeaths), previous: fixed(previous.avgDeaths),
         wrRecent: pct(recent.wr), wrPrevious: pct(previous.wr),
       }),
-      action: tr('coachEngine.trend.deathsUpAction', { tip: survivalTip(lane) }),
+      action: tr('coachEngine.trend.deathsUpAction', { tip: survivalTip(lane, mainOwnOf(recentRows, lane)) }),
       evidence: [
         tr('coachEngine.trend.evidenceRecent', { games: recent.games, deaths: fixed(recent.avgDeaths), wr: pct(recent.wr) }),
         tr('coachEngine.trend.evidencePrevious', { games: previous.games, deaths: fixed(previous.avgDeaths), wr: pct(previous.wr) }),
@@ -182,7 +200,10 @@ export function detectTeamplay(ctx) {
   const lane = mainLaneOf(rows);
   const expected = EXPECTED_KP[lane] ?? 0.5;
   const isolated = kp <= expected - 0.1;
-  const feeding = deathShare !== null && deathShare >= 0.3;
+  // Un tanque o un support de engage entra primero: es normal que se lleve más muertes del equipo.
+  const own = mainOwnOf(rows, lane);
+  const frontline = own?.isTank || (own?.buildClass === 'support' && own.supportStyle === 'engage');
+  const feeding = deathShare !== null && deathShare >= (frontline ? 0.36 : 0.3);
   if (!isolated && !feeding) return [];
   return [makeInsight({
     key: feeding ? 'teamplay-death-share' : 'teamplay-low-kp',

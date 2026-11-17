@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Flame,
+  Share2,
   Sparkles,
   Swords,
   Target,
@@ -26,8 +27,27 @@ import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
 import { useCoachReport } from '@/hooks/useCoachReport';
 import { filterByPatch, getPatchGroup, patchMatchesSelection } from '@/utils/patches';
-import { matchKda } from '@/domain/matchStats';
+import { averageMatchKda, matchRowKda } from '@/domain/matchStats';
+import { matchesInPeriod } from '@/features/share/periodSummary';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
+
+// La tarjeta compartible (y html-to-image) se carga recién al abrirla.
+const ShareDialog = lazy(() => import('@/features/share/ShareDialog'));
+
+// El botón Compartir llama la atención cuando hay una semana para mostrar (5 partidas o
+// más en los últimos 7 días) y no se abrió en los últimos 7 días.
+const SHARE_CTA_MIN_MATCHES = 5;
+const SHARE_CTA_KEY = 'rd-share-cta-opened-at';
+const SHARE_CTA_PAUSE_MS = 7 * 24 * 3600 * 1000;
+
+function shareOpenedRecently() {
+  try {
+    const openedAt = Number(localStorage.getItem(SHARE_CTA_KEY));
+    return Number.isFinite(openedAt) && Date.now() - openedAt < SHARE_CTA_PAUSE_MS;
+  } catch {
+    return false;
+  }
+}
 import { tr } from '@/i18n/uiI18n';
 
 const COACH_IMAGE_URL = 'https://media.base44.com/images/public/6a04ac70fd92bb3979b654a9/83cce9c3d_ChatGPTImage19may202611_43_41pm.png';
@@ -80,8 +100,7 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`;
 };
 
-const getKda = (match) =>
-  matchKda(Number(match?.kills) || 0, Number(match?.deaths) || 0, Number(match?.assists) || 0);
+const getKda = matchRowKda;
 
 // K/D/A legible: un dato no registrado (null) se muestra como "—".
 const formatKdaLine = (match) =>
@@ -99,9 +118,26 @@ export default function Dashboard() {
   const [metaLane, setMetaLane] = useState('top');
   const activityRef = useRef(null);
   const [activitySlide, setActivitySlide] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareSeen, setShareSeen] = useState(shareOpenedRecently);
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
 
   const { data: allMatches = [] } = useQuery(userMatchesQuery(user));
+  // Va después de allMatches: usarlo antes de declararlo rompe el render.
+  const shareReady = useMemo(
+    () => matchesInPeriod(allMatches, { period: 'week' }).rows.length >= SHARE_CTA_MIN_MATCHES,
+    [allMatches],
+  );
+  const shareHighlight = shareReady && !shareSeen;
+  const openShare = () => {
+    setShareOpen(true);
+    setShareSeen(true);
+    try {
+      localStorage.setItem(SHARE_CTA_KEY, String(Date.now()));
+    } catch {
+      // Sin almacenamiento, el efecto vuelve en la próxima visita: no pasa nada.
+    }
+  };
   const { data: allBuilds = [] } = useQuery({
     queryKey: ['builds-dashboard', user?.email],
     queryFn: () => user?.email ? getUserBuilds(user, 1000) : [],
@@ -163,7 +199,7 @@ export default function Dashboard() {
   sevenDayCutoff.setDate(sevenDayCutoff.getDate() - 6);
   const recentSevenDayMatches = sortedMatches.filter(match => getMatchTimestamp(match) >= sevenDayCutoff.getTime());
   const averageSevenDayKda = recentSevenDayMatches.length
-    ? recentSevenDayMatches.reduce((sum, match) => sum + getKda(match), 0) / recentSevenDayMatches.length
+    ? averageMatchKda(recentSevenDayMatches)
     : null;
   const lastTenMatches = sortedMatches.slice(0, 10);
   const recentFormWr = lastTenMatches.length
@@ -261,7 +297,7 @@ export default function Dashboard() {
     const deathsAvg = totalDeaths / championMatches.length;
     const assistsAvg = totalAssists / championMatches.length;
     const personalWr = (personalWins / championMatches.length) * 100;
-    const personalKda = championMatches.reduce((sum, match) => sum + getKda(match), 0) / championMatches.length;
+    const personalKda = averageMatchKda(championMatches);
     const recentMainMatches = [...championMatches]
       .sort((a, b) => getMatchTimestamp(b) - getMatchTimestamp(a))
       .slice(0, 10);
@@ -369,18 +405,44 @@ export default function Dashboard() {
             </>}
             <Sparkles size={14} className="text-primary" />
           </div>
-          <PatchFilter
-            className="rd-dashboard-patch"
-            value={patchFilter}
-            onChange={(value) => { setPatchFilter(value); setMainIndex(0); }}
-            patches={[
-              ...allMatches.map(match => match.patch),
-              ...allBuilds.map(build => build.patch),
-              ...executions.map(execution => execution.patch),
-            ]}
-          />
+          <div className="rd-dashboard-actions flex items-end gap-2">
+            {/* Tarjeta compartible "Mi resumen en Rift Deck". */}
+            <button
+              type="button"
+              onClick={openShare}
+              disabled={!allMatches.length}
+              title={shareHighlight ? t('share.ready') : t('share.button')}
+              aria-label={t('share.button')}
+              className={`rd-dashboard-share ${shareHighlight ? 'rd-share-cta' : ''} flex shrink-0 items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              <Share2 size={15} />
+              <span className="hidden sm:inline">{t('share.button')}</span>
+            </button>
+            <PatchFilter
+              className="rd-dashboard-patch"
+              value={patchFilter}
+              onChange={(value) => { setPatchFilter(value); setMainIndex(0); }}
+              patches={[
+                ...allMatches.map(match => match.patch),
+                ...allBuilds.map(build => build.patch),
+                ...executions.map(execution => execution.patch),
+              ]}
+            />
+          </div>
         </div>
       </header>
+
+      {shareOpen && (
+        <Suspense fallback={null}>
+          <ShareDialog
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            matches={allMatches}
+            champions={champions}
+            patch={activePatchVersion || ''}
+          />
+        </Suspense>
+      )}
 
       <main className="rd-dashboard-panel rd-analytics-panel">
         {activeTab === 'summary' && (

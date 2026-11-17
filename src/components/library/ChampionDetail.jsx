@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Champion } from '@/api/entitiesSupabase';
 import { userMatchesQuery } from '@/api/matchesSupabase';
+import { averageMatchKda } from '@/domain/matchStats';
 import { getTierlistEntries, getTierlistExecutions } from '@/api/tierlistSupabase';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -495,17 +496,8 @@ export default function ChampionDetail({
   const avgAssists =
     champMatches.length > 0 ? (totalAssists / champMatches.length).toFixed(1) : null;
 
-  const numericKda =
-    champMatches.length > 0
-      ? champMatches.reduce((sum, match) => {
-          const kills = Number(match.kills || 0);
-          const deaths = Number(match.deaths || 0);
-          const assists = Number(match.assists || 0);
-          const matchKda = deaths === 0 ? kills + assists : (kills + assists) / deaths;
-
-          return sum + matchKda;
-        }, 0) / champMatches.length
-      : 0;
+  // Misma fórmula que Estadísticas: promedio del KDA de cada partida.
+  const numericKda = averageMatchKda(champMatches) ?? 0;
 
   const personalKdaValue = numericKda.toFixed(2);
 

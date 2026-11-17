@@ -50,9 +50,10 @@ export async function getUserMatches(user, limit = MAX_USER_MATCHES) {
   return fetchMatchPages("user_id", user.id, limit);
 }
 
-// Columnas agregadas por 202611160002_coach_history_and_team_kills.sql. Si la migración
-// todavía no se aplicó, la partida se guarda igual sin ellas.
-const OPTIONAL_COLUMNS = ["team_kills", "enemy_team_kills"];
+// Columnas agregadas por migraciones recientes (202611160002: kills de equipo;
+// 202611170002: build vinculada). Si la migración todavía no se aplicó, la partida se
+// guarda igual sin ellas.
+const OPTIONAL_COLUMNS = ["team_kills", "enemy_team_kills", "build_id"];
 const isMissingColumn = error => error?.code === "PGRST204" || /column .* does not exist|Could not find the '.*' column/i.test(error?.message || "");
 const withoutOptional = payload => Object.fromEntries(Object.entries(payload).filter(([key]) => !OPTIONAL_COLUMNS.includes(key)));
 const hasOptional = payload => OPTIONAL_COLUMNS.some(key => key in payload);

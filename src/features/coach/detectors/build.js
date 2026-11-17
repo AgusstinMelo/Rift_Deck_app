@@ -35,10 +35,17 @@ export function buildHabitsOf(matches) {
   return habits;
 }
 
-/** Texto de cuándo y cómo responder: los carries tienen el suyo (sin cambiar daño por defensa pura). */
+/** Variante del texto de timing según cómo arma el campeón. */
+const TIMING_VARIANT = { carry: 'timingCarry', tank: 'timingTank', support: 'timingSupport' };
+
+/**
+ * Texto de cuándo y cómo responder. Cada clase tiene el suyo si hace falta: el carry no
+ * cambia daño por defensa pura, el tanque entra primero y el support protege a su equipo.
+ */
 function timingFor(threatId, own) {
-  const carryKey = `coachEngine.threat.${threatId}.timingCarry`;
-  if (own?.buildClass === 'carry' && lookup(baseMessages, carryKey)) return tr(carryKey);
+  const variant = TIMING_VARIANT[own?.buildClass];
+  const key = variant && `coachEngine.threat.${threatId}.${variant}`;
+  if (key && lookup(baseMessages, key)) return tr(key);
   return tr(`coachEngine.threat.${threatId}.timing`);
 }
 
@@ -47,7 +54,7 @@ export function threatAdvice(ctx, threatId, champion) {
   const threat = THREATS.find(entry => entry.id === threatId);
   const habits = ctx.buildHabits.get(keyOf(champion?.name)) || { bought: new Set(), damageTypes: [] };
   const items = champion?.own
-    ? suggestItems(ctx.catalog, champion.own, threat.answers, { boughtKeys: habits.bought, preferredTypes: habits.damageTypes })
+    ? suggestItems(ctx.catalog, champion.own, threat.answers, { boughtKeys: habits.bought, preferredTypes: habits.damageTypes, boots: Boolean(threat.boots) })
     : [];
   const timing = timingFor(threatId, champion?.own);
   return items.length
@@ -124,24 +131,40 @@ export function detectThreatGaps(ctx) {
   return cards;
 }
 
-/** Disparadores de runa clave que encajan con cada forma de hacer daño. */
-const ABILITY_TRIGGERS = ['impacto_habilidad', 'impacto_campeon', 'trade_corto', 'golpes_multiples', 'lanzar_ulti'];
-const AUTO_TRIGGERS = ['autoataque', 'golpes_consecutivos', 'golpes_mismo_objetivo', 'combate_extendido', 'impacto_campeon'];
+/**
+ * Runa de velocidad de ataque: se carga con golpes consecutivos de autoataque (Cadencia
+ * Letal, Potenciación). Conquistador también usa golpes consecutivos, pero se carga con
+ * habilidades en un combate largo, así que no cuenta.
+ */
+const isAttackSpeedKeystone = rune => rune.triggers.has('golpes_consecutivos')
+  && (rune.triggers.has('autoataque') || !rune.triggers.has('combate_extendido'));
+
+/** Runa que solo se activa con habilidades (Cometa Arcano). */
+const isAbilityOnlyKeystone = rune => rune.triggers.has('impacto_habilidad') && !rune.triggers.has('autoataque')
+  && !['golpes_consecutivos', 'golpes_multiples', 'combate_extendido'].some(tag => rune.triggers.has(tag));
 
 /**
  * true si la runa clave encaja, false si choca y null si no se puede juzgar.
- * Choca: una runa que solo se activa con autoataques en un campeón de habilidades, o una
- * que solo se activa con habilidades en un campeón de autoataques.
+ * Choca: una runa de velocidad de ataque en un campeón de habilidades (Cadencia Letal en
+ * un mago), o una que solo se activa con habilidades en uno de autoataques (Cometa Arcano
+ * en Jinx). Los tanques no se juzgan: Agarre del Perpetuo, Guardián o Soberano del Hielo
+ * les sirven igual.
  */
 export function keystoneFits(own, keystone) {
-  if (!own || !keystone || !keystone.triggers.size) return null;
-  const triggers = [...keystone.triggers];
-  if (own.abilityBased) return !(triggers.includes('autoataque') && !triggers.some(tag => ABILITY_TRIGGERS.includes(tag)));
-  if (own.autoAttacker) {
-    const abilityOnly = triggers.every(tag => ['impacto_habilidad', 'lanzar_ulti'].includes(tag));
-    return !abilityOnly;
-  }
+  if (!own || !keystone || !keystone.triggers.size || own.isTank) return null;
+  if (own.abilityBased) return !isAttackSpeedKeystone(keystone);
+  if (own.autoAttacker) return !isAbilityOnlyKeystone(keystone);
   return null;
+}
+
+/** Runas clave del catálogo que encajan con el campeón, las más afines primero. */
+function fittingKeystones(ctx, own) {
+  const preferred = rune => (own.abilityBased ? isAbilityOnlyKeystone(rune) : isAttackSpeedKeystone(rune));
+  return ctx.catalog.runes.rows
+    .map(row => ctx.catalog.rune(row.name))
+    .filter(rune => rune?.keystone && keystoneFits(own, rune) === true)
+    .sort((a, b) => Number(preferred(b)) - Number(preferred(a)))
+    .map(rune => rune.name);
 }
 
 /** Runa clave que no encaja con el campeón (por ejemplo, una de autoataques en un mago). */
@@ -160,14 +183,12 @@ export function detectRuneFit(ctx) {
     const fitting = rows.filter(row => keystoneFits(row.own, row.keystone) === true);
     const misfitStats = summarize(misfit);
     const fittingStats = summarize(fitting);
-    const wanted = own.abilityBased ? ABILITY_TRIGGERS : AUTO_TRIGGERS;
-    // Runa clave sugerida: la que mejor le fue con ese campeón entre las que encajan, o la primera del catálogo.
-    const usedFitting = [...new Set(fitting.map(row => row.keystone.name))];
-    const catalogFitting = ctx.catalog.runes.rows
-      .map(row => ctx.catalog.rune(row.name))
-      .filter(rune => rune?.keystone && [...rune.triggers].some(tag => wanted.includes(tag)))
-      .map(rune => rune.name);
-    const suggestion = usedFitting[0] || catalogFitting[0];
+    // Runa clave sugerida: la que mejor le fue con ese campeón entre las que encajan, o la más afín del catálogo.
+    const usedFitting = [...groupBy(fitting, row => row.keystone.name)]
+      .map(([name, keystoneRows]) => ({ name, stats: summarize(keystoneRows) }))
+      .sort((a, b) => b.stats.wins - a.stats.wins || b.stats.games - a.stats.games)
+      .map(entry => entry.name);
+    const suggestion = usedFitting[0] || fittingKeystones(ctx, own)[0];
     if (!suggestion) return;
     const misfitKeystone = misfit[0].keystone.name;
     cards.push(makeInsight({
@@ -187,6 +208,65 @@ export function detectRuneFit(ctx) {
       z: fittingStats.games >= 2 ? twoProportionZ(fittingStats.wins, fittingStats.games, misfitStats.wins, misfitStats.games) : 0.5,
       sample: rows.length, corroborated: true, priority: 60, impact: misfitStats.losses,
       entities: [own.name],
+    }));
+  });
+  return cards.sort((a, b) => b.score - a.score).slice(0, 1);
+}
+
+/** Objetos de una build guardada (nombres sin repetir). */
+const buildItems = build => [...new Set((build?.items || []).map(name => String(name).trim()).filter(Boolean))];
+
+/**
+ * Tus builds guardadas: con un mismo campeón, una build vinculada a tus partidas rinde
+ * claramente más que otra. Requiere 4 partidas por build y una diferencia sólida.
+ */
+export function detectSavedBuilds(ctx) {
+  if (!ctx.builds?.length) return [];
+  const byId = new Map(ctx.builds.map(build => [String(build.id), build]));
+  const linked = ctx.matches.filter(match => match.raw.build_id != null && byId.has(String(match.raw.build_id)));
+  const cards = [];
+  groupBy(linked.filter(match => match.championKey), match => match.championKey).forEach(rows => {
+    const prior = summarize(rows).wr;
+    const groups = [...groupBy(rows, row => String(row.raw.build_id))]
+      .map(([id, buildRows]) => ({ build: byId.get(id), stats: summarize(buildRows) }))
+      .filter(group => group.stats.games >= 4)
+      .map(group => ({ ...group, shrunk: shrunkRate(group.stats.wins, group.stats.games, prior) }))
+      .sort((a, b) => b.shrunk - a.shrunk);
+    if (groups.length < 2) return;
+    const best = groups[0];
+    const worst = groups[groups.length - 1];
+    const gap = best.shrunk - worst.shrunk;
+    const z = twoProportionZ(best.stats.wins, best.stats.games, worst.stats.wins, worst.stats.games);
+    if (gap < 0.12 || z < 1) return;
+
+    const champion = rows[0].champion;
+    const bestItems = buildItems(best.build);
+    const worstItems = buildItems(worst.build);
+    const onlyBest = bestItems.filter(name => !worstItems.some(other => keyOf(other) === keyOf(name))).slice(0, 3);
+    const onlyWorst = worstItems.filter(name => !bestItems.some(other => keyOf(other) === keyOf(name))).slice(0, 3);
+    const names = { best: best.build.name, worst: worst.build.name };
+
+    cards.push(makeInsight({
+      key: `saved-build-${keyOf(champion)}-${best.build.id}`,
+      family: FAMILY.SAVED_BUILD,
+      tone: 'opportunity',
+      title: tr('coachEngine.savedBuild.title', { champion, best: names.best }),
+      thesis: tr('coachEngine.savedBuild.thesis', {
+        champion, ...names,
+        wrBest: pct(best.stats.wr), gamesBest: best.stats.games,
+        wrWorst: pct(worst.stats.wr), gamesWorst: worst.stats.games,
+        diff: onlyBest.length && onlyWorst.length
+          ? tr('coachEngine.savedBuild.diff', { ...names, onlyBest: onlyBest.join(', '), onlyWorst: onlyWorst.join(', ') })
+          : '',
+      }),
+      action: tr('coachEngine.savedBuild.action', { champion, ...names }),
+      evidence: [
+        tr('coachEngine.savedBuild.evidence', { name: names.best, wr: pct(best.stats.wr), games: best.stats.games }),
+        tr('coachEngine.savedBuild.evidence', { name: names.worst, wr: pct(worst.stats.wr), games: worst.stats.games }),
+      ],
+      z, sample: best.stats.games + worst.stats.games, corroborated: true,
+      priority: 72, impact: worst.stats.losses,
+      entities: [champion],
     }));
   });
   return cards.sort((a, b) => b.score - a.score).slice(0, 1);

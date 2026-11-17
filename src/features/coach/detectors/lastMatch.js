@@ -30,7 +30,7 @@ export function detectLastMatch(ctx) {
         text: ceiling !== undefined
           ? tr('coachEngine.last.deathsCeiling', { deaths: match.deaths, ceiling })
           : tr('coachEngine.last.deathsWins', { deaths: match.deaths, avg: fixed(wins.avgDeaths) }),
-        action: survivalTip(match.lane),
+        action: survivalTip(match.lane, match.own),
       });
     } else if (limit !== null && match.deaths <= Math.max(1, limit - 2)) {
       praise.push(tr('coachEngine.last.praiseDeaths', { deaths: match.deaths }));

@@ -775,7 +775,12 @@
     "items3": "Itens",
     "buscarItem": "Buscar item...",
     "oro": "ouro",
-    "noSeEncontraronItems": "Nenhum item encontrado"
+    "noSeEncontraronItems": "Nenhum item encontrado",
+    "recordUna": "1 partida · {wr}",
+    "recordVarias": "{games} partidas · {wr}",
+    "recordSinPartidas": "Sem partidas vinculadas",
+    "recordAyuda": "Partidas registradas aplicando esta build (campanha {wins}-{losses}).",
+    "recordSinPartidasAyuda": "Aplique esta build ao registrar uma partida para ver como ela rende."
   },
   "coach": {
     "queMuestranLosDatos": "O que os dados mostram",
@@ -1045,7 +1050,7 @@
     "aplicarBuild": "Aplicar build",
     "buscandoBuildsGuardadas": "Buscando builds salvas...",
     "noTenesBuildsGuardadas": "Você não tem builds salvas para {name}.",
-    "precargaObjetosRunasY": "Pré-carrega itens, runas e feitiços. Depois você pode alterar qualquer seleção.",
+    "precargaObjetosRunasY": "Pré-carrega itens, runas e feitiços, e vincula a partida a essa build para medir como ela rende. Depois você pode alterar qualquer seleção.",
     "buildGuardada": "Build salva",
     "usarUnaBuildGuardada": "Usar uma build salva",
     "kda": "KDA {value}/{value2}/{value3}",
@@ -1132,7 +1137,10 @@
     "completaLosDatosDe": "Preencha os dados do seu desempenho",
     "guardarPartida": "Salvar Partida",
     "teamKills": "Abates do seu time",
-    "enemyTeamKills": "Abates do inimigo"
+    "enemyTeamKills": "Abates do inimigo",
+    "buildVinculada": "Vinculada",
+    "buildVinculadaAyuda": "A partida fica vinculada a esta build: em Builds e no Coach você vai ver como ela rende.",
+    "desvincularBuild": "Desvincular a build"
   },
   "membership": {
     "confirmandoTuPago": "Confirmando seu pagamento",
@@ -2039,7 +2047,8 @@
       "runes": "Runas",
       "prep": "Preparação",
       "plan": "Plano de jogo",
-      "strength": "Ponto forte"
+      "strength": "Ponto forte",
+      "savedBuild": "Suas builds"
     },
     "or": " ou ",
     "and": " e ",
@@ -2049,7 +2058,8 @@
       "mid": "No mid, não entre no rio nem na selva inimiga sem saber onde está o caçador inimigo; se não o vê, empurre a wave e recue antes de rotacionar.",
       "adc": "Como atirador, bata no que estiver mais perto e nunca seja o primeiro a entrar: fique atrás da sua linha de frente e guarde o Flash para fugir, não para perseguir.",
       "support": "Como suporte, não vá colocar visão sozinho e à frente do time: faça isso com prioridade de rota ou acompanhado, e não inicie se o seu atirador não puder te seguir.",
-      "any": "Antes de cada luta, conte quantos inimigos você vê no mapa: se faltam dois ou mais, não entre primeiro nem se afaste do seu time."
+      "any": "Antes de cada luta, conte quantos inimigos você vê no mapa: se faltam dois ou mais, não entre primeiro nem se afaste do seu time.",
+      "supportEnchanter": "Como suporte, fique atrás do seu atirador e não vá colocar visão sozinho: guarde escudos e curas para quando o inimigo entrar, não gaste nas trocas da rota."
     },
     "deaths": {
       "title": "Morrer {next} vezes te custa a partida",
@@ -2122,35 +2132,44 @@
         "title": "Falta anticura contra times que se curam",
         "present": "2 ou mais campeões que se curam",
         "answer": "anticura",
-        "timing": "Monte como 2º item assim que vir 2 curandeiros na seleção; nas lutas, guarde seu dano para quando o curandeiro gastar a habilidade."
+        "timing": "Monte como 2º item assim que vir 2 curandeiros na seleção; nas lutas, guarde seu dano para quando o curandeiro gastar a habilidade.",
+        "timingTank": "Monte como 2º ou 3º item assim que vir 2 curandeiros na seleção e fique na frente nas lutas: o antiheal se aplica a quem bater em você.",
+        "timingSupport": "Monte como 2º ou 3º item assim que vir 2 curandeiros, e combine com seu atirador para que ele também leve antiheal: juntos vocês cortam a cura deles."
       },
       "magic": {
         "title": "Você não está se defendendo do dano mágico",
         "present": "3 ou mais campeões de dano mágico",
         "answer": "resistência mágica",
         "timing": "Faça dela seu 2º ou 3º item e não fique em linha com os magos: espere que gastem as habilidades antes de entrar.",
-        "timingCarry": "Como carry, não troque dano por um item de tanque: escolha um item de dano com resistência mágica ou escudo como 4º ou 5º item quando os magos te destruírem, e espere que gastem as habilidades antes de entrar."
+        "timingCarry": "Como carry, não troque dano por um item de tanque: escolha um item de dano com resistência mágica ou escudo como 4º ou 5º item quando os magos te destruírem, e espere que gastem as habilidades antes de entrar.",
+        "timingTank": "Faça dela seu 2º ou 3º item: com resistência mágica você pode entrar primeiro e absorver as habilidades deles para que seus carries lutem livres.",
+        "timingSupport": "Pegue resistência mágica com um item de suporte que também proteja o time, e não avance para colocar visão enquanto os magos deles não estiverem à vista."
       },
       "physical": {
         "title": "Você não está se defendendo do dano físico",
         "present": "3 ou mais campeões de dano físico",
         "answer": "armadura",
         "timing": "Faça dela seu 2º ou 3º item; contra atiradores e lutadores, armadura rende mais que só vida.",
-        "timingCarry": "Como carry, não troque dano por um item de tanque: escolha um item de dano que também defenda como 4º ou 5º item quando o dano físico inimigo estiver te destruindo, e fique atrás da sua linha de frente."
+        "timingCarry": "Como carry, não troque dano por um item de tanque: escolha um item de dano que também defenda como 4º ou 5º item quando o dano físico inimigo estiver te destruindo, e fique atrás da sua linha de frente.",
+        "timingTank": "Faça dela seu 2º ou 3º item: contra atiradores e lutadores a armadura rende mais que vida pura, e permite aguentar a primeira explosão para o time responder.",
+        "timingSupport": "Pegue armadura com um item de suporte que também proteja o time, e nas lutas proteja seu atirador em vez de buscar dano."
       },
       "cc": {
         "title": "O controle inimigo te pega sem tenacidade",
         "present": "3 ou mais campeões com controle forte",
         "answer": "tenacidade ou limpeza de controle",
         "timing": "Pegue com as botas ou como 3º item, e não entre primeiro: deixe que gastem o controle na sua linha de frente.",
-        "timingCarry": "Pegue tenacidade com as botas ou um item de dano com limpeza de controle, e não entre até que gastem o controle na sua linha de frente."
+        "timingCarry": "Pegue tenacidade com as botas ou um item de dano com limpeza de controle, e não entre até que gastem o controle na sua linha de frente.",
+        "timingTank": "Pegue com as botas ou como 3º item: como linha de frente, entre primeiro para que gastem o controle em você e seus carries lutem livres.",
+        "timingSupport": "Pegue tenacidade com as botas; se o controle inimigo cair no seu atirador, um item que limpe o controle aliado o salva mais do que a sua própria tenacidade."
       },
       "burst": {
         "title": "Os assassinos te apagam sem um item anti-burst",
         "present": "2 ou mais assassinos ou campeões de burst",
         "answer": "um item anti-burst",
         "timing": "Monte quando o assassino inimigo estiver na frente e guarde o ativo para o momento em que ele entrar em você.",
-        "timingCarry": "Monte depois do seu núcleo de dano quando o assassino inimigo vier com vantagem, e guarde o efeito para o momento em que ele pular em você."
+        "timingCarry": "Monte depois do seu núcleo de dano quando o assassino inimigo vier com vantagem, e guarde o efeito para o momento em que ele pular em você.",
+        "timingSupport": "Monte quando o assassino inimigo estiver na frente: um item que dê escudo ao time salva seu atirador além de você."
       },
       "tanks": {
         "title": "Falta penetração contra times de tanques",
@@ -2178,12 +2197,12 @@
       "title": "{champion} vs {enemy}: um matchup que está te escapando",
       "record": "Contra {enemy} com {champion} você está {wins}-{losses} (seu winrate com {champion} é {base}).",
       "weakTo": "{enemy} sofre contra {list}.",
-      "hasTools": "{champion} tem como puni-lo.",
+      "hasTools": "{champion} tem como aproveitar isso.",
       "noTools": "{champion} não tem ferramentas naturais para isso: a resposta está na build.",
-      "itemsBought": "O catálogo marca {items} como bons contra {enemy}.",
-      "itemsNotBought": "O catálogo marca {items} como bons contra {enemy} e você não os montou em nenhuma dessas partidas.",
+      "itemsBought": "Itens do catálogo bons contra {enemy}: {items}.",
+      "itemsNotBought": "Itens do catálogo bons contra {enemy}: {items}, e você não montou nenhum nessas partidas.",
       "buyAction": "Monte {item} cedo quando pegar {enemy}.",
-      "counterAction": "Se puder escolher depois dele, {counter} é uma resposta melhor ({wr} em {games} partidas).",
+      "counterAction": "Se puder escolher depois do rival, {counter} é uma resposta melhor ({wr} em {games} partidas).",
       "fallbackAction": "Contra {enemy}, jogue os primeiros minutos farmando com segurança e peça ajuda ao seu caçador antes de lutar: o matchup te pune se você trocar sozinho.",
       "evidenceRecord": "{champion} vs {enemy}: {wins}-{losses}",
       "evidenceBase": "Com {champion}: {wr}",
@@ -2222,15 +2241,15 @@
       "gap_close": "Feche a distância em {enemy} quando ele tiver gastado a mobilidade ou a habilidade de alcance.",
       "bloqueo_movilidad": "Use seu controle para travar a mobilidade de {enemy}: sem o deslocamento, ele fica exposto.",
       "dano_burst": "Procure o combo completo em {enemy} quando ele estiver fora de posição: ele não aguenta dano explosivo.",
-      "asesino": "Procure {enemy} quando ele se separar do time: é vulnerável a ser pego sozinho.",
-      "presion_early": "Pressione {enemy} desde o nível 1: puna cada farm antes que ele chegue aos itens.",
+      "asesino": "Procure {enemy} quando se separar do time: sem ajuda por perto, é presa fácil.",
+      "presion_early": "Pressione {enemy} desde o nível 1: puna cada farm antes que os itens fiquem prontos.",
       "outscale": "Contra {enemy}, não force lutas cedo: farme com segurança, no late quem vence é você.",
       "dano_por_vida_porcentual": "Contra {enemy}, dano por vida percentual rende mais que dano fixo: priorize na build.",
       "dano_verdadero": "Contra {enemy}, apoie-se no dano verdadeiro: as resistências dele não o seguram.",
       "largo_alcance": "Puna {enemy} de longe toda vez que ele se aproximar para farmar.",
       "dano_sostenido": "Contra {enemy}, alongue as trocas: em lutas longas seu dano sustentado vence.",
       "acceso_backline": "Procure {enemy} na retaguarda: com a linha de frente ocupada, ele fica exposto.",
-      "diver": "Pule em {enemy} quando ele usar a fuga: ele não aguenta ser perseguido.",
+      "diver": "Pule em {enemy} quando a fuga for usada: sem ela, não há como escapar da perseguição.",
       "disengage": "Desengaje quando {enemy} entrar: sem a luta longa, ele não causa seu dano.",
       "anti_curacion": "Monte anticura cedo contra {enemy}: a cura é o que vence as trocas dele.",
       "reduccion_velocidad_ataque": "Contra {enemy}, priorize um item que reduza a velocidade de ataque: o dano dele depende dos ataques básicos.",
@@ -2239,7 +2258,7 @@
       "anti_escudo": "Contra {enemy}, um item anti-escudo vence as trocas: os escudos são a defesa dele.",
       "vida_alta": "Contra {enemy}, vida extra vence a troca: priorize um item de vida cedo.",
       "presion_mana": "Force {enemy} a gastar mana cedo: sem recursos ele não consegue trocar.",
-      "revelado_vision": "Coloque visão onde {enemy} se esconde: revelado, ele perde a vantagem."
+      "revelado_vision": "Coloque visão onde {enemy} se esconde: sem o fator surpresa, a vantagem acaba."
     },
     "pool": {
       "focusTitle": "Fora dos seus 3 campeões você perde partidas",
@@ -2335,7 +2354,7 @@
       "hasTools": "{champion} tem como aproveitar isso.",
       "noTools": "{champion} não tem ferramentas naturais para isso: apoie-se na build e no seu time.",
       "itemsKeep": "Continue montando {items} quando pegar {enemy}.",
-      "itemsTry": "O catálogo marca {items} como bons contra {enemy}: considere-os quando pegar ele.",
+      "itemsTry": "Se pegar {enemy}, o catálogo recomenda: {items}.",
       "evidenceRecord": "{enemy}: {wins}-{losses}",
       "evidenceChampion": "Com {champion}: {games} partidas"
     },
@@ -2356,6 +2375,67 @@
       "deaths": " Além disso, você morre menos: {deaths} por partida contra {base} de média.",
       "action": "Quando precisar escolher primeiro ou não souber o que o inimigo vai trazer, escolha {champion} no {lane}: é seu pick mais seguro na ranqueada.",
       "evidence": "{champion}: {wr} · {games}"
+    },
+    "savedBuild": {
+      "title": "Com {champion}, sua build «{best}» rende mais",
+      "thesis": "Com {champion}, a build «{best}» venceu {wrBest} das partidas ({gamesBest}) e «{worst}», {wrWorst} ({gamesWorst}).{diff}",
+      "diff": " A diferença: «{best}» monta {onlyBest}; «{worst}», {onlyWorst}.",
+      "action": "Use «{best}» como build base com {champion}. Antes de voltar para «{worst}», veja o que muda: se for uma adaptação a um rival, guarde para esse confronto.",
+      "evidence": "«{name}»: {wr} · {games}"
     }
+  },
+  "share": {
+    "button": "Compartilhar",
+    "title": "Compartilhe seu resumo",
+    "description": "Uma imagem com seus números para stories ou posts.",
+    "period": {
+      "week": "Semana",
+      "month": "30 dias",
+      "patch": "Patch"
+    },
+    "format": {
+      "story": "Story",
+      "square": "Post"
+    },
+    "card": {
+      "periodWeek": "Semana · {from} a {to}",
+      "periodMonth": "{from} a {to}",
+      "periodPatch": "Patch {patch}",
+      "featured": "Campeão destaque",
+      "featuredRecord": "{games} partidas · {winrate}% de winrate",
+      "featuredRecordOne": "1 partida · {winrate}% de winrate",
+      "winrate": "Winrate",
+      "games": "Partidas",
+      "kda": "KDA",
+      "streak": "Melhor sequência",
+      "deaths": "Mortes/partida",
+      "bestMatch": "Melhor partida",
+      "winsShort": "{wins}V",
+      "lossesShort": "{losses}D",
+      "streakBadge": "Sequência de {count}",
+      "tier": {
+        "legend": "Modo lenda",
+        "unstoppable": "Imparável",
+        "onFire": "Pegando fogo",
+        "inForm": "Em forma",
+        "comeback": "Na virada"
+      },
+      "kdaTotal": "K/D/A total"
+    },
+    "share": "Compartilhar imagem",
+    "download": "Baixar",
+    "generating": "Gerando…",
+    "empty": "Não há partidas desse tipo neste período.",
+    "error": "Não foi possível gerar a imagem. Tente de novo.",
+    "shareText": "Meu resumo no Rift Deck · riftdeckapp.com",
+    "periodLabel": "Período",
+    "formatLabel": "Formato",
+    "typeLabel": "Tipo de partida",
+    "type": {
+      "ranked": "Ranqueada",
+      "legendary_ranked": "Lendária",
+      "casual": "Casual"
+    },
+    "ready": "Sua semana está pronta para compartilhar!"
   }
 }

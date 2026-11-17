@@ -5,15 +5,15 @@ import { computeCoachReport } from '../features/coach/engine.js';
 
 /**
  * @param {{
- *   matches?: any[], wrItems?: any[], champions?: any[], runes?: any[],
+ *   matches?: any[], wrItems?: any[], champions?: any[], runes?: any[], builds?: any[],
  *   history?: { insight_key: string, track: any, first_seen_at: string }[],
  *   championNotes?: (champion: any) => string, limit?: number, now?: Date,
  * }} input
  */
 export function computeInsightReport({
-  matches = [], wrItems = [], champions = [], runes = [], history = [], championNotes = null, limit = 8, now,
+  matches = [], wrItems = [], champions = [], runes = [], builds = [], history = [], championNotes = null, limit = 8, now,
 } = {}) {
-  return computeCoachReport({ matches, champions, items: wrItems, runes, history, championNotes, limit, now });
+  return computeCoachReport({ matches, champions, items: wrItems, runes, builds, history, championNotes, limit, now });
 }
 
 export function computeInsights(input) {

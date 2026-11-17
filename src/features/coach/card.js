@@ -15,6 +15,8 @@ export const FAMILY = Object.freeze({
   TREND: 'trend',
   TEAMPLAY: 'teamplay',
   RUNES: 'runes',
+  // Tus builds guardadas comparadas entre sí (partidas vinculadas con matches.build_id).
+  SAVED_BUILD: 'savedBuild',
   // Preparación: no dependen de un problema detectado, completan el informe.
   PREP: 'prep',
   PLAN: 'plan',

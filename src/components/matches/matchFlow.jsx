@@ -56,11 +56,16 @@ export function branchesOfRunes(runes, fallbackPrimary = 'Dominación') {
   return { primary, secondary: branches[1] || PRIMARY_BRANCHES.find(branch => branch !== primary) };
 }
 
+const sameName = (a, b) => String(a ?? '').trim().toLowerCase() === String(b ?? '').trim().toLowerCase();
+
 /**
  * Estado de la build de una partida: objetos (5 + botas + encantamiento), runas por
- * rama, hechizos (2) y el panel visible en smartphone.
+ * rama, hechizos (2), el panel visible en smartphone y la build guardada vinculada.
+ * `initialBuild`: build vinculada de una partida que se edita ({ id, championId, championName }).
  */
-export function useMatchBuild({ items, runes, initialSpells = [] }) {
+export function useMatchBuild({ items, runes, initialSpells = [], initialBuild = null }) {
+  // Build guardada que se aplicó: la partida queda vinculada para medir cómo rinde.
+  const [linkedBuild, setLinkedBuild] = useState(initialBuild);
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedRunes, setSelectedRunes] = useState([]);
   const [selectedSpells, setSelectedSpells] = useState(initialSpells);
@@ -123,6 +128,20 @@ export function useMatchBuild({ items, runes, initialSpells = [] }) {
     setSelectedRunes(resolvedRunes);
     setSelectedSpells((build.spells || []).slice(0, 2));
     setBranches(branchesOfRunes(resolvedRunes, primaryBranch));
+    setLinkedBuild({ id: build.id, name: build.name, championId: build.champion_id, championName: build.champion_name });
+  };
+
+  /**
+   * Build vinculada para guardar: solo si es del campeón elegido (si después se cambió de
+   * campeón, la partida no se jugó con esa build). Sin datos del campeón, se conserva.
+   */
+  const linkedBuildIdFor = champion => {
+    if (!linkedBuild) return null;
+    const known = linkedBuild.championId != null || linkedBuild.championName;
+    if (!known || !champion) return linkedBuild.id;
+    const same = (linkedBuild.championId != null && String(linkedBuild.championId) === String(champion.id))
+      || sameName(linkedBuild.championName, champion.name);
+    return same ? linkedBuild.id : null;
   };
 
   const claveRunes = runes.filter(r => r.branch === 'Clave');
@@ -166,10 +185,11 @@ export function useMatchBuild({ items, runes, initialSpells = [] }) {
     setSelectedRunes(prev => [...prev, rune]);
   };
 
-  /** Vuelve a una build vacía (al cambiar de parche cambia el catálogo). */
+  /** Vuelve a una build vacía (al cambiar de parche cambia el catálogo) y sin vínculo. */
   const resetBuild = () => {
     setSelectedItems([]);
     setSelectedRunes([]);
+    setLinkedBuild(null);
   };
 
   return {
@@ -183,12 +203,14 @@ export function useMatchBuild({ items, runes, initialSpells = [] }) {
     primaryRunes: getRunesByBranch(primaryBranch),
     secondaryRunes: getRunesByBranch(secondaryBranch),
     applySavedBuild, resetBuild,
+    linkedBuild, unlinkBuild: () => setLinkedBuild(null), linkedBuildIdFor,
     buildPanel, setBuildPanel,
-    /** Campos de la build para guardar la partida. */
-    payload: () => ({
+    /** Campos de la build para guardar la partida (con la build guardada vinculada, si la hay). */
+    payload: champion => ({
       items_used: selectedItems.map(i => i.name),
       runes_used: selectedRunes.map(r => r.name),
       spells_used: selectedSpells,
+      build_id: linkedBuildIdFor(champion),
     }),
   };
 }
@@ -533,7 +555,14 @@ export function BuildStep({ description, champion, patch, build, items, spells, 
       <div className="rd-buildstep-header flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <StepHeader title={t('matches.tuBuild')} description={description} />
         <div className="w-full xl:w-[min(36rem,55%)]">
-          <SavedBuildPicker champion={champion} patch={patch} onApply={build.applySavedBuild} compact />
+          <SavedBuildPicker
+            champion={champion}
+            patch={patch}
+            onApply={build.applySavedBuild}
+            linkedBuildId={build.linkedBuildIdFor(champion)}
+            onUnlink={build.unlinkBuild}
+            compact
+          />
         </div>
       </div>
 

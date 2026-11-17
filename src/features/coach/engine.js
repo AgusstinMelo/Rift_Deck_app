@@ -5,11 +5,11 @@
 import { tr } from '../../i18n/uiI18n.js';
 import { FAMILY, makeInsight } from './card.js';
 import { buildCatalog } from './catalog.js';
-import { buildHabitsOf, detectRuneFit, detectThreatGaps } from './detectors/build.js';
+import { buildHabitsOf, detectRuneFit, detectSavedBuilds, detectThreatGaps } from './detectors/build.js';
 import { detectLastMatch } from './detectors/lastMatch.js';
 import { detectMatchups, detectPool } from './detectors/matchups.js';
 import {
-  detectDeathCeiling, detectPowerCurve, detectRecentTrend, detectSession, detectTeamplay, mainLaneOf, survivalTip,
+  detectDeathCeiling, detectPowerCurve, detectRecentTrend, detectSession, detectTeamplay, mainLaneOf, mainOwnOf, survivalTip,
 } from './detectors/performance.js';
 import { detectFollowUps } from './followUp.js';
 import { detectChampionPlan, detectRivalPrep, detectStrength } from './detectors/profile.js';
@@ -53,7 +53,7 @@ function warmUpCard(ctx) {
     thesis: tr('coachEngine.warmUp.thesis', {
       games: ctx.matches.length, wr: pct(ctx.base.wr), deaths: fixed(ctx.base.avgDeaths),
     }),
-    action: survivalTip(lane),
+    action: survivalTip(lane, mainOwnOf(ctx.matches, lane)),
     evidence: [tr('coachEngine.warmUp.evidence', { games: ctx.matches.length })],
     confidence: 0.2, sample: ctx.matches.length, priority: 10,
   });
@@ -61,13 +61,14 @@ function warmUpCard(ctx) {
 
 /**
  * @param {{
- *   matches?: any[], champions?: any[], items?: any[], runes?: any[],
+ *   matches?: any[], champions?: any[], items?: any[], runes?: any[], builds?: any[],
  *   history?: { insight_key: string, track: any, first_seen_at: string }[],
  *   championNotes?: (champion: any) => string, now?: Date, limit?: number,
  * }} input  `championNotes`: nota estratégica del campeón en el idioma activo.
+ *   `builds`: builds guardadas del jugador (para comparar las vinculadas a sus partidas).
  */
 export function computeCoachReport({
-  matches = [], champions = [], items = [], runes = [], history = [], championNotes = null, now = new Date(), limit = 8,
+  matches = [], champions = [], items = [], runes = [], builds = [], history = [], championNotes = null, now = new Date(), limit = 8,
 } = {}) {
   const catalog = buildCatalog({ champions, items, runes });
   const rows = normalizeMatches(matches, catalog);
@@ -80,7 +81,7 @@ export function computeCoachReport({
   };
   if (!rows.length) return { insights: [], coverage, generatedAt: now.toISOString() };
 
-  const ctx = { matches: rows, base: summarize(rows), catalog, buildHabits: buildHabitsOf(rows), championNotes, now };
+  const ctx = { matches: rows, base: summarize(rows), catalog, buildHabits: buildHabitsOf(rows), builds, championNotes, now };
   const candidates = [
     ...detectLastMatch(ctx),
     ...detectDeathCeiling(ctx),
@@ -92,6 +93,7 @@ export function computeCoachReport({
     ...detectRecentTrend(ctx),
     ...detectTeamplay(ctx),
     ...detectRuneFit(ctx),
+    ...detectSavedBuilds(ctx),
   ];
   // Preparación (prioridad baja): rivales frecuentes que no tengan ya tarjeta de matchup,
   // plan con el main y fortaleza.

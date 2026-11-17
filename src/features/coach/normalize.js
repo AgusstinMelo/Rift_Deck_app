@@ -1,7 +1,7 @@
 // Normaliza las partidas para el Coach y les agrega lo que se deduce del catálogo:
 // perfil del campeón propio y del rival directo, amenazas de la composición rival y
 // qué respuestas tuvo la build.
-import { THREATS, asList, keyOf } from './catalog.js';
+import { THREATS, asList, inLane, keyOf, observedBuildClass, withBuildClass } from './catalog.js';
 
 const LANE_ALIASES = {
   adc: 'adc', bot: 'adc', bottom: 'adc', dragonline: 'adc', dragonlane: 'adc', duo: 'adc',
@@ -43,6 +43,52 @@ const unique = values => {
 };
 
 /**
+ * Amenazas de la composición rival que le tocan responder a este campeón (según su clase)
+ * y si la build las respondió. Se recalculan si cambia la clase (ver `withOwn`).
+ */
+export function assessThreats({ own, enemyProfiles, itemProfiles, compKnown, buildKnown }) {
+  const threats = {};
+  if (!compKnown) return threats;
+  THREATS.forEach(threat => {
+    const count = threat.count(enemyProfiles);
+    if (count < threat.min || !threat.appliesTo(own)) return;
+    threats[threat.id] = {
+      count,
+      answered: buildKnown ? itemProfiles.some(item => threat.answers(item, own)) : null,
+    };
+  });
+  return threats;
+}
+
+/** La misma partida con otro perfil del campeón propio (y sus amenazas recalculadas). */
+export function withOwn(row, own) {
+  if (row.own === own) return row;
+  return { ...row, own, threats: assessThreats({ ...row, own }) };
+}
+
+/**
+ * Ajusta la clase del campeón a lo que el jugador arma con él en cada línea (picks
+ * exóticos: Malphite mid full AP, Leona top tanque). Sin builds suficientes, manda la línea.
+ */
+export function applyObservedClasses(rows) {
+  const groups = new Map();
+  rows.forEach(row => {
+    if (!row.own || !row.championKey) return;
+    const key = `${row.championKey}|${row.lane || ''}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  });
+  const adjusted = new Map();
+  groups.forEach(group => {
+    const observed = observedBuildClass(group[0].own, group);
+    if (!observed) return;
+    const own = withBuildClass(group[0].own, observed);
+    group.forEach(row => adjusted.set(row, withOwn(row, own)));
+  });
+  return adjusted.size ? rows.map(row => adjusted.get(row) || row) : rows;
+}
+
+/**
  * @param {any} match  Fila de `matches`.
  * @param {ReturnType<import('./catalog.js').buildCatalog>} catalog
  */
@@ -63,7 +109,9 @@ export function normalizeMatch(match, catalog) {
   const teamKills = countOf(match.team_kills);
   const enemyKills = countOf(match.enemy_team_kills);
 
-  const own = catalog.champion(champion, match.own_champion_id);
+  const lane = laneOf(match.lane);
+  // Perfil según la línea: en support, Leona o Lux juegan (y arman) como supports.
+  const own = inLane(catalog.champion(champion, match.own_champion_id), lane);
   const enemyProfiles = enemies.map(name => catalog.champion(name)).filter(Boolean);
   const items = asList(match.items_used).map(name => String(name).trim()).filter(Boolean);
   const itemProfiles = items.map(name => catalog.item(name)).filter(Boolean);
@@ -76,17 +124,7 @@ export function normalizeMatch(match, catalog) {
   // La build cuenta como conocida desde 3 objetos reconocidos: antes la partida pudo
   // terminar sin llegar a comprar la respuesta.
   const buildKnown = itemProfiles.length >= 3;
-  const threats = {};
-  if (compKnown) {
-    THREATS.forEach(threat => {
-      const count = threat.count(enemyProfiles);
-      if (count < threat.min || !threat.appliesTo(own)) return;
-      threats[threat.id] = {
-        count,
-        answered: buildKnown ? itemProfiles.some(item => threat.answers(item, own)) : null,
-      };
-    });
-  }
+  const threats = assessThreats({ own, enemyProfiles, itemProfiles, compKnown, buildKnown });
 
   return {
     raw: match,
@@ -100,7 +138,7 @@ export function normalizeMatch(match, catalog) {
     champion,
     championKey: keyOf(champion),
     own,
-    lane: laneOf(match.lane),
+    lane,
     enemy,
     enemyKey: keyOf(enemy),
     enemyProfile: enemy ? catalog.champion(enemy) : null,
@@ -131,10 +169,14 @@ export function normalizeMatch(match, catalog) {
   };
 }
 
-/** Partidas normalizadas, más reciente primero. Las que no tienen resultado se descartan. */
+/**
+ * Partidas normalizadas, más reciente primero. Las que no tienen resultado se descartan.
+ * La clase del campeón sale de la línea y, si alcanza, de lo que el jugador arma.
+ */
 export function normalizeMatches(matches, catalog) {
-  return (matches || [])
+  const rows = (matches || [])
     .map(match => normalizeMatch(match, catalog))
     .filter(match => match.result)
     .sort((a, b) => b.time - a.time);
+  return applyObservedClasses(rows);
 }

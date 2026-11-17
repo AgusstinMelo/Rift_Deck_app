@@ -25,3 +25,35 @@ export function averageOf(values) {
 export function matchKda(kills, deaths, assists) {
   return deaths === 0 ? kills + assists : (kills + assists) / deaths;
 }
+
+/** KDA de una fila de `matches`. Un dato no registrado cuenta como 0 (criterio de Estadísticas). */
+export function matchRowKda(match) {
+  return matchKda(Number(match?.kills) || 0, Number(match?.deaths) || 0, Number(match?.assists) || 0);
+}
+
+/**
+ * KDA promedio: el promedio del KDA de cada partida. Es la fórmula de Estadísticas y la
+ * usan todas las pantallas (Dashboard, ficha de campeón, tarjeta compartible) para que el
+ * número coincida. null sin partidas.
+ */
+export function averageMatchKda(matches) {
+  return matches?.length ? sumOf(matches.map(matchRowKda)) / matches.length : null;
+}
+
+/**
+ * Récord de cada build guardada con las partidas vinculadas (matches.build_id):
+ * Map(id de la build → { games, wins, losses }).
+ */
+export function recordsByBuild(matches) {
+  const records = new Map();
+  (matches || []).forEach(match => {
+    if (match?.build_id == null || (match.result !== 'win' && match.result !== 'loss')) return;
+    const key = String(match.build_id);
+    const record = records.get(key) || { games: 0, wins: 0, losses: 0 };
+    record.games += 1;
+    if (match.result === 'win') record.wins += 1;
+    else record.losses += 1;
+    records.set(key, record);
+  });
+  return records;
+}
