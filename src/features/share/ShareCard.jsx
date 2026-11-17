@@ -143,7 +143,12 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
   // El arte del campeón ocupa el alto que dejan los demás bloques (con un mínimo): así
   // la tarjeta nunca se desborda, aunque los textos midan distinto según el idioma o el
   // CSS de la página.
-  const heroMinHeight = story ? 600 : 320;
+  const heroMinHeight = story ? 460 : 320;
+  // Historia: zona segura de Instagram, medida sobre una historia publicada. Arriba van la
+  // barra de progreso, el avatar y el usuario (~120 px de 1920) y abajo la caja de
+  // comentario (desde ~1800 px): el contenido queda adentro, con un margen de resguardo.
+  // El fondo y el marco siguen ocupando toda la imagen.
+  const contentPadding = story ? '170px 72px 150px' : '60px 60px';
   // Un decimal con el separador del idioma (3,8 en español).
   const decimal = new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const fixed = value => (value === null || value === undefined ? '—' : decimal.format(value));
@@ -165,8 +170,8 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
       <Frame />
 
       <div style={{
-        position: 'relative', height: '100%', boxSizing: 'border-box', padding: story ? '76px 72px' : '60px 60px',
-        display: 'flex', flexDirection: 'column', gap: story ? 36 : 26,
+        position: 'relative', height: '100%', boxSizing: 'border-box', padding: contentPadding,
+        display: 'flex', flexDirection: 'column', gap: story ? 30 : 26,
       }}>
         {/* Encabezado: marca y período. */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexShrink: 0 }}>

@@ -70,17 +70,19 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
     ? champions.find(row => row.name === summary.topChampion.name)
     : null;
 
-  // Splash en alta resolución (Data Dragon); mientras carga o si no existe, el arte del catálogo.
+  // Arte del campeón, de mejor a peor: el splash guardado en la base (image_url_splash),
+  // el de Data Dragon si todavía no se cargó y, por último, la imagen card del catálogo.
+  const storedSplash = champion?.image_url_splash || null;
   const [artIds, setArtIds] = useState(null);
   useEffect(() => {
-    if (!open || artIds) return undefined;
+    if (!open || artIds || storedSplash) return undefined;
     let cancelled = false;
     loadChampionIds().then(ids => { if (!cancelled) setArtIds(ids); });
     return () => { cancelled = true; };
-  }, [open, artIds]);
+  }, [open, artIds, storedSplash]);
   const catalogArt = champion?.image_url_card || champion?.image_url;
   const artId = artIds ? championArtId(artIds, champion) : null;
-  const championArt = artId ? splashUrl(artId) : catalogArt;
+  const championArt = storedSplash || (artId ? splashUrl(artId) : catalogArt);
 
   const periodText = !summary ? '' : period === 'patch'
     ? t('share.card.periodPatch', { patch: getPatchGroup(patch) || patch })
