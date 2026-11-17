@@ -164,12 +164,32 @@
   box-shadow: 0 0 16px rgba(212, 175, 55, 0.55);
 }
 
+/* Estética de la tarjeta para compartir (features/share/ShareCard.jsx), aplicada a las
+   tarjetas de la app: fondo azul noche que se oscurece hacia abajo, borde dorado, línea
+   dorada arriba que se desvanece a los costados, resplandor dorado arriba a la derecha y
+   violeta abajo a la izquierda, y la grilla triangular muy suave. Sin brillo en los números. */
+:root {
+  --rd-card-border: rgba(212, 175, 55, 0.26);
+  --rd-card-border-hover: rgba(212, 175, 55, 0.42);
+  --rd-card-bg:
+    radial-gradient(120% 90% at 50% 0%, rgba(29, 37, 64, 0.97) 0%, rgba(11, 15, 26, 0.98) 62%, rgba(7, 9, 15, 0.98) 100%);
+  --rd-card-decor:
+    linear-gradient(90deg, rgba(226, 196, 106, 0) 6%, rgba(226, 196, 106, 0.55) 50%, rgba(226, 196, 106, 0) 94%) top / 100% 1.5px no-repeat,
+    radial-gradient(60% 55% at 100% 0%, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0) 70%),
+    radial-gradient(70% 60% at 0% 100%, rgba(124, 58, 237, 0.13) 0%, rgba(124, 58, 237, 0) 70%),
+    repeating-linear-gradient(60deg, rgba(212, 175, 55, 0.028) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(-60deg, rgba(212, 175, 55, 0.028) 0 1px, transparent 1px 26px);
+  --rd-card-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    0 0 26px rgba(212, 175, 55, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
 .rd-status-pill {
   padding: 10px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(212, 175, 55, 0.16);
-  background:
-    linear-gradient(180deg, rgba(18, 24, 38, 0.95), rgba(11, 15, 26, 0.95));
+  border: 1px solid var(--rd-card-border);
+  background: var(--rd-card-decor), var(--rd-card-bg);
   box-shadow:
     0 12px 30px rgba(0, 0, 0, 0.26),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -179,12 +199,9 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  border: 1px solid rgba(212, 175, 55, 0.11);
-  background:
-    linear-gradient(180deg, rgba(18, 24, 38, 0.96) 0%, rgba(11, 15, 26, 0.98) 100%);
-  box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--rd-card-border);
+  background: var(--rd-card-bg);
+  box-shadow: var(--rd-card-shadow);
 }
 
 .rd-card-overflow-visible {
@@ -204,10 +221,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(77, 166, 255, 0.08), transparent 36%),
-    radial-gradient(circle at 0% 100%, rgba(212, 175, 55, 0.045), transparent 34%);
-  opacity: 0.75;
+  border-radius: inherit;
+  background: var(--rd-card-decor);
 }
 
 .rd-card > * {
@@ -216,11 +231,11 @@
 }
 
 .rd-card:hover {
-  border-color: rgba(212, 175, 55, 0.24);
+  border-color: var(--rd-card-border-hover);
   box-shadow:
     0 14px 46px rgba(0, 0, 0, 0.34),
-    0 0 26px rgba(77, 166, 255, 0.055),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    0 0 30px rgba(212, 175, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .rd-card-watermark::after,
@@ -327,17 +342,14 @@
   gap: 16px;
   border-radius: 16px;
   padding: 16px;
-  border: 1px solid rgba(212, 175, 55, 0.11);
-  background:
-    linear-gradient(180deg, rgba(18, 24, 38, 0.96), rgba(11, 15, 26, 0.98));
+  border: 1px solid var(--rd-card-border);
+  background: var(--rd-card-decor), var(--rd-card-bg);
   transition: all 160ms ease;
 }
 
 .rd-action-card:hover {
-  border-color: rgba(212, 175, 55, 0.28);
-  background:
-    linear-gradient(180deg, rgba(24, 31, 48, 0.98), rgba(11, 15, 26, 0.98));
-  box-shadow: 0 0 28px rgba(212, 175, 55, 0.07);
+  border-color: var(--rd-card-border-hover);
+  box-shadow: 0 0 28px rgba(212, 175, 55, 0.09);
 }
 
 /* Accesos compactos de "A medida" (paso 1 de nuevo objetivo). */
@@ -351,15 +363,14 @@
   text-align: center;
   border-radius: 16px;
   padding: 14px 10px;
-  border: 1px solid rgba(212, 175, 55, 0.1);
-  background:
-    linear-gradient(180deg, rgba(18, 24, 38, 0.92), rgba(11, 15, 26, 0.96));
+  border: 1px solid var(--rd-card-border);
+  background: var(--rd-card-decor), var(--rd-card-bg);
   transition: all 160ms ease;
 }
 
 .rd-mini-action:hover {
-  border-color: rgba(212, 175, 55, 0.26);
-  box-shadow: 0 0 24px rgba(77, 166, 255, 0.055);
+  border-color: var(--rd-card-border-hover);
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.08);
 }
 
 /* Glow effects */

@@ -2502,7 +2502,13 @@
       "loss": "L",
       "tabPool": "Pool",
       "tabLanes": "Lanes",
-      "tabRecent": "Games"
+      "tabRecent": "Games",
+      "kda": "KDA",
+      "kdaSub": "average",
+      "streak": "Best streak",
+      "streakSub": "Patch {patch}",
+      "blueSide": "Blue side",
+      "redSide": "Red side"
     },
     "builds": {
       "makePublic": "Make public",

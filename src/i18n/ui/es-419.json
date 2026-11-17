@@ -2502,7 +2502,13 @@
       "loss": "D",
       "tabPool": "Pool",
       "tabLanes": "Líneas",
-      "tabRecent": "Partidas"
+      "tabRecent": "Partidas",
+      "kda": "KDA",
+      "kdaSub": "promedio",
+      "streak": "Mejor racha",
+      "streakSub": "Parche {patch}",
+      "blueSide": "Lado azul",
+      "redSide": "Lado rojo"
     },
     "builds": {
       "makePublic": "Hacer pública",

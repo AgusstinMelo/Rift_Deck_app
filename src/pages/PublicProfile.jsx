@@ -14,7 +14,7 @@ import { Check, Crosshair, HeartHandshake, Loader2, Swords, UserX, History, Rada
 import { getPublicProfile } from '@/api/publicProfileSupabase';
 import { Champion } from '@/api/entitiesSupabase';
 import {
-  availableTypes, championFocus, packBubbles, recentMatches, summarizePublicStats,
+  availableTypes, bestStreak, championFocus, packBubbles, recentMatches, sideSummary, summarizePublicStats,
 } from '@/features/publicProfile/publicProfile';
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { formatLocale } from '@/i18n/uiI18n';
@@ -73,6 +73,17 @@ function useRowsThatFit(ref, rowHeight, gap, ready) {
     return () => observer.disconnect();
   }, [ref, rowHeight, gap, ready]);
   return rows;
+}
+
+/** Número del banner: rótulo, valor y detalle, alineados con el bloque del récord. */
+function HeroStat({ label, value, sub, tone }) {
+  return (
+    <div className={`rd-pp-stat ${tone ? `rd-pp-stat-${tone}` : ''}`}>
+      <span className="rd-pp-record-label">{label}</span>
+      <span className="rd-pp-stat-value">{value}</span>
+      <span className="rd-pp-record-games">{sub || ' '}</span>
+    </div>
+  );
 }
 
 function Panel({ icon: Icon, title, hint, className = '', children }) {
@@ -143,7 +154,7 @@ function ChampionPool({ champions, selected, onSelect, imageOf, labelOf }) {
             aria-label={`${label}: ${bubble.games} · ${bubble.winrate}%`}
           >
             <title>{`${label} · ${bubble.games} · ${bubble.winrate}%`}</title>
-            {active && <circle cx={bubble.x} cy={bubble.y} r={bubble.r + 4} fill="none" stroke="#E2C46A" strokeWidth="2.5" className="rd-pp-bubble-halo" />}
+            
             <circle cx={bubble.x} cy={bubble.y} r={bubble.r} fill="#141A29" />
             {image && (
               <image
@@ -156,7 +167,7 @@ function ChampionPool({ champions, selected, onSelect, imageOf, labelOf }) {
                 preserveAspectRatio="xMidYMid slice"
               />
             )}
-            <circle cx={bubble.x} cy={bubble.y} r={bubble.r - 1.5} fill="none" stroke={color} strokeWidth="3" />
+            <circle cx={bubble.x} cy={bubble.y} r={bubble.r - 1.5} fill="none" stroke={color} strokeWidth="1" />
             {/* Winrate en una pastilla abajo de la burbuja (solo si entra). */}
             {bubble.r >= 26 && (
               <g>
@@ -226,6 +237,10 @@ export default function PublicProfile() {
   });
 
   const summary = useMemo(() => summarizePublicStats(profile?.stats, activeTypes), [profile, activeTypes]);
+  const sides = useMemo(() => sideSummary(profile?.sides, activeTypes), [profile, activeTypes]);
+  const patchStreak = useMemo(() => bestStreak(profile?.patch_results, activeTypes), [profile, activeTypes]);
+  // KDA con dos decimales y el separador del idioma (3,45), como en Estadísticas.
+  const kdaFormat = new Intl.NumberFormat(formatLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const pool = summary.champions.slice(0, POOL_SIZE);
   const [picked, setPicked] = useState(null);
   const focusName = pool.some(entry => entry.name === picked) ? picked : pool[0]?.name || null;
@@ -282,56 +297,75 @@ export default function PublicProfile() {
 
   return shell(
     <main className="rd-pp-main" data-tab={tab}>
-      {/* Banner con la estética de la tarjeta para compartir. */}
+      {/* Banner con la estética de la tarjeta para compartir: arriba quién es (y los tipos
+          de partida); abajo una franja de números en columnas iguales, alineados en tres
+          líneas (rótulo, valor y detalle). */}
       <section className="rd-pp-hero">
-        <div className="rd-pp-hero-id">
-          <div className="rd-pp-avatar">
-            <ProfileAvatar src={profile.avatar_url} alt={profile.name} iconSize={26} />
+        <div className="rd-pp-hero-top">
+          <div className="rd-pp-hero-id">
+            <div className="rd-pp-avatar">
+              <ProfileAvatar src={profile.avatar_url} alt={profile.name} iconSize={26} />
+            </div>
+            <div className="min-w-0">
+              <div className="rd-pp-kicker"><span />{t('publicProfile.page.kicker')}</div>
+              <h1 className="rd-pp-name">{profile.name}</h1>
+            </div>
           </div>
-          <div className="min-w-0">
-            <div className="rd-pp-kicker"><span />{t('publicProfile.page.kicker')}</div>
-            <h1 className="rd-pp-name">{profile.name}</h1>
-          </div>
-        </div>
 
-        <div className="rd-pp-hero-stats">
-          <div className="rd-pp-winrate" style={{ color: summary.games ? undefined : 'hsl(var(--muted-foreground))' }}>
-            {summary.games ? `${summary.winrate}%` : '—'}
-          </div>
-          <div className="rd-pp-record">
-            <span className="rd-pp-record-label">{t('publicProfile.page.winrate')}</span>
-            <span className="rd-pp-record-value">
-              <span className="text-green-400">{t('share.card.winsShort', { wins: summary.wins })}</span>
-              <span className="text-muted-foreground"> · </span>
-              <span className="text-red-400">{t('share.card.lossesShort', { losses: summary.losses })}</span>
-            </span>
-            <span className="rd-pp-record-games">{gamesLabel(summary.games)}</span>
-          </div>
-        </div>
-
-        <div className="rd-pp-hero-side">
-          {types.length > 1 && (
-            <div className="rd-panel-tabs rd-pp-types" role="group" aria-label={t('publicProfile.page.typeLabel')}>
-              {types.map(type => {
-                const active = activeTypes.includes(type);
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => toggleType(type)}
-                    className={`rd-panel-tab inline-flex min-w-0 flex-1 items-center justify-center gap-1 ${active ? 'rd-panel-tab-active' : ''}`}
-                  >
-                    {active && <Check size={12} strokeWidth={3} className="shrink-0" />}
-                    <span className="truncate">{t(`share.type.${type}`)}</span>
-                  </button>
-                );
-              })}
+          {(types.length > 1 || !isAuthenticated) && (
+            <div className="rd-pp-hero-side">
+              {types.length > 1 && (
+                <div className="rd-panel-tabs rd-pp-types" role="group" aria-label={t('publicProfile.page.typeLabel')}>
+                  {types.map(type => {
+                    const active = activeTypes.includes(type);
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => toggleType(type)}
+                        className={`rd-panel-tab inline-flex min-w-0 flex-1 items-center justify-center gap-1 ${active ? 'rd-panel-tab-active' : ''}`}
+                      >
+                        {active && <Check size={12} strokeWidth={3} className="shrink-0" />}
+                        <span className="truncate">{t(`share.type.${type}`)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {!isAuthenticated && (
+                <Link to="/registro" className="rd-pp-cta"><Sparkles size={14} /> {t('publicProfile.page.ctaButton')}</Link>
+              )}
             </div>
           )}
-          {!isAuthenticated && (
-            <Link to="/registro" className="rd-pp-cta"><Sparkles size={14} /> {t('publicProfile.page.ctaButton')}</Link>
-          )}
+        </div>
+
+        <div className="rd-pp-strip">
+          <HeroStat
+            label={t('publicProfile.page.winrate')}
+            value={summary.games ? `${summary.winrate}%` : '—'}
+            tone="gold"
+            sub={gamesLabel(summary.games)}
+          />
+          <HeroStat
+            label={t('publicProfile.page.record')}
+            value={(
+              <>
+                <span className="text-green-400">{t('share.card.winsShort', { wins: summary.wins })}</span>
+                <span className="text-muted-foreground"> · </span>
+                <span className="text-red-400">{t('share.card.lossesShort', { losses: summary.losses })}</span>
+              </>
+            )}
+          />
+          <HeroStat label={t('publicProfile.page.kda')} value={summary.kda === null ? '—' : kdaFormat.format(summary.kda)} sub={t('publicProfile.page.kdaSub')} />
+          <HeroStat
+            label={t('publicProfile.page.streak')}
+            value={patchStreak ? `${patchStreak}` : '—'}
+            tone={patchStreak >= 3 ? 'fire' : undefined}
+            sub={profile.patch ? t('publicProfile.page.streakSub', { patch: profile.patch }) : ''}
+          />
+          <HeroStat label={t('publicProfile.page.blueSide')} value={sides.blue.winrate === null ? '—' : `${sides.blue.winrate}%`} tone="blue" sub={gamesLabel(sides.blue.games)} />
+          <HeroStat label={t('publicProfile.page.redSide')} value={sides.red.winrate === null ? '—' : `${sides.red.winrate}%`} tone="red" sub={gamesLabel(sides.red.games)} />
         </div>
       </section>
 

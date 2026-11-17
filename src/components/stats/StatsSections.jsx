@@ -22,13 +22,12 @@ export function HeroStat({ label, value, sub, tone }) {
 export function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, redWR, blueWins, blueLosses, redWins, redLosses, champImageUrl, poolScore }) {
   const t = useT();
   return (
-    <div className="rd-stats-hero relative overflow-hidden rounded-2xl border border-border min-h-[150px]"
+    // Misma estética que las demás tarjetas (variables --rd-card-* en 13-shell-misc.css).
+    <div className="rd-stats-hero relative overflow-hidden rounded-2xl min-h-[150px]"
     style={{
-      background: `
-        radial-gradient(circle at 18% 0%, rgba(74, 222, 128, 0.08), transparent 32%),
-        radial-gradient(circle at 85% 15%, rgba(96, 165, 250, 0.08), transparent 35%),
-        linear-gradient(135deg, hsl(222,36%,13%) 0%, hsl(222,36%,9%) 100%)
-      `,
+      border: '1px solid var(--rd-card-border)',
+      background: 'var(--rd-card-decor), var(--rd-card-bg)',
+      boxShadow: 'var(--rd-card-shadow)',
     }}>
       {champImageUrl && (
         <>
@@ -64,7 +63,7 @@ export function StatsHeroCard({ winrate, wins, losses, avgKDA, kdaLine, blueWR, 
             <div
               className="
                 absolute inset-y-0 right-0 w-10
-                bg-gradient-to-l from-[hsl(222,36%,9%)]/85 to-transparent
+                bg-gradient-to-l from-[rgb(11,15,26)]/85 to-transparent
               "
             />
             </div>

@@ -60,11 +60,16 @@ export function summarizePublicStats(stats, types = []) {
   const rows = (stats || []).filter(row => !types.length || types.includes(row.type || 'ranked'));
   const games = rows.reduce((sum, row) => sum + (Number(row.games) || 0), 0);
   const wins = rows.reduce((sum, row) => sum + (Number(row.wins) || 0), 0);
+  // KDA promedio como en Estadísticas: promedio del KDA de cada partida (kda_sum / partidas).
+  const kdaRows = rows.filter(row => row.kda_sum !== undefined && row.kda_sum !== null);
+  const kdaGames = kdaRows.reduce((sum, row) => sum + (Number(row.games) || 0), 0);
+  const kdaSum = kdaRows.reduce((sum, row) => sum + (Number(row.kda_sum) || 0), 0);
   return {
     games,
     wins,
     losses: games - wins,
     winrate: pct(wins, games),
+    kda: kdaGames ? kdaSum / kdaGames : null,
     champions: groupBy(rows, row => row.champion).map(({ key, ...entry }) => ({ name: key, ...entry })),
     lanes: groupBy(rows, row => row.lane).map(({ key, ...entry }) => ({ lane: key, ...entry })),
   };
@@ -153,6 +158,28 @@ export function packBubbles(entries, { minRadius = 16, maxRadius = 56, gap = 4, 
   const minY = Math.min(...placed.map(b => b.y - b.r));
   const maxY = Math.max(...placed.map(b => b.y + b.r));
   return { bubbles: placed, bounds: { x: minX, y: minY, width: maxX - minX, height: maxY - minY } };
+}
+
+/** Récord y winrate por lado del mapa (blue / red) con los tipos elegidos. */
+export function sideSummary(sides, types = []) {
+  const rows = (sides || []).filter(byType(types));
+  const of = side => {
+    const games = rows.filter(row => row.side === side).reduce((sum, row) => sum + (Number(row.games) || 0), 0);
+    const wins = rows.filter(row => row.side === side).reduce((sum, row) => sum + (Number(row.wins) || 0), 0);
+    return { games, wins, winrate: games ? pct(wins, games) : null };
+  };
+  return { blue: of('blue'), red: of('red') };
+}
+
+/** Racha de victorias más larga en los resultados del parche (en orden), con los tipos elegidos. */
+export function bestStreak(results, types = []) {
+  let best = 0;
+  let current = 0;
+  (results || []).filter(byType(types)).forEach(row => {
+    current = row.result === 'win' ? current + 1 : 0;
+    best = Math.max(best, current);
+  });
+  return best;
 }
 
 /** Tipos de partida que el perfil tiene cargados, en el orden de la app. */

@@ -97,3 +97,28 @@ test('últimas partidas: filtra por tipo y corta en el límite', async () => {
   assert.equal(recentMatches(recent, ['ranked']).length, 3);
   assert.equal(recentMatches(recent, [], 2).length, 2);
 });
+
+test('banner: KDA promedio, winrate por lado del mapa y mejor racha del parche', async () => {
+  const { bestStreak, sideSummary, summarizePublicStats } = await import('../../src/features/publicProfile/publicProfile.js');
+  const stats = [
+    { type: 'ranked', champion: "Kai'Sa", lane: 'adc', games: 4, wins: 3, kda_sum: 14 },
+    { type: 'ranked', champion: 'Lux', lane: 'mid', games: 1, wins: 0, kda_sum: 1 },
+    { type: 'casual', champion: 'Lux', lane: 'mid', games: 5, wins: 5, kda_sum: 50 },
+  ];
+  assert.equal(summarizePublicStats(stats, ['ranked']).kda, 3);
+  assert.equal(summarizePublicStats([{ type: 'ranked', champion: 'A', lane: 'mid', games: 2, wins: 1 }], ['ranked']).kda, null);
+
+  const sides = sideSummary([
+    { type: 'ranked', side: 'blue', games: 10, wins: 7 },
+    { type: 'ranked', side: 'red', games: 4, wins: 1 },
+    { type: 'casual', side: 'red', games: 6, wins: 6 },
+  ], ['ranked']);
+  assert.deepEqual(sides.blue, { games: 10, wins: 7, winrate: 70 });
+  assert.deepEqual(sides.red, { games: 4, wins: 1, winrate: 25 });
+  assert.equal(sideSummary([], ['ranked']).blue.winrate, null);
+
+  const results = ['win', 'win', 'loss', 'win', 'win', 'win', 'loss'].map(result => ({ type: 'ranked', result }));
+  results.splice(4, 0, { type: 'casual', result: 'loss' }); // una casual en el medio no corta la racha clasificatoria
+  assert.equal(bestStreak(results, ['ranked']), 3);
+  assert.equal(bestStreak(results, ['ranked', 'casual']), 2);
+});
