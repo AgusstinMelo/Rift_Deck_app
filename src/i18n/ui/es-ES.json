@@ -2074,7 +2074,7 @@
     "deaths": {
       "title": "Morir {next} veces te cuesta la partida",
       "thesis": "Con {ceiling} muertes o menos ganas el {wrLow} de tus partidas ({gamesLow}); con {next} o más, solo el {wrHigh} ({gamesHigh}). En tus victorias promedias {winDeaths} muertes y en las derrotas {lossDeaths}.",
-      "action": "Cuando llegues a {ceiling} muertes, cambia el chip: tu prioridad pasa a no regalar la siguiente. {tip}",
+      "action": "No es un cupo de muertes: cada una que evitas suma, desde la primera, y a partir de la {next} la partida se te escapa. {tip}",
       "evidenceLow": "≤{ceiling} muertes: {wr} · {games}",
       "evidenceHigh": "{next}+ muertes: {wr} · {games}",
       "evidenceLane": "Pasa más en {lane}"
@@ -2477,6 +2477,29 @@
         "thesis": "En {games} partidas el rival construyó 3 o más objetos de curación o robo de vida; en {missed} no construiste antiheal y ganaste el {wr}.{withAnswer}",
         "action": "Si en el marcador ves robo de vida o curación en dos rivales, compra {items} antes de tu tercer objeto.",
         "actionGeneric": "Si en el marcador ves robo de vida o curación en dos rivales, compra un objeto antiheal antes de tu tercer objeto."
+      }
+    },
+    "review": {
+      "theme": {
+        "damage": "daño",
+        "protect": "protección (curaciones y escudos)",
+        "defense": "defensa"
+      },
+      "reason": {
+        "divers": "el rival tenía {count} campeones que llegan a la línea de atrás ({names})",
+        "carry": "tenías a {name} para cuidar",
+        "burst": "tu campeón es frágil contra el burst que traían",
+        "noMagic": "tu equipo no tenía otro daño mágico",
+        "noPhysical": "tu equipo no tenía otro daño físico",
+        "noDive": "el rival casi no tenía cómo llegarte",
+        "frontline": "{name} delante te daba espacio para pegar"
+      },
+      "good": "tu build de {built} era la indicada, porque {reasons}",
+      "shift": "Armaste {built} ({items}), pero la partida pedía {wanted}: {reasons}.",
+      "itemsAction": "Con {champion} en una partida así: {items}.",
+      "play": {
+        "protect": "Juega al lado de tu tirador y guarda escudos y curaciones para cuando le salten encima: el daño lo pone tu equipo.",
+        "damage": "Pega desde lejos antes de cada objetivo para llegar con ventaja y sal cuando entren: tu daño es el que le faltaba al equipo."
       }
     }
   },

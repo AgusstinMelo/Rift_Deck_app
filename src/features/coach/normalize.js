@@ -46,15 +46,21 @@ const unique = values => {
  * Amenazas de la composición rival que le tocan responder a este campeón (según su clase)
  * y si la build las respondió. Se recalculan si cambia la clase (ver `withOwn`).
  */
-export function assessThreats({ own, enemyProfiles, itemProfiles, compKnown, buildKnown }) {
+export function assessThreats({ own, enemyProfiles, itemProfiles, compKnown, buildKnown, itemSlots = itemProfiles.length }) {
   const threats = {};
   if (!compKnown) return threats;
   THREATS.forEach(threat => {
     const count = threat.count(enemyProfiles);
     if (count < threat.min || !threat.appliesTo(own)) return;
+    // Solo cuentan objetos terminados (y botas donde son respuesta): un componente camino a
+    // Zhonya no es "armaste armadura".
+    const hasAnswer = itemProfiles.some(item => (item.final || (threat.boots && item.boots)) && threat.answers(item, own));
+    // Sin la respuesta pero con slots libres antes de cuando le toca: pudo venir después
+    // (la partida terminó antes), así que no se cuenta como que faltó.
+    const due = itemSlots >= threat.dueBy(own);
     threats[threat.id] = {
       count,
-      answered: buildKnown ? itemProfiles.some(item => threat.answers(item, own)) : null,
+      answered: !buildKnown ? null : hasAnswer ? true : due ? false : null,
     };
   });
   return threats;
@@ -113,6 +119,7 @@ export function normalizeMatch(match, catalog) {
   // Perfil según la línea: en support, Leona o Lux juegan (y arman) como supports.
   const own = inLane(catalog.champion(champion, match.own_champion_id), lane);
   const enemyProfiles = enemies.map(name => catalog.champion(name)).filter(Boolean);
+  const allyProfiles = allies.map(name => catalog.champion(name)).filter(Boolean);
   const items = asList(match.items_used).map(name => String(name).trim()).filter(Boolean);
   const itemProfiles = items.map(name => catalog.item(name)).filter(Boolean);
   const runes = unique(asList(match.runes_used));
@@ -124,7 +131,9 @@ export function normalizeMatch(match, catalog) {
   // La build cuenta como conocida desde 3 objetos reconocidos: antes la partida pudo
   // terminar sin llegar a comprar la respuesta.
   const buildKnown = itemProfiles.length >= 3;
-  const threats = assessThreats({ own, enemyProfiles, itemProfiles, compKnown, buildKnown });
+  // Slots ocupados por objetos (las botas y los encantamientos van aparte).
+  const itemSlots = items.length - itemProfiles.filter(item => item.types.some(type => ['movimiento', 'encantamiento'].includes(type))).length;
+  const threats = assessThreats({ own, enemyProfiles, itemProfiles, compKnown, buildKnown, itemSlots });
 
   return {
     raw: match,
@@ -145,10 +154,12 @@ export function normalizeMatch(match, catalog) {
     enemies,
     enemyProfiles,
     allies,
+    allyProfiles,
     items,
     itemKeys: new Set(items.map(keyOf)),
     itemProfiles,
     buildKnown,
+    itemSlots,
     compKnown,
     threats,
     runes,

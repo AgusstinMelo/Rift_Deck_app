@@ -39,3 +39,6 @@ test/fixtures/captures/
 # Playwright
 /test-results/
 /playwright-report/
+
+# Material de promoción (local)
+promotion/

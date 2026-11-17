@@ -4,6 +4,7 @@ import { tr } from '../../../i18n/uiI18n.js';
 import { FAMILY, makeInsight } from '../card.js';
 import { fixed, pct, summarize } from '../stats.js';
 import { threatAdvice } from './build.js';
+import { reviewBuild } from './buildReview.js';
 import { vulnerabilityPlan } from './matchups.js';
 import { findDeathCeiling, survivalTip } from './performance.js';
 
@@ -37,8 +38,16 @@ export function detectLastMatch(ctx) {
     }
   }
 
+  // Temática de la build contra las dos composiciones (daño, protección): si pedían otra,
+  // es la corrección principal y las amenazas de defensa quedan dentro de ella.
+  const review = reviewBuild(ctx, match);
+  if (review?.verdict === 'shift') flags.push({ weight: 3.2, text: review.text, action: review.action });
+  else if (review?.verdict === 'good') praise.push(review.text);
+  const coveredByReview = review?.verdict === 'shift' ? ['burst', 'physical', 'magic'] : [];
+
   // Build contra la composición rival.
   Object.entries(match.threats).forEach(([id, threat]) => {
+    if (coveredByReview.includes(id)) return;
     if (threat.answered === false) {
       flags.push({
         weight: THREAT_WEIGHT[id] ?? 2,

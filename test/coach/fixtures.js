@@ -27,6 +27,11 @@ export const champions = [
   champion('Janna', { roles: ['Soporte'], traits: ['dependiente_habilidades', 'rango', 'escudo_aliado', 'curacion_aliada'], damage_type: 'AP', scaling: 'lategame' }),
   // Luchador que también se juega de support.
   champion('Sett', { roles: ['Luchador'], traits: ['dependiente_autoataques', 'melee', 'cc_duro'], damage_type: 'AD' }),
+  // Support maga (como en el catálogo real) y rivales que llegan a la línea de atrás.
+  champion('Seraphine', { roles: ['Mago'], traits: ['dependiente_habilidades', 'daño_magico', 'rango', 'curacion_aliada', 'cc_duro'], vulnerabilities: ['gap_close', 'asesino', 'presion_early'], damage_type: 'AP', scaling: 'lategame' }),
+  champion('Akali', { roles: ['Asesino'], traits: ['melee', 'dash', 'daño_burst'], damage_type: 'AP' }),
+  champion('Lee Sin', { roles: ['Luchador'], traits: ['melee', 'dash', 'salto'], damage_type: 'AD', scaling: 'earlygame' }),
+  champion('Ashe', { roles: ['Tirador'], traits: ['rango', 'dependiente_autoataques', 'cc_duro'], damage_type: 'AD', scaling: 'lategame' }),
 ];
 
 const item = (name, fields) => ({
@@ -55,6 +60,10 @@ export const items = [
   item('Reloj de Arena de Zhonya', { type: ['Daño Magico', 'Defensa'], effect_tags: ['invulnerabilidad', 'anti_burst'], armor: 45, situational_role: ['defensivo'] }),
   item('Botas de Mercurio', { category: 'Nivel Medio', type: ['Movimiento'], tenacity: 30, magic_res: 25 }),
   item('Orbe del Infinito', { type: ['Daño Magico'], effect_tags: ['penetracion_magica'] }),
+  item('Eco de Luden', { type: ['Daño Magico'], effect_tags: ['daño_burst', 'daño_habilidad'], situational_role: ['core', 'ofensivo'] }),
+  item('Báculo de Agua Fluyente', { type: ['Soporte'], effect_tags: ['curacion_aliada', 'escudo_aliado', 'buff_aliado'], situational_role: ['utilidad'] }),
+  // Componente con armadura camino a Zhonya: no es un objeto terminado.
+  item('Brazal del Buscador', { category: 'Nivel Medio', type: ['Daño Magico', 'Defensa'], armor: 20 }),
 ];
 
 export const runes = [

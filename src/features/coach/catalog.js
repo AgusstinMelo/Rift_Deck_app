@@ -202,10 +202,17 @@ export function itemProfile(row) {
  * `boots`: las botas son una respuesta válida (tenacidad, armadura o resistencia mágica).
  * `answers(item)` dice si un objeto la responde. `appliesTo(own)` filtra a quién le
  * corresponde responderla (un tanque no compra penetración contra tanques).
+ * `dueBy(own)`: para qué objeto (sin contar botas) ya tendría que estar la respuesta. Con
+ * slots libres antes de eso no se puede afirmar que faltó: un carry arma su defensa de
+ * 4º o 5º objeto, y en una partida corta todavía no había llegado.
  */
+/** Defensa contra daño o burst: el carry la arma al final de su núcleo de daño. */
+const defenseDue = own => (own?.buildClass === 'carry' ? 5 : own?.buildClass === 'support' ? 4 : 3);
+
 export const THREATS = [
   {
     id: 'healing',
+    dueBy: () => 3,
     min: 2,
     count: enemies => enemies.filter(enemy => enemy.healer).length,
     answers: item => item.effects.has('anti_curacion'),
@@ -214,6 +221,7 @@ export const THREATS = [
   },
   {
     id: 'magic',
+    dueBy: defenseDue,
     boots: true,
     min: 3,
     count: enemies => enemies.reduce((sum, enemy) => sum + (enemy.damage === 'AP' ? 1 : enemy.damage === 'HYBRID' ? 0.5 : 0), 0),
@@ -224,6 +232,7 @@ export const THREATS = [
   },
   {
     id: 'physical',
+    dueBy: defenseDue,
     boots: true,
     min: 3,
     count: enemies => enemies.reduce((sum, enemy) => sum + (enemy.damage === 'AD' ? 1 : enemy.damage === 'HYBRID' ? 0.5 : 0), 0),
@@ -234,6 +243,7 @@ export const THREATS = [
   },
   {
     id: 'cc',
+    dueBy: () => 3,
     boots: true,
     min: 3,
     count: enemies => enemies.filter(enemy => enemy.hardCc).length,
@@ -242,6 +252,7 @@ export const THREATS = [
   },
   {
     id: 'burst',
+    dueBy: defenseDue,
     min: 2,
     count: enemies => enemies.filter(enemy => enemy.burst).length,
     answers: item => ['anti_burst', 'escudo_hechizo', 'invulnerabilidad', 'escudo'].some(tag => item.effects.has(tag)),
@@ -250,6 +261,7 @@ export const THREATS = [
   },
   {
     id: 'tanks',
+    dueBy: () => 3,
     min: 2,
     count: enemies => enemies.filter(enemy => enemy.isTank).length,
     answers: item => ['penetracion_armadura', 'penetracion_magica', 'dano_vida_porcentual', 'reduccion_armadura',
@@ -258,6 +270,7 @@ export const THREATS = [
   },
   {
     id: 'shields',
+    dueBy: () => 4,
     min: 2,
     count: enemies => enemies.filter(enemy => enemy.shields).length,
     answers: item => item.effects.has('anti_escudo'),

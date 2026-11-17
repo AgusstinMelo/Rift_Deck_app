@@ -217,6 +217,24 @@ test('carry: Ángel Guardián cuenta como respuesta al daño físico', () => {
   assert.equal(row.threats.physical.answered, true);
 });
 
+test('build sin terminar: con slots libres no se afirma que faltó la defensa (pudo venir después)', () => {
+  const index = buildCatalog(catalog);
+  const enemies = ['Zed', 'Ahri', 'Darius', 'Jinx', 'Aatrox'];
+  // Kai'Sa con 4 objetos y botas: el anti-burst de un carry llega de 4º o 5º objeto.
+  const unfinished = normalizeMatch(match(kaisa({ enemy_champions: enemies, items_used: ['Hidra Titánica', 'Filo Infinito', 'Cuchilla Negra', 'Espada Larga', 'Botas de Mercurio'] })), index);
+  assert.equal(unfinished.threats.burst.answered, null);
+  assert.equal(unfinished.threats.physical.answered, null);
+  // Build completa sin respuesta: ahí sí faltó.
+  const full = normalizeMatch(match(kaisa({ enemy_champions: enemies, items_used: ['Hidra Titánica', 'Filo Infinito', 'Cuchilla Negra', 'Espada Larga', 'Hoja del Rey Arruinado'] })), index);
+  assert.equal(full.threats.burst.answered, false);
+  // Si la respuesta ya está, cuenta aunque la build no esté terminada.
+  const early = normalizeMatch(match(kaisa({ enemy_champions: enemies, items_used: ['Hidra Titánica', 'Filo Infinito', 'Ángel Guardián'] })), index);
+  assert.equal(early.threats.burst.answered, true);
+  // El antiheal sí se espera desde el 3er objeto.
+  const healers = normalizeMatch(match({ enemy_champions: HEALERS, items_used: ['Hidra Titánica', 'Cuchilla Negra', 'Filo Infinito'] }), index);
+  assert.equal(healers.threats.healing.answered, false);
+});
+
 test('carry: 59% sin defensa contra 80% en 5 partidas con defensa no alcanza para aconsejar', () => {
   const matches = [
     ...many(10, kaisa({ result: 'win' })),

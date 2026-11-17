@@ -73,7 +73,7 @@ export function detectDeathCeiling(ctx) {
       wrLow: pct(low.wr), gamesLow: low.games, wrHigh: pct(high.wr), gamesHigh: high.games,
       winDeaths: fixed(wins.avgDeaths), lossDeaths: fixed(losses.avgDeaths),
     }),
-    action: tr('coachEngine.deaths.action', { ceiling, tip: survivalTip(lane, mainOwnOf(highRows, lane)) }),
+    action: tr('coachEngine.deaths.action', { next: ceiling + 1, tip: survivalTip(lane, mainOwnOf(highRows, lane)) }),
     evidence: [
       tr('coachEngine.deaths.evidenceLow', { ceiling, wr: pct(low.wr), games: low.games }),
       tr('coachEngine.deaths.evidenceHigh', { next: ceiling + 1, wr: pct(high.wr), games: high.games }),

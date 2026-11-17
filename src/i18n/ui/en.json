@@ -2074,7 +2074,7 @@
     "deaths": {
       "title": "Dying {next} times costs you the game",
       "thesis": "With {ceiling} deaths or fewer you win {wrLow} of your matches ({gamesLow}); with {next} or more, only {wrHigh} ({gamesHigh}). You average {winDeaths} deaths in your wins and {lossDeaths} in your losses.",
-      "action": "Once you reach {ceiling} deaths, switch gears: your priority becomes not giving away the next one. {tip}",
+      "action": "This is not a death allowance: every death you avoid counts, starting with the first, and from death {next} on the game slips away. {tip}",
       "evidenceLow": "≤{ceiling} deaths: {wr} · {games}",
       "evidenceHigh": "{next}+ deaths: {wr} · {games}",
       "evidenceLane": "Happens most in {lane}"
@@ -2477,6 +2477,29 @@
         "thesis": "In {games} games the enemy built 3 or more healing or lifesteal items; in {missed} of them you had no anti-heal and won {wr}.{withAnswer}",
         "action": "If the scoreboard shows lifesteal or healing on two enemies, buy {items} before your third item.",
         "actionGeneric": "If the scoreboard shows lifesteal or healing on two enemies, buy an anti-heal item before your third item."
+      }
+    },
+    "review": {
+      "theme": {
+        "damage": "damage",
+        "protect": "protection (heals and shields)",
+        "defense": "defense"
+      },
+      "reason": {
+        "divers": "the enemy had {count} champions who reach the backline ({names})",
+        "carry": "you had {name} to protect",
+        "burst": "your champion is fragile against the burst they brought",
+        "noMagic": "your team had no other magic damage",
+        "noPhysical": "your team had no other physical damage",
+        "noDive": "the enemy had almost no way to reach you",
+        "frontline": "{name} up front gave you room to deal damage"
+      },
+      "good": "your {built} build was the right call, because {reasons}",
+      "shift": "You built {built} ({items}), but the game called for {wanted}: {reasons}.",
+      "itemsAction": "With {champion} in a game like this: {items}.",
+      "play": {
+        "protect": "Stay next to your marksman and save shields and heals for when they get jumped: your team brings the damage.",
+        "damage": "Poke from range before each objective to start it ahead, and back off when they engage: your damage is what the team was missing."
       }
     }
   },

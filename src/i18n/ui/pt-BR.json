@@ -2074,7 +2074,7 @@
     "deaths": {
       "title": "Morrer {next} vezes te custa a partida",
       "thesis": "Com {ceiling} mortes ou menos você vence {wrLow} das suas partidas ({gamesLow}); com {next} ou mais, só {wrHigh} ({gamesHigh}). Nas vitórias você tem média de {winDeaths} mortes e nas derrotas, {lossDeaths}.",
-      "action": "Quando chegar a {ceiling} mortes, mude a chave: sua prioridade passa a ser não entregar a próxima. {tip}",
+      "action": "Não é uma cota de mortes: cada morte que você evita conta, desde a primeira, e a partir da {next}ª a partida escapa. {tip}",
       "evidenceLow": "≤{ceiling} mortes: {wr} · {games}",
       "evidenceHigh": "{next}+ mortes: {wr} · {games}",
       "evidenceLane": "Acontece mais em {lane}"
@@ -2477,6 +2477,29 @@
         "thesis": "Em {games} partidas o rival montou 3 ou mais itens de cura ou roubo de vida; em {missed} você não montou antiheal e venceu {wr}.{withAnswer}",
         "action": "Se no placar você vir roubo de vida ou cura em dois rivais, compre {items} antes do terceiro item.",
         "actionGeneric": "Se no placar você vir roubo de vida ou cura em dois rivais, compre um item antiheal antes do terceiro item."
+      }
+    },
+    "review": {
+      "theme": {
+        "damage": "dano",
+        "protect": "proteção (curas e escudos)",
+        "defense": "defesa"
+      },
+      "reason": {
+        "divers": "o rival tinha {count} campeões que chegam na linha de trás ({names})",
+        "carry": "você tinha {name} para proteger",
+        "burst": "seu campeão é frágil contra o burst que eles tinham",
+        "noMagic": "seu time não tinha outro dano mágico",
+        "noPhysical": "seu time não tinha outro dano físico",
+        "noDive": "o rival quase não tinha como chegar em você",
+        "frontline": "{name} na frente te dava espaço para causar dano"
+      },
+      "good": "sua build de {built} era a certa, porque {reasons}",
+      "shift": "Você montou {built} ({items}), mas a partida pedia {wanted}: {reasons}.",
+      "itemsAction": "Com {champion} numa partida assim: {items}.",
+      "play": {
+        "protect": "Jogue ao lado do seu atirador e guarde escudos e curas para quando pularem nele: o dano vem do seu time.",
+        "damage": "Cause dano de longe antes de cada objetivo para chegar com vantagem e saia quando eles entrarem: seu dano é o que faltava ao time."
       }
     }
   },
