@@ -15,3 +15,4 @@
 @import './styles/12-stats.css'; /* Estadísticas. */
 @import './styles/13-shell-misc.css'; /* Sidebar, movimiento reducido, efectos, landing. */
 @import './styles/14-pages-misc.css'; /* Fichas en escritorio, tierlist por tier, home pública, encabezados y carga con capturas. */
+@import './styles/15-public-profile.css'; /* Perfil público (/p/<nombre>). */

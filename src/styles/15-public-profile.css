@@ -1,0 +1,862 @@
+/* Perfil público (/p/<nombre>): vitrina que entra entera en la pantalla, con la estética
+   de la tarjeta para compartir (dorado, degradés, grilla triangular).
+   - Escritorio: banner arriba; pool | foco del campeón | (radar / últimas partidas).
+   - Celular y tablet: banner compacto, un panel a la vez y pestañas al pie. */
+
+.rd-pp {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.rd-pp-frame {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.rd-pp-main {
+  display: grid;
+  width: 100%;
+  max-width: 1600px;
+  min-height: 0;
+  flex: 1 1 auto;
+  gap: 1rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 1.25rem;
+  overflow: hidden;
+}
+
+.rd-pp-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Banner ─────────────────────────────────────────────────────────────── */
+.rd-pp-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.1rem 1.5rem;
+  overflow: hidden;
+  border: 1.5px solid rgba(212, 175, 55, 0.45);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(55% 140% at 100% 0%, rgba(212, 175, 55, 0.16) 0%, rgba(212, 175, 55, 0) 70%),
+    radial-gradient(45% 160% at 0% 100%, rgba(124, 58, 237, 0.26) 0%, rgba(124, 58, 237, 0) 70%),
+    linear-gradient(180deg, rgba(29, 37, 64, 0.94) 0%, rgba(11, 15, 26, 0.94) 100%);
+  box-shadow: 0 0 40px rgba(212, 175, 55, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* Grilla triangular, como el fondo de la tarjeta. */
+.rd-pp-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(60deg, rgba(212, 175, 55, 0.05) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(-60deg, rgba(212, 175, 55, 0.05) 0 1px, transparent 1px 22px);
+}
+
+.rd-pp-hero > * {
+  position: relative;
+}
+
+.rd-pp-hero-id {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rd-pp-avatar {
+  display: flex;
+  width: 4.5rem;
+  height: 4.5rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px solid rgba(212, 175, 55, 0.7);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 22px rgba(212, 175, 55, 0.25);
+}
+
+.rd-pp-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rd-pp-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(226, 196, 106, 0.85);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.rd-pp-kicker > span {
+  width: 2rem;
+  height: 1px;
+  background: rgba(212, 175, 55, 0.5);
+}
+
+.rd-pp-name {
+  overflow: hidden;
+  margin-top: 0.15rem;
+  color: hsl(var(--foreground));
+  font-family: var(--font-rajdhani);
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rd-pp-hero-stats {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.rd-pp-winrate {
+  color: #E2C46A;
+  font-family: var(--font-rajdhani);
+  font-size: 3.75rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  text-shadow: 0 0 28px rgba(212, 175, 55, 0.3);
+}
+
+.rd-pp-record {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-bottom: 0.2rem;
+}
+
+.rd-pp-record-label,
+.rd-pp-record-games {
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.rd-pp-record-games {
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.rd-pp-record-value {
+  font-family: var(--font-rajdhani);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.rd-pp-hero-side {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.rd-pp-types {
+  width: 21rem;
+  max-width: 100%;
+}
+
+.rd-pp-types .rd-panel-tab {
+  font-size: 0.72rem;
+}
+
+.rd-pp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #D9BC63 0%, #BF9B35 55%, #8A6C20 100%);
+  color: #1A1405;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.rd-pp-cta:hover {
+  filter: brightness(1.08);
+}
+
+/* ── Paneles ────────────────────────────────────────────────────────────── */
+.rd-pp-panel {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0.9rem 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.012) 100%),
+    hsl(var(--card) / 0.88);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.rd-pp-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(226, 196, 106, 0.8) 50%, rgba(212, 175, 55, 0) 100%);
+}
+
+.rd-pp-panel-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  color: #E2C46A;
+}
+
+.rd-pp-panel-head h2 {
+  color: hsl(var(--foreground));
+  font-family: var(--font-rajdhani);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.rd-pp-panel-hint {
+  margin-left: auto;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+}
+
+.rd-pp-panel-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  margin-top: 0.6rem;
+}
+
+.rd-pp-empty {
+  margin: auto;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Pool de campeones */
+.rd-pp-pool-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.rd-pp-bubble {
+  cursor: pointer;
+  outline: none;
+}
+
+.rd-pp-bubble image {
+  opacity: 0.82;
+  transition: opacity 0.2s ease;
+}
+
+.rd-pp-bubble:hover image,
+.rd-pp-bubble:focus-visible image,
+.rd-pp-bubble.is-active image {
+  opacity: 1;
+}
+
+.rd-pp-bubble-halo {
+  filter: drop-shadow(0 0 6px rgba(226, 196, 106, 0.7));
+}
+
+/* Foco del campeón */
+.rd-pp-focus {
+  gap: 0.8rem;
+}
+
+.rd-pp-focus-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.rd-pp-focus-avatar {
+  width: 4rem;
+  height: 4rem;
+  flex: none;
+  overflow: hidden;
+  border: 2px solid;
+  border-radius: 1rem;
+  background: #141A29;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.15);
+}
+
+.rd-pp-focus-avatar img,
+.rd-pp-tile-avatar img,
+.rd-pp-recent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rd-pp-focus-name {
+  overflow: hidden;
+  font-family: var(--font-rajdhani);
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rd-pp-focus-meta {
+  margin-top: 0.15rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+}
+
+.rd-pp-tiles {
+  display: grid;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.rd-pp-tile {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid;
+  border-radius: 1rem;
+}
+
+.rd-pp-tile-good {
+  border-color: rgba(74, 222, 128, 0.25);
+  background: radial-gradient(90% 120% at 0% 0%, rgba(74, 222, 128, 0.12) 0%, rgba(74, 222, 128, 0.02) 70%);
+}
+
+.rd-pp-tile-bad {
+  border-color: rgba(248, 113, 113, 0.25);
+  background: radial-gradient(90% 120% at 0% 0%, rgba(248, 113, 113, 0.12) 0%, rgba(248, 113, 113, 0.02) 70%);
+}
+
+.rd-pp-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rd-pp-tile-good .rd-pp-tile-label svg { color: #4ADE80; }
+.rd-pp-tile-bad .rd-pp-tile-label svg { color: #F87171; }
+
+.rd-pp-tile-body {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.rd-pp-tile-avatar {
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.8rem;
+  background: #141A29;
+}
+
+.rd-pp-tile-name {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rd-pp-tile-meta {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.rd-pp-tile-empty {
+  color: hsl(var(--muted-foreground) / 0.8);
+  font-size: 0.8rem;
+}
+
+/* Radar por línea: el de Estadísticas, ocupando el panel. */
+.rd-pp-lanes .rd-stats-lane {
+  width: 100%;
+}
+
+.rd-pp-lanes .rd-stats-lane-chart {
+  max-height: none;
+}
+
+/* Últimas partidas */
+.rd-pp-recent-list {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.rd-pp-recent-row {
+  display: grid;
+  flex: none;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.rd-pp-result {
+  display: flex;
+  width: 1.6rem;
+  height: 1.6rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.45rem;
+  font-family: var(--font-rajdhani);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.rd-pp-result.is-win { background: rgba(74, 222, 128, 0.16); color: #4ADE80; }
+.rd-pp-result.is-loss { background: rgba(248, 113, 113, 0.16); color: #F87171; }
+
+.rd-pp-recent-avatar {
+  width: 1.9rem;
+  height: 1.9rem;
+  overflow: hidden;
+  border-radius: 0.55rem;
+  background: #141A29;
+}
+
+.rd-pp-recent-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.rd-pp-recent-name,
+.rd-pp-recent-vs {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rd-pp-recent-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.rd-pp-recent-vs,
+.rd-pp-recent-date {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+}
+
+.rd-pp-recent-kda {
+  font-family: var(--font-rajdhani);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rd-pp-recent-date {
+  min-width: 2.8rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rd-pp-tabs {
+  display: none;
+}
+
+/* ── Escritorio ─────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-pp-main {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .rd-pp-hero { grid-column: 1 / -1; grid-row: 1; }
+  .rd-pp-pool { grid-column: 1; grid-row: 2 / 4; }
+  .rd-pp-focus { grid-column: 2; grid-row: 2 / 4; }
+  .rd-pp-lanes { grid-column: 3; grid-row: 2; }
+  .rd-pp-recent { grid-column: 3; grid-row: 3; }
+
+  /* En la columna angosta la línea de cada partida no entra: se ve en el radar. */
+  .rd-pp-recent-lane {
+    display: none;
+  }
+}
+
+/* Escritorio con poco alto (notebooks): todo un poco más compacto. */
+@media (min-width: 1024px) and (min-height: 501px) and (max-height: 760px) {
+  .rd-pp-main { gap: 0.75rem; padding: 0.75rem 1rem 1rem; }
+  .rd-pp-hero { padding: 0.7rem 1.25rem; }
+  .rd-pp-avatar { width: 3.5rem; height: 3.5rem; }
+  .rd-pp-name { font-size: 2rem; }
+  .rd-pp-winrate { font-size: 3rem; }
+  .rd-pp-tile-avatar { width: 2.6rem; height: 2.6rem; }
+}
+
+/* ── Celular y tablet: un panel a la vez ────────────────────────────────── */
+@media (max-width: 1023px), (max-height: 500px) {
+  .rd-pp-main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem max(0.6rem, env(safe-area-inset-bottom));
+  }
+
+  /* Pestaña Pool: burbujas arriba y foco del campeón abajo. */
+  .rd-pp-main[data-tab='pool'] {
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+
+  .rd-pp-main[data-tab='pool'] .rd-pp-lanes,
+  .rd-pp-main[data-tab='pool'] .rd-pp-recent,
+  .rd-pp-main[data-tab='lanes'] .rd-pp-pool,
+  .rd-pp-main[data-tab='lanes'] .rd-pp-focus,
+  .rd-pp-main[data-tab='lanes'] .rd-pp-recent,
+  .rd-pp-main[data-tab='recent'] .rd-pp-pool,
+  .rd-pp-main[data-tab='recent'] .rd-pp-focus,
+  .rd-pp-main[data-tab='recent'] .rd-pp-lanes {
+    display: none;
+  }
+
+  .rd-pp-tabs {
+    display: flex;
+    padding: 0.25rem;
+  }
+
+  .rd-pp-tabs .rd-panel-tab {
+    min-height: 2.4rem;
+    font-size: 0.8rem;
+  }
+
+  .rd-pp-hero {
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 1.1rem;
+  }
+
+  .rd-pp-avatar { width: 3rem; height: 3rem; }
+  .rd-pp-name { font-size: 1.45rem; }
+  .rd-pp-kicker { font-size: 9px; }
+  .rd-pp-winrate { font-size: 2.4rem; }
+  .rd-pp-record-value { font-size: 1.05rem; }
+  .rd-pp-record-label { display: none; }
+
+  .rd-pp-hero-side {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .rd-pp-types {
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .rd-pp-cta {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.72rem;
+  }
+
+  .rd-pp-panel {
+    padding: 0.75rem 0.85rem;
+    border-radius: 1.1rem;
+  }
+
+  .rd-pp-panel-hint {
+    display: none;
+  }
+
+  /* Foco compacto: encabezado chico y casillas en 2x2 de alto justo. */
+  .rd-pp-focus {
+    gap: 0.6rem;
+  }
+
+  .rd-pp-focus-avatar { width: 2.6rem; height: 2.6rem; border-radius: 0.75rem; }
+  .rd-pp-focus-name { font-size: 1.15rem; }
+  .rd-pp-focus-meta { font-size: 0.72rem; }
+
+  .rd-pp-tiles {
+    flex: none;
+    grid-template-rows: auto auto;
+    gap: 0.45rem;
+  }
+
+  .rd-pp-tile {
+    gap: 0.35rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 0.8rem;
+  }
+
+  .rd-pp-tile-label { font-size: 9px; letter-spacing: 0.1em; }
+  .rd-pp-tile-avatar { width: 2rem; height: 2rem; border-radius: 0.55rem; }
+  .rd-pp-tile-name { font-size: 0.82rem; }
+  .rd-pp-tile-meta { font-size: 0.68rem; }
+}
+
+/* Celular horizontal: muy poco alto. Banner en una línea y, en Pool, burbujas y foco
+   lado a lado. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-pp-main {
+    gap: 0.45rem;
+    padding: 0.45rem 0.75rem max(0.45rem, env(safe-area-inset-bottom));
+  }
+
+  .rd-pp-hero {
+    flex-wrap: nowrap;
+    padding: 0.45rem 0.8rem;
+  }
+
+  .rd-pp-avatar { width: 2.2rem; height: 2.2rem; }
+  .rd-pp-kicker { display: none; }
+  .rd-pp-name { font-size: 1.15rem; }
+  .rd-pp-winrate { font-size: 1.7rem; }
+  .rd-pp-record-games { display: none; }
+
+  .rd-pp-hero-side {
+    width: auto;
+  }
+
+  .rd-pp-types {
+    width: 17rem;
+  }
+
+  .rd-pp-main[data-tab='pool'] {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .rd-pp-main[data-tab='pool'] .rd-pp-hero,
+  .rd-pp-main[data-tab='pool'] .rd-pp-tabs {
+    grid-column: 1 / -1;
+  }
+
+  .rd-pp-main[data-tab='pool'] .rd-pp-pool { grid-column: 1; grid-row: 2; }
+  .rd-pp-main[data-tab='pool'] .rd-pp-focus { grid-column: 2; grid-row: 2; }
+
+  .rd-pp-tabs .rd-panel-tab {
+    min-height: 2rem;
+  }
+
+  .rd-pp-panel {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .rd-pp-panel-body {
+    margin-top: 0.35rem;
+  }
+}
+
+/* Pool: el SVG ocupa una caja medida (su proporción ordena las burbujas). */
+.rd-pp-pool-box {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.rd-pp-focus-splash {
+  display: none;
+}
+
+/* Escritorio: el foco arranca con un banner del campeón (splash de fondo, nombre
+   encima) y las cuatro casillas con el contenido centrado y en columna. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-pp-focus {
+    padding: 0;
+    gap: 0;
+  }
+
+  .rd-pp-focus-head {
+    position: relative;
+    flex: 0 0 38%;
+    align-items: flex-end;
+    padding: 1rem 1.1rem;
+    overflow: hidden;
+    background: #141A29;
+  }
+
+  .rd-pp-focus-splash {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 22%;
+  }
+
+  .rd-pp-focus-head::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(11, 15, 26, 0.1) 0%, rgba(11, 15, 26, 0) 35%, rgba(11, 15, 26, 0.92) 100%),
+      linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.07) 50%, transparent 60%);
+  }
+
+  .rd-pp-focus-head > :not(.rd-pp-focus-splash) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .rd-pp-focus-name {
+    font-size: 2.1rem;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  }
+
+  .rd-pp-focus-meta {
+    color: rgba(244, 239, 227, 0.85);
+  }
+
+  .rd-pp-tiles {
+    padding: 0.9rem;
+  }
+
+  .rd-pp-tile {
+    align-items: center;
+    text-align: center;
+  }
+
+  .rd-pp-tile-body {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rd-pp-tile-avatar {
+    width: 4.25rem;
+    height: 4.25rem;
+    border-radius: 999px;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.35);
+  }
+
+  .rd-pp-tile-good .rd-pp-tile-avatar { border: 2px solid rgba(74, 222, 128, 0.6); }
+  .rd-pp-tile-bad .rd-pp-tile-avatar { border: 2px solid rgba(248, 113, 113, 0.6); }
+
+  .rd-pp-tile-name {
+    max-width: 100%;
+    font-family: var(--font-rajdhani);
+    font-size: 1.15rem;
+    text-transform: uppercase;
+  }
+
+  .rd-pp-tile-meta {
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 1024px) and (min-height: 501px) and (max-height: 760px) {
+  .rd-pp-focus-head { flex-basis: 34%; padding: 0.75rem 0.9rem; }
+  .rd-pp-focus-name { font-size: 1.6rem; }
+  .rd-pp-tiles { padding: 0.7rem; gap: 0.5rem; }
+  .rd-pp-tile { gap: 0.35rem; padding: 0.5rem; }
+  .rd-pp-tile-avatar { width: 3rem; height: 3rem; }
+  .rd-pp-tile-name { font-size: 0.95rem; }
+}
+
+/* Celular horizontal: foco compacto (entran las cuatro casillas) y sin la invitación
+   (ya está "Iniciar sesión" en el encabezado y el nombre necesita el lugar). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-pp-cta {
+    display: none;
+  }
+
+  .rd-pp-types {
+    width: 14rem;
+  }
+
+  .rd-pp-focus {
+    gap: 0.4rem;
+  }
+
+  .rd-pp-focus-avatar { width: 1.9rem; height: 1.9rem; border-radius: 0.55rem; }
+  .rd-pp-focus-name { font-size: 0.95rem; }
+  .rd-pp-focus-meta { font-size: 0.65rem; margin-top: 0; }
+
+  .rd-pp-tiles {
+    flex: 1 1 auto;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-pp-tile {
+    gap: 0.2rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.65rem;
+  }
+
+  .rd-pp-tile-label { font-size: 8px; }
+  .rd-pp-tile-avatar { width: 1.6rem; height: 1.6rem; border-radius: 0.45rem; }
+  .rd-pp-tile-name { font-size: 0.75rem; }
+  .rd-pp-tile-meta { font-size: 0.62rem; }
+}
+
+/* Notebooks: el banner reparte menos espacio entre bloques para que el nombre entre. */
+@media (min-width: 1024px) and (min-height: 501px) and (max-width: 1500px) {
+  .rd-pp-hero { gap: 1.25rem; }
+  .rd-pp-name { font-size: 1.9rem; }
+  .rd-pp-winrate { font-size: 3.1rem; }
+  .rd-pp-types { width: 17rem; }
+}

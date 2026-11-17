@@ -2458,7 +2458,7 @@
   "publicProfile": {
     "settings": {
       "title": "Perfil público",
-      "description": "Compartí un link con tu winrate, tus campeones y líneas y las builds que marques como públicas. Solo lo ve quien tenga el link: no aparece en Google ni en rankings.",
+      "description": "Compartí un link con tu winrate, tu pool de campeones, tus líneas, tus mejores y peores matchups y tus últimas partidas. Solo lo ve quien tenga el link: no aparece en Google ni en rankings.",
       "toggle": "Mostrar mi perfil público",
       "linkLabel": "Nombre del link",
       "linkHint": "Minúsculas, números y guiones, de 3 a 24 caracteres.",
@@ -2469,7 +2469,6 @@
       "copy": "Copiar link",
       "copied": "¡Link copiado!",
       "open": "Ver mi perfil",
-      "buildsHint": "Para mostrar una build, marcala como pública en Builds.",
       "error": "No se pudo guardar el perfil público."
     },
     "page": {
@@ -2481,20 +2480,33 @@
       "games": "Partidas",
       "winrate": "Winrate",
       "record": "Récord",
-      "champions": "Campeones",
-      "lanes": "Líneas",
-      "builds": "Builds públicas",
-      "noBuilds": "Todavía no hay builds públicas.",
       "noMatches": "No hay partidas de este tipo.",
       "gamesCount": "{count} partidas",
       "gamesCountOne": "1 partida",
       "ctaTitle": "¿Jugás Wild Rift?",
       "ctaText": "Registrá tus partidas, seguí tu winrate y armá tus builds con Rift Deck.",
-      "ctaButton": "Crear cuenta gratis"
+      "ctaButton": "Crear cuenta gratis",
+      "pool": "Pool de campeones",
+      "poolHint": "Tocá un campeón para ver sus matchups",
+      "focusGames": "{count} partidas · {winrate}% de winrate",
+      "focusGamesOne": "1 partida · {winrate}% de winrate",
+      "bestMatchup": "Mejor matchup",
+      "worstMatchup": "Peor matchup",
+      "bestSynergy": "Mejor sinergia",
+      "worstSynergy": "Peor sinergia",
+      "noData": "Sin datos todavía",
+      "lanesTitle": "Winrate por línea",
+      "recent": "Últimas partidas",
+      "vs": "vs",
+      "win": "V",
+      "loss": "D",
+      "tabPool": "Pool",
+      "tabLanes": "Líneas",
+      "tabRecent": "Partidas"
     },
     "builds": {
-      "makePublic": "Mostrar en mi perfil público",
-      "makePrivate": "Ocultar de mi perfil público",
+      "makePublic": "Hacer pública",
+      "makePrivate": "Hacer privada",
       "publicTag": "Pública"
     }
   }

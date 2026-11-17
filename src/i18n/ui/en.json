@@ -2458,7 +2458,7 @@
   "publicProfile": {
     "settings": {
       "title": "Public profile",
-      "description": "Share a link with your winrate, your champions and lanes, and the builds you mark as public. Only people with the link can see it: it is not on Google or in any ranking.",
+      "description": "Share a link with your winrate, your champion pool, your lanes, your best and worst matchups and your latest games. Only people with the link can see it: it is not on Google or in any ranking.",
       "toggle": "Show my public profile",
       "linkLabel": "Link name",
       "linkHint": "Lowercase letters, numbers and hyphens, 3 to 24 characters.",
@@ -2469,7 +2469,6 @@
       "copy": "Copy link",
       "copied": "Link copied!",
       "open": "View my profile",
-      "buildsHint": "To show a build, mark it as public in Builds.",
       "error": "Could not save the public profile."
     },
     "page": {
@@ -2481,20 +2480,33 @@
       "games": "Games",
       "winrate": "Winrate",
       "record": "Record",
-      "champions": "Champions",
-      "lanes": "Lanes",
-      "builds": "Public builds",
-      "noBuilds": "No public builds yet.",
       "noMatches": "No games of this type.",
       "gamesCount": "{count} games",
       "gamesCountOne": "1 game",
       "ctaTitle": "Do you play Wild Rift?",
       "ctaText": "Log your games, track your winrate and create your builds with Rift Deck.",
-      "ctaButton": "Create a free account"
+      "ctaButton": "Create a free account",
+      "pool": "Champion pool",
+      "poolHint": "Tap a champion to see its matchups",
+      "focusGames": "{count} games · {winrate}% winrate",
+      "focusGamesOne": "1 game · {winrate}% winrate",
+      "bestMatchup": "Best matchup",
+      "worstMatchup": "Worst matchup",
+      "bestSynergy": "Best synergy",
+      "worstSynergy": "Worst synergy",
+      "noData": "No data yet",
+      "lanesTitle": "Winrate by lane",
+      "recent": "Latest games",
+      "vs": "vs",
+      "win": "W",
+      "loss": "L",
+      "tabPool": "Pool",
+      "tabLanes": "Lanes",
+      "tabRecent": "Games"
     },
     "builds": {
-      "makePublic": "Show on my public profile",
-      "makePrivate": "Hide from my public profile",
+      "makePublic": "Make public",
+      "makePrivate": "Make private",
       "publicTag": "Public"
     }
   }

@@ -70,6 +70,91 @@ export function summarizePublicStats(stats, types = []) {
   };
 }
 
+// Winrate "suavizado" (Laplace): con 1 partida 100% no le gana a 8 de 10.
+const smoothed = entry => (entry.wins + 1) / (entry.games + 2);
+
+/**
+ * El mejor (winrate > 50) y el peor (< 50) de una lista { key, games, wins }. Si hay
+ * entradas con 2 o más partidas, solo se consideran esas.
+ */
+function bestAndWorst(entries) {
+  const solid = entries.filter(entry => entry.games >= 2);
+  const pool = solid.length ? solid : entries;
+  const best = pool.filter(entry => entry.winrate > 50)
+    .sort((a, b) => smoothed(b) - smoothed(a) || b.games - a.games)[0] || null;
+  const worst = pool.filter(entry => entry.winrate < 50)
+    .sort((a, b) => smoothed(a) - smoothed(b) || b.games - a.games)[0] || null;
+  const toResult = entry => (entry ? { name: entry.key, games: entry.games, wins: entry.wins, winrate: entry.winrate } : null);
+  return { best: toResult(best), worst: toResult(worst) };
+}
+
+const sameName = (a, b) => String(a || '').toLowerCase() === String(b || '').toLowerCase();
+const byType = types => row => !types.length || types.includes(row.type || 'ranked');
+
+/**
+ * Para un campeón del usuario: mejor y peor matchup directo (contra el rival de línea) y
+ * mejor y peor sinergia (con un aliado), con los tipos de partida elegidos.
+ */
+export function championFocus(profile, champion, types = []) {
+  const ofChampion = rows => (rows || []).filter(byType(types)).filter(row => sameName(row.champion, champion));
+  const matchups = bestAndWorst(groupBy(ofChampion(profile?.matchups), row => row.opponent));
+  const synergies = bestAndWorst(groupBy(ofChampion(profile?.synergies), row => row.ally));
+  return {
+    bestMatchup: matchups.best,
+    worstMatchup: matchups.worst,
+    bestSynergy: synergies.best,
+    worstSynergy: synergies.worst,
+  };
+}
+
+/** Últimas partidas con los tipos elegidos (vienen ordenadas de la más nueva a la más vieja). */
+export function recentMatches(recent, types = [], limit = 8) {
+  return (recent || []).filter(byType(types)).slice(0, limit);
+}
+
+/**
+ * Acomoda los campeones como burbujas sin superponerse: radio según partidas (área
+ * proporcional), la más grande al centro y el resto en espiral alrededor.
+ * Devuelve las burbujas con x, y, r y los límites del dibujo (para el viewBox del SVG).
+ * @param {{ name: string, games: number }[]} entries  de más a menos jugado.
+ */
+export function packBubbles(entries, { minRadius = 16, maxRadius = 56, gap = 4, aspect = 1.25 } = {}) {
+  // Proporción ancho/alto del panel: la espiral se estira en ese sentido para llenarlo.
+  const stretch = Math.min(2.4, Math.max(0.5, aspect || 1));
+  if (!entries?.length) return { bubbles: [], bounds: { x: 0, y: 0, width: 0, height: 0 } };
+  const maxGames = Math.max(...entries.map(entry => entry.games));
+  const radiusOf = games => minRadius + (maxRadius - minRadius) * Math.sqrt(games / maxGames);
+  const placed = [];
+  const overlaps = (x, y, r) => placed.some(other => Math.hypot(other.x - x, other.y - y) < other.r + r + gap);
+
+  entries.forEach(entry => {
+    const r = radiusOf(entry.games);
+    if (!placed.length) {
+      placed.push({ ...entry, x: 0, y: 0, r });
+      return;
+    }
+    // Espiral desde el centro: la primera posición libre, estirada según el panel.
+    const sx = Math.sqrt(stretch);
+    const sy = 1 / sx;
+    for (let step = 0; step < 6000; step += 1) {
+      const angle = step * 0.35;
+      const distance = 2 + step * 0.9;
+      const x = Math.cos(angle) * distance * sx;
+      const y = Math.sin(angle) * distance * sy;
+      if (!overlaps(x, y, r)) {
+        placed.push({ ...entry, x, y, r });
+        return;
+      }
+    }
+  });
+
+  const minX = Math.min(...placed.map(b => b.x - b.r));
+  const maxX = Math.max(...placed.map(b => b.x + b.r));
+  const minY = Math.min(...placed.map(b => b.y - b.r));
+  const maxY = Math.max(...placed.map(b => b.y + b.r));
+  return { bubbles: placed, bounds: { x: minX, y: minY, width: maxX - minX, height: maxY - minY } };
+}
+
 /** Tipos de partida que el perfil tiene cargados, en el orden de la app. */
 export function availableTypes(stats, order) {
   const present = new Set((stats || []).map(row => row.type || 'ranked'));

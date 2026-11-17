@@ -365,7 +365,6 @@ export default function Profile() {
               </>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">{t('publicProfile.settings.buildsHint')}</p>
         </form>
       </div>
 

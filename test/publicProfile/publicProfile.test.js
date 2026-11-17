@@ -51,3 +51,49 @@ test('toSlugDraft: mientras se escribe deja un guion al final', async () => {
   assert.equal(toSlugDraft('El Pibe'), 'el-pibe');
   assert.equal(toSlugDraft('-'), '');
 });
+
+test('foco del campeón: mejor y peor matchup y sinergia, priorizando los de 2+ partidas', async () => {
+  const { championFocus } = await import('../../src/features/publicProfile/publicProfile.js');
+  const profile = {
+    matchups: [
+      { type: 'ranked', champion: "Kai'Sa", opponent: 'Ezreal', games: 4, wins: 3 },
+      { type: 'ranked', champion: "Kai'Sa", opponent: 'Jinx', games: 1, wins: 1 },
+      { type: 'ranked', champion: "Kai'Sa", opponent: 'Caitlyn', games: 3, wins: 0 },
+      { type: 'ranked', champion: "Kai'Sa", opponent: 'Vayne', games: 2, wins: 1 },
+      { type: 'casual', champion: "Kai'Sa", opponent: 'Draven', games: 5, wins: 0 },
+      { type: 'ranked', champion: 'Lux', opponent: 'Ahri', games: 3, wins: 3 },
+    ],
+    synergies: [
+      { type: 'ranked', champion: "kai'sa", ally: 'Nautilus', games: 3, wins: 3 },
+      { type: 'ranked', champion: "Kai'Sa", ally: 'Lulu', games: 2, wins: 0 },
+    ],
+  };
+  const focus = championFocus(profile, "Kai'Sa", ['ranked']);
+  assert.equal(focus.bestMatchup.name, 'Ezreal');      // 3/4 le gana a 1/1 (Jinx, 1 partida)
+  assert.equal(focus.worstMatchup.name, 'Caitlyn');    // Draven es casual: no cuenta
+  assert.equal(focus.bestSynergy.name, 'Nautilus');    // sin distinguir mayúsculas
+  assert.equal(focus.worstSynergy.name, 'Lulu');
+  assert.equal(championFocus(profile, 'Lux', ['ranked']).worstMatchup, null);
+});
+
+test('burbujas: no se superponen y la más jugada es la más grande', async () => {
+  const { packBubbles } = await import('../../src/features/publicProfile/publicProfile.js');
+  const entries = [43, 9, 7, 5, 4, 3, 2, 2, 1, 1, 1, 1].map((games, index) => ({ name: `C${index}`, games }));
+  const { bubbles, bounds } = packBubbles(entries, { gap: 4 });
+  assert.equal(bubbles.length, entries.length);
+  assert.equal(bubbles[0].r, Math.max(...bubbles.map(b => b.r)));
+  for (let i = 0; i < bubbles.length; i += 1) {
+    for (let j = i + 1; j < bubbles.length; j += 1) {
+      const a = bubbles[i]; const b = bubbles[j];
+      assert.ok(Math.hypot(a.x - b.x, a.y - b.y) >= a.r + b.r + 4 - 1e-9, `${a.name} y ${b.name} se pisan`);
+    }
+  }
+  assert.ok(bounds.width > 0 && bounds.height > 0);
+});
+
+test('últimas partidas: filtra por tipo y corta en el límite', async () => {
+  const { recentMatches } = await import('../../src/features/publicProfile/publicProfile.js');
+  const recent = [{ type: 'ranked' }, { type: 'casual' }, { type: null }, { type: 'ranked' }];
+  assert.equal(recentMatches(recent, ['ranked']).length, 3);
+  assert.equal(recentMatches(recent, [], 2).length, 2);
+});
