@@ -248,7 +248,7 @@ test('build: carry full daño con la build terminada contra 3 divers y sin quien
   const card = lastCard(kaisa({ id: 'kai-full', ...recent, ...fight, items_used: ['Hidra Titánica', 'Filo Infinito', 'Cuchilla Negra', 'Recordatorio Mortal', 'Hoja del Rey Arruinado'] }), kaisa);
   assert.match(card.thesis, /Armaste full daño .*pero la partida pedía daño con un objeto defensivo/);
   assert.ok(card.thesis.includes('(Zed, Akali y Lee Sin)'));
-  assert.match(card.thesis, /no tenías tanque ni encantador/);
+  assert.match(card.thesis, /nadie de tu equipo te podía cuidar/);
   assert.match(card.action, /Ángel Guardián|Danza de la Muerte/);
   assert.doesNotMatch(card.action, /Corazón|Cota|Randuin/, 'nunca objetos de tanque a un carry');
   // Con slots libres no se juzga: el defensivo pudo venir de 5º objeto.
@@ -272,7 +272,7 @@ test('build: luchador full daño sin tanque en su equipo contra daño físico �
     id: 'garen-dmg', ...recent, ally_champions: ['Jinx', 'Lux', 'Ahri', 'Soraka'],
     enemy_champions: ['Darius', 'Zed', 'Jinx', 'Aatrox', 'Sett'], items_used: ['Hidra Titánica', 'Cuchilla Negra', 'Filo Infinito'],
   }), garen);
-  assert.match(card.thesis, /Armaste daño .*pero la partida pedía resistencias: no tenías tanque, así que/);
+  assert.match(card.thesis, /Armaste daño .*pero la partida pedía resistencias: nadie de tu equipo aguantaba adelante, así que/);
   assert.match(card.thesis, /casi todo físico/);
   assert.match(card.action, /Corazón Helado|Cota de Espinas|Presagio de Randuin|Corazón de Hielo/);
 });

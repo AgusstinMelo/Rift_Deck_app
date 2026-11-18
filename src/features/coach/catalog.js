@@ -54,6 +54,9 @@ function indexBy(rows) {
 const CC_TRAITS = ['cc_duro', 'stun', 'root', 'miedo', 'supresion', 'encanto', 'provocacion', 'silencio'];
 const HEAL_TRAITS = ['autocuracion', 'curacion_aliada', 'dependiente_robo_vida'];
 const SHIELD_TRAITS = ['escudo', 'escudo_aliado'];
+/** Puntajes 0-5 del perfil del Coach (columnas score_*). */
+const SCORE_KEYS = ['engage', 'peel', 'disengage', 'mobility', 'burst', 'sustained_damage', 'range', 'self_sustain', 'waveclear'];
+const scoreOf = value => (value === null || value === undefined || value === '' || !Number.isFinite(Number(value)) ? null : Number(value));
 
 /** Perfil compacto de un campeón del catálogo. */
 export function championProfile(row, resolveName = name => name) {
@@ -81,6 +84,10 @@ export function championProfile(row, resolveName = name => name) {
     vulnerabilities: asList(row.vulnerabilities).map(keyOf),
     /** Con qué estadísticas escala el kit (poder_habilidad, vida, armadura, poder_escudo...). */
     itemScalings: tagSet(row.item_scalings),
+    /** Rol en la pelea (frontline, iniciador, diver, protector, poke, pick, dano_sostenido, split). */
+    teamRoles: tagSet(row.team_roles),
+    /** Puntajes 0-5 (engage, peel, mobility, range...); null si no se cargó. */
+    scores: Object.fromEntries(SCORE_KEYS.map(key => [key, scoreOf(row[`score_${key}`])])),
     strongAgainst: champions(row.strong_against),
     weakAgainst: champions(row.weak_against),
     scaling: keyOf(row.scaling), // earlygame | midgame | lategame

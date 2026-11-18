@@ -23,6 +23,8 @@ export const FAMILY = Object.freeze({
   // números de tu rol (impacto), y el oro contra tu rival de línea.
   IMPACT: 'impact',
   LANE_EDGE: 'laneEdge',
+  // Cómo te va contra tipos de composición (pick, engage, poke) o sin primera línea.
+  COMP: 'comp',
   // Preparación: no dependen de un problema detectado, completan el informe.
   PREP: 'prep',
   PLAN: 'plan',

@@ -2058,7 +2058,8 @@
       "savedBuild": "Tus builds",
       "weeklyPicks": "Pool de la semana",
       "impact": "Tu impacto",
-      "laneEdge": "Tu línea"
+      "laneEdge": "Tu línea",
+      "comp": "Composiciones"
     },
     "or": " o ",
     "and": " y ",
@@ -2500,10 +2501,10 @@
         "noDive": "el rival casi no tenía cómo llegarte",
         "frontline": "{name} adelante te daba espacio para pegar",
         "fed": "{name} terminó {kda} y te podía alcanzar",
-        "noPeel": "no tenías tanque ni encantador que te cuide",
+        "noPeel": "nadie de tu equipo te podía cuidar",
         "peel": "{name} te cuidaba",
         "fewCarries": "tu equipo tenía poco daño aparte del tuyo",
-        "noFrontline": "no tenías tanque, así que el que aguantaba adelante eras vos",
+        "noFrontline": "nadie de tu equipo aguantaba adelante, así que eras vos",
         "squishy": "el rival tenía {count} campeones frágiles para castigar",
         "enemyPhysical": "el daño rival era casi todo físico ({names})",
         "enemyMagic": "el daño rival era casi todo mágico ({names})",
@@ -2551,7 +2552,52 @@
         "escape": "Contra {diver}, guardá tu desplazamiento para escapar cuando se te tire encima, no para entrar."
       }
     },
-    "championsMore": "{list} y {count} más"
+    "championsMore": "{list} y {count} más",
+    "comp": {
+      "pick": {
+        "title": "Contra equipos de pick morís de más",
+        "thesis": "Con {champions}, en {games} partidas contra equipos que atrapan a un rival aislado ({names}) morís {present} veces por partida, contra {absent} en las otras {gamesOther}.",
+        "label": "Contra pick",
+        "action": {
+          "carry": "Contra {names}, no entres solo a zonas sin visión: movete con tu equipo y guardá Flash o tu desplazamiento para escapar de su atrapada, no para pegar.",
+          "support": "Contra {names}, poné visión antes de que tu equipo avance y caminá con alguien: el que entra primero a la niebla es el que atrapan.",
+          "tank": "Contra {names}, entrá vos primero a la niebla, pero con tu equipo cerca: si te atrapan solo, también es un pick."
+        }
+      },
+      "engage": {
+        "title": "Contra equipos que inician fuerte morís de más",
+        "thesis": "Con {champions}, en {games} partidas contra equipos con mucho engage ({names}) morís {present} veces por partida, contra {absent} en las otras {gamesOther}.",
+        "label": "Contra engage",
+        "action": {
+          "carry": "Contra {names}, quedate fuera del alcance de su entrada y guardá Flash o tu desplazamiento para cuando entren; pegale a lo que tengas más cerca en vez de avanzar.",
+          "support": "Contra {names}, guardá tu control o tu protección para cuando entren: en esas peleas tu trabajo es cortar su entrada, no abrir la pelea."
+        }
+      },
+      "poke": {
+        "title": "Contra equipos de poke perdés más",
+        "thesis": "Con {champions}, en {games} partidas contra equipos de poke ({names}) ganás el {present}, contra el {absent} en las otras {gamesOther}.",
+        "label": "Contra poke",
+        "action": {
+          "melee": "Contra {names}, no te quedes recibiendo daño antes de la pelea: entrá rápido cuando fallen o gasten sus habilidades, o retirate a recuperarte. Quedarte en el medio es lo peor."
+        }
+      },
+      "noFrontline": {
+        "title": "Cuando tu equipo no tiene primera línea, perdés más",
+        "thesis": "Con {champions}, en {games} partidas en las que tu equipo no tenía quien aguante adelante ganás el {present}, contra el {absent} cuando lo tenía ({gamesOther} partidas).",
+        "label": "Sin primera línea",
+        "action": {
+          "carry": "En esas partidas el rival te llega a vos primero: jugá detrás de la oleada, pegale a lo que tengas más cerca y sumá un objeto de daño que también defienda.",
+          "fighter": "En esas partidas el primero en recibir el daño rival sos vos: sumá una resistencia antes de tu tercer objeto y entrá a la pelea después de que el rival gaste su control."
+        }
+      },
+      "example": "Por ejemplo, {item}.",
+      "evidence": {
+        "deaths": "{label}: {value} muertes por partida ({games} partidas)",
+        "deathsOther": "Resto: {value} muertes por partida ({games} partidas)",
+        "wr": "{label}: {value} de victorias ({games} partidas)",
+        "wrOther": "Resto: {value} de victorias ({games} partidas)"
+      }
+    }
   },
   "share": {
     "button": "Compartir",

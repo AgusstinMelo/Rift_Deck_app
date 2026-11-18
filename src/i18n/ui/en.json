@@ -2058,7 +2058,8 @@
       "savedBuild": "Your builds",
       "weeklyPicks": "Weekly pool",
       "impact": "Your impact",
-      "laneEdge": "Your lane"
+      "laneEdge": "Your lane",
+      "comp": "Team comps"
     },
     "or": " or ",
     "and": " and ",
@@ -2500,10 +2501,10 @@
         "noDive": "the enemy had almost no way to reach you",
         "frontline": "{name} up front gave you room to deal damage",
         "fed": "{name} ended {kda} and could reach you",
-        "noPeel": "you had no tank or enchanter to protect you",
+        "noPeel": "nobody on your team could protect you",
         "peel": "{name} was protecting you",
         "fewCarries": "your team had little damage besides yours",
-        "noFrontline": "you had no tank, so you were the one holding the front line",
+        "noFrontline": "nobody on your team held the front line, so it was you",
         "squishy": "the enemy had {count} fragile champions to punish",
         "enemyPhysical": "the enemy damage was almost all physical ({names})",
         "enemyMagic": "the enemy damage was almost all magic ({names})",
@@ -2551,7 +2552,52 @@
         "escape": "Against {diver}, save your dash to escape when they jump on you, not to go in."
       }
     },
-    "championsMore": "{list} and {count} more"
+    "championsMore": "{list} and {count} more",
+    "comp": {
+      "pick": {
+        "title": "You die too much against pick comps",
+        "thesis": "With {champions}, in {games} games against teams that catch isolated targets ({names}) you die {present} times per game, versus {absent} in the other {gamesOther}.",
+        "label": "Against pick",
+        "action": {
+          "carry": "Against {names}, don't walk into unwarded areas alone: move with your team and save Flash or your dash to escape their catch, not to deal damage.",
+          "support": "Against {names}, place vision before your team moves up and walk with someone: whoever enters the fog first is the one who gets caught.",
+          "tank": "Against {names}, be the one who enters the fog first, but with your team close: getting caught alone is still a pick."
+        }
+      },
+      "engage": {
+        "title": "You die too much against hard engage",
+        "thesis": "With {champions}, in {games} games against teams with heavy engage ({names}) you die {present} times per game, versus {absent} in the other {gamesOther}.",
+        "label": "Against engage",
+        "action": {
+          "carry": "Against {names}, stay outside their engage range and save Flash or your dash for when they go in; hit whatever is closest instead of stepping forward.",
+          "support": "Against {names}, save your crowd control or your protection for when they go in: in those fights your job is to stop their engage, not to start the fight."
+        }
+      },
+      "poke": {
+        "title": "You lose more against poke comps",
+        "thesis": "With {champions}, in {games} games against poke comps ({names}) you win {present}, versus {absent} in the other {gamesOther}.",
+        "label": "Against poke",
+        "action": {
+          "melee": "Against {names}, don't stand there taking damage before the fight: go in fast when they miss or use their abilities, or back off to recover. Staying in between is the worst option."
+        }
+      },
+      "noFrontline": {
+        "title": "You lose more when your team has no front line",
+        "thesis": "With {champions}, in {games} games where your team had nobody to hold the front line you win {present}, versus {absent} when it did ({gamesOther} games).",
+        "label": "No front line",
+        "action": {
+          "carry": "In those games the enemy reaches you first: play behind the wave, hit whatever is closest and add a damage item that also protects you.",
+          "fighter": "In those games you're the first to take the enemy's damage: add a resistance item before your third item and join the fight after the enemy uses their crowd control."
+        }
+      },
+      "example": "For example, {item}.",
+      "evidence": {
+        "deaths": "{label}: {value} deaths per game ({games} games)",
+        "deathsOther": "Other games: {value} deaths per game ({games} games)",
+        "wr": "{label}: {value} win rate ({games} games)",
+        "wrOther": "Other games: {value} win rate ({games} games)"
+      }
+    }
   },
   "share": {
     "button": "Share",

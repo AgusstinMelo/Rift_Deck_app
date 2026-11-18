@@ -6,6 +6,7 @@ import { tr } from '../../i18n/uiI18n.js';
 import { FAMILY, makeInsight } from './card.js';
 import { buildCatalog } from './catalog.js';
 import { buildHabitsOf, detectRuneFit, detectSavedBuilds, detectThreatGaps } from './detectors/build.js';
+import { detectCompPlans } from './detectors/comp.js';
 import { detectLastMatch } from './detectors/lastMatch.js';
 import { detectParticipantInsights } from './detectors/participants.js';
 import { detectMatchups, detectPool } from './detectors/matchups.js';
@@ -97,6 +98,7 @@ export function computeCoachReport({
     ...detectSession(ctx),
     ...detectRecentTrend(ctx),
     ...detectTeamplay(ctx),
+    ...detectCompPlans(ctx),
     ...detectRuneFit(ctx),
     ...detectSavedBuilds(ctx),
     // Con los 10 jugadores (solo partidas cargadas con capturas).

@@ -43,12 +43,21 @@ const resistsMagic = item => item.magicRes || ['defensa_magica', 'escudo_hechizo
 const listOf = names => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')}${tr('coachEngine.and')}${names.at(-1)}`);
 
 /**
- * Rival que se tira a tu línea de atrás: asesino, o luchador cuerpo a cuerpo con
- * movilidad (Riven, Lee Sin). Los tanques no: su amenaza es iniciar o aislar a un carry
- * (K'Sante), no matarlo de un combo.
+ * Rival que se tira a tu línea de atrás: el que tiene "diver" en su rol en la pelea o, si
+ * no se cargó, un asesino o un luchador cuerpo a cuerpo con movilidad (Riven, Lee Sin).
+ * Los tanques no: su amenaza es iniciar o aislar a un carry (K'Sante), no matarlo de un combo.
  */
-const isDiver = enemy => !enemy.isTank
-  && (enemy.isAssassin || (enemy.traits.has('melee') && MOBILITY.some(tag => enemy.traits.has(tag))));
+export const isDiver = enemy => !enemy.isTank && (enemy.teamRoles?.size
+  ? enemy.teamRoles.has('diver')
+  : enemy.isAssassin || (enemy.traits.has('melee') && MOBILITY.some(tag => enemy.traits.has(tag))));
+
+/** Aguanta adelante: tanque o "frontline" en su rol en la pelea (Darius, Sett). */
+export const isFrontline = champ => champ.isTank || Boolean(champ.teamRoles?.has('frontline'));
+
+/** Cuida a sus carries: peel 3 o más; sin puntaje cargado, un tanque o un encantador. */
+const isPeeler = champ => (champ.scores?.peel != null
+  ? champ.scores.peel >= 3
+  : champ.isTank || (champ.isSupport && champ.supportStyle === 'enchanter'));
 
 /** Daño físico y mágico que aporta un campeón (los híbridos cuentan la mitad de cada uno). */
 const physicalOf = champ => (champ.damage === 'AD' ? 1 : champ.damage === 'HYBRID' ? 0.5 : 0);
@@ -95,8 +104,8 @@ function compFacts(ctx, match) {
     mainDiver: fedDivers[0]?.profile || divers.find(enemy => enemy.isAssassin) || divers[0] || null,
     ward,
     wardDeaths: ward ? players.deathsOf(ward.name) : null,
-    tank: allies.find(ally => ally.isTank),
-    enchanter: allies.find(ally => ally.isSupport && ally.supportStyle === 'enchanter'),
+    tank: allies.find(isFrontline),
+    peeler: allies.find(isPeeler),
     allyCarries: allies.filter(ally => ally.buildClass === 'carry').length,
     allyMagic: sum(allies, magicOf),
     enemyCarries: enemies.filter(enemy => enemy.buildClass === 'carry').length,
@@ -182,11 +191,11 @@ const EVALUATORS = {
     if (facts.divers.length >= 2) guard.push(diverReason(facts));
     if (facts.fedDivers.length) guard.push(fedReason(facts, 1.5));
     if (facts.enemyBurst >= 2 && facts.ownExposed) guard.push(reason(0.5, 'burst'));
-    if (!facts.tank && !facts.enchanter && facts.divers.length) guard.push(reason(0.5, 'noPeel'));
+    if (!facts.peeler && facts.divers.length) guard.push(reason(0.5, 'noPeel'));
     const failed = match.hasKda && match.deaths >= DIED && facts.divers.length > 0;
     if (failed) guard.push(reason(1, 'selfDied', { deaths: match.deaths }));
     if (!facts.divers.length) fullDamage.push(reason(1.5, 'noDive'));
-    const peel = facts.tank || facts.enchanter;
+    const peel = facts.peeler;
     if (peel && facts.divers.length <= 1) fullDamage.push(reason(0.5, 'peel', { name: peel.name }));
     if (facts.allyCarries <= 1) fullDamage.push(reason(1, 'fewCarries'));
     const side = damageSide(facts);
