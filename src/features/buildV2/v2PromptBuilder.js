@@ -42,6 +42,7 @@ const THEME_GOALS = [
   { key: 'ability_power', label: 'poder de habilidad y daño mágico', patterns: [/poder(?: de)? habilidad/, /dano magico/, /(^|\s)ap($|\s)/], terms: ['poder de habilidad', 'ability power', 'ability_power', 'dano magico'] },
   { key: 'attack_damage', label: 'daño de ataque y daño físico', patterns: [/dano(?: de)? ataque/, /dano fisico/, /(^|\s)ad($|\s)/], terms: ['dano de ataque', 'attack damage', 'attack_damage', 'dano fisico'] },
   { key: 'on_hit', label: 'efectos al impacto', patterns: [/on[ -]?hit/, /al impacto/, /efectos? de impacto/], terms: ['al impacto', 'on-hit', 'on_hit'] },
+  { key: 'tank', label: 'aguante de tanque (vida, armadura y resistencia mágica)', patterns: [/tanque/, /tank/, /aguante/, /resistente/], terms: ['tanque', 'defensa_fisica', 'defensa_magica', 'anti_burst', 'reduccion_dano'] },
   { key: 'health', label: 'vida', patterns: [/(^|\s)vida($|\s)/], terms: ['vida', 'health'] },
   { key: 'armor', label: 'armadura defensiva', patterns: [/(^|\s)armadura($|\s)/], terms: ['armadura', 'armor'] },
   { key: 'magic_resistance', label: 'resistencia mágica', patterns: [/resistencia magica/], terms: ['resistencia magica', 'magic_resistance'] },
@@ -176,6 +177,7 @@ GUÍA OPCIONAL
 - Penetración de armadura significa priorizar objetos que literalmente tengan penetración, letalidad o reducción de armadura. Críticos significa priorizar probabilidad o daño crítico. Nunca confundas armadura defensiva con penetración de armadura.
 - build_theme y build_plan.primary_archetype deben describir el plan coherente resultante, aunque no repitan literalmente el texto del usuario.
 - Si la idea no puede construirse literalmente con este catálogo, elegí la aproximación viable más cercana y explicá el límite en key_adaptations. Nunca inventes objetos o efectos.
+- Con requested_theme, la temática manda sobre las reglas de clase de CÓMO DECIDIR (kit_fit, "nunca con objetos de tanque", el defensivo no obligatorio, armar según la clase del campeón): si el usuario pide Kai'Sa tanque, la build es de tanque aunque su clase sea tirador y esos objetos tengan kit_fit bajo. Sólo siguen valiendo el CONTRATO INNEGOCIABLE y las reglas de Wild Rift. Explicá en key_adaptations qué se resigna con esa temática.
 - THEME_ITEM_HINTS indica qué objetivo reconocido coincide con cada objeto y sólo acelera la búsqueda; verificá siempre las filas completas y podés elegir otros IDs que encajen mejor.
 
 CONTRATO INNEGOCIABLE
@@ -191,7 +193,7 @@ CONTRATO INNEGOCIABLE
 
 CÓMO DECIDIR, EN ESTE ORDEN
 1. Plan de daño: con requested_theme, sus objetivos; sin ella, un único arquetipo desde item_scalings, traits, rol y draft. Elegí un camino (path): no mezcles una build al_impacto con un Filo del Infinito aislado.
-2. Núcleo: los objetos de mejor kit_fit dentro del plan, ordenados por valor temprano, piezas del motor y multiplicadores. Filo del Infinito nunca va en los slots 1 o 2 y sólo se elige si la build suma al menos otros dos objetos con critical_impact. Los objetos con situational_role late o tardío van después de los habilitadores tempranos.
+2. Núcleo: sin requested_theme, los objetos de mejor kit_fit dentro del plan; con ella, los que mejor cumplen la temática, ordenados por valor temprano, piezas del motor y multiplicadores. Filo del Infinito nunca va en los slots 1 o 2 y sólo se elige si la build suma al menos otros dos objetos con critical_impact. Los objetos con situational_role late o tardío van después de los habilitadores tempranos.
 3. Lo que pide la partida, con answers como guía:
    - Curación: si enemy_signals incluye curacion, un objeto con anti_curacion de tu clase a más tardar en el slot 3 (salvo un support encantador).
    - Defensa: un objeto defensivo nunca es obligatorio: depende de la partida. Un carry (tirador, mago o asesino) lleva uno cuando algo lo amenaza: enemy_signals incluye divers, asesinos, burst, pick o engage; ally_gaps incluye peel (nadie lo cuida); o hay 2 enemigos cargados o menos y no se sabe qué trae el rival. Si nada de eso pasa, la mejor build puede ser full daño: decilo en build_plan y no agregues defensa por costumbre. Cuando lleva defensa, un carry se defiende con objetos de daño que también protegen (anti_burst, revivir, invulnerabilidad, escudo_hechizo), nunca con objetos de tanque, en el slot 4 o 5, y del lado del daño que lo amenaza (enemy_damage): contra daño físico, armadura o revivir; contra daño mágico, resistencia mágica o escudo_hechizo.

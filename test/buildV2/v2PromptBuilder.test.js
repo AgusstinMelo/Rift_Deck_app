@@ -143,3 +143,10 @@ test('cada objeto llega con answers, kit_fit y path calculados para la partida',
   assert.match(prompt, /\["armor-pen","Penetración",1,/);
   assert.match(prompt, /Decidí sobre estas columnas/);
 });
+
+test('con temática "tanque" la temática manda sobre las reglas de clase', () => {
+  const prompt = buildV2Prompt({ ...input, buildPreference: 'Kai\'Sa full tanque' });
+  assert.match(prompt, /\x22key\x22:\x22tank\x22/);
+  assert.match(prompt, /la temática manda sobre las reglas de clase/);
+  assert.match(prompt, /con ella, los que mejor cumplen la temática/);
+});
