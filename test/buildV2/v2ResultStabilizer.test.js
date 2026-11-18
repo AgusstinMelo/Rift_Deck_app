@@ -101,3 +101,11 @@ test('agrega Castigo únicamente para jungla', () => {
   assert.equal(stabilized.spells.some(spell => spell.id === 'smite'), true);
   assert.equal(validateV2Result(stabilized, snapshot, { role: 'jungler' }).ok, true);
 });
+
+test('los textos visibles no muestran valores internos con guiones bajos; los IDs quedan igual', () => {
+  const value = candidate();
+  value.build_theme = 'Arquetipo al_impacto contra daño_sostenido';
+  const stabilized = stabilizeV2Result(value, snapshot, { role: 'adc' });
+  assert.equal(stabilized.build_theme, 'Arquetipo al impacto contra daño sostenido');
+  assert.ok(stabilized.core_items.every(item => snapshot.coreItems.some(row => String(row.id) === item.id)));
+});

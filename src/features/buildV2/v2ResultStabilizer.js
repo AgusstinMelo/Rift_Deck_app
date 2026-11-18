@@ -241,8 +241,25 @@ function withAuditNotes(adaptations, notes) {
   return [...adaptations.slice(0, keep), ...notes].slice(0, 4);
 }
 
-export function stabilizeV2Result(value, snapshot, context = {}) {
-  if (!value || typeof value !== 'object') return value;
+/**
+ * Red de seguridad para los textos visibles: si la IA filtra un valor interno de los datos
+ * ("al_impacto", "daño_sostenido"), se escribe con espacios. Los IDs no se tocan.
+ */
+const INTERNAL_TOKEN = /[\p{L}\d]+(?:_[\p{L}\d]+)+/gu;
+const humanize = text => text.replace(INTERNAL_TOKEN, token => token.replace(/_/g, ' '));
+function humanizeTexts(value, key = '') {
+  if (key === 'id') return value;
+  if (typeof value === 'string') return humanize(value);
+  if (Array.isArray(value)) return value.map(entry => humanizeTexts(entry));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([field, entry]) => [field, humanizeTexts(entry, field)]));
+  }
+  return value;
+}
+
+export function stabilizeV2Result(rawValue, snapshot, context = {}) {
+  if (!rawValue || typeof rawValue !== 'object') return rawValue;
+  const value = humanizeTexts(rawValue);
   const result = {
     ...value,
     core_items: Array.isArray(value.core_items) ? value.core_items.map(item => ({ ...item })) : value.core_items,

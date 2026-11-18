@@ -201,6 +201,7 @@ CÓMO DECIDIR, EN ESTE ORDEN
 
 CONTENIDO DE LA RESPUESTA
 - Razones breves, concretas y basadas en datos; no expongas deliberación interna.
+- Los textos los lee el jugador: nunca escribas nombres de campos ni valores internos de los datos (al_impacto, critico, kit_fit, answers, enemy_signals, draft_profile, team_roles, daño_sostenido, anti_curacion...). Decilos en lenguaje natural: "al impacto", "crítico", "daño sostenido", "heridas graves".
 - Cada reason de core_items, movement_item, keystone, primary_runes, secondary_rune y spells debe justificar POR QUÉ se elige esa pieza en esta partida: qué parte del kit del campeón potencia, qué amenaza enemiga responde, qué sinergia tiene con otros objetos/runas o en qué momento de la partida rinde. Nunca copies ni parafrasees la description del catálogo, y no empieces repitiendo el nombre de la pieza.
 - Cada reason debe tener 1 o 2 frases y como máximo 150 caracteres.
 - composition_analysis: perfil aliado, amenazas, respuestas y encaje del arquetipo.
