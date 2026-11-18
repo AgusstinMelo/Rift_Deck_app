@@ -8,6 +8,9 @@ import { requestV2Build } from './v2AiClient';
 import { validateV2Result } from './v2Validation';
 import { stabilizeV2Result } from './v2ResultStabilizer';
 import { createEligibleV2Snapshot } from './v2Eligibility';
+import { draftFitContext } from './v2DraftProfile';
+import { createIdAliases } from './v2IdAliases';
+import { logBuildAudit } from './v2AuditLog';
 import { resolveV2Result } from './v2ResultResolver';
 import V2BuildResult from './V2BuildResult';
 import StepNav from '@/components/suggester/StepNav';
@@ -132,7 +135,7 @@ const RESULT_STEP = STEPS.length;
 export default function V2BuildTab({ tabSelector }) {
   const t = useT();
   const { entityName } = useCatalogText();
-  const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 300000 });
+  const { data: snapshot, isLoading, error: loadError } = useQuery({ queryKey: ['build-v2-snapshot'], queryFn: loadV2Snapshot, staleTime: 1800000 });
   const usage = useSuggesterUsage('build');
   const [championId, setChampionId] = useState('');
   const [role, setRole] = useState('');
@@ -185,12 +188,15 @@ export default function V2BuildTab({ tabSelector }) {
     // Los dos intentos (el segundo corrige al primero) cuentan como una sola ejecución.
     const requestId = newSuggesterRequestId();
     try {
-      const generationSnapshot = createEligibleV2Snapshot(snapshot, championId);
-      const requestContext = { snapshot: generationSnapshot, championId, role, allies, enemies, buildPreference, language: responseLanguage() };
+      const themed = Boolean(buildPreference.trim());
+      const generationSnapshot = createEligibleV2Snapshot(snapshot, championId, role, { themed });
+      // Clase, línea y señales del draft: el estabilizador las usa si tiene que completar una pieza.
+      const fit = draftFitContext({ snapshot: generationSnapshot, championId, role, allies, enemies });
+      // Gemini ve IDs cortos (I1, R1, S1...): con los reales el schema roza el tope de Google.
+      const aliases = createIdAliases(generationSnapshot);
+      const requestContext = { snapshot: aliases.snapshot, championId, role, allies, enemies, buildPreference, language: responseLanguage() };
       let prompt = buildV2Prompt(requestContext);
       let lastValidation = null;
-      // Build del primer intento ya reparada por el estabilizador. Se usa si la corrección falla.
-      let fallbackData = null;
       const showResult = data => {
         setResult({ ...resolveV2Result(data, generationSnapshot), champion: snapshot.champions.find(c => String(c.id) === championId), role });
         setState('success');
@@ -200,9 +206,8 @@ export default function V2BuildTab({ tabSelector }) {
         if (import.meta.env.DEV) console.debug('[Build IA V2] request', { attempt, counts: { champions: generationSnapshot.champions.length, coreItems: generationSnapshot.coreItems.length, movementItems: generationSnapshot.movementItems.length, runes: generationSnapshot.runes.length, spells: generationSnapshot.spells.length }, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
         let response;
         try {
-          response = await requestV2Build(prompt, generationSnapshot, { role, attempt, requestId });
+          response = await requestV2Build(prompt, aliases.snapshot, { role, attempt, requestId });
         } catch (cause) {
-          if (fallbackData) { showResult(fallbackData); return; }
           if (attempt === 1 && cause.retryable) {
             await new Promise(resolve => setTimeout(resolve, 1200));
             continue;
@@ -211,20 +216,30 @@ export default function V2BuildTab({ tabSelector }) {
         }
 
         if (import.meta.env.DEV) console.debug('[Build IA V2] response', { attempt, raw: response.raw, parsed: response.parsed });
-        // Se valida la respuesta cruda: si la IA eligió piezas inválidas, el estabilizador las
-        // reemplazaría con razones genéricas. Primero se le pide a la IA que las corrija.
-        const rawValidation = validateV2Result(response.parsed, generationSnapshot, { role });
-        const stabilized = stabilizeV2Result(response.parsed, generationSnapshot, { role, nameOf: entityName });
+        // El estabilizador repara la estructura y la auditoría corrige las piezas. Si con eso la
+        // build es válida, se muestra: un segundo pedido a la IA duplica la espera para cambiar,
+        // como mucho, el texto de una pieza. Solo se le pide corregir lo que no se pudo reparar.
+        let audit = null;
+        const stabilized = stabilizeV2Result(aliases.restore(response.parsed), generationSnapshot, { role, nameOf: entityName, fit, themed, onAudit: value => { audit = value; } });
         const validation = validateV2Result(stabilized, generationSnapshot, { role });
         const isLastAttempt = attempt === 2;
-        if (validation.ok && (rawValidation.ok || isLastAttempt)) {
+        if (validation.ok) {
+          const raw = validateV2Result(response.parsed, aliases.snapshot, { role });
+          logBuildAudit({
+            patchVersion: snapshot.patchVersion,
+            champion: snapshot.champions.find(c => String(c.id) === championId)?.name,
+            role, themed, attempt, audit,
+            enemiesKnown: Object.values(enemies).filter(Boolean).length,
+            repairs: raw.schemaErrors.length + raw.validationErrors.length,
+            promptTokens: estimatePromptTokens(prompt),
+          });
           showResult(validation.data);
           return;
         }
-        if (validation.ok) fallbackData = validation.data;
-
-        lastValidation = validation.ok ? rawValidation : validation;
-        if (import.meta.env.DEV) console.debug('[Build IA V2] validation', { attempt, rawValidation, validation });
+        // Errores con los IDs que ve la IA (alias), para que pueda corregirlos.
+        lastValidation = validateV2Result(response.parsed, aliases.snapshot, { role });
+        if (lastValidation.ok) lastValidation = validation;
+        if (import.meta.env.DEV) console.debug('[Build IA V2] validation', { attempt, validation, lastValidation });
         if (!isLastAttempt) {
           prompt = buildV2Prompt({
             ...requestContext,
@@ -236,7 +251,6 @@ export default function V2BuildTab({ tabSelector }) {
         }
       }
 
-      if (fallbackData) { showResult(fallbackData); return; }
       setState('validation_error');
       setError(t('buildV2.invalidBuild'));
     } catch (cause) { setState(cause.kind === 'malformed_response' ? 'malformed_response' : 'provider_error'); setError(cause.message); if (import.meta.env.DEV) console.debug('[Build IA V2] error', { kind: cause.kind, raw: cause.raw, message: cause.message, details: cause.details }); }

@@ -91,7 +91,7 @@ test('corrige ramas, secundaria, objetos y hechizos antes de validar', () => {
   assert.equal(stabilized.secondary_rune.id, 'v2');
   assert.equal(new Set(stabilized.core_items.map(item => item.id)).size, 5);
   assert.equal(stabilized.core_items.findIndex(item => item.id === 'i1'), 2);
-  assert.match(stabilized.build_plan.first_item_rationale, /Filo del Infinito se reserva para el slot/);
+  assert.match(stabilized.build_plan.first_item_rationale, /Filo del Infinito va como objeto 3/);
   assert.equal(new Set(stabilized.spells.map(spell => spell.id)).size, 2);
   assert.equal(validateV2Result(stabilized, snapshot, { role: 'adc' }).ok, true);
 });

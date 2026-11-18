@@ -1761,16 +1761,39 @@
       "bestFitBuild": "É a opção disponível que melhor se encaixa no plano da build.",
       "complementsPlan": "Complementa o plano da build.",
       "completesCore": "Completa o núcleo sem repetir itens.",
-      "infinityThirdReason": "Fica reservado para o terceiro item, quando a build já acumulou uma base de crítico que permite aproveitar seu multiplicador.",
-      "infinityReserved": "{item} fica reservado para o slot {slot}, depois de acumular uma base de crítico.",
+      "infinityReserved": "{item} entra como item {slot}: o multiplicador de crítico rende quando a build já soma outros itens de crítico.",
       "boughtFirst": "{item} é comprado primeiro porque {reason}",
-      "opensCurve": "{item} abre a curva pelo seu valor imediato; {infinity} fica reservado para o slot {slot}, depois de acumular uma base de crítico.",
+      "opensCurve": "{item} abre a curva pelo valor imediato; {infinity} entra como item {slot}, quando o multiplicador de crítico já rende.",
       "firstItem": "O primeiro item",
       "completesRuneGroup": "Completa o grupo {group} de {branch}.",
       "secondaryBranch": "Traz uma árvore secundária diferente.",
       "definesKeystone": "Define a runa principal do plano.",
       "smiteRequired": "É obrigatório para a posição de caçador.",
       "complementsSpells": "Complementa os feitiços da build."
+    },
+    "audit": {
+      "tankItemReason": "Ocupa o lugar de {removed}: um carry se defende com itens de dano que também protegem, não com itens de tanque.",
+      "tankItemNote": "O Rift Deck trocou {removed} por {item}: um carry se defende sem abrir mão do dano.",
+      "infinityReason": "Ocupa o lugar de {removed}, que quase não rende sem outros itens de crítico: este soma ao dano que a build já tem.",
+      "infinityNote": "O Rift Deck trocou {removed} por {item}: a build não tinha outros itens de crítico para aproveitar o multiplicador.",
+      "antihealReason": "Feridas Dolorosas antes do terceiro item: {names} se curam durante as lutas.",
+      "antihealNote": "O Rift Deck colocou {item} no lugar de {removed}: contra {names}, Feridas Dolorosas não pode faltar.",
+      "antihealEarlierNote": "O Rift Deck adiantou {item} para o item {slot}: contra {names}, Feridas Dolorosas rende desde cedo.",
+      "defenseLaterNote": "O Rift Deck moveu {item} para o item {slot}: o item defensivo de um carry vem depois do núcleo de dano.",
+      "classReason": "Ocupa o lugar de {removed}, que não é para a classe de {champion}: esta combina com o kit e com este draft.",
+      "classNote": "O Rift Deck trocou {removed} por {item}: {removed} não é para a classe de {champion}.",
+      "tooDefensiveReason": "Ocupa o lugar de {removed}: com dois itens defensivos um carry já está coberto, e o resto da build tem que ser dano.",
+      "tooDefensiveNote": "O Rift Deck trocou {removed} por {item}: um carry com mais de dois itens defensivos perde o dano que é o trabalho dele.",
+      "wrongSide": {
+        "physical": {
+          "reason": "Ocupa o lugar de {removed}: a resistência mágica dele quase não protege contra um time que causa dano físico.",
+          "note": "O Rift Deck trocou {removed} por {item}: o rival causa quase só dano físico e a resistência mágica dele quase não ajuda."
+        },
+        "magic": {
+          "reason": "Ocupa o lugar de {removed}: a armadura dele quase não protege contra um time que causa dano mágico.",
+          "note": "O Rift Deck trocou {removed} por {item}: o rival causa quase só dano mágico e a armadura dele quase não ajuda."
+        }
+      }
     }
   },
   "stats": {

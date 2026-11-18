@@ -60,8 +60,13 @@ export const CHAMPION_SCORES = [
 export const FIT_CLASSES = ['tirador', 'mago', 'asesino', 'luchador', 'tanque', 'soporte'];
 export const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
-/** Contra qué responde una runa o un hechizo (counters). */
-export const COUNTER_TAGS = ['poke', 'desgaste', 'burst', 'asesinos', 'divers', 'cc', 'curacion', 'escudos', 'tanques', 'kiteo'];
+/**
+ * Contra qué responde una runa o un hechizo (counters). Funciona como un "o": responde si
+ * coincide con cualquiera. daño_magico / daño_fisico = solo sirve contra ese tipo de daño
+ * (para piezas así, ese es su único valor: si no, parecen útiles contra cualquier rival).
+ * Ojo: en Wild Rift el escudo de Orbe de Anulación absorbe cualquier daño (en PC, solo mágico).
+ */
+export const COUNTER_TAGS = ['poke', 'desgaste', 'burst', 'asesinos', 'divers', 'cc', 'curacion', 'escudos', 'tanques', 'kiteo', 'daño_magico', 'daño_fisico'];
 
 /**
  * Qué activa una runa (runes.trigger_tags). El Coach (detectors/build.js) y Build V2

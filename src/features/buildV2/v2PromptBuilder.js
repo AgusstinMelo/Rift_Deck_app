@@ -1,9 +1,13 @@
 const FIELD_SETS = {
-  champion: ['id', 'name', 'roles', 'damage_type', 'scaling', 'strategic_notes', 'attack_type', 'range_type', 'attack_range', 'traits', 'item_scalings', 'vulnerabilities', 'tags', 'description'],
-  item: ['id', 'name', 'type', 'description', 'tags', 'effect_tags', 'trigger_tags', 'situational_role', 'price', 'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power', 'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact', 'critical_damage', 'lifesteal', 'physic_vamp', 'magic_vamp', 'ability_haste', 'tenacity', 'healing_and_shield', 'adaptable_ad', 'adaptable_ap', 'flat_armor_penetration', 'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration', 'good_against', 'avoid_against'],
-  rune: ['id', 'name', 'branch', 'group', 'description', 'tags', 'trigger_tags', 'benefit_tags', 'mana_reg', 'attack_damage', 'attack_speed', 'life', 'flat_armor_penetration', 'percentage_movement', 'percentage_armor_penetration', 'critical_damage', 'tenacity', 'percentage_magic_penetration', 'life_reg', 'ability_power', 'ability_haste', 'critical_impact', 'flat_magic_penetration', 'magic_res', 'lifesteal', 'physic_vamp', 'armor', 'mana', 'healing_and_shield', 'flat_movement', 'magic_vamp'],
-  spell: ['id', 'name', 'description', 'effect', 'tags', 'cooldown'],
+  champion: ['id', 'name', 'roles', 'damage_type', 'scaling', 'strategic_notes', 'attack_type', 'range_type', 'attack_range', 'traits', 'item_scalings', 'vulnerabilities', 'team_roles',
+    'score_engage', 'score_peel', 'score_disengage', 'score_mobility', 'score_burst', 'score_sustained_damage', 'score_range', 'score_self_sustain', 'score_waveclear', 'tags', 'description'],
+  item: ['id', 'name', 'answers', 'kit_fit', 'path', 'type', 'description', 'tags', 'effect_tags', 'trigger_tags', 'situational_role', 'price', 'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power', 'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact', 'critical_damage', 'lifesteal', 'physic_vamp', 'magic_vamp', 'ability_haste', 'tenacity', 'healing_and_shield', 'adaptable_ad', 'adaptable_ap', 'flat_armor_penetration', 'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration', 'good_against', 'avoid_against'],
+  rune: ['id', 'name', 'branch', 'group', 'description', 'tags', 'trigger_tags', 'benefit_tags', 'fits_classes', 'counters', 'mana_reg', 'attack_damage', 'attack_speed', 'life', 'flat_armor_penetration', 'percentage_movement', 'percentage_armor_penetration', 'critical_damage', 'tenacity', 'percentage_magic_penetration', 'life_reg', 'ability_power', 'ability_haste', 'critical_impact', 'flat_magic_penetration', 'magic_res', 'lifesteal', 'physic_vamp', 'armor', 'mana', 'healing_and_shield', 'flat_movement', 'magic_vamp'],
+  spell: ['id', 'name', 'description', 'effect', 'tags', 'cooldown', 'fits_classes', 'fits_lanes', 'counters'],
 };
+
+import { buildDraftProfile, fitHints } from './v2DraftProfile.js';
+import { itemAnnotations } from './v2BuildAudit.js';
 
 const hasValue = value => value !== null && value !== undefined && value !== '' && value !== 0 && (!Array.isArray(value) || value.length > 0);
 
@@ -100,6 +104,12 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies, bui
   const themeGuidance = requestedTheme ? deriveThemeGuidance(requestedTheme) : null;
   const selectedAllies = Object.entries(allies).filter(([, id]) => Boolean(id));
   const selectedEnemies = Object.entries(enemies).filter(([, id]) => Boolean(id));
+  const draftProfile = buildDraftProfile({
+    champion: selected,
+    role,
+    allies: selectedAllies.filter(([, id]) => String(id) !== String(championId)).map(([, id]) => championMap.get(String(id))).filter(Boolean),
+    enemies: selectedEnemies.map(([, id]) => championMap.get(String(id))).filter(Boolean),
+  });
   const context = {
     selected: { role, champion: championData(selected) },
     allies: selectedAllies.map(([lane, id]) => ({ lane, champion: championData(championMap.get(String(id))) })),
@@ -108,16 +118,31 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies, bui
       allies_provided: selectedAllies.length,
       enemies_provided: selectedEnemies.length,
     },
+    draft_profile: draftProfile,
     requested_theme: requestedTheme,
     theme_guidance: themeGuidance,
   };
+  // good_against y avoid_against solo con los rivales de este draft: el resto del roster no
+  // aporta nada a esta partida y ocupa tokens.
+  const enemyNames = new Set(selectedEnemies.map(([, id]) => normalizeText(championMap.get(String(id))?.name).trim()).filter(Boolean));
+  const annotationContext = {
+    signals: draftProfile.enemy_signals,
+    scalings: new Set((selected.item_scalings || []).map(value => String(value).trim().toLowerCase())),
+  };
+  const forDraft = item => ({
+    ...item,
+    ...itemAnnotations(item, annotationContext),
+    good_against: (item.good_against || []).filter(name => enemyNames.has(normalizeText(name).trim())),
+    avoid_against: (item.avoid_against || []).filter(name => enemyNames.has(normalizeText(name).trim())),
+  });
   const catalogs = {
-    CORE_ITEMS: compactTable(snapshot.coreItems, FIELD_SETS.item),
-    MOVEMENT_ITEMS: compactTable(snapshot.movementItems, FIELD_SETS.item),
+    CORE_ITEMS: compactTable(snapshot.coreItems.map(forDraft), FIELD_SETS.item),
+    MOVEMENT_ITEMS: compactTable(snapshot.movementItems.map(forDraft), FIELD_SETS.item),
     RUNES: compactTable(snapshot.runes, FIELD_SETS.rune),
     SPELLS: compactTable(snapshot.spells, FIELD_SETS.spell),
   };
   const themeHints = createThemeHints(themeGuidance, snapshot.coreItems, 20);
+  const answerHints = fitHints(snapshot, { champion: selected, role, profile: draftProfile });
   const mechanicsNote = championMechanicsNote(selected);
   const mechanicsBlock = `
 REGLAS DE WILD RIFT
@@ -138,10 +163,11 @@ PRIORIDADES, EN ESTE ORDEN
 2. Si requested_theme tiene texto, usarlo como guía dominante de estadísticas y estilo. No exigir que sea el nombre exacto de un arquetipo.
 3. Mantener compatibilidad con el campeón y adaptar los espacios restantes al draft.
 ${mechanicsBlock}
-COMPOSICIONES OPCIONALES
-- allies y enemies pueden estar completos, parciales o vacíos. Analizá exclusivamente los campeones presentes y tratá los espacios faltantes como desconocidos; nunca inventes integrantes, amenazas ni necesidades.
-- Si no hay enemigos cargados, basá la build en el campeón, el rol, sus traits, item_scalings y vulnerabilities. Si hay información parcial, usala como señal adicional sin asumir que representa al equipo completo.
-- No afirmes que el equipo tiene un perfil global físico, mágico, resistente o frágil cuando faltan integrantes. En ese caso describí solamente la evidencia disponible.
+DATOS DEL DRAFT
+- allies y enemies pueden estar completos, parciales o vacíos: tratá los espacios faltantes como desconocidos y nunca inventes integrantes, amenazas ni necesidades. Con integrantes faltantes no afirmes un perfil global del equipo (físico, mágico, frágil). Si no hay enemigos cargados, basá la build en el campeón, el rol, sus traits, item_scalings y vulnerabilities.
+- team_roles dice cómo pelea cada campeón (frontline, iniciador, diver, protector, poke, pick, daño_sostenido, split) y los score_* lo miden de 0 a 5. Son evidencia del kit, junto con traits.
+- draft_profile ya resume el draft cargado y es la evidencia principal: enemy_signals (amenazas del rival y quiénes las forman), enemy_damage (daño físico y mágico del rival), ally_gaps (lo que le falta a tu equipo; sólo con 3 o más aliados cargados) y selected_covers (lo que le falta a tu equipo y aporta tu campeón). Respondé a esas señales y no inventes otras.
+- Columnas calculadas para esta partida en CORE_ITEMS: answers (señales de enemy_signals a las que responde el objeto), kit_fit (cuánto aprovecha tu campeón sus estadísticas según item_scalings: más alto, mejor; negativo, estadísticas que no usa; vacío, neutro) y path (critico o al_impacto). good_against y avoid_against ya vienen filtrados a los rivales de este draft. Decidí sobre estas columnas y usá description para confirmar detalles.
 
 GUÍA OPCIONAL
 - requested_theme es orientativa: puede ser una temática, una estadística, una combinación abreviada o una idea informal. theme_guidance traduce expresiones frecuentes a objetivos concretos.
@@ -150,7 +176,6 @@ GUÍA OPCIONAL
 - Penetración de armadura significa priorizar objetos que literalmente tengan penetración, letalidad o reducción de armadura. Críticos significa priorizar probabilidad o daño crítico. Nunca confundas armadura defensiva con penetración de armadura.
 - build_theme y build_plan.primary_archetype deben describir el plan coherente resultante, aunque no repitan literalmente el texto del usuario.
 - Si la idea no puede construirse literalmente con este catálogo, elegí la aproximación viable más cercana y explicá el límite en key_adaptations. Nunca inventes objetos o efectos.
-- Sin requested_theme: inferí un único arquetipo desde item_scalings, traits, vulnerabilidades, rol y draft, y construí alrededor de él.
 - THEME_ITEM_HINTS indica qué objetivo reconocido coincide con cada objeto y sólo acelera la búsqueda; verificá siempre las filas completas y podés elegir otros IDs que encajen mejor.
 
 CONTRATO INNEGOCIABLE
@@ -164,12 +189,14 @@ CONTRATO INNEGOCIABLE
 - Elegir Support como posición no otorga capacidades de soporte al campeón. Un objeto o runa que sólo se activa cuando el propio campeón cura o escuda aliados requiere que traits o item_scalings del campeón declaren literalmente curacion_aliada, escudo_aliado, poder_curacion o poder_escudo. El catálogo ya excluye esas piezas cuando el campeón no puede activarlas. No las reconstruyas ni las reemplaces por IDs ausentes.
 - Un objeto con activación propia que cura, escuda o protege aliados no necesita una habilidad previa del campeón y sigue siendo elegible.
 
-MÉTODO BREVE
-1. Convertí la guía opcional en objetivos de estadísticas/mecánicas, o inferí el arquetipo si no existe, y definí el perfil de daño final.
-2. Elegí cinco objetos como un solo sistema: mínimo tres sostienen el núcleo; ordenalos por valor temprano, piezas del motor, multiplicadores y adaptación/defensa.
-   Filo del Infinito es un multiplicador tardío: si lo seleccionás, debe ocupar exactamente el slot 3, nunca los slots 1 o 2. Los demás objetos cuyo situational_role indique late o tardío deben ir después de los habilitadores tempranos.
-3. Usá únicamente evidencia de los datos para anti-curación, anti-escudo, vida alta, penetración, resistencias, burst, dive o CC.
-4. Elegí runas después de los objetos y hechizos según rol y amenazas.
+CÓMO DECIDIR, EN ESTE ORDEN
+1. Plan de daño: con requested_theme, sus objetivos; sin ella, un único arquetipo desde item_scalings, traits, rol y draft. Elegí un camino (path): no mezcles una build al_impacto con un Filo del Infinito aislado.
+2. Núcleo: los objetos de mejor kit_fit dentro del plan, ordenados por valor temprano, piezas del motor y multiplicadores. Filo del Infinito nunca va en los slots 1 o 2 y sólo se elige si la build suma al menos otros dos objetos con critical_impact. Los objetos con situational_role late o tardío van después de los habilitadores tempranos.
+3. Lo que pide la partida, con answers como guía:
+   - Curación: si enemy_signals incluye curacion, un objeto con anti_curacion de tu clase a más tardar en el slot 3 (salvo un support encantador).
+   - Defensa: un objeto defensivo nunca es obligatorio: depende de la partida. Un carry (tirador, mago o asesino) lleva uno cuando algo lo amenaza: enemy_signals incluye divers, asesinos, burst, pick o engage; ally_gaps incluye peel (nadie lo cuida); o hay 2 enemigos cargados o menos y no se sabe qué trae el rival. Si nada de eso pasa, la mejor build puede ser full daño: decilo en build_plan y no agregues defensa por costumbre. Cuando lleva defensa, un carry se defiende con objetos de daño que también protegen (anti_burst, revivir, invulnerabilidad, escudo_hechizo), nunca con objetos de tanque, en el slot 4 o 5, y del lado del daño que lo amenaza (enemy_damage): contra daño físico, armadura o revivir; contra daño mágico, resistencia mágica o escudo_hechizo.
+   - Tu rol en la pelea: si selected_covers incluye primera_linea, tu campeón es quien aguanta adelante y prioriza supervivencia aunque sea luchador; si incluye peel, o el rival tiene divers o pick y tu campeón es protector, priorizá piezas que protejan aliados. Contra pick o engage, valorá lo que salve a tu campeón de ser atrapado (movilidad, tenacidad, limpieza de control, escudos). Si ally_gaps marca algo, la build no lo reemplaza: adaptá supervivencia o posicionamiento y nunca recomiendes otro pick ni cambios en el draft.
+4. Runas y hechizos, después de los objetos: de la clase con la que tu campeón juega esta build (fits_classes; Support suma soporte) y, en hechizos, de tu línea (fits_lanes). counters funciona como un "o": la pieza responde a cualquiera de sus señales; si su counters es sólo daño_magico o daño_fisico, no la elijas si enemy_signals no trae esa señal. ANSWER_HINTS lista las que encajan con tu clase y línea y responden a enemy_signals; es una ayuda para buscar, no una lista cerrada.
 5. Antes de responder verificá cantidades, IDs, unicidad, ramas, grupos, Castigo y alineación temática. Corregí cualquier incumplimiento.
 
 CONTENIDO DE LA RESPUESTA
@@ -195,6 +222,9 @@ ${JSON.stringify(context)}
 
 THEME_ITEM_HINTS
 ${JSON.stringify(themeHints)}
+
+ANSWER_HINTS
+${JSON.stringify(answerHints)}
 
 CATALOGS patch=${snapshot.patchVersion}
 Cada tabla usa fields + rows; cada posición de una fila corresponde a la misma posición en fields.

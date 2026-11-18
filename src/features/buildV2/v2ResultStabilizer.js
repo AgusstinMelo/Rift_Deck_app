@@ -1,5 +1,7 @@
 import { tr } from '../../i18n/uiI18n.js';
 import { runeBranchLabel } from '../../utils/runeBranches.js';
+import { fitOf } from './v2DraftProfile.js';
+import { auditCoreItems, auditRunesAndSpells } from './v2BuildAudit.js';
 
 const normalizeText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const STOP_WORDS = new Set(['para', 'como', 'esta', 'este', 'build', 'runa', 'objeto', 'daño', 'dano', 'enemigo', 'aliado', 'desde', 'entre']);
@@ -23,14 +25,28 @@ const searchableEntity = entity => normalizeText([
   entity?.benefit_tags,
 ].flat().filter(Boolean).join(' '));
 
-function bestCandidate(candidates, result, usedIds = new Set()) {
+/**
+ * Encaje de una runa o un hechizo con el campeón y el draft (`fit` sale de
+ * draftFitContext): su clase y su línea pesan más que coincidir palabras con el plan, y
+ * suma cada señal del rival a la que responde.
+ */
+function fitBonus(candidate, fit) {
+  if (!fit) return 0;
+  const { fitsClass, fitsLane, answers } = fitOf(candidate, fit);
+  return (fitsClass === true ? 2 : fitsClass === false ? -2 : 0)
+    + (fitsLane === true ? 1 : fitsLane === false ? -3 : 0)
+    + answers.length * 1.5;
+}
+
+function bestCandidate(candidates, result, usedIds = new Set(), fit = null) {
   const tokens = relevanceTokens(result);
   return candidates
     .filter(candidate => !usedIds.has(String(candidate.id)))
     .map((candidate, index) => ({
       candidate,
       index,
-      score: tokens.reduce((total, token) => total + (searchableEntity(candidate).includes(token) ? 1 : 0), 0),
+      score: tokens.reduce((total, token) => total + (searchableEntity(candidate).includes(token) ? 1 : 0), 0)
+        + fitBonus(candidate, fit),
     }))
     .sort((a, b) => b.score - a.score || a.index - b.index)[0]?.candidate;
 }
@@ -111,31 +127,11 @@ function stabilizeCoreItems(result, snapshot) {
     used.add(id);
     selected.push({ id, reason: fallbackReason(item, tr('buildV2.stabilizer.completesCore'), result) });
   }
-  const ordered = selected.slice(0, 5);
-  const deferred = itemMap.size
-    ? ordered.filter(selection => {
-        const item = itemMap.get(String(selection.id));
-        const role = normalizeText(item?.situational_role);
-        return role.includes('late') || role.includes('tardio') || role.includes('tardío');
-      })
-    : [];
-  const immediate = ordered.filter(selection => !deferred.includes(selection));
-  let stabilized = [...immediate, ...deferred];
-
-  const infinityIndex = stabilized.findIndex(selection =>
-    normalizeText(itemMap.get(String(selection.id))?.name) === 'filo del infinito'
-  );
-  if (infinityIndex >= 0 && infinityIndex !== 2) {
-    const [infinityEdge] = stabilized.splice(infinityIndex, 1);
-    stabilized.splice(Math.min(2, stabilized.length), 0, {
-      ...infinityEdge,
-      reason: tr('buildV2.stabilizer.infinityThirdReason'),
-    });
-  }
-  return stabilized;
+  // El orden lo decide la IA; la auditoría (v2BuildAudit.js) solo corrige reglas firmes.
+  return selected.slice(0, 5);
 }
 
-function stabilizeRunes(result, snapshot) {
+function stabilizeRunes(result, snapshot, fit = null) {
   const runeMap = new Map(snapshot.runes.map(rune => [String(rune.id), rune]));
   const keystones = snapshot.runes.filter(rune => rune.branch === 'Clave');
   const regular = snapshot.runes.filter(rune => rune.branch !== 'Clave');
@@ -169,6 +165,7 @@ function stabilizeRunes(result, snapshot) {
       regular.filter(candidate => candidate.branch === preferredBranch && Number(candidate.group) === group),
       result,
       used,
+      fit,
     );
     if (!rune) return null;
     used.add(String(rune.id));
@@ -190,7 +187,7 @@ function stabilizeRunes(result, snapshot) {
     !used.has(String(currentSecondary.id))
     ? result.secondary_rune
     : alternateOriginal?.selection || (() => {
-        const rune = bestCandidate(regular.filter(candidate => candidate.branch !== preferredBranch), result, used);
+        const rune = bestCandidate(regular.filter(candidate => candidate.branch !== preferredBranch), result, used, fit);
         return rune ? { id: String(rune.id), reason: fallbackReason(rune, tr('buildV2.stabilizer.secondaryBranch'), result) } : result.secondary_rune;
       })();
 
@@ -198,14 +195,14 @@ function stabilizeRunes(result, snapshot) {
   const keystone = currentKeystone?.branch === 'Clave'
     ? result.keystone
     : (() => {
-        const rune = bestCandidate(keystones, result);
+        const rune = bestCandidate(keystones, result, new Set(), fit);
         return rune ? { id: String(rune.id), reason: fallbackReason(rune, tr('buildV2.stabilizer.definesKeystone'), result) } : result.keystone;
       })();
 
   return { keystone, primaryRunes, secondaryRune };
 }
 
-function stabilizeSpells(result, snapshot, role) {
+function stabilizeSpells(result, snapshot, role, fit = null) {
   const spellMap = new Map(snapshot.spells.map(spell => [String(spell.id), spell]));
   const smite = snapshot.spells.find(spell => normalizeText(spell.name) === 'castigo');
   const isJungler = normalizeText(role) === 'jungler';
@@ -228,12 +225,20 @@ function stabilizeSpells(result, snapshot, role) {
       snapshot.spells.filter(candidate => isJungler || !smite || String(candidate.id) !== String(smite.id)),
       result,
       used,
+      fit,
     );
     if (!spell) break;
     used.add(String(spell.id));
     selected.push({ id: String(spell.id), reason: fallbackReason(spell, tr('buildV2.stabilizer.complementsSpells'), result) });
   }
   return selected.slice(0, 2);
+}
+
+/** Suma las notas de la auditoría a key_adaptations sin pasar de 4: reemplazan a las últimas. */
+function withAuditNotes(adaptations, notes) {
+  if (!notes.length || !Array.isArray(adaptations)) return adaptations;
+  const keep = Math.max(0, Math.min(adaptations.length, 4 - notes.length));
+  return [...adaptations.slice(0, keep), ...notes].slice(0, 4);
 }
 
 export function stabilizeV2Result(value, snapshot, context = {}) {
@@ -244,11 +249,20 @@ export function stabilizeV2Result(value, snapshot, context = {}) {
     primary_runes: Array.isArray(value.primary_runes) ? value.primary_runes.map(rune => ({ ...rune })) : value.primary_runes,
     spells: Array.isArray(value.spells) ? value.spells.map(spell => ({ ...spell })) : value.spells,
   };
-  const runes = stabilizeRunes(result, snapshot);
-  const coreItems = stabilizeCoreItems(result, snapshot);
+  const stableRunes = stabilizeRunes(result, snapshot, context.fit);
+  const nameOf = context.nameOf || defaultNameOf;
+  // Runas y hechizos que no son para la clase del campeón (fits_classes).
+  const pieces = auditRunesAndSpells({
+    ...stableRunes, spells: stabilizeSpells(result, snapshot, context.role, context.fit),
+    snapshot, fit: context.fit, themed: Boolean(context.themed), role: context.role, nameOf,
+  });
+  const runes = pieces;
+  const audit = auditCoreItems({ coreItems: stabilizeCoreItems(result, snapshot), snapshot, fit: context.fit, themed: Boolean(context.themed), nameOf });
+  const coreItems = audit.coreItems;
+  // Para el registro de intervenciones (build_v2_audit_log).
+  context.onAudit?.({ itemChanges: audit.changes, runeChanges: pieces.changes.runes, spellChanges: pieces.changes.spells });
   const itemMap = new Map(snapshot.coreItems.map(item => [String(item.id), item]));
   const firstItem = itemMap.get(String(coreItems[0]?.id));
-  const nameOf = context.nameOf || defaultNameOf;
   const infinitySlot = coreItems.findIndex(selection =>
     normalizeText(itemMap.get(String(selection.id))?.name) === 'filo del infinito'
   );
@@ -267,11 +281,13 @@ export function stabilizeV2Result(value, snapshot, context = {}) {
 
   return {
     ...result,
+    // Lo que corrigió la auditoría se cuenta en las adaptaciones (máximo 4).
+    key_adaptations: withAuditNotes(result.key_adaptations, [...audit.notes, ...pieces.notes]),
     build_plan: synchronizedBuildPlan,
     core_items: coreItems,
     keystone: runes.keystone,
     primary_runes: runes.primaryRunes,
     secondary_rune: runes.secondaryRune,
-    spells: stabilizeSpells(result, snapshot, context.role),
+    spells: pieces.spells,
   };
 }

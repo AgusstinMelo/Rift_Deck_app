@@ -1761,16 +1761,39 @@
       "bestFitBuild": "Es la opción disponible que mejor encaja con el plan de la build.",
       "complementsPlan": "Complementa el plan de la build.",
       "completesCore": "Completa el núcleo sin repetir objetos.",
-      "infinityThirdReason": "Se reserva para el tercer objeto, cuando la build ya acumuló una base de crítico que permite aprovechar su multiplicador.",
-      "infinityReserved": "{item} se reserva para el slot {slot}, después de acumular una base de crítico.",
+      "infinityReserved": "{item} va como objeto {slot}: su multiplicador de crítico rinde cuando la build ya suma otros objetos de crítico.",
       "boughtFirst": "{item} se compra primero porque {reason}",
-      "opensCurve": "{item} abre la curva por su valor inmediato; {infinity} se reserva para el slot {slot}, después de acumular una base de crítico.",
+      "opensCurve": "{item} abre la curva por su valor inmediato; {infinity} va como objeto {slot}, cuando su multiplicador de crítico ya rinde.",
       "firstItem": "El primer objeto",
       "completesRuneGroup": "Completa el grupo {group} de {branch}.",
       "secondaryBranch": "Aporta una rama secundaria diferente.",
       "definesKeystone": "Define la runa clave del plan.",
       "smiteRequired": "Es obligatorio para la posición de jungla.",
       "complementsSpells": "Complementa los hechizos de la build."
+    },
+    "audit": {
+      "tankItemReason": "Ocupa el lugar de {removed}: un carry se defiende con objetos de daño que también protegen, no con objetos de tanque.",
+      "tankItemNote": "Rift Deck cambió {removed} por {item}: un carry se defiende sin renunciar al daño.",
+      "infinityReason": "Ocupa el lugar de {removed}, que casi no rinde sin otros objetos de crítico: este suma al daño que ya arma la build.",
+      "infinityNote": "Rift Deck cambió {removed} por {item}: la build no tenía otros objetos de crítico para aprovechar su multiplicador.",
+      "antihealReason": "Heridas graves antes del tercer objeto: {names} se curan durante las peleas.",
+      "antihealNote": "Rift Deck añadió {item} en lugar de {removed}: contra {names} las heridas graves no pueden faltar.",
+      "antihealEarlierNote": "Rift Deck adelantó {item} al objeto {slot}: contra {names} las heridas graves rinden desde pronto.",
+      "defenseLaterNote": "Rift Deck movió {item} al objeto {slot}: el defensivo de un carry va después de su núcleo de daño.",
+      "classReason": "Ocupa el lugar de {removed}, que no es para la clase de {champion}: esta sí encaja con su kit y con este draft.",
+      "classNote": "Rift Deck cambió {removed} por {item}: {removed} no es para la clase de {champion}.",
+      "tooDefensiveReason": "Ocupa el lugar de {removed}: con dos defensivos un carry ya está cubierto, y el resto de la build tiene que ser daño.",
+      "tooDefensiveNote": "Rift Deck cambió {removed} por {item}: un carry con más de dos objetos defensivos pierde el daño que es su trabajo.",
+      "wrongSide": {
+        "physical": {
+          "reason": "Ocupa el lugar de {removed}: su resistencia mágica casi no protege contra un equipo que pega físico.",
+          "note": "Rift Deck cambió {removed} por {item}: el rival pega casi todo físico y su resistencia mágica casi no sirve."
+        },
+        "magic": {
+          "reason": "Ocupa el lugar de {removed}: su armadura casi no protege contra un equipo que pega mágico.",
+          "note": "Rift Deck cambió {removed} por {item}: el rival pega casi todo mágico y su armadura casi no sirve."
+        }
+      }
     }
   },
   "stats": {

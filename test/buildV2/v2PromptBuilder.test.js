@@ -93,7 +93,7 @@ test('el segundo intento incluye errores y sólo las selecciones previas', () =>
 test('prohíbe comprar Filo del Infinito antes del tercer slot', () => {
   const prompt = buildV2Prompt({ ...input, buildPreference: 'críticos' });
   assert.match(prompt, /Filo del Infinito/);
-  assert.match(prompt, /exactamente el slot 3/);
+  assert.match(prompt, /nunca va en los slots 1 o 2/);
 });
 
 test('acepta composiciones parciales sin inventar espacios vacíos', () => {
@@ -116,4 +116,30 @@ test('genera contexto válido sin ninguna composición enemiga', () => {
   assert.match(prompt, /\x22enemies\x22:\[\]/);
   assert.match(prompt, /\x22enemies_provided\x22:0/);
   assert.match(prompt, /basá la build en el campeón, el rol/);
+});
+
+test('good_against y avoid_against solo nombran a los rivales del draft', () => {
+  const withLists = {
+    ...snapshot,
+    coreItems: snapshot.coreItems.map(item => ({ ...item, good_against: ['Enemigo', 'Darius', 'Jinx'], avoid_against: ['Zed'] })),
+  };
+  const prompt = buildV2Prompt({ ...input, snapshot: withLists });
+  assert.match(prompt, /\["Enemigo"\]/);
+  assert.doesNotMatch(prompt, /"Darius"|"Zed"/);
+});
+
+test('el defensivo de un carry no es obligatorio: depende de las señales del draft', () => {
+  const prompt = buildV2Prompt(input);
+  assert.match(prompt, /un objeto defensivo nunca es obligatorio/i);
+  assert.match(prompt, /la mejor build puede ser full daño/);
+  assert.doesNotMatch(prompt, /y ese defensivo va en el slot 4 o 5/);
+});
+
+test('cada objeto llega con answers, kit_fit y path calculados para la partida', () => {
+  const champ = { ...snapshot.champions[0], item_scalings: ['penetracion_armadura_porcentual'] };
+  const prompt = buildV2Prompt({ ...input, snapshot: { ...snapshot, champions: [champ, ...snapshot.champions.slice(1)] } });
+  // Sin señales del rival en este draft, answers y path quedan vacíos y no se envían.
+  assert.match(prompt, /"CORE_ITEMS":\{"fields":\["id","name","kit_fit",/);
+  assert.match(prompt, /\["armor-pen","Penetración",1,/);
+  assert.match(prompt, /Decidí sobre estas columnas/);
 });

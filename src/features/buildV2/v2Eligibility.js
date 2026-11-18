@@ -1,3 +1,6 @@
+import { championBuildFit, itemFitsChampion } from './v2BuildAudit.js';
+import { championClasses } from './v2DraftProfile.js';
+
 const normalizeText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const flattenText = values => normalizeText(values.flat(Infinity).filter(Boolean).join(' '));
 
@@ -35,7 +38,72 @@ export function requiresChampionAllyHealOrShield(entity) {
   return conditionalDescription || Boolean(onlyHealShieldTriggers);
 }
 
-export function createEligibleV2Snapshot(snapshot, championId) {
+/**
+ * Hechizos que se llevan en la línea (fits_lanes): Teleportación no va en support ni
+ * Curación en top. Un hechizo sin fits_lanes cargado se mantiene. Castigo lo resuelven
+ * las reglas de jungla.
+ */
+export function spellFitsLane(spell, role) {
+  const lanes = (spell?.fits_lanes || []).map(normalizeText);
+  return !role || !lanes.length || lanes.includes(normalizeText(role));
+}
+
+/**
+ * Catálogo que ve la IA para este campeón y rol:
+ * - hechizos de la línea (fits_lanes);
+ * - sin piezas de encantador si el campeón no cura ni escuda aliados;
+ * - sin temática (`themed` false), solo objetos, runas y hechizos de su clase: lo mismo
+ *   que exige la auditoría (v2BuildAudit.js). Mostrarle a la IA piezas que después se
+ *   descartan cuesta tokens, tiempo y errores. Con temática ve todo: el usuario puede pedir
+ *   algo fuera de la clase.
+ */
+export function createEligibleV2Snapshot(snapshot, championId, role = null, { themed = false } = {}) {
+  const spells = (snapshot.spells || []).filter(spell => spellFitsLane(spell, role));
+  const laneSnapshot = spells.length === (snapshot.spells || []).length ? snapshot : { ...snapshot, spells };
+  const eligible = withAllyHealShieldEligibility(laneSnapshot, championId);
+  return role && !themed ? withClassEligibility(eligible, championId, role) : eligible;
+}
+
+/** Objetos mínimos para que la IA tenga de dónde elegir; con menos, se muestra todo. */
+const MIN_CLASS_ITEMS = 12;
+
+const fitsClasses = (entity, classes) => {
+  const list = (entity?.fits_classes || []).map(normalizeText);
+  return !list.length || list.some(value => classes.has(value));
+};
+
+/** Runas suficientes para armar una página: clave, una rama con los grupos 1-3 y otra rama. */
+function viableRunes(runes) {
+  const regular = runes.filter(rune => rune.branch !== 'Clave');
+  const full = [...new Set(regular.map(rune => rune.branch))]
+    .filter(branch => [1, 2, 3].every(group => regular.some(rune => rune.branch === branch && Number(rune.group) === group)));
+  return runes.some(rune => rune.branch === 'Clave') && full.some(branch => regular.some(rune => rune.branch !== branch));
+}
+
+function withClassEligibility(snapshot, championId, role) {
+  const champion = snapshot.champions.find(candidate => String(candidate.id) === String(championId));
+  if (!champion) return snapshot;
+  const fit = championBuildFit(champion, role);
+  const classes = championClasses(champion, role);
+  const classItems = snapshot.coreItems.filter(item => itemFitsChampion(item, fit));
+  const coreItems = classItems.length >= MIN_CLASS_ITEMS ? classItems : snapshot.coreItems;
+  const classRunes = snapshot.runes.filter(rune => fitsClasses(rune, classes));
+  const runes = viableRunes(classRunes) ? classRunes : snapshot.runes;
+  const isSmite = spell => normalizeText(spell.name).trim() === 'castigo';
+  const classSpells = snapshot.spells.filter(spell => isSmite(spell) || fitsClasses(spell, classes));
+  const spells = classSpells.filter(spell => !isSmite(spell)).length >= 2 ? classSpells : snapshot.spells;
+  const kept = new Set(coreItems.map(item => String(item.id)));
+  const core = new Set(snapshot.coreItems.map(item => String(item.id)));
+  return {
+    ...snapshot,
+    items: snapshot.items.filter(item => !core.has(String(item.id)) || kept.has(String(item.id))),
+    coreItems,
+    runes,
+    spells,
+  };
+}
+
+function withAllyHealShieldEligibility(snapshot, championId) {
   const champion = snapshot.champions.find(candidate => String(candidate.id) === String(championId));
   if (!champion || championCanHealOrShieldAllies(champion)) return snapshot;
 

@@ -18,11 +18,11 @@ export function validateV2Result(value, snapshot, context = {}) {
   const runeIds = [result.keystone.id, ...result.primary_runes.map(x => x.id), result.secondary_rune.id];
   const spellIds = result.spells.map(x => x.id);
 
-  if (duplicates(coreIds)) errors.push('Los 5 core_items deben ser Ãºnicos.');
+  if (duplicates(coreIds)) errors.push('Los 5 core_items deben ser únicos.');
   for (const id of coreIds) {
     const item = itemMap.get(id);
     if (!item) errors.push(`Item core inexistente en el snapshot: ${id}.`);
-    else if (!isCoreItem(item)) errors.push(`El item core ${id} no es un objeto final core vÃ¡lido.`);
+    else if (!isCoreItem(item)) errors.push(`El item core ${id} no es un objeto final core válido.`);
   }
 
   const movement = itemMap.get(result.movement_item.id);

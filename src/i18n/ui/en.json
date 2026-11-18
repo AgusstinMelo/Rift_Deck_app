@@ -1761,16 +1761,39 @@
       "bestFitBuild": "It's the available option that best fits the build's plan.",
       "complementsPlan": "Complements the build's plan.",
       "completesCore": "Completes the core without repeating items.",
-      "infinityThirdReason": "Saved for the third item, once the build has stacked enough crit to make the most of its multiplier.",
-      "infinityReserved": "{item} is saved for slot {slot}, after building up some crit first.",
+      "infinityReserved": "{item} goes as item {slot}: its crit multiplier pays off once the build has other crit items.",
       "boughtFirst": "{item} is bought first because it {reason}",
-      "opensCurve": "{item} opens the power curve thanks to its immediate value; {infinity} is saved for slot {slot}, after building up some crit first.",
+      "opensCurve": "{item} opens the curve with its immediate value; {infinity} goes as item {slot}, once its crit multiplier pays off.",
       "firstItem": "The first item",
       "completesRuneGroup": "Completes group {group} of {branch}.",
       "secondaryBranch": "Adds a different secondary tree.",
       "definesKeystone": "Defines the plan's keystone rune.",
       "smiteRequired": "Required for the jungle position.",
       "complementsSpells": "Complements the build's spells."
+    },
+    "audit": {
+      "tankItemReason": "Takes the place of {removed}: a carry defends with damage items that also protect, not with tank items.",
+      "tankItemNote": "Rift Deck swapped {removed} for {item}: a carry defends without giving up damage.",
+      "infinityReason": "Takes the place of {removed}, which barely pays off without other crit items: this one adds to the damage the build already has.",
+      "infinityNote": "Rift Deck swapped {removed} for {item}: the build had no other crit items to make use of its multiplier.",
+      "antihealReason": "Grievous Wounds before the third item: {names} heal during fights.",
+      "antihealNote": "Rift Deck added {item} instead of {removed}: against {names}, Grievous Wounds is a must.",
+      "antihealEarlierNote": "Rift Deck moved {item} up to item {slot}: against {names}, Grievous Wounds pays off early.",
+      "defenseLaterNote": "Rift Deck moved {item} to item {slot}: a carry's defensive item comes after its damage core.",
+      "classReason": "Takes the place of {removed}, which isn't meant for {champion}'s class: this one fits the kit and this draft.",
+      "classNote": "Rift Deck swapped {removed} for {item}: {removed} isn't meant for {champion}'s class.",
+      "tooDefensiveReason": "Takes the place of {removed}: two defensive items already cover a carry, and the rest of the build has to be damage.",
+      "tooDefensiveNote": "Rift Deck swapped {removed} for {item}: a carry with more than two defensive items loses the damage that is its job.",
+      "wrongSide": {
+        "physical": {
+          "reason": "Takes the place of {removed}: its magic resistance barely helps against a team that deals physical damage.",
+          "note": "Rift Deck swapped {removed} for {item}: the enemy deals almost only physical damage, so its magic resistance barely helps."
+        },
+        "magic": {
+          "reason": "Takes the place of {removed}: its armor barely helps against a team that deals magic damage.",
+          "note": "Rift Deck swapped {removed} for {item}: the enemy deals almost only magic damage, so its armor barely helps."
+        }
+      }
     }
   },
   "stats": {
