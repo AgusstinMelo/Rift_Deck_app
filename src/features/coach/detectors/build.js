@@ -21,6 +21,20 @@ function mainChampionOf(rows) {
 }
 
 /**
+ * Con qué campeones se jugaron unas partidas, para aclarar de quién habla el consejo:
+ * "Kai'Sa" si es uno solo, "Kai'Sa (5) y Jinx (2)" si son varios (los dos más jugados).
+ */
+export function championsLabel(rows) {
+  const counts = new Map();
+  rows.forEach(row => { if (row.champion) counts.set(row.champion, (counts.get(row.champion) || 0) + 1); });
+  const ranked = [...counts].sort((a, b) => b[1] - a[1]);
+  if (!ranked.length) return '';
+  if (ranked.length === 1) return ranked[0][0];
+  const shown = ranked.slice(0, 2).map(([name, games]) => `${name} (${games})`).join(tr('coachEngine.and'));
+  return ranked.length > 2 ? tr('coachEngine.championsMore', { list: shown, count: ranked.length - 2 }) : shown;
+}
+
+/**
  * Lo que el jugador arma con cada campeón: objetos ya comprados (para sugerir primero lo
  * conocido) y tipos de daño de sus objetos finales (para no sugerir otra build).
  */
@@ -49,16 +63,19 @@ function timingFor(threatId, own) {
   return tr(`coachEngine.threat.${threatId}.timing`);
 }
 
-/** Texto de la respuesta a una amenaza con objetos sugeridos para un campeón. */
+/**
+ * Texto de la respuesta a una amenaza: el tipo de objeto que pide y, como mucho, un
+ * objeto de ejemplo que encaje con el campeón (el consejo es la temática, no la lista).
+ */
 export function threatAdvice(ctx, threatId, champion) {
   const threat = THREATS.find(entry => entry.id === threatId);
   const habits = ctx.buildHabits.get(keyOf(champion?.name)) || { bought: new Set(), damageTypes: [] };
   const items = champion?.own
-    ? suggestItems(ctx.catalog, champion.own, threat.answers, { boughtKeys: habits.bought, preferredTypes: habits.damageTypes, boots: Boolean(threat.boots) })
+    ? suggestItems(ctx.catalog, champion.own, threat.answers, { boughtKeys: habits.bought, preferredTypes: habits.damageTypes, boots: Boolean(threat.boots), limit: 1 })
     : [];
   const timing = timingFor(threatId, champion?.own);
   return items.length
-    ? tr('coachEngine.threat.actionWithItems', { champion: champion.name, items: items.join(tr('coachEngine.or')), timing })
+    ? tr('coachEngine.threat.actionWithItems', { champion: champion.name, answer: tr(`coachEngine.threat.${threatId}.answer`), items: items[0], timing })
     : timing;
 }
 
@@ -104,22 +121,24 @@ export function detectThreatGaps(ctx) {
       family: FAMILY.BUILD,
       tone: 'critical',
       title: tr(`coachEngine.threat.${threat.id}.title`),
-      thesis: tr('coachEngine.threat.thesis', {
+      thesis: tr(answeredRows.length ? 'coachEngine.threat.thesis' : 'coachEngine.threat.thesisNone', {
+        champions: championsLabel(rows),
         games: threatStats.games,
         threat: tr(`coachEngine.threat.${threat.id}.present`),
         answer: tr(`coachEngine.threat.${threat.id}.answer`),
         answered: answeredRows.length,
         wrUnanswered: pct(unanswered.wr),
+        winsUnanswered: unanswered.wins,
         gamesUnanswered: unanswered.games,
         withAnswer: answered.games >= 2
-          ? tr('coachEngine.threat.withAnswer', { wr: pct(answered.wr), games: answered.games })
+          ? tr('coachEngine.threat.withAnswer', { wr: pct(answered.wr), wins: answered.wins, games: answered.games })
           : '',
       }),
       action: threatAdvice(ctx, threat.id, champion),
       evidence: [
-        tr('coachEngine.threat.evidenceRate', { answer: tr(`coachEngine.threat.${threat.id}.answer`), rate: pct(answerRate), games: rows.length }),
-        tr('coachEngine.threat.evidenceWithout', { wr: pct(unanswered.wr), games: unanswered.games }),
-        answered.games >= 2 && tr('coachEngine.threat.evidenceWith', { wr: pct(answered.wr), games: answered.games }),
+        tr('coachEngine.threat.evidenceRate', { answer: tr(`coachEngine.threat.${threat.id}.answer`), answered: answeredRows.length, games: rows.length }),
+        tr('coachEngine.threat.evidenceWithout', { wr: pct(unanswered.wr), wins: unanswered.wins, games: unanswered.games }),
+        answered.games >= 2 && tr('coachEngine.threat.evidenceWith', { wr: pct(answered.wr), wins: answered.wins, games: answered.games }),
       ],
       z, sample: rows.length, corroborated: true,
       priority: THREAT_PRIORITY[threat.id] ?? 70,

@@ -28,7 +28,11 @@ export const champions = [
   // Luchador que también se juega de support.
   champion('Sett', { roles: ['Luchador'], traits: ['dependiente_autoataques', 'melee', 'cc_duro'], damage_type: 'AD' }),
   // Support maga (como en el catálogo real) y rivales que llegan a la línea de atrás.
-  champion('Seraphine', { roles: ['Mago'], traits: ['dependiente_habilidades', 'daño_magico', 'rango', 'curacion_aliada', 'cc_duro'], vulnerabilities: ['gap_close', 'asesino', 'presion_early'], damage_type: 'AP', scaling: 'lategame' }),
+  champion('Seraphine', { roles: ['Mago'], traits: ['dependiente_habilidades', 'daño_magico', 'rango', 'curacion_aliada', 'cc_duro'], vulnerabilities: ['gap_close', 'asesino', 'presion_early'], item_scalings: ['poder_habilidad', 'aceleracion_habilidad', 'poder_escudo', 'poder_curacion'], damage_type: 'AP', scaling: 'lategame' }),
+  // Tirador que escala tarde, luchador que se tira atrás y tanque que inicia (como en el catálogo real).
+  champion('Smolder', { roles: ['Tirador'], traits: ['dependiente_habilidades', 'daño_mixto', 'rango', 'mecanica_acumulacion'], damage_type: 'AD', scaling: 'lategame' }),
+  champion('Riven', { roles: ['Luchador'], traits: ['dependiente_habilidades', 'daño_fisico', 'melee', 'dash', 'escudo'], damage_type: 'AD' }),
+  champion("K'Sante", { roles: ['Tanque'], traits: ['dependiente_habilidades', 'daño_fisico', 'melee', 'alta_durabilidad', 'desplazamiento'], item_scalings: ['vida', 'armadura', 'resistencia_magica'], damage_type: 'AD' }),
   champion('Akali', { roles: ['Asesino'], traits: ['melee', 'dash', 'daño_burst'], damage_type: 'AP' }),
   champion('Lee Sin', { roles: ['Luchador'], traits: ['melee', 'dash', 'salto'], damage_type: 'AD', scaling: 'earlygame' }),
   champion('Ashe', { roles: ['Tirador'], traits: ['rango', 'dependiente_autoataques', 'cc_duro'], damage_type: 'AD', scaling: 'lategame' }),
@@ -59,8 +63,8 @@ export const items = [
   item('Presagio de Randuin', { type: ['Defensa'], effect_tags: ['defensa_fisica', 'anti_burst'], armor: 75, situational_role: ['defensivo'] }),
   item('Reloj de Arena de Zhonya', { type: ['Daño Magico', 'Defensa'], effect_tags: ['invulnerabilidad', 'anti_burst'], armor: 45, situational_role: ['defensivo'] }),
   item('Botas de Mercurio', { category: 'Nivel Medio', type: ['Movimiento'], tenacity: 30, magic_res: 25 }),
-  item('Orbe del Infinito', { type: ['Daño Magico'], effect_tags: ['penetracion_magica'] }),
-  item('Eco de Luden', { type: ['Daño Magico'], effect_tags: ['daño_burst', 'daño_habilidad'], situational_role: ['core', 'ofensivo'] }),
+  item('Orbe del Infinito', { type: ['Daño Magico'], effect_tags: ['penetracion_magica'], ability_power: 110 }),
+  item('Eco de Luden', { type: ['Daño Magico'], effect_tags: ['daño_burst', 'daño_habilidad'], situational_role: ['core', 'ofensivo'], ability_power: 100 }),
   item('Báculo de Agua Fluyente', { type: ['Soporte'], effect_tags: ['curacion_aliada', 'escudo_aliado', 'buff_aliado'], situational_role: ['utilidad'] }),
   // Componente con armadura camino a Zhonya: no es un objeto terminado.
   item('Brazal del Buscador', { category: 'Nivel Medio', type: ['Daño Magico', 'Defensa'], armor: 20 }),

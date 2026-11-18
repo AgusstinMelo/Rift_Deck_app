@@ -38,12 +38,14 @@ export function detectLastMatch(ctx) {
     }
   }
 
-  // Temática de la build contra las dos composiciones (daño, protección): si pedían otra,
-  // es la corrección principal y las amenazas de defensa quedan dentro de ella.
+  // Temática de la build contra las dos composiciones: corrección (se perdió y la build no
+  // tenía con qué), alternativa (funcionó, pero había otra opción con argumentos) o elogio.
+  // Si la revisión habló de la build, las amenazas de defensa quedan dentro de ella.
   const review = reviewBuild(ctx, match);
   if (review?.verdict === 'shift') flags.push({ weight: 3.2, text: review.text, action: review.action });
-  else if (review?.verdict === 'good') praise.push(review.text);
-  const coveredByReview = review?.verdict === 'shift' ? ['burst', 'physical', 'magic'] : [];
+  else if (review?.verdict === 'alternative') flags.push({ weight: 2.9, text: review.text, action: review.action, soft: true });
+  else if (review?.verdict === 'good' && review.text) praise.push(review.text);
+  const coveredByReview = review?.text ? ['burst', 'physical', 'magic'] : [];
 
   // Build contra la composición rival.
   Object.entries(match.threats).forEach(([id, threat]) => {
@@ -107,18 +109,23 @@ export function detectLastMatch(ctx) {
       tone: 'positive',
       title,
       thesis: tr('coachEngine.last.cleanThesis', { list: praise.slice(0, 2).join(tr('coachEngine.and')) }),
-      action: tr('coachEngine.last.cleanAction'),
+      action: [review?.tip, tr('coachEngine.last.cleanAction')].filter(Boolean).join(' '),
       evidence: [kda && tr('coachEngine.last.evidenceKda', { kda }), match.duration && tr('coachEngine.last.evidenceDuration', { minutes: Math.round(match.duration) })],
       confidence: 0.6, sample: 1, priority: recent ? 96 : 40,
       entities: [match.champion],
     })];
   }
 
-  const opener = match.won ? tr('coachEngine.last.wonBut') : '';
+  // Una alternativa no es un error: si solo hay alternativas en una victoria, la tarjeta
+  // arranca por lo que salió bien.
+  const onlyOptions = match.won && flags.slice(0, 2).every(flag => flag.soft);
+  const opener = !match.won ? ''
+    : onlyOptions ? (praise.length ? `${tr('coachEngine.last.cleanThesis', { list: praise.slice(0, 2).join(tr('coachEngine.and')) })} ` : '')
+      : tr('coachEngine.last.wonBut');
   return [makeInsight({
     key: `last-${match.id}`,
     family: FAMILY.LAST_MATCH,
-    tone: match.won ? 'opportunity' : 'warning',
+    tone: onlyOptions ? 'positive' : match.won ? 'opportunity' : 'warning',
     title,
     thesis: `${opener}${flags.slice(0, 2).map(flag => flag.text).join(' ')}`,
     // Las dos correcciones principales, si son distintas.

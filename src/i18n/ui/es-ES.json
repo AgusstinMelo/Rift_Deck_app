@@ -2075,8 +2075,8 @@
       "title": "Morir {next} veces te cuesta la partida",
       "thesis": "Con {ceiling} muertes o menos ganas el {wrLow} de tus partidas ({gamesLow}); con {next} o más, solo el {wrHigh} ({gamesHigh}). En tus victorias promedias {winDeaths} muertes y en las derrotas {lossDeaths}.",
       "action": "No es un cupo de muertes: cada una que evitas suma, desde la primera, y a partir de la {next} la partida se te escapa. {tip}",
-      "evidenceLow": "≤{ceiling} muertes: {wr} · {games}",
-      "evidenceHigh": "{next}+ muertes: {wr} · {games}",
+      "evidenceLow": "≤{ceiling} muertes: {wr} en {games} partidas",
+      "evidenceHigh": "{next}+ muertes: {wr} en {games} partidas",
       "evidenceLane": "Pasa más en {lane}"
     },
     "curve": {
@@ -2086,9 +2086,9 @@
       "earlyThesis": "Con campeones fuertes en early ({champions}) ganas el {wrWeak} de las partidas que pasan los {long} minutos ({gamesWeak}) y el {wrStrong} de las más cortas ({gamesStrong}). Si no cierras antes, el rival te alcanza.",
       "lateAction": "En la fase de líneas juega a no perder: farmea bajo torre si hace falta, no pelees el primer dragón en desventaja y busca peleas recién con 2 objetos completos. Si el rival presiona temprano, rota con tu equipo en vez de defender solo.",
       "earlyAction": "Convierte cada ventaja en un objetivo antes del minuto 15: después de una kill, torre o dragón, no la jungla. Con ventaja, agrúpate y fuerza barón antes de que los campeones de late completen su build.",
-      "evidenceShort": "≤{short} min: {wr} · {games}",
-      "evidenceLong": "≥{long} min: {wr} · {games}",
-      "evidenceRest": "Resto: {wr} · {games}"
+      "evidenceShort": "≤{short} min: {wr} en {games} partidas",
+      "evidenceLong": "≥{long} min: {wr} en {games} partidas",
+      "evidenceRest": "Resto: {wr} en {games} partidas"
     },
     "trend": {
       "deathsUpTitle": "Estás muriendo más en las últimas partidas",
@@ -2126,21 +2126,21 @@
       "streakTitle": "Después de dos derrotas seguidas, tu nivel cae",
       "streakThesis": "Cuando vienes de 2 derrotas seguidas en la misma sesión ganas el {wr} de las partidas ({games}), contra el {wrRest} del resto.",
       "streakAction": "Regla fija: 2 derrotas seguidas en ranked = fin de la sesión. Si quieres seguir jugando, pasa a normales o tómate al menos 20 minutos antes de volver.",
-      "evidenceStreak": "Tras 2 derrotas: {wr} · {games}",
-      "evidenceRest": "Resto: {wr} · {games}",
+      "evidenceStreak": "Tras 2 derrotas: {wr} en {games} partidas",
+      "evidenceRest": "Resto: {wr} en {games} partidas",
       "lengthTitle": "A partir de la partida {from} del día rindes menos",
       "lengthThesis": "Desde la partida {from} de cada sesión ganas el {wr} ({games} partidas); en las primeras, el {wrEarly}.",
       "lengthAction": "Corta las sesiones de ranked en {max} partidas. Las que sigan, en normales o después de un descanso largo.",
-      "evidenceEarly": "Partidas 1–{max}: {wr} · {games}",
-      "evidenceLate": "Partida {from} en adelante: {wr} · {games}"
+      "evidenceEarly": "Partidas 1–{max}: {wr} en {games} partidas",
+      "evidenceLate": "Partida {from} en adelante: {wr} en {games} partidas"
     },
     "threat": {
-      "thesis": "En {games} partidas el rival tenía {threat} y armaste {answer} solo en {answered}. Sin esa respuesta ganaste el {wrUnanswered} ({gamesUnanswered} partidas){withAnswer}.",
-      "withAnswer": "; cuando sí la armaste, el {wr} ({games})",
-      "actionWithItems": "Con {champion}: {items}. {timing}",
-      "evidenceRate": "Armaste {answer}: {rate} de {games}",
-      "evidenceWithout": "Sin respuesta: {wr} · {games}",
-      "evidenceWith": "Con respuesta: {wr} · {games}",
+      "thesis": "Jugando con {champions}, en {games} partidas el rival tenía {threat} y armaste {answer} solo en {answered}. Sin esa respuesta ganaste {winsUnanswered} de {gamesUnanswered} ({wrUnanswered}){withAnswer}.",
+      "withAnswer": "; cuando sí la armaste, {wins} de {games} ({wr})",
+      "actionWithItems": "Con {champion}, suma {answer} (por ejemplo, {items}). {timing}",
+      "evidenceRate": "Armaste {answer}: {answered} de {games} partidas",
+      "evidenceWithout": "Sin respuesta: ganaste {wins} de {games} ({wr})",
+      "evidenceWith": "Con respuesta: ganaste {wins} de {games} ({wr})",
       "healing": {
         "title": "Te falta antiheal contra equipos que se curan",
         "present": "2 o más campeones que se curan",
@@ -2195,7 +2195,8 @@
         "present": "2 o más campeones con escudos",
         "answer": "anti-escudo",
         "timing": "Ármalo cuando los escudos te ganen los intercambios; en las peleas, castiga después de que el escudo se gaste."
-      }
+      },
+      "thesisNone": "Jugando con {champions}, en {games} partidas el rival tenía {threat} y no armaste {answer} en ninguna. Sin esa respuesta ganaste {winsUnanswered} de {gamesUnanswered} ({wrUnanswered}){withAnswer}."
     },
     "runes": {
       "title": "{keystone} no encaja con {champion}",
@@ -2203,8 +2204,8 @@
       "thesisAuto": "{champion} hace su daño con autoataques, pero en {games} partidas usaste {keystone}, que solo se activa con habilidades. Con ella ganas el {wr}{comparison}.",
       "comparison": "; con una clave que encaja, el {wr} ({games})",
       "action": "Con {champion}, usa {suggestion} como runa clave: se activa con la forma en que realmente haces daño.",
-      "evidenceMisfit": "{keystone}: {wr} · {games}",
-      "evidenceFit": "Clave que encaja: {wr} · {games}"
+      "evidenceMisfit": "{keystone}: {wr} en {games} partidas",
+      "evidenceFit": "Clave que encaja: {wr} en {games} partidas"
     },
     "matchup": {
       "title": "{champion} vs {enemy}: un matchup que se te escapa",
@@ -2277,14 +2278,14 @@
       "focusTitle": "Fuera de tus 3 campeones perdés partidas",
       "focusThesis": "Con {names} ganas el {wrIn} ({gamesIn} partidas); con los otros {picks} campeones que usaste, el {wrOut} ({gamesOut}).",
       "focusAction": "En ranked elige entre {names}. Si te banean uno o te lo sacan, toma otro de esos tres antes que un campeón nuevo.",
-      "evidenceIn": "Núcleo: {wr} · {games}",
-      "evidenceOut": "Resto: {wr} · {games}",
+      "evidenceIn": "Núcleo: {wr} en {games} partidas",
+      "evidenceOut": "Resto: {wr} en {games} partidas",
       "underTitle": "{name} te está costando partidas",
       "underThesis": "Jugaste {games} partidas con {name} y ganas el {wr}, contra tu {base} general.{deaths}",
       "underDeaths": " Con él mueres {deaths} veces por partida; tu promedio es {base}.",
       "underActionAlt": "En ranked prioriza {alt} ({wr} en {games} partidas) en esa línea y deja {name} para cuando el matchup lo favorezca.",
       "underActionDeaths": "Con {name} el problema son las muertes: juégalo más conservador, sin entrar primero a las peleas, hasta que tenga sus objetos clave.",
-      "evidenceChampion": "{name}: {wr} · {games}",
+      "evidenceChampion": "{name}: {wr} en {games} partidas",
       "evidenceBase": "General: {wr}"
     },
     "last": {
@@ -2387,14 +2388,14 @@
       "thesis": "Con {champion} ganas el {wr} de tus partidas ({games}), frente a tu {base} general.{deaths}",
       "deaths": " Además mueres menos: {deaths} por partida frente a {base} de media.",
       "action": "Cuando tengas que elegir primero o no sepas qué trae el rival, elige {champion} en {lane}: es tu pick más seguro para ranked.",
-      "evidence": "{champion}: {wr} · {games}"
+      "evidence": "{champion}: {wr} en {games} partidas"
     },
     "savedBuild": {
       "title": "Con {champion}, tu build «{best}» rinde más",
       "thesis": "Con {champion}, la build «{best}» ganó el {wrBest} de sus partidas ({gamesBest}) y «{worst}», el {wrWorst} ({gamesWorst}).{diff}",
       "diff": " La diferencia: «{best}» arma {onlyBest}; «{worst}», {onlyWorst}.",
       "action": "Usa «{best}» como build base con {champion}. Antes de volver a «{worst}», fíjate qué cambia: si es una adaptación a un rival, guárdala para ese matchup.",
-      "evidence": "«{name}»: {wr} · {games}"
+      "evidence": "«{name}»: {wr} en {games} partidas"
     },
     "weekly": {
       "titleTwo": "Esta semana juega {first} y {second}",
@@ -2409,7 +2410,7 @@
       "actionOne": "Empieza la semana en ranked con {first} en {lane}.",
       "banNote": "Ojo: en el {ban} de las partidas banean a {champion}, así que ten el plan B listo.",
       "avoid": "Deja {champion} ({wr} en {games}) para normales hasta encontrarle el truco.",
-      "evidence": "{champion}: {wr} · {games}{tier}"
+      "evidence": "{champion}: {wr} en {games} partidas{tier}"
     },
     "impact": {
       "damageShare": {
@@ -2457,25 +2458,25 @@
       "evidenceWin": "Victorias: {gold} de oro frente a tu rival ({games} partidas)"
     },
     "enemyItems": {
-      "withAnswer": " Cuando sí respondiste, ganaste el {wr} ({games} partidas).",
-      "evidenceMissed": "Sin respuesta: {wr} de victorias ({games} partidas)",
-      "evidenceAnswered": "Con respuesta: {wr} de victorias ({games} partidas)",
+      "withAnswer": " Cuando sí respondiste, ganaste {wins} de {games} ({wr}).",
+      "evidenceMissed": "Sin respuesta: ganaste {wins} de {games} ({wr})",
+      "evidenceAnswered": "Con respuesta: ganaste {wins} de {games} ({wr})",
       "armor": {
         "title": "El rival se llenó de armadura y no compraste penetración",
-        "thesis": "En {games} partidas el rival construyó 5 o más objetos con armadura; en {missed} no compraste penetración y ganaste el {wr}.{withAnswer}",
-        "action": "Cuando veas a dos o más rivales con armadura en el marcador, cambia tu tercer o cuarto objeto por {items}.",
+        "thesis": "Jugando con {champions}, en {games} partidas el rival construyó 5 o más objetos con armadura; en {missed} no compraste penetración y ganaste {wins} de esas {missed} ({wr}).{withAnswer}",
+        "action": "Cuando veas a dos o más rivales con armadura en el marcador, añade un objeto de penetración de armadura a tu build (por ejemplo, {items}).",
         "actionGeneric": "Cuando veas a dos o más rivales con armadura en el marcador, añade un objeto de penetración de armadura a tu build."
       },
       "magicRes": {
         "title": "El rival se llenó de resistencia mágica y no compraste penetración",
-        "thesis": "En {games} partidas el rival construyó 5 o más objetos con resistencia mágica; en {missed} no compraste penetración mágica y ganaste el {wr}.{withAnswer}",
-        "action": "Cuando veas a dos o más rivales con resistencia mágica en el marcador, añade {items} a tu build.",
+        "thesis": "Jugando con {champions}, en {games} partidas el rival construyó 5 o más objetos con resistencia mágica; en {missed} no compraste penetración mágica y ganaste {wins} de esas {missed} ({wr}).{withAnswer}",
+        "action": "Cuando veas a dos o más rivales con resistencia mágica en el marcador, añade un objeto de penetración mágica a tu build (por ejemplo, {items}).",
         "actionGeneric": "Cuando veas a dos o más rivales con resistencia mágica en el marcador, añade un objeto de penetración mágica a tu build."
       },
       "healing": {
         "title": "El rival se curaba y no construiste antiheal",
-        "thesis": "En {games} partidas el rival construyó 3 o más objetos de curación o robo de vida; en {missed} no construiste antiheal y ganaste el {wr}.{withAnswer}",
-        "action": "Si en el marcador ves robo de vida o curación en dos rivales, compra {items} antes de tu tercer objeto.",
+        "thesis": "Jugando con {champions}, en {games} partidas el rival construyó 3 o más objetos de curación o robo de vida; en {missed} no construiste antiheal y ganaste {wins} de esas {missed} ({wr}).{withAnswer}",
+        "action": "Si en el marcador ves robo de vida o curación en dos rivales, compra un objeto antiheal antes de tu tercer objeto (por ejemplo, {items}).",
         "actionGeneric": "Si en el marcador ves robo de vida o curación en dos rivales, compra un objeto antiheal antes de tu tercer objeto."
       }
     },
@@ -2483,7 +2484,12 @@
       "theme": {
         "damage": "daño",
         "protect": "protección (curaciones y escudos)",
-        "defense": "defensa"
+        "defense": "defensa",
+        "fullDamage": "full daño",
+        "guard": "daño con un objeto defensivo",
+        "resist": "resistencias",
+        "armor": "armadura",
+        "magicRes": "resistencia mágica"
       },
       "reason": {
         "divers": "el rival tenía {count} campeones que llegan a la línea de atrás ({names})",
@@ -2492,16 +2498,60 @@
         "noMagic": "tu equipo no tenía otro daño mágico",
         "noPhysical": "tu equipo no tenía otro daño físico",
         "noDive": "el rival casi no tenía cómo llegarte",
-        "frontline": "{name} delante te daba espacio para pegar"
+        "frontline": "{name} delante te daba espacio para pegar",
+        "fed": "{name} terminó {kda} y te podía alcanzar",
+        "noPeel": "no tenías tanque ni encantador que te cuide",
+        "peel": "{name} te cuidaba",
+        "fewCarries": "tu equipo tenía poco daño aparte del tuyo",
+        "noFrontline": "no tenías tanque, así que el que aguantaba delante eras tú",
+        "squishy": "el rival tenía {count} campeones frágiles para castigar",
+        "enemyPhysical": "el daño rival era casi todo físico ({names})",
+        "enemyMagic": "el daño rival era casi todo mágico ({names})",
+        "carryDied": "{name} murió {deaths} veces",
+        "selfDied": "moriste {deaths} veces",
+        "pokeLane": "a {name}, que escala tarde, tu poke en línea le daba espacio para farmear",
+        "coverShield": "con {champion}, el poder de habilidad también agranda tus escudos y curaciones",
+        "coverTank": "con {champion}, la vida y las resistencias también te suben el daño"
       },
       "good": "tu build de {built} era la indicada, porque {reasons}",
       "shift": "Armaste {built} ({items}), pero la partida pedía {wanted}: {reasons}.",
-      "itemsAction": "Con {champion} en una partida así: {items}.",
+      "itemsAction": "Un ejemplo con {champion}: {items}.",
       "play": {
-        "protect": "Juega al lado de tu tirador y guarda escudos y curaciones para cuando le salten encima: el daño lo pone tu equipo.",
-        "damage": "Pega desde lejos antes de cada objetivo para llegar con ventaja y sal cuando entren: tu daño es el que le faltaba al equipo."
+        "support": {
+          "protect": "Juega al lado de tu tirador y guarda escudos y curaciones para cuando le salten encima: el daño lo pone tu equipo.",
+          "damage": "Pega desde lejos antes de cada objetivo para llegar con ventaja y sal cuando entren: tu daño es el que le faltaba al equipo."
+        },
+        "carry": {
+          "guard": "Arma el defensivo en cuanto veas que te buscan, aunque sea antes de tu último objeto de daño, y pelea detrás de tu frontline: si te alcanzan sin él, no llegas a pegar.",
+          "fullDamage": "Aquí podías ir full daño: no te alcanzaban, así que el defensivo fue daño que tu equipo no tuvo. Cámbialo por otro objeto de daño."
+        },
+        "fighter": {
+          "resist": "Suma resistencias contra el daño que más te pega antes del 3er objeto: aguantar delante le da tiempo a tu equipo para hacer su daño.",
+          "damage": "Con alguien que aguanta delante, tu trabajo es llegar a sus carries: prioriza daño y entra después de que gasten sus controles."
+        },
+        "tank": {
+          "armor": "Prioriza armadura: el daño que te tiene que atravesar es físico, y la resistencia mágica casi no te sirve en esa partida.",
+          "magicRes": "Prioriza resistencia mágica: el daño que te tiene que atravesar es mágico, y la armadura casi no te sirve en esa partida."
+        }
+      },
+      "worked": {
+        "wardSurvived": " ({name} murió solo {deaths} veces)",
+        "wardSurvivedOne": " ({name} murió solo 1 vez)",
+        "wardSurvivedNone": " ({name} no murió)",
+        "selfSurvived": " (moriste solo {deaths} veces)",
+        "selfSurvivedOne": " (moriste solo 1 vez)",
+        "selfSurvivedNone": " (no moriste)"
+      },
+      "alternativeWon": "Armaste {built} y te funcionó{worked}{cover}. También tenías la opción de armar {wanted}: {reasons}.",
+      "alternativeCovered": "Armaste {built}, que tenía sentido{cover}. También tenías la opción de armar {wanted}: {reasons}.",
+      "coverJoin": "; {cover}",
+      "altLead": "Si se repite una composición así, otra opción:",
+      "kit": {
+        "peel": "Contra {diver}, que se lanza a la línea de atrás, guarda tu control para cuando salte sobre {carry}.",
+        "escape": "Contra {diver}, guarda tu desplazamiento para escapar cuando se te eche encima, no para entrar."
       }
-    }
+    },
+    "championsMore": "{list} y {count} más"
   },
   "share": {
     "button": "Compartir",

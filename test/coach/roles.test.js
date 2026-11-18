@@ -148,16 +148,16 @@ test('pick exótico: Leona top armando defensa sigue siendo tanque; Lux armando 
 });
 
 // ── Temática de la build contra las composiciones (support mago) ─────────────
-test('build: Seraphine support de daño contra divers con un tirador para cuidar → pedía protección', () => {
-  const seraphine = fields => match({ own_champion_name: 'Seraphine', lane: 'support', enemy_champion_name: 'Lee Sin', ...fields });
-  const last = seraphine({
-    id: 'sera-last', date: '2026-11-15', created_at: '2026-11-15T20:00:00Z', result: 'win', kills: 1, deaths: 2, assists: 14,
-    ally_champions: ['Ashe', 'Garen', 'Lux', 'Darius'],
+test('build: support mago sin protección en su kit, de daño contra divers, perdió → pedía protección', () => {
+  const lux = fields => match({ own_champion_name: 'Lux', lane: 'support', enemy_champion_name: 'Lee Sin', ...fields });
+  const last = lux({
+    id: 'lux-last', date: '2026-11-15', created_at: '2026-11-15T20:00:00Z', result: 'loss', kills: 1, deaths: 4, assists: 6,
+    ally_champions: ['Ashe', 'Garen', 'Annie', 'Darius'],
     enemy_champions: ['Zed', 'Akali', 'Lee Sin', 'Darius', 'Jinx'],
     items_used: ['Eco de Luden', 'Orbe del Infinito', 'Brazal del Buscador', 'Botas de Mercurio'],
   });
-  const insights = computeCoachReport({ matches: [last, seraphine({}), seraphine({}), seraphine({})], ...catalog, now: new Date('2026-11-16T12:00:00Z'), limit: 30 }).insights;
-  const card = insights.find(insight => insight.id.startsWith('last-sera-last'));
+  const insights = computeCoachReport({ matches: [last, lux({}), lux({}), lux({})], ...catalog, now: new Date('2026-11-16T12:00:00Z'), limit: 30 }).insights;
+  const card = insights.find(insight => insight.id.startsWith('last-lux-last'));
   assert.ok(card, 'hay tarjeta de última partida');
   assert.match(card.thesis, /Armaste daño \(Eco de Luden y Orbe del Infinito\), pero la partida pedía protección/);
   assert.ok(card.thesis.includes('3 campeones que llegan a la línea de atrás (Zed, Akali y Lee Sin)'));
@@ -166,6 +166,59 @@ test('build: Seraphine support de daño contra divers con un tirador para cuidar
   assert.doesNotMatch(card.thesis, /armadura/);
   assert.match(card.action, /Relicario de los Solari de Hierro|Báculo de Agua Fluyente/);
   assert.doesNotMatch(card.action, /Orbe|Luden/);
+  // Consejo del kit: Lux tiene control; lo guarda para cuando salten sobre su tirador.
+  assert.match(card.action, /guardá tu control para cuando salte sobre Ashe/);
+});
+
+test("build: Seraphine de daño ganó con Smolder contra Riven y K'Sante → bien armada, y el tanque no cuenta como diver", () => {
+  const seraphine = fields => match({ own_champion_name: 'Seraphine', lane: 'support', enemy_champion_name: 'Lux', ...fields });
+  const last = seraphine({
+    id: 'sera-real', date: '2026-11-15', created_at: '2026-11-15T20:00:00Z', result: 'win', kills: 1, deaths: 2, assists: 14,
+    ally_champions: ['Smolder', 'Garen', 'Lee Sin', 'Darius'],
+    enemy_champions: ["K'Sante", 'Riven', 'Lux', 'Jinx', 'Darius'],
+    items_used: ['Eco de Luden', 'Orbe del Infinito', 'Brazal del Buscador', 'Botas de Mercurio'],
+  });
+  const insights = computeCoachReport({ matches: [last, seraphine({}), seraphine({}), seraphine({})], ...catalog, now: new Date('2026-11-16T12:00:00Z'), limit: 30 }).insights;
+  const card = insights.find(insight => insight.id.startsWith('last-sera-real'));
+  assert.doesNotMatch(card.thesis, /hay algo para corregir|pedía/);
+  assert.doesNotMatch(card.thesis, /K'Sante/, 'un tanque no es un rival que se tira a la línea de atrás');
+  assert.match(card.thesis, /tu build de daño era la indicada, porque tu equipo no tenía otro daño mágico y a Smolder, que escala tarde, tu poke en línea le daba espacio para farmear/);
+  assert.match(card.action, /Contra Riven, que se tira a la línea de atrás, guardá tu control para cuando salte sobre Smolder/);
+});
+
+test('build: Seraphine de daño que ganó contra 3 divers → alternativa (su poder de habilidad también protege), no error', () => {
+  const seraphine = fields => match({ own_champion_name: 'Seraphine', lane: 'support', enemy_champion_name: 'Lee Sin', ...fields });
+  const last = seraphine({
+    id: 'sera-alt', date: '2026-11-15', created_at: '2026-11-15T20:00:00Z', result: 'win', kills: 1, deaths: 2, assists: 14,
+    ally_champions: ['Smolder', 'Garen', 'Lux', 'Darius'],
+    enemy_champions: ['Zed', 'Akali', 'Lee Sin', 'Darius', 'Jinx'],
+    items_used: ['Eco de Luden', 'Orbe del Infinito', 'Botas de Mercurio'],
+  });
+  const participants = [
+    { match_id: 'sera-alt', team: 'ally', is_self: true, lane: 'support', champion: 'Seraphine', kills: 1, deaths: 2, assists: 14 },
+    { match_id: 'sera-alt', team: 'ally', is_self: false, lane: 'adc', champion: 'Smolder', kills: 9, deaths: 2, assists: 5 },
+  ];
+  const insights = computeCoachReport({ matches: [last, seraphine({}), seraphine({}), seraphine({})], participants, ...catalog, now: new Date('2026-11-16T12:00:00Z'), limit: 30 }).insights;
+  const card = insights.find(insight => insight.id.startsWith('last-sera-alt'));
+  assert.equal(card.tone, 'positive');
+  assert.doesNotMatch(card.thesis, /hay algo para corregir/);
+  assert.match(card.thesis, /Armaste daño y te funcionó \(Smolder murió solo 2 veces\); con Seraphine, el poder de habilidad también agranda tus escudos y curaciones\. También tenías la opción de armar protección/);
+  assert.match(card.action, /^Si se repite una composición así, otra opción: jugá al lado de tu tirador/);
+});
+
+test('build: ganó, pero el tirador a cuidar murió 7 veces → la build no lo protegió (corrección)', () => {
+  const lux = fields => match({ own_champion_name: 'Lux', lane: 'support', enemy_champion_name: 'Lee Sin', ...fields });
+  const last = lux({
+    id: 'lux-died', date: '2026-11-15', created_at: '2026-11-15T20:00:00Z', result: 'win', kills: 3, deaths: 3, assists: 9,
+    ally_champions: ['Ashe', 'Garen', 'Annie', 'Darius'],
+    enemy_champions: ['Zed', 'Akali', 'Lee Sin', 'Darius', 'Jinx'],
+    items_used: ['Eco de Luden', 'Orbe del Infinito', 'Botas de Mercurio'],
+  });
+  const participants = [{ match_id: 'lux-died', team: 'ally', is_self: false, lane: 'adc', champion: 'Ashe', kills: 4, deaths: 7, assists: 3 }];
+  const insights = computeCoachReport({ matches: [last, lux({}), lux({}), lux({})], participants, ...catalog, now: new Date('2026-11-16T12:00:00Z'), limit: 30 }).insights;
+  const card = insights.find(insight => insight.id.startsWith('last-lux-died'));
+  assert.match(card.thesis, /Ganaste, pero hay algo para corregir\. Armaste daño .*pero la partida pedía protección/);
+  assert.match(card.thesis, /Ashe murió 7 veces/);
 });
 
 test('build: Seraphine support de daño en un equipo sin daño mágico y sin divers rivales → bien armada', () => {
@@ -180,4 +233,56 @@ test('build: Seraphine support de daño en un equipo sin daño mágico y sin div
   const card = insights.find(insight => insight.id.startsWith('last-sera-good'));
   assert.ok(card);
   assert.match(card.thesis, /tu build de daño era la indicada, porque tu equipo no tenía otro daño mágico/);
+});
+
+/** Tarjeta de última partida de `last` (con 3 partidas de historial del mismo campeón). */
+function lastCard(last, history) {
+  const insights = computeCoachReport({ matches: [last, history({}), history({}), history({})], ...catalog, now: new Date('2026-11-16T12:00:00Z'), limit: 30 }).insights;
+  return insights.find(insight => insight.id.startsWith(`last-${last.id}`));
+}
+const recent = { date: '2026-11-15', created_at: '2026-11-15T20:00:00Z', result: 'loss', kills: 4, deaths: 3, assists: 5 };
+
+test('build: carry full daño con la build terminada contra 3 divers y sin quien lo cuide → pedía un defensivo', () => {
+  const kaisa = fields => match({ own_champion_name: "Kai'Sa", lane: 'adc', enemy_champion_name: 'Zed', ...fields });
+  const fight = { ally_champions: ['Garen', 'Lux', 'Ahri', 'Sett'], enemy_champions: ['Zed', 'Akali', 'Lee Sin', 'Darius', 'Malphite'] };
+  const card = lastCard(kaisa({ id: 'kai-full', ...recent, ...fight, items_used: ['Hidra Titánica', 'Filo Infinito', 'Cuchilla Negra', 'Recordatorio Mortal', 'Hoja del Rey Arruinado'] }), kaisa);
+  assert.match(card.thesis, /Armaste full daño .*pero la partida pedía daño con un objeto defensivo/);
+  assert.ok(card.thesis.includes('(Zed, Akali y Lee Sin)'));
+  assert.match(card.thesis, /no tenías tanque ni encantador/);
+  assert.match(card.action, /Ángel Guardián|Danza de la Muerte/);
+  assert.doesNotMatch(card.action, /Corazón|Cota|Randuin/, 'nunca objetos de tanque a un carry');
+  // Con slots libres no se juzga: el defensivo pudo venir de 5º objeto.
+  const early = lastCard(kaisa({ id: 'kai-early', ...recent, ...fight, items_used: ['Hidra Titánica', 'Filo Infinito', 'Cuchilla Negra', 'Recordatorio Mortal'] }), kaisa);
+  assert.doesNotMatch(early?.thesis || '', /pedía/);
+});
+
+test('build: carry con defensivo cuando nadie lo alcanzaba y tenía tanque → podía ir full daño', () => {
+  const kaisa = fields => match({ own_champion_name: "Kai'Sa", lane: 'adc', enemy_champion_name: 'Jinx', ...fields });
+  const card = lastCard(kaisa({
+    id: 'kai-guard', ...recent, ally_champions: ['Malphite', 'Garen', 'Darius', 'Soraka'],
+    enemy_champions: ['Darius', 'Jinx', 'Lux', 'Malphite', 'Soraka'], items_used: ['Hidra Titánica', 'Filo Infinito', 'Ángel Guardián'],
+  }), kaisa);
+  assert.match(card.thesis, /Armaste daño con un objeto defensivo \(Ángel Guardián\), pero la partida pedía full daño/);
+  assert.match(card.action, /Cambialo por otro objeto de daño/);
+});
+
+test('build: luchador full daño sin tanque en su equipo contra daño físico → pedía resistencias', () => {
+  const garen = fields => match({ own_champion_name: 'Garen', lane: 'top', ...fields });
+  const card = lastCard(garen({
+    id: 'garen-dmg', ...recent, ally_champions: ['Jinx', 'Lux', 'Ahri', 'Soraka'],
+    enemy_champions: ['Darius', 'Zed', 'Jinx', 'Aatrox', 'Sett'], items_used: ['Hidra Titánica', 'Cuchilla Negra', 'Filo Infinito'],
+  }), garen);
+  assert.match(card.thesis, /Armaste daño .*pero la partida pedía resistencias: no tenías tanque, así que/);
+  assert.match(card.thesis, /casi todo físico/);
+  assert.match(card.action, /Corazón Helado|Cota de Espinas|Presagio de Randuin|Corazón de Hielo/);
+});
+
+test('build: tanque con armadura contra un equipo de daño mágico → pedía resistencia mágica', () => {
+  const malphite = fields => match({ own_champion_name: 'Malphite', lane: 'top', ...fields });
+  const card = lastCard(malphite({
+    id: 'malph-armor', ...recent, ally_champions: ['Jinx', 'Garen', 'Ahri', 'Soraka'],
+    enemy_champions: ['Lux', 'Ahri', 'Annie', 'Soraka', 'Darius'], items_used: ['Corazón Helado', 'Presagio de Randuin', 'Cota de Espinas'],
+  }), malphite);
+  assert.match(card.thesis, /Armaste armadura .*pero la partida pedía resistencia mágica: el daño rival era casi todo mágico/);
+  assert.match(card.action, /Priorizá resistencia mágica/);
 });

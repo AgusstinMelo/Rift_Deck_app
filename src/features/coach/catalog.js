@@ -75,6 +75,8 @@ export function championProfile(row) {
     traits,
     roles,
     vulnerabilities: asList(row.vulnerabilities).map(keyOf),
+    /** Con qué estadísticas escala el kit (poder_habilidad, vida, armadura, poder_escudo...). */
+    itemScalings: tagSet(row.item_scalings),
     strongAgainst: asList(row.strong_against).map(keyOf),
     weakAgainst: asList(row.weak_against).map(keyOf),
     scaling: keyOf(row.scaling), // earlygame | midgame | lategame
@@ -192,6 +194,9 @@ export function itemProfile(row) {
     boots: isBoots(row),
     armor: Number(row.armor) > 0,
     magicRes: Number(row.magic_res) > 0,
+    abilityPower: Number(row.ability_power) > 0,
+    attackDamage: Number(row.attack_damage) > 0,
+    life: Number(row.life) > 0,
     tenacity: Number(row.tenacity) > 0,
   };
 }
@@ -350,6 +355,8 @@ export function suggestItems(catalog, own, answers, { boughtKeys = new Set(), pr
     .map(({ row, item }) => ({
       name: row.name,
       score: (boughtKeys.has(keyOf(row.name)) ? 2 : 0) + (item.roles.has('counter') ? 1 : 0) + (item.roles.has('defensivo') ? 0.5 : 0)
+        // Con un solo ejemplo, mejor uno del tipo de daño que el jugador ya arma.
+        + (preferredTypes.length && item.types.some(type => preferredTypes.includes(type)) ? 0.75 : 0)
         // Las botas son la respuesta más barata y no le quitan un espacio de daño a nadie.
         + (item.boots ? 1 : 0)
         // Un support prefiere lo que también protege a su equipo.

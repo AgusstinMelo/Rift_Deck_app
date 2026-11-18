@@ -6,6 +6,7 @@
 import { tr } from '../../../i18n/uiI18n.js';
 import { FAMILY, makeInsight } from '../card.js';
 import { isEnchanter, suggestItems } from '../catalog.js';
+import { championsLabel } from './build.js';
 import { fixed, pct, summarize, twoProportionZ } from '../stats.js';
 import { mainOwnOf } from './performance.js';
 
@@ -289,22 +290,23 @@ export function detectEnemyItems(ctx, rows = participantMatches(ctx)) {
     if (reference.wr - missedStats.wr < 0.1) return;
     const own = missed[0].match.own;
     const champion = missed[0].match.champion;
-    const suggestions = suggestItems(ctx.catalog, own, item => threat.answers(item), { limit: 2 });
+    const suggestions = suggestItems(ctx.catalog, own, item => threat.answers(item), { limit: 1 });
     cards.push(makeInsight({
       key: `enemy-items-${threat.id}`,
       family: FAMILY.BUILD,
       tone: 'critical',
       title: tr(`coachEngine.enemyItems.${threat.id}.title`),
       thesis: tr(`coachEngine.enemyItems.${threat.id}.thesis`, {
-        games: facing.length, missed: missed.length, wr: pct(missedStats.wr),
-        withAnswer: answeredStats.games >= 2 ? tr('coachEngine.enemyItems.withAnswer', { wr: pct(answeredStats.wr), games: answeredStats.games }) : '',
+        champions: championsLabel(facing.map(row => row.match)),
+        games: facing.length, missed: missed.length, wins: missedStats.wins, wr: pct(missedStats.wr),
+        withAnswer: answeredStats.games >= 2 ? tr('coachEngine.enemyItems.withAnswer', { wr: pct(answeredStats.wr), wins: answeredStats.wins, games: answeredStats.games }) : '',
       }),
       action: suggestions.length
         ? tr(`coachEngine.enemyItems.${threat.id}.action`, { items: suggestions.join(tr('coachEngine.or')) })
         : tr(`coachEngine.enemyItems.${threat.id}.actionGeneric`),
       evidence: [
-        tr('coachEngine.enemyItems.evidenceMissed', { wr: pct(missedStats.wr), games: missedStats.games }),
-        answeredStats.games >= 2 && tr('coachEngine.enemyItems.evidenceAnswered', { wr: pct(answeredStats.wr), games: answeredStats.games }),
+        tr('coachEngine.enemyItems.evidenceMissed', { wr: pct(missedStats.wr), wins: missedStats.wins, games: missedStats.games }),
+        answeredStats.games >= 2 && tr('coachEngine.enemyItems.evidenceAnswered', { wr: pct(answeredStats.wr), wins: answeredStats.wins, games: answeredStats.games }),
       ],
       z: answeredStats.games >= 2 ? twoProportionZ(answeredStats.wins, answeredStats.games, missedStats.wins, missedStats.games) : 1,
       sample: facing.length, corroborated: true, priority: 76, impact: missedStats.losses * 2,

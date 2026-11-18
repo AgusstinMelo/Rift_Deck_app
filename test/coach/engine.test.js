@@ -32,7 +32,7 @@ test('encogimiento: 2 de 2 no es 100%', () => {
   assert.equal(shrunkRate(2, 2, 0.5, 6), 0.625);
 });
 
-test('antiheal: sin respuesta contra curadores se pierde, y el consejo nombra el objeto del catálogo', () => {
+test('antiheal: sin respuesta contra curadores se pierde; el consejo pide el tipo de objeto y da un solo ejemplo', () => {
   const matches = [
     ...many(6, { enemy_champions: HEALERS, result: 'loss' }),
     ...many(2, { enemy_champions: HEALERS, result: 'win' }, 10),
@@ -41,7 +41,8 @@ test('antiheal: sin respuesta contra curadores se pierde, y el consejo nombra el
   const card = find(report(matches).insights, 'threat-healing');
   assert.ok(card, 'debería detectar la falta de antiheal');
   assert.match(card.thesis, /2 o más campeones que se curan/);
-  assert.match(card.action, /Recordatorio Mortal/);
+  assert.match(card.action, /sumá antiheal \(por ejemplo, Recordatorio Mortal\)/);
+  assert.doesNotMatch(card.action, /Cota de Espinas/, 'un solo ejemplo');
   assert.equal(card.tone, 'critical');
 });
 

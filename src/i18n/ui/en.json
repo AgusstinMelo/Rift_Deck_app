@@ -2075,8 +2075,8 @@
       "title": "Dying {next} times costs you the game",
       "thesis": "With {ceiling} deaths or fewer you win {wrLow} of your matches ({gamesLow}); with {next} or more, only {wrHigh} ({gamesHigh}). You average {winDeaths} deaths in your wins and {lossDeaths} in your losses.",
       "action": "This is not a death allowance: every death you avoid counts, starting with the first, and from death {next} on the game slips away. {tip}",
-      "evidenceLow": "≤{ceiling} deaths: {wr} · {games}",
-      "evidenceHigh": "{next}+ deaths: {wr} · {games}",
+      "evidenceLow": "≤{ceiling} deaths: {wr} in {games} games",
+      "evidenceHigh": "{next}+ deaths: {wr} in {games} games",
       "evidenceLane": "Happens most in {lane}"
     },
     "curve": {
@@ -2086,9 +2086,9 @@
       "earlyThesis": "With early-game champions ({champions}) you win {wrWeak} of games that go past {long} minutes ({gamesWeak}) and {wrStrong} of shorter ones ({gamesStrong}). If you don't close it out, the enemy catches up.",
       "lateAction": "In the laning phase, play not to lose: farm under tower if needed, don't contest the first dragon from behind, and only look for fights once you have 2 completed items. If the enemy pressures early, rotate with your team instead of defending alone.",
       "earlyAction": "Turn every lead into an objective before minute 15: after a kill, go for a tower or dragon, not the jungle. When ahead, group up and force Baron before their late-game champions finish their builds.",
-      "evidenceShort": "≤{short} min: {wr} · {games}",
-      "evidenceLong": "≥{long} min: {wr} · {games}",
-      "evidenceRest": "Rest: {wr} · {games}"
+      "evidenceShort": "≤{short} min: {wr} in {games} games",
+      "evidenceLong": "≥{long} min: {wr} in {games} games",
+      "evidenceRest": "Rest: {wr} in {games} games"
     },
     "trend": {
       "deathsUpTitle": "You've been dying more in recent games",
@@ -2126,21 +2126,21 @@
       "streakTitle": "After two losses in a row, your level drops",
       "streakThesis": "When you come off 2 straight losses in the same session you win {wr} of games ({games}), versus {wrRest} the rest of the time.",
       "streakAction": "Hard rule: 2 losses in a row in ranked = session over. If you want to keep playing, switch to normals or take at least a 20-minute break before coming back.",
-      "evidenceStreak": "After 2 losses: {wr} · {games}",
-      "evidenceRest": "Rest: {wr} · {games}",
+      "evidenceStreak": "After 2 losses: {wr} in {games} games",
+      "evidenceRest": "Rest: {wr} in {games} games",
       "lengthTitle": "From game {from} of the day on, you perform worse",
       "lengthThesis": "From game {from} of each session on, you win {wr} ({games} matches); in the earlier ones, {wrEarly}.",
       "lengthAction": "Cap your ranked sessions at {max} games. Anything after that, play normals or take a long break first.",
-      "evidenceEarly": "Games 1–{max}: {wr} · {games}",
-      "evidenceLate": "Game {from} onwards: {wr} · {games}"
+      "evidenceEarly": "Games 1–{max}: {wr} in {games} games",
+      "evidenceLate": "Game {from} onwards: {wr} in {games} games"
     },
     "threat": {
-      "thesis": "In {games} matches the enemy had {threat} and you built {answer} in only {answered}. Without that answer you won {wrUnanswered} ({gamesUnanswered} matches){withAnswer}.",
-      "withAnswer": "; when you did build it, {wr} ({games})",
-      "actionWithItems": "With {champion}: {items}. {timing}",
-      "evidenceRate": "Built {answer}: {rate} of {games}",
-      "evidenceWithout": "No answer: {wr} · {games}",
-      "evidenceWith": "With answer: {wr} · {games}",
+      "thesis": "Playing {champions}, in {games} matches the enemy had {threat} and you built {answer} in only {answered}. Without that answer you won {winsUnanswered} of {gamesUnanswered} ({wrUnanswered}){withAnswer}.",
+      "withAnswer": "; when you did build it, {wins} of {games} ({wr})",
+      "actionWithItems": "With {champion}, add {answer} (for example, {items}). {timing}",
+      "evidenceRate": "Built {answer}: {answered} of {games} matches",
+      "evidenceWithout": "No answer: won {wins} of {games} ({wr})",
+      "evidenceWith": "With answer: won {wins} of {games} ({wr})",
       "healing": {
         "title": "You're missing anti-heal against teams that heal",
         "present": "2 or more champions that heal",
@@ -2195,7 +2195,8 @@
         "present": "2 or more champions with shields",
         "answer": "anti-shield",
         "timing": "Build it when shields are winning your trades; in fights, punish after the shield is gone."
-      }
+      },
+      "thesisNone": "Playing {champions}, in {games} matches the enemy had {threat} and you never built {answer}. Without that answer you won {winsUnanswered} of {gamesUnanswered} ({wrUnanswered}){withAnswer}."
     },
     "runes": {
       "title": "{keystone} doesn't fit {champion}",
@@ -2203,8 +2204,8 @@
       "thesisAuto": "{champion} deals damage with basic attacks, but in {games} matches you used {keystone}, which only triggers on abilities. With it you win {wr}{comparison}.",
       "comparison": "; with a keystone that fits, {wr} ({games})",
       "action": "On {champion}, take {suggestion} as your keystone: it triggers on the way you actually deal damage.",
-      "evidenceMisfit": "{keystone}: {wr} · {games}",
-      "evidenceFit": "Fitting keystone: {wr} · {games}"
+      "evidenceMisfit": "{keystone}: {wr} in {games} games",
+      "evidenceFit": "Fitting keystone: {wr} in {games} games"
     },
     "matchup": {
       "title": "{champion} vs {enemy}: a matchup slipping away from you",
@@ -2277,14 +2278,14 @@
       "focusTitle": "Outside your top 3 champions you lose games",
       "focusThesis": "With {names} you win {wrIn} ({gamesIn} matches); with the other {picks} champions you played, {wrOut} ({gamesOut}).",
       "focusAction": "In ranked, pick from {names}. If one gets banned or taken, go for another of those three before a new champion.",
-      "evidenceIn": "Core: {wr} · {games}",
-      "evidenceOut": "Rest: {wr} · {games}",
+      "evidenceIn": "Core: {wr} in {games} games",
+      "evidenceOut": "Rest: {wr} in {games} games",
       "underTitle": "{name} is costing you games",
       "underThesis": "You played {games} matches with {name} and win {wr} of them, versus your overall {base}.{deaths}",
       "underDeaths": " On them you die {deaths} times per game; your average is {base}.",
       "underActionAlt": "In ranked, prioritize {alt} ({wr} in {games} matches) in that lane and save {name} for matchups that favor them.",
       "underActionDeaths": "On {name} the problem is deaths: play more conservatively, without going in first, until you have your key items.",
-      "evidenceChampion": "{name}: {wr} · {games}",
+      "evidenceChampion": "{name}: {wr} in {games} games",
       "evidenceBase": "Overall: {wr}"
     },
     "last": {
@@ -2387,14 +2388,14 @@
       "thesis": "With {champion} you win {wr} of your matches ({games}), versus your overall {base}.{deaths}",
       "deaths": " You also die less: {deaths} per game versus your {base} average.",
       "action": "When you have to pick first or don't know what the enemy will bring, pick {champion} in {lane}: it's your safest ranked pick.",
-      "evidence": "{champion}: {wr} · {games}"
+      "evidence": "{champion}: {wr} in {games} games"
     },
     "savedBuild": {
       "title": "With {champion}, your “{best}” build performs better",
       "thesis": "With {champion}, the “{best}” build won {wrBest} of its matches ({gamesBest}) and “{worst}” won {wrWorst} ({gamesWorst}).{diff}",
       "diff": " The difference: “{best}” builds {onlyBest}; “{worst}”, {onlyWorst}.",
       "action": "Use “{best}” as your base build with {champion}. Before going back to “{worst}”, check what changes: if it is an adjustment for a specific enemy, save it for that matchup.",
-      "evidence": "“{name}”: {wr} · {games}"
+      "evidence": "“{name}”: {wr} in {games} games"
     },
     "weekly": {
       "titleTwo": "This week, play {first} and {second}",
@@ -2409,7 +2410,7 @@
       "actionOne": "Start the week in ranked with {first} in {lane}.",
       "banNote": "Heads up: {champion} is banned in {ban} of matches, so have a plan B ready.",
       "avoid": "Leave {champion} ({wr} in {games}) for normals until you figure them out.",
-      "evidence": "{champion}: {wr} · {games}{tier}"
+      "evidence": "{champion}: {wr} in {games} games{tier}"
     },
     "impact": {
       "damageShare": {
@@ -2457,25 +2458,25 @@
       "evidenceWin": "Wins: {gold} gold vs your opponent ({games} games)"
     },
     "enemyItems": {
-      "withAnswer": " When you did answer, you won {wr} ({games} games).",
-      "evidenceMissed": "Without an answer: {wr} win rate ({games} games)",
-      "evidenceAnswered": "With an answer: {wr} win rate ({games} games)",
+      "withAnswer": " When you did answer, you won {wins} of {games} ({wr}).",
+      "evidenceMissed": "Without an answer: won {wins} of {games} ({wr})",
+      "evidenceAnswered": "With an answer: won {wins} of {games} ({wr})",
       "armor": {
         "title": "The enemy stacked armor and you did not buy penetration",
-        "thesis": "In {games} games the enemy built 5 or more armor items; in {missed} of them you had no penetration and won {wr}.{withAnswer}",
-        "action": "When you see two or more enemies with armor on the scoreboard, swap your third or fourth item for {items}.",
+        "thesis": "Playing {champions}, in {games} games the enemy built 5 or more armor items; in {missed} of them you had no penetration and won {wins} of those {missed} ({wr}).{withAnswer}",
+        "action": "When you see two or more enemies with armor on the scoreboard, add an armor penetration item to your build (for example, {items}).",
         "actionGeneric": "When you see two or more enemies with armor on the scoreboard, add an armor penetration item to your build."
       },
       "magicRes": {
         "title": "The enemy stacked magic resist and you did not buy penetration",
-        "thesis": "In {games} games the enemy built 5 or more magic resist items; in {missed} of them you had no magic penetration and won {wr}.{withAnswer}",
-        "action": "When you see two or more enemies with magic resist on the scoreboard, add {items} to your build.",
+        "thesis": "Playing {champions}, in {games} games the enemy built 5 or more magic resist items; in {missed} of them you had no magic penetration and won {wins} of those {missed} ({wr}).{withAnswer}",
+        "action": "When you see two or more enemies with magic resist on the scoreboard, add a magic penetration item to your build (for example, {items}).",
         "actionGeneric": "When you see two or more enemies with magic resist on the scoreboard, add a magic penetration item to your build."
       },
       "healing": {
         "title": "The enemy healed and you did not build anti-heal",
-        "thesis": "In {games} games the enemy built 3 or more healing or lifesteal items; in {missed} of them you had no anti-heal and won {wr}.{withAnswer}",
-        "action": "If the scoreboard shows lifesteal or healing on two enemies, buy {items} before your third item.",
+        "thesis": "Playing {champions}, in {games} games the enemy built 3 or more healing or lifesteal items; in {missed} of them you had no anti-heal and won {wins} of those {missed} ({wr}).{withAnswer}",
+        "action": "If the scoreboard shows lifesteal or healing on two enemies, buy an anti-heal item before your third item (for example, {items}).",
         "actionGeneric": "If the scoreboard shows lifesteal or healing on two enemies, buy an anti-heal item before your third item."
       }
     },
@@ -2483,7 +2484,12 @@
       "theme": {
         "damage": "damage",
         "protect": "protection (heals and shields)",
-        "defense": "defense"
+        "defense": "defense",
+        "fullDamage": "full damage",
+        "guard": "damage with a defensive item",
+        "resist": "resistances",
+        "armor": "armor",
+        "magicRes": "magic resist"
       },
       "reason": {
         "divers": "the enemy had {count} champions who reach the backline ({names})",
@@ -2492,16 +2498,60 @@
         "noMagic": "your team had no other magic damage",
         "noPhysical": "your team had no other physical damage",
         "noDive": "the enemy had almost no way to reach you",
-        "frontline": "{name} up front gave you room to deal damage"
+        "frontline": "{name} up front gave you room to deal damage",
+        "fed": "{name} ended {kda} and could reach you",
+        "noPeel": "you had no tank or enchanter to protect you",
+        "peel": "{name} was protecting you",
+        "fewCarries": "your team had little damage besides yours",
+        "noFrontline": "you had no tank, so you were the one holding the front line",
+        "squishy": "the enemy had {count} fragile champions to punish",
+        "enemyPhysical": "the enemy damage was almost all physical ({names})",
+        "enemyMagic": "the enemy damage was almost all magic ({names})",
+        "carryDied": "{name} died {deaths} times",
+        "selfDied": "you died {deaths} times",
+        "pokeLane": "{name}, who scales late, got room to farm from your lane poke",
+        "coverShield": "with {champion}, ability power also makes your shields and heals bigger",
+        "coverTank": "with {champion}, health and resistances also raise your damage"
       },
       "good": "your {built} build was the right call, because {reasons}",
       "shift": "You built {built} ({items}), but the game called for {wanted}: {reasons}.",
-      "itemsAction": "With {champion} in a game like this: {items}.",
+      "itemsAction": "One example with {champion}: {items}.",
       "play": {
-        "protect": "Stay next to your marksman and save shields and heals for when they get jumped: your team brings the damage.",
-        "damage": "Poke from range before each objective to start it ahead, and back off when they engage: your damage is what the team was missing."
+        "support": {
+          "protect": "Stay next to your marksman and save shields and heals for when they get jumped: your team brings the damage.",
+          "damage": "Poke from range before each objective to start it ahead, and back off when they engage: your damage is what the team was missing."
+        },
+        "carry": {
+          "guard": "Build the defensive item as soon as you see they are hunting you, even before your last damage item, and fight behind your front line: if they reach you without it, you never get to deal damage.",
+          "fullDamage": "You could go full damage here: they could not reach you, so the defensive item was damage your team never had. Swap it for another damage item."
+        },
+        "fighter": {
+          "resist": "Add resistances against the damage that hurts you most before your 3rd item: holding the front line buys your team time to deal their damage.",
+          "damage": "With someone holding the front line, your job is to reach their carries: prioritize damage and go in after they use their crowd control."
+        },
+        "tank": {
+          "armor": "Prioritize armor: the damage that has to get through you is physical, and magic resist barely helps you in that game.",
+          "magicRes": "Prioritize magic resist: the damage that has to get through you is magic, and armor barely helps you in that game."
+        }
+      },
+      "worked": {
+        "wardSurvived": " ({name} died only {deaths} times)",
+        "wardSurvivedOne": " ({name} died only once)",
+        "wardSurvivedNone": " ({name} never died)",
+        "selfSurvived": " (you died only {deaths} times)",
+        "selfSurvivedOne": " (you died only once)",
+        "selfSurvivedNone": " (you never died)"
+      },
+      "alternativeWon": "You built {built} and it worked{worked}{cover}. You also had the option of building {wanted}: {reasons}.",
+      "alternativeCovered": "You built {built}, which made sense{cover}. You also had the option of building {wanted}: {reasons}.",
+      "coverJoin": "; {cover}",
+      "altLead": "If a comp like this comes up again, another option:",
+      "kit": {
+        "peel": "Against {diver}, who dives the backline, save your crowd control for when they jump on {carry}.",
+        "escape": "Against {diver}, save your dash to escape when they jump on you, not to go in."
       }
-    }
+    },
+    "championsMore": "{list} and {count} more"
   },
   "share": {
     "button": "Share",
