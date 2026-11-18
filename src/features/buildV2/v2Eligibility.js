@@ -20,7 +20,8 @@ export function championCanHealOrShieldAllies(champion) {
 
 export function requiresChampionAllyHealOrShield(entity) {
   const description = normalizeText(entity?.description);
-  const triggers = flattenText([entity?.trigger_tags]);
+  // Tags exactos (con guion bajo, sin tildes): 'recibir_daño' queda 'recibir_dano'.
+  const triggers = new Set((entity?.trigger_tags || []).map(normalizeText));
   const conditionalDescription = [
     /cuando curas o escudas a un campeon aliado/,
     /curar u otorgar escudos a un aliado/,
@@ -28,9 +29,9 @@ export function requiresChampionAllyHealOrShield(entity) {
     /si otorgas a un aliado curaciones o escudos/,
     /al curar y otorgar escudos/,
   ].some(pattern => pattern.test(description));
-  const onlyHealShieldTriggers = triggers &&
-    ['curar', 'escudar'].some(trigger => triggers.includes(trigger)) &&
-    !['autoataque', 'impacto', 'recibir dano', 'cerca aliado', 'lanzar ulti'].some(trigger => triggers.includes(trigger));
+  const onlyHealShieldTriggers = ['curar', 'escudar'].some(trigger => triggers.has(trigger)) &&
+    !['autoataque', 'impacto_campeon', 'impacto_habilidad', 'recibir_dano', 'cerca_aliado', 'lanzar_ulti']
+      .some(trigger => triggers.has(trigger));
   return conditionalDescription || Boolean(onlyHealShieldTriggers);
 }
 

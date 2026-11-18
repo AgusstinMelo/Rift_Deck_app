@@ -1,0 +1,34 @@
+-- Rollback de 202611200011_resync_champion_base_stats.sql: vuelve las estadísticas viejas que había en la base.
+
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":62}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b4e';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b4f';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b52';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b53';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b58';
+update public.champions b set ("attack_speed", "bonus_attack_speed") = (select r."attack_speed", r."bonus_attack_speed" from jsonb_populate_record(b, $rd${"attack_speed":0.62,"bonus_attack_speed":0}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b5d';
+update public.champions b set ("life", "armor") = (select r."life", r."armor" from jsonb_populate_record(b, $rd${"life":660,"armor":40}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b60';
+update public.champions b set ("life", "movement") = (select r."life", r."movement" from jsonb_populate_record(b, $rd${"life":690,"movement":355}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b61';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b62';
+update public.champions b set ("life") = (select r."life" from jsonb_populate_record(b, $rd${"life":690}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b65';
+update public.champions b set ("life", "attack_speed", "bonus_attack_speed") = (select r."life", r."attack_speed", r."bonus_attack_speed" from jsonb_populate_record(b, $rd${"life":690,"attack_speed":0.664,"bonus_attack_speed":10}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b67';
+update public.champions b set ("armor", "attack_damage") = (select r."armor", r."attack_damage" from jsonb_populate_record(b, $rd${"armor":46,"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b6f';
+update public.champions b set ("armor") = (select r."armor" from jsonb_populate_record(b, $rd${"armor":49}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b78';
+update public.champions b set ("life", "armor") = (select r."life", r."armor" from jsonb_populate_record(b, $rd${"life":750,"armor":55}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b81';
+update public.champions b set ("attack_speed", "attack_damage", "bonus_attack_speed") = (select r."attack_speed", r."attack_damage", r."bonus_attack_speed" from jsonb_populate_record(b, $rd${"attack_speed":0.625,"attack_damage":54,"bonus_attack_speed":30}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b85';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b8b';
+update public.champions b set ("attack_speed", "attack_damage") = (select r."attack_speed", r."attack_damage" from jsonb_populate_record(b, $rd${"attack_speed":0.625,"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b97';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b98';
+update public.champions b set ("life_reg") = (select r."life_reg" from jsonb_populate_record(b, $rd${"life_reg":9}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b9c';
+update public.champions b set ("attack_speed", "attack_damage", "bonus_attack_speed") = (select r."attack_speed", r."attack_damage", r."bonus_attack_speed" from jsonb_populate_record(b, $rd${"attack_speed":0.625,"attack_damage":62,"bonus_attack_speed":30}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5b9e';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5ba0';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5ba7';
+update public.champions b set ("armor") = (select r."armor" from jsonb_populate_record(b, $rd${"armor":43}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bb0';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":54}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bb5';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bbe';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":58}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bc1';
+update public.champions b set ("armor") = (select r."armor" from jsonb_populate_record(b, $rd${"armor":34}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bc3';
+update public.champions b set ("attack_damage") = (select r."attack_damage" from jsonb_populate_record(b, $rd${"attack_damage":62}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bc9';
+update public.champions b set ("attack_damage", "bonus_attack_speed") = (select r."attack_damage", r."bonus_attack_speed" from jsonb_populate_record(b, $rd${"attack_damage":54,"bonus_attack_speed":30}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bd2';
+update public.champions b set ("armor") = (select r."armor" from jsonb_populate_record(b, $rd${"armor":35}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bb2';
+update public.champions b set ("magic_res") = (select r."magic_res" from jsonb_populate_record(b, $rd${"magic_res":30}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bcc';
+update public.champions b set ("magic_res") = (select r."magic_res" from jsonb_populate_record(b, $rd${"magic_res":38}$rd$::jsonb) r) where b.id::text = '6a07b2cd79d7ef15722f5bd4';

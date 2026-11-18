@@ -47,8 +47,8 @@ export const ITEM_EFFECT_TAGS = [
   'velocidad_movimiento', 'velocidad_movimiento_combate', 'velocidad_movimiento_fuera_combate',
 ];
 
-/** Rol en la pelea (champions.team_roles). */
-export const TEAM_ROLES = ['frontline', 'iniciador', 'diver', 'protector', 'poke', 'daño_sostenido', 'split'];
+/** Rol en la pelea (champions.team_roles). pick = atrapa a un rival aislado y lo borra. */
+export const TEAM_ROLES = ['frontline', 'iniciador', 'diver', 'protector', 'poke', 'pick', 'daño_sostenido', 'split'];
 
 /** Perfil 0-5 de cada campeón (columnas champions.score_*); vacío = sin cargar. */
 export const CHAMPION_SCORES = [
@@ -62,6 +62,33 @@ export const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
 
 /** Contra qué responde una runa o un hechizo (counters). */
 export const COUNTER_TAGS = ['poke', 'desgaste', 'burst', 'asesinos', 'divers', 'cc', 'curacion', 'escudos', 'tanques', 'kiteo'];
+
+/**
+ * Qué activa una runa (runes.trigger_tags). El Coach (detectors/build.js) y Build V2
+ * (v2Eligibility.js) buscan estos valores exactos. Los tres "golpes" son distintos:
+ * golpes_multiples = N impactos mezclando ataques y habilidades en una ventana corta
+ * (Electrocutar, Fase Veloz); golpes_consecutivos = ataques seguidos o acumulaciones
+ * (Potenciación, Cadencia Letal, Conquistador); golpes_mismo_objetivo = tienen que
+ * caer sobre el mismo campeón.
+ */
+export const RUNE_TRIGGER_TAGS = [
+  'autoataque', 'blink', 'cerca_aliado', 'combate_extendido', 'curar', 'dash', 'derribo',
+  'distancia_recorrida', 'enemigo_con_cc', 'enemigo_ralentizado', 'escalado_tiempo', 'escudar',
+  'fuera_combate', 'golpes_consecutivos', 'golpes_mismo_objetivo', 'golpes_multiples',
+  'impacto_campeon', 'impacto_habilidad', 'lanzar_ulti', 'movimiento', 'nivel', 'objetivo_vida_alta',
+  'objetivo_vida_baja', 'recibir_daño', 'salto', 'sigilo', 'trade_corto', 'vida_propia_baja',
+];
+
+/** Qué da una runa (runes.benefit_tags). */
+export const RUNE_BENEFIT_TAGS = [
+  'aceleracion_habilidad', 'armadura', 'buff_aliado', 'curacion', 'curacion_aliada', 'daño_adaptativo',
+  'daño_adicional', 'daño_burst', 'daño_ejecucion', 'daño_escalado', 'daño_on_hit', 'daño_sostenido',
+  'daño_verdadero', 'debuff_enemigo', 'defensa_escalada', 'escudo', 'escudo_aliado',
+  'estadisticas_permanentes', 'generacion_oro', 'mana', 'poder_all_in', 'poder_teamfight', 'poder_trade',
+  'reduccion_daño', 'reduccion_enfriamiento', 'reduccion_enfriamiento_ulti', 'regeneracion_mana',
+  'regeneracion_vida', 'resistencia_magica', 'resistencia_ralentizacion', 'sosten_linea', 'tenacidad',
+  'velocidad_ataque', 'velocidad_movimiento', 'vida_escalada',
+];
 
 export const ITEM_SITUATIONAL_ROLES = ['core', 'counter', 'defensivo', 'early', 'escalado', 'late', 'ofensivo', 'snowball', 'utilidad'];
 
@@ -106,6 +133,9 @@ export function catalogProblems({ champions = [], items = [], runes = [], spells
     }
   });
   runes.forEach(rune => {
+    outside(rune.name, 'trigger_tags', rune.trigger_tags, RUNE_TRIGGER_TAGS);
+    outside(rune.name, 'benefit_tags', rune.benefit_tags, RUNE_BENEFIT_TAGS);
+    if (rune.branch === 'Clave' && !(rune.trigger_tags || []).length) problems.push(`${rune.name}: runa clave sin trigger_tags (el Coach no sabe si le pega al campeón)`);
     outside(rune.name, 'fits_classes', rune.fits_classes, FIT_CLASSES);
     outside(rune.name, 'counters', rune.counters, COUNTER_TAGS);
   });
@@ -117,14 +147,70 @@ export function catalogProblems({ champions = [], items = [], runes = [], spells
   return problems;
 }
 
+/** Campos que se cargan a mano solo en la tabla base (el parche no los tiene que pisar). */
+export const BASE_ONLY_COLUMNS = [
+  'counters', 'fits_classes', 'fits_lanes', 'team_roles', ...CHAMPION_SCORES,
+  'traits', 'vulnerabilities', 'item_scalings',
+];
+
+/**
+ * Lo que el trigger sync_catalog_base_from_patch NO copia del parche a la base
+ * (misma lista que public.catalog_sync_excluded_columns()).
+ */
+export const PATCH_SYNC_EXCLUDED = [
+  'id', 'created_at', 'created_date', 'created_by_id', 'updated_at', 'updated_date', 'is_sample',
+  ...BASE_ONLY_COLUMNS, 'tags', 'recommended_champions', 'recommended_champion', 'recommended_items', 'active',
+];
+
+const isEmpty = value => value == null || value === '' || (Array.isArray(value) && !value.length);
+const sameValue = (a, b) => {
+  if (a == null && b == null) return true;
+  if (typeof a === 'number' || typeof b === 'number') return Number(a) === Number(b);
+  return JSON.stringify(a) === JSON.stringify(b);
+};
+
+/**
+ * Problemas entre la tabla base y los datos del parche activo, que ganan en las vistas
+ * current_* aunque valgan null:
+ *  - un null del parche que tapa un valor cargado en la base;
+ *  - un campo de carga manual (perfil del Coach) metido en el parche, que tapa la base;
+ *  - un campo distinto entre base y parche: la base se actualiza sola al guardar el
+ *    parche, así que casi siempre es una edición hecha en la base que no se ve.
+ * `patch` son filas { [key]: id, data }; `key` es la columna con el id.
+ */
+export function patchOverrideProblems({ label, base = [], patch = [], key }) {
+  const problems = [];
+  const excluded = new Set(PATCH_SYNC_EXCLUDED);
+  const baseOnly = new Set(BASE_ONLY_COLUMNS);
+  const byId = new Map(base.map(row => [String(row.id), row]));
+  patch.forEach(row => {
+    const entity = byId.get(String(row[key]));
+    if (!entity || row.data?.active === false) return;
+    const name = String(entity.name ?? entity.id).trim();
+    Object.entries(row.data || {}).forEach(([field, value]) => {
+      if (!(field in entity)) return;
+      if (baseOnly.has(field)) {
+        problems.push(`${label} ${name}: ${field} está en el parche y tapa lo que cargás en la base (borrá la clave del parche)`);
+      } else if (value === null) {
+        if (!excluded.has(field) && !isEmpty(entity[field])) problems.push(`${label} ${name}: ${field} vale null en el parche y tapa el valor de la base (borrá la clave del parche)`);
+      } else if (!excluded.has(field) && !sameValue(entity[field], value)) {
+        problems.push(`${label} ${name}: ${field} es distinto en la base y en el parche activo; se ve el del parche (editalo ahí, la base se actualiza sola)`);
+      }
+    });
+  });
+  return problems;
+}
+
 /** Cuánto del perfil del Coach está cargado (para ir completándolo a mano). */
 export function catalogCoverage({ champions = [], runes = [], spells = [] }) {
   const filled = (rows, test) => `${rows.filter(test).length}/${rows.length}`;
   return {
     'Campeones con rol en la pelea': filled(champions, champ => (champ.team_roles || []).length),
     'Campeones con perfil 0-5 completo': filled(champions, champ => CHAMPION_SCORES.every(field => champ[field] != null)),
-    'Runas clave con clases y respuestas': filled(runes.filter(rune => rune.branch === 'Clave'), rune => (rune.fits_classes || []).length && (rune.counters || []).length),
+    // counters puede quedar vacío: una runa de daño puro no responde a nada del rival.
+    'Runas clave con clases': filled(runes.filter(rune => rune.branch === 'Clave'), rune => (rune.fits_classes || []).length),
     'Runas con clases': filled(runes, rune => (rune.fits_classes || []).length),
-    'Hechizos completos': filled(spells, spell => (spell.fits_classes || []).length && (spell.fits_lanes || []).length && (spell.counters || []).length),
+    // Igual que las runas: Castigo o Teleportación no responden a nada del rival.
+    'Hechizos con clases y líneas': filled(spells, spell => (spell.fits_classes || []).length && (spell.fits_lanes || []).length),
   };
 }

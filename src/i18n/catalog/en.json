@@ -65,17 +65,17 @@
     "6a04bc1334f787bb5bb2e031": {
       "name": "Magnetic Blaster",
       "description": "Overdrive: Gain 5% Movement Speed.\nPower Frenzy: Moving and attacking build up Energized attacks. Energized attacks gain 100 range (50 range for melee attacks), deal 40-100 bonus magic damage and grant 60 Movement Speed for 0.75s. This damage bounces to up to 5 nearby enemies and can critically strike (deals 50%-80% bonus damage against minions).",
-      "source": "8fa7d671"
+      "source": "18e2e2c9"
     },
     "6a04bc1334f787bb5bb2e032": {
       "name": "Kircheis Shard",
       "description": "Discharge: Energized attacks deal 40 bonus magic damage. Moving and attacking builds up Energized attacks.",
-      "source": "ba323825"
+      "source": "86dad3a3"
     },
     "6a04bc1334f787bb5bb2e033": {
       "name": "Recurve Bow",
       "description": "Steeled: Attacks deal 15 bonus physical damage on hit against champions.",
-      "source": "7b0ea41e"
+      "source": "e7d83caa"
     },
     "6a04bc1334f787bb5bb2e034": {
       "name": "Youmuu's Ghostblade",
@@ -88,17 +88,17 @@
     "6a04bc1334f787bb5bb2e036": {
       "name": "Infinity Edge",
       "description": "Infinity: Critical strikes deal 230% damage instead of 200%.",
-      "source": "91c55626"
+      "source": "434e03a2"
     },
     "6a04bc1334f787bb5bb2e037": {
       "name": "Muramana",
       "description": "Awe: Grants Attack Damage equal to 2% of max Mana and refunds 15% of all Mana spent.\nShock: When an attack hits an enemy champion, drains 1.5% of current Mana and deals bonus physical damage equal to 3.5% (melee) / 3% (ranged) of max Mana.",
-      "source": "6331fe58"
+      "source": "8d06163c"
     },
     "6a04bc1334f787bb5bb2e038": {
       "name": "Divine Sunderer",
       "description": "Spellblade: After using an ability, your next attack within 10s deals 10% of the target's max Health as bonus physical damage (7% for ranged attacks). If the target is a champion, heal for 6% of the target's max Health (2.5% for ranged attacks) (1.5s cooldown). Damage is reduced against structures.",
-      "source": "8355b7f9"
+      "source": "d0483bb7"
     },
     "6a04bc1334f787bb5bb2e039": {
       "name": "Zeal",
@@ -121,7 +121,7 @@
     "6a04bc1334f787bb5bb2e03d": {
       "name": "Eclipse",
       "description": "Ever Rising Moon: Hitting an enemy champion with 2 different attacks or abilities within 1.8s deals bonus physical damage equal to 7% of the target's max Health (3.5% for ranged champions). It also grants you a shield that absorbs damage equal to 140 + 35% bonus Attack Damage (70 + 18% bonus Attack Damage for ranged champions) for 2s (6s cooldown).",
-      "source": "d8785cd7"
+      "source": "37c4738b"
     },
     "6a04bc1334f787bb5bb2e03e": {
       "name": "Nashor's Claw",
@@ -131,12 +131,12 @@
     "6a04bc1334f787bb5bb2e03f": {
       "name": "Runaan's Hurricane",
       "description": "Wind's Fury: Attacks hit 2 additional nearby enemies, each dealing 55% physical damage. These attacks can critically strike and apply on-hit effects.",
-      "source": "53742682"
+      "source": "744d9076"
     },
     "6a04bc1334f787bb5bb2e040": {
       "name": "Serpent's Fang",
       "description": "Gouge: +15 Armor Penetration.\nShield Reaver: Damaging an enemy champion reduces any shields they gain for 3s. Melee champions apply (10% bonus Attack Damage + 40)% shield reduction, capped at 60%; ranged champions apply (10% bonus Attack Damage + 25)% shield reduction, capped at 45%. When you damage an enemy not affected by Shield Reaver, all of their shields are reduced by the same amount.",
-      "source": "da201e76"
+      "source": "c48b013c"
     },
     "6a04bc1334f787bb5bb2e041": {
       "name": "Death's Dance",
@@ -151,12 +151,12 @@
     "6a04bc1334f787bb5bb2e043": {
       "name": "Blade of The Ruined King",
       "description": "Ruined Strikes: Attacks deal bonus physical damage on hit equal to 7% of the enemy's current Health (10% for melee attacks). Minimum damage: 15. Max damage against monsters: 60.\nSiphon: Hitting the same enemy champion 3 times with basic attacks or abilities slows them by 30% for 1.5s (30s cooldown).",
-      "source": "6a483d06"
+      "source": "bf2958a0"
     },
     "6a04bc1334f787bb5bb2e044": {
       "name": "Mortal Reminder",
       "description": "Last Whisper: Gain 30% Armor Penetration. Attacks that critically strike gain 6% bonus Armor Penetration.\nSepsis: Dealing physical damage applies 50% Grievous Wounds to enemy champions for 3s.",
-      "source": "25f78792"
+      "source": "931ac768"
     },
     "6a04bc1334f787bb5bb2e045": {
       "name": "Tear of the Goddess",
@@ -176,27 +176,27 @@
     "6a04bc1334f787bb5bb2e048": {
       "name": "Chempunk Chainsword",
       "description": "Hackshorn: Dealing physical damage to enemy champions applies 50% Grievous Wounds for 3s.",
-      "source": "28760ddf"
+      "source": "d4af1edb"
     },
     "6a04bc1334f787bb5bb2e049": {
       "name": "Hullbreaker",
       "description": "Full Sail: Gain 5% Movement Speed.\nCaptain: Every 4th attack against champions and epic monsters deals bonus physical damage equal to 160% base Attack Damage + 5% max Health (ranged champions deal 40% of the damage), increased to 240% base Attack Damage + 9% max Health against structures (ranged champions deal 40% of the damage).\nBoarding Party: Nearby allied siege minions and super minions gain 20-130 Armor (25% more for ranged champions) and 10-120 Magic Resistance (25% more for ranged champions).",
-      "source": "4fd98e3a"
+      "source": "4b00e2dc"
     },
     "6a04bc1334f787bb5bb2e04a": {
       "name": "Spear of Shojin",
       "description": "Dragonforce: Gain 20 Basic Ability Haste.\nFocused Will: Damaging enemies or monsters with abilities increases your champion's ability and passive damage by 3% for 6s (stacks up to 4 times). Focused Will can only stack once per second per ability cast.",
-      "source": "5aaba17e"
+      "source": "f6f669c2"
     },
     "6a04bc1334f787bb5bb2e04b": {
       "name": "Terminus",
       "description": "Shadow: Attacks deal 30 bonus magic damage on hit.\nJuxtaposition: Attacks alternate between Light and Dark on-hit effects. Light attacks grant 5-8 Armor and Magic Resistance for 5s on hit. Dark attacks grant 10% Armor Penetration and 10% Magic Penetration for 5s on hit. Each on-hit effect stacks up to 3 times. While you hold this item, the bonus Armor Penetration and Magic Penetration it grants are capped at 40%.",
-      "source": "97a548b7"
+      "source": "99aadd13"
     },
     "6a04bc1334f787bb5bb2e04c": {
       "name": "Titanic Hydra",
       "description": "Cleave: Every 1.75s, your next attack deals bonus physical damage equal to 25 + 3% of your bonus max Health (also applies to turrets) and creates a shockwave that deals physical damage equal to 80 + 10% of your bonus max Health to enemies behind the target. Ranged champions deal 75% of the damage.",
-      "source": "198afd20"
+      "source": "23960f3e"
     },
     "6a04bc1334f787bb5bb2e04d": {
       "name": "Sheen",
@@ -206,7 +206,7 @@
     "6a04bc1334f787bb5bb2e04e": {
       "name": "Trinity Force",
       "description": "Zeal: +5% Movement Speed.\nSpellblade: After using an ability, your next basic attack within 10s deals bonus physical damage equal to 200% base Attack Damage (1.5s cooldown). Damage is reduced against structures.",
-      "source": "d7dc6d85"
+      "source": "474e1c77"
     },
     "6a04bc1334f787bb5bb2e04f": {
       "name": "Serylda's Grudge",
@@ -216,7 +216,7 @@
     "6a04bc1334f787bb5bb2e050": {
       "name": "The Black Cleaver",
       "description": "Carve: Dealing physical damage to a champion reduces their Armor by 6% for 6s, stacking up to 5 times for a 30% reduction.\nPursuit: Gain 20 Movement Speed when dealing physical damage. Gain 40 Movement Speed when moving toward enemy champions with 5 stacks of Carve. Ranged champions gain half of these bonuses.",
-      "source": "95893ab2"
+      "source": "25403864"
     },
     "6a04bc1334f787bb5bb2e051": {
       "name": "Soul Transfer",
@@ -226,7 +226,7 @@
     "6a04bc1334f787bb5bb2e052": {
       "name": "Duskblade of Draktharr",
       "description": "Razor: +18 Armor Penetration.\nNightstalker: Your first attack against a champion deals 60-160 bonus physical damage and slows them by 99% for 0.35s (10s cooldown).\nChampion takedowns reset the cooldown.",
-      "source": "26d64964"
+      "source": "73245038"
     },
     "6a04bc1334f787bb5bb2e053": {
       "name": "Navori Flickerblades",
@@ -236,7 +236,7 @@
     "6a04bc1334f787bb5bb2e054": {
       "name": "The Collector",
       "description": "Assassin: +10 Armor Penetration.\nDeath and Taxes: Dealing damage that would leave an enemy champion below (4% + 2% Crit Rate) of their max Health executes them, permanently increases the max Health execute threshold by 0.1% and grants 25 bonus gold.",
-      "source": "3f1d7e02"
+      "source": "63b4f394"
     },
     "6a04bc1334f787bb5bb2e055": {
       "name": "Edge of Night",
@@ -256,7 +256,7 @@
     "6a04bc1334f787bb5bb2e058": {
       "name": "Sundered Sky",
       "description": "Lightshield Strike: Your first attack against an enemy champion critically strikes (6s cooldown per target), dealing 160% damage and restoring Health equal to 125% base Attack Damage + 6% of your missing Health.",
-      "source": "c1b3b3c3"
+      "source": "fb401ca5"
     },
     "6a04bc1334f787bb5bb2e059": {
       "name": "B. F. Sword"
@@ -269,12 +269,12 @@
     "6a04bc1334f787bb5bb2e05b": {
       "name": "Crown of the Shattered Queen",
       "description": "Safeguard: Grants a magic shield that blocks the next enemy ability. When the shield breaks, damage taken is reduced by 40% for 1s (40s cooldown).\nPoise: Ability Power is increased by 20 while Safeguard is active. Dealing magic damage to enemy champions with an active ability reduces Safeguard's cooldown by 4s.",
-      "source": "2b191f67"
+      "source": "f6e6b60b"
     },
     "6a04bc1334f787bb5bb2e05c": {
       "name": "Horizon Focus",
       "description": "Hypershot: Damaging an enemy champion with an ability from 600 units away reveals them for 8s and increases damage dealt to them by 10%.\nFocus: Triggering Hypershot reveals all enemy champions within 1200 units of the target for 3s (12s cooldown).",
-      "source": "875f6927"
+      "source": "a1a4f71d"
     },
     "6a04bc1334f787bb5bb2e05d": {
       "name": "Prophet's Pendant",
@@ -301,22 +301,22 @@
     "6a04bc1334f787bb5bb2e063": {
       "name": "Liandry's Torment",
       "description": "Torment: Damaging abilities and empowered attacks deal 2% of the target's max Health as magic damage per second for 3s.\n\nMadness: While fighting enemy champions, deal 2% bonus damage per second (up to 6%).",
-      "source": "1c90ba2c"
+      "source": "448c4590"
     },
     "6a04bc1334f787bb5bb2e064": {
       "name": "Bandle Fantasy",
       "description": "Fire Flower: Damaging an enemy champion with an active ability spawns a trap at their feet. After a short delay, the trap deals 105 + 15% Ability Power magic damage to enemies inside it (8s cooldown per target). If a target is hit by more than one trap placed by the same champion within a short period, traps after the first deal only 20% damage.",
-      "source": "d6dba493"
+      "source": "0836b20b"
     },
     "6a04bc1334f787bb5bb2e065": {
       "name": "Knight's Vow",
       "description": "Sacrifice: While your Worthy ally is nearby, 12% of the damage they take is redirected to you. You also heal for 10% of the damage your Worthy ally deals to champions.\nPledge: When you buy or rebuy this item, designate an ally as Worthy.",
-      "source": "569a5ad6"
+      "source": "992fa594"
     },
     "6a04bc1334f787bb5bb2e066": {
       "name": "Kraken Slayer",
       "description": "Cloud Step: Gain 5% Movement Speed.\nBring It Down: Every third attack deals 150-210 bonus physical damage (120-168 for ranged champions), increased by 0.75% for every 1% of the target's missing Health. The bonus physical damage is capped at 75%.",
-      "source": "8166c3c7"
+      "source": "28b7883d"
     },
     "6a04bc1334f787bb5bb2e067": {
       "name": "Cloak of Agility"
@@ -324,7 +324,7 @@
     "6a04bc1334f787bb5bb2e068": {
       "name": "Executioner's Calling",
       "description": "Rend: Dealing physical damage to enemy champions applies 40% Grievous Wounds for 3s.",
-      "source": "c36517d7"
+      "source": "f69bcf11"
     },
     "6a04bc1334f787bb5bb2e069": {
       "name": "Jaurim's Fist"
@@ -343,12 +343,12 @@
     "6a04bc1334f787bb5bb2e06d": {
       "name": "Hextech Alternator",
       "description": "Revved: Damaging abilities and empowered attacks against champions deal 25-60 bonus magic damage (20s cooldown).",
-      "source": "11e0d1b9"
+      "source": "323fe4f5"
     },
     "6a04bc1334f787bb5bb2e06e": {
       "name": "Thornmail",
       "description": "Thorns: When hit by an attack, deal 20 + 6% bonus Armor + 1% bonus Health magic damage to the attacker.\nEntangle: When hit by an attack from an enemy champion or when you damage one, apply 50% Grievous Wounds to them for 3s.",
-      "source": "c1eeaf5d"
+      "source": "8b32a5ef"
     },
     "6a04bc1334f787bb5bb2e06f": {
       "name": "Overlord's Bloodmail",
@@ -358,12 +358,12 @@
     "6a04bc1334f787bb5bb2e070": {
       "name": "Relic Shield",
       "description": "Tribute: Every 30s, gain 1 energy orb that orbits you (max 3 orbs). While near an ally, the following actions trigger Tribute, consuming 1 energy orb to grant you 65 gold and restore 20-80 Health:\n1. Damaging enemy champions or structures with abilities or attacks.\n2. Attacking minions below 65% Health. This also executes them, and the gold from those minion kills goes to the nearest ally.\n3. Having 3 orbs and being near a minion when it dies.\nTriggering Tribute grants Tribute stacks to the nearest ally.\nWarden: Deal 1 bonus damage to Vision Wards revealed by Oracle Lens, Control Wards and Scryer's Bloom.\nRestriction: You don't receive gold from killing minions, but gain gold equal to 50% of the bounty. The gold from your minion kills goes to the nearest ally. Gold gained from killing monsters is also reduced by 50%.\nQuest: Earn 750 gold with this item to transform it into Black Mist Scythe. This bonds you with the ally who has the most Tribute stacks and makes you best partners.",
-      "source": "27a53c24"
+      "source": "f47f75d4"
     },
     "6a04bc1334f787bb5bb2e071": {
       "name": "Mana Boots",
       "description": "Magic Break: +8 Magic Penetration.\nBalance: Manaless champions gain 75% bonus Health Regen.\nBig Bully: Attacks and active abilities deal 18 bonus physical damage to minions.",
-      "source": "50e14ae0"
+      "source": "f086f36c"
     },
     "6a04bc1334f787bb5bb2e072": {
       "name": "Kindlegem"
@@ -402,7 +402,7 @@
     "6a04bc1334f787bb5bb2e07a": {
       "name": "Morellonomicon",
       "description": "Affliction: Dealing magic damage to enemy champions applies 50% Grievous Wounds for 3s.",
-      "source": "fabaac6f"
+      "source": "deb02249"
     },
     "6a04bc1334f787bb5bb2e07b": {
       "name": "Mejai's Soulstealer",
@@ -422,12 +422,12 @@
     "6a04bc1334f787bb5bb2e07e": {
       "name": "Unending Despair",
       "description": "Anguish: Every 4s while in combat with a champion, deal 3% of your max Health as magic damage to nearby enemy champions and heal for 250% of the damage dealt. Ability Haste from items doesn't affect Anguish.",
-      "source": "421acf23"
+      "source": "33f08d8b"
     },
     "6a04bc1334f787bb5bb2e07f": {
       "name": "Hollow Radiance",
       "description": "Immolate: While in combat, deal 20-30 + 1% of your bonus Health magic damage per second to nearby enemies for 5s. Deals 125% damage to monsters and 200% damage to minions.\nDesolate: Killing a neutral monster or an enemy deals 30 + 2% of your bonus Health magic damage in the surrounding area.",
-      "source": "b2604578"
+      "source": "e62d2546"
     },
     "6a04bc1334f787bb5bb2e080": {
       "name": "Nashor's Tooth",
@@ -442,7 +442,7 @@
     "6a04bc1334f787bb5bb2e082": {
       "name": "Spectral Sickle",
       "description": "Versatile: Gain 10 Attack Damage or 20 Ability Power (adaptive).\nTribute: Every 30s, gain 1 energy orb that orbits you (max 3 orbs). While near an ally, the following actions trigger Tribute, consuming 1 energy orb to grant you 65 gold and restore 20-80 Health:\n1. Damaging enemy champions or structures with abilities or attacks.\n2. Attacking minions below 65% Health. This also executes them, and the gold from those minion kills goes to the nearest ally.\n3. Having 3 orbs and being near a minion when it dies.\nTriggering Tribute grants Tribute stacks to the nearest ally.\nWarden: Deal 1 bonus damage to Vision Wards revealed by Oracle Lens, Control Wards and Scryer's Bloom.\nRestriction: You don't receive gold from killing minions, but gain gold equal to 50% of the bounty. The gold from your minion kills goes to the nearest ally. Gold gained from killing monsters is also reduced by 50%.\nQuest: Earn 750 gold with this item to transform it into Black Mist Scythe. This bonds you with the ally who has the most Tribute stacks and makes you best partners.",
-      "source": "35328bee"
+      "source": "6d49df8e"
     },
     "6a04bc1334f787bb5bb2e083": {
       "name": "Rod of Ages",
@@ -465,7 +465,7 @@
     "6a04bc1334f787bb5bb2e087": {
       "name": "Redemption",
       "description": "Intervention: Target a large area. After 2.5s, restore 150-350 Health (based on the ally's level) to allied units and deal 10% max Health true damage to enemy champions (60s cooldown). Can be cast while dead.",
-      "source": "e6851cc2"
+      "source": "36c9a8ac"
     },
     "6a04bc1334f787bb5bb2e088": {
       "name": "Experimental Hexplate",
@@ -499,7 +499,7 @@
     "6a04bc1334f787bb5bb2e08f": {
       "name": "Guinsoo's Rageblade",
       "description": "Wrath: Attacks deal 30 bonus magic damage.\nSeething Strike: Basic attacks grant 8% Attack Speed, stacking up to 4 times. At max stacks, every third basic attack triggers an additional on-hit effect.",
-      "source": "80c2fa7f"
+      "source": "b389414b"
     },
     "6a04bc1334f787bb5bb2e090": {
       "name": "Last Whisper",
@@ -540,7 +540,7 @@
     "6a04bc1334f787bb5bb2e098": {
       "name": "Malignance",
       "description": "Scorn: Your ultimate gains 20 Ability Haste.\nToxic Field: Damaging a champion with your ultimate burns the ground beneath them for 3s, dealing 60 + 5% Ability Power magic damage per second and reducing their Magic Resistance by 10. The burn radius grows with damage dealt, reaching its maximum at 800 damage.",
-      "source": "b641169b"
+      "source": "f0322a33"
     },
     "6a04bc1334f787bb5bb2e099": {
       "name": "Lost Chapter",
@@ -550,7 +550,7 @@
     "6a04bc1334f787bb5bb2e09a": {
       "name": "Oblivion Orb",
       "description": "Grievous Wounds: Dealing magic damage to enemy champions applies 40% Grievous Wounds for 3s.",
-      "source": "7ed6beaf"
+      "source": "d8647359"
     },
     "6a04bc1334f787bb5bb2e09b": {
       "name": "Gluttonous Greaves",
@@ -565,17 +565,17 @@
     "6a04bc1334f787bb5bb2e09d": {
       "name": "Infinity Orb",
       "description": "Destiny: +5% Movement Speed.\nBalance: +15 Magic Penetration.\nInevitable Demise: Abilities and empowered attacks critically strike for 20% bonus damage against enemies below 40% Health.",
-      "source": "73f2b809"
+      "source": "e066c355"
     },
     "6a04bc1334f787bb5bb2e09e": {
       "name": "Cosmic Drive",
       "description": "Spelldance: Dealing magic or true damage to champions grants 30 Movement Speed for 4s.",
-      "source": "951523f3"
+      "source": "2e62c5ff"
     },
     "6a04bc1334f787bb5bb2e09f": {
       "name": "Oceanid's Trident",
       "description": "Lethal Weapon: Damaging an enemy champion with abilities reduces any shields they gain for 3s. Area-of-effect abilities apply (5% Ability Power + 25)% shield reduction, capped at 45%; single-target abilities apply (5% Ability Power + 40)% shield reduction, capped at 60%. When you damage an enemy not affected by Lethal Weapon, all of their shields are reduced by the same amount.",
-      "source": "993f5ab9"
+      "source": "5dd05ef9"
     },
     "6a04bc1334f787bb5bb2e0a0": {
       "name": "Psychic Projector",
@@ -585,7 +585,7 @@
     "6a04bc1334f787bb5bb2e0a1": {
       "name": "Awakened Soulstealer",
       "description": "Soul Hunt: +15 Magic Penetration.\nWandering Soul: Whenever you take down an enemy champion within 3s of damaging them, your ability cooldowns are reduced by 25%. You steal 10% of their base Movement Speed for 10s and 50% of their Ability Haste until they respawn. Ability Haste stolen this way stacks.",
-      "source": "7348f661"
+      "source": "c24f6cbf"
     },
     "6a04bc1334f787bb5bb2e0a2": {
       "name": "Abyssal Mask",
@@ -595,17 +595,17 @@
     "6a04bc1334f787bb5bb2e0a3": {
       "name": "Randuin's Omen",
       "description": "Countercurrent: When struck by a physical critical strike, gain 1 stack of Countercurrent. Each stack grants 5% Movement Speed and 5% Slow Resistance. Max 4 stacks.\nResilience: Critical strikes deal 30% less physical damage to you.",
-      "source": "6eade03e"
+      "source": "c782ec78"
     },
     "6a04bc1334f787bb5bb2e0a4": {
       "name": "Radiant Spark",
       "description": "Immolate: Deals 5-10 magic damage per second to nearby enemies.",
-      "source": "35222729"
+      "source": "2ae607e5"
     },
     "6a04bc1334f787bb5bb2e0a5": {
       "name": "Dead Man's Plate",
       "description": "Relentless: +4% Movement Speed.\nMomentum: Moving builds Momentum, granting up to 40 Movement Speed at 100 stacks. Attacking removes all Momentum stacks. Stacks decay when your movement is impaired.\nCrushing Blow: Attacks deal up to 100 bonus magic damage based on Momentum built. Melee attacks that consume maximum Momentum also slow by 75% for 1s.",
-      "source": "72f7b18a"
+      "source": "31c8f6e6"
     },
     "6a04bc1334f787bb5bb2e0a6": {
       "name": "Force of Nature",
@@ -615,7 +615,7 @@
     "6a04bc1334f787bb5bb2e0a7": {
       "name": "Dawnshroud",
       "description": "Dawnbringer: When you immobilize a champion or are immobilized within 400 units of an enemy champion, gain 20% Armor and Magic Resistance, reveal nearby enemy champions for 3s and deal 40 + 2.5% bonus Health magic damage to them (3s cooldown).",
-      "source": "4fa12eac"
+      "source": "bcf5aad8"
     },
     "6a04bc1334f787bb5bb2e0a8": {
       "name": "Mantle of the Twelfth Hour",
@@ -643,7 +643,7 @@
     "6a04bc1334f787bb5bb2e0ad": {
       "name": "Heartsteel",
       "description": "Colossal Consumption: While within 700 units of an enemy champion, charge up over 2.5s to land a powerful strike. This charged attack deals bonus physical damage equal to 140 + 3.5% max Health and grants max Health equal to 15% of the damage dealt. 20s cooldown per target.",
-      "source": "d50dcca0"
+      "source": "6116ee0e"
     },
     "6a04bc1334f787bb5bb2e0ae": {
       "name": "Radiant Virtue",
@@ -668,12 +668,12 @@
     "6a04bc1334f787bb5bb2e0b2": {
       "name": "Lord Dominik's Regards",
       "description": "Giant Slayer: Deal bonus damage based on the enemy champion's bonus Health. The bonus damage caps at 12%, reached when attacking an enemy champion with 1200 bonus Health.",
-      "source": "738f4778"
+      "source": "f285533a"
     },
     "6a04bc1334f787bb5bb2e0b3": {
       "name": "Ardent Censer",
       "description": "Censer: When you heal or shield an allied champion (other than yourself), that champion gains 30% Attack Speed and their attacks deal 25 bonus magic damage for 6s. This damage can critically strike.",
-      "source": "d4588b2d"
+      "source": "83c4a867"
     },
     "6a04bc1334f787bb5bb2e0b4": {
       "name": "Spectre's Cowl",
@@ -698,7 +698,7 @@
     "6a04bc1334f787bb5bb2e0b8": {
       "name": "Searing Crown",
       "description": "Touch of Fire: After dealing damage with an attack or ability, burns the target for 3s, dealing 1.4% of the target's max Health as magic damage per second (reduced to 0.7% for ranged users). Deals 150% damage to minions and monsters. Max 125 damage against monsters.",
-      "source": "acca125b"
+      "source": "f44dc17b"
     },
     "6a04bc1334f787bb5bb2e0b9": {
       "name": "Kaenic Rookern",
@@ -708,7 +708,7 @@
     "6a04bc1334f787bb5bb2e0ba": {
       "name": "Bramble Vest",
       "description": "Thorns: When hit by an attack from an enemy champion, deals 4 + 6% bonus Armor magic damage to the attacker.\nEntangle: When hit by an attack from an enemy champion or when you damage one, apply 40% Grievous Wounds to them for 3s.",
-      "source": "ff08a1bf"
+      "source": "d597e76d"
     },
     "6a04bc1334f787bb5bb2e0bb": {
       "name": "Glacial Shroud"
@@ -740,7 +740,7 @@
     "6a04bc1334f787bb5bb2e0c2": {
       "name": "Bami's Cinder",
       "description": "Embers: Deal 10-20 magic damage per second to nearby enemies (deals 115% damage to minions and monsters).",
-      "source": "ee6c1dcf"
+      "source": "27b631b5"
     },
     "6a0a641493de40f0abdf74a2": {
       "name": "Zhonya's Hourglass",
@@ -956,7 +956,7 @@
     "6a04bc5f681bf773dac12a8c": {
       "name": "Last Stand",
       "description": "While below 60% Health, your attacks against enemy champions deal 5% to 11% bonus adaptive damage.\n\nYou deal the maximum bonus damage while below 30% Health.",
-      "source": "c82d6a0c"
+      "source": "beea4d79"
     },
     "6a04bc5f681bf773dac12a8d": {
       "name": "Gathering Storm",
@@ -1001,7 +1001,7 @@
     "6a04bc5f681bf773dac12a95": {
       "name": "Chain Assault",
       "description": "Damaging an enemy champion with an active ability marks them. Your next 2 attacks or active ability casts against them deal bonus adaptive damage equal to 12-38 + 3% bonus Attack Damage + 1.5% Ability Power (15s cooldown).",
-      "source": "cd8ebb4b"
+      "source": "f9dba130"
     },
     "6a04bc5f681bf773dac12a96": {
       "name": "Hubris",
@@ -1016,7 +1016,7 @@
     "6a04bc5f681bf773dac12a98": {
       "name": "Bone Plating",
       "description": "After taking damage from a champion, the current ability or attack and the next 3 abilities or attacks from that champion against you within 1.5s deal 30-60 less damage (40s cooldown).",
-      "source": "43176d3b"
+      "source": "12803d19"
     },
     "6a04bc5f681bf773dac12a99": {
       "name": "Aery",
@@ -1100,8 +1100,8 @@
     },
     "6a04bc5f681bf773dac12aa9": {
       "name": "Demolish",
-      "description": "After hitting a turret with 3 basic attacks, melee champions deal 85 + 28% max Health bonus physical damage, while ranged champions deal 50 + 20% max Health bonus physical damage.",
-      "source": "76d5ff95"
+      "description": "Your third attack against a turret deals bonus physical damage (85 + 28% max Health for melee champions; 50 + 20% max Health for ranged champions). (30s cooldown).",
+      "source": "ed7360c3"
     },
     "6a04bc5f681bf773dac12aaa": {
       "name": "First Strike",
@@ -1116,12 +1116,12 @@
     "6a04bc5f681bf773dac12aac": {
       "name": "Triumph",
       "description": "Champion takedowns restore 10% of your missing Health and 10% of your max Mana or max Energy. You also gain 35 Movement Speed for 2s.",
-      "source": "bda76ce7"
+      "source": "f7489823"
     },
     "6a04bc5f681bf773dac12aad": {
       "name": "Legend: Alacrity",
       "description": "Gain 3% Attack Speed. Take down monsters, enemy champions or minions to gain up to 18% bonus Attack Speed.",
-      "source": "a3b4f6c8"
+      "source": "b354207c"
     },
     "6a04bc5f681bf773dac12aae": {
       "name": "Lethal Tempo",
@@ -1156,7 +1156,7 @@
     "6a04bc5f681bf773dac12ab4": {
       "name": "Cut Down",
       "description": "Your attacks and abilities deal 6.5% bonus adaptive damage to enemy champions above 60% Health.",
-      "source": "5802cb57"
+      "source": "e1e4c321"
     },
     "6a04bc5f681bf773dac12ab5": {
       "name": "Zombie Ward",

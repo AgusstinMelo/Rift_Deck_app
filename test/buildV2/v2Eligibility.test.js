@@ -84,3 +84,10 @@ test('un campeón con capacidad real conserva los objetos de encantador', () => 
   assert.equal(championCanHealOrShieldAllies(nami), true);
   assert.equal(createEligibleV2Snapshot(snapshot, 'nami'), snapshot);
 });
+
+test('una runa que también se activa al recibir daño o cerca de un aliado no exige curar', () => {
+  const guardian = { id: 'guardian', name: 'Guardián', branch: 'Clave', description: 'Protege a un aliado cercano.', trigger_tags: ['escudar', 'cerca_aliado'] };
+  const resolve = { id: 'resolve', name: 'Resolución', branch: 'Valor', description: 'Al recibir daño.', trigger_tags: ['curar', 'recibir_daño'] };
+  assert.equal(requiresChampionAllyHealOrShield(guardian), false);
+  assert.equal(requiresChampionAllyHealOrShield(resolve), false);
+});

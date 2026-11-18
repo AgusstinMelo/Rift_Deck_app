@@ -1,0 +1,3 @@
+-- Rollback de 202611200007_catalog_text_fixes_followup.sql
+
+update public.runes set description = $rd$Al impactar a un campeón enemigo con un ataque o una habilidad, tú y el campeón aliado cercano con la menor cantidad de vida se curan. \n\n Aliado: Recupera un 1.5% de Vida Máxima + un 5% de Poder de Habilidad. \n\n Tú: Recuperas un 1% de tu Vida Máxima + un 5% de tu Poder de Habildiad. Enfriamiento: 20 seg. \n\n Si eres un campeón cuerpo a cuerpo, la curación tiene un 130% de efectividad. (No se activa si tú o tus aliados cercanos tienen la vida al máximo; tampoco se activa si no hay aliados cerca).$rd$ where id::text = '6a04bc5f681bf773dac12a83';

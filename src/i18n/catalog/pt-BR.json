@@ -65,17 +65,17 @@
     "6a04bc1334f787bb5bb2e031": {
       "name": "Blaster Magnético",
       "description": "Sobrecarga: Concede 5% de Velocidade de Movimento.\nFrenesi de Poder: Mover-se e atacar gera ataques Energizados. Ataques Energizados recebem 100 de alcance (50 para ataques corpo a corpo), causam de 40 a 100 de dano mágico adicional e concedem 60 de Velocidade de Movimento por 0,75s. Esse dano ricocheteia em até 5 inimigos próximos e pode acertar criticamente (causa de 50% a 80% de dano adicional contra tropas).",
-      "source": "8fa7d671"
+      "source": "18e2e2c9"
     },
     "6a04bc1334f787bb5bb2e032": {
       "name": "Estilhaço de Kircheis",
       "description": "Descarga: Ataques Energizados causam 40 de dano mágico adicional. Mover-se e atacar gera ataques Energizados.",
-      "source": "ba323825"
+      "source": "86dad3a3"
     },
     "6a04bc1334f787bb5bb2e033": {
       "name": "Arco Recurvo",
       "description": "Reforçado: Os ataques causam 15 de dano físico adicional ao atingir campeões.",
-      "source": "7b0ea41e"
+      "source": "e7d83caa"
     },
     "6a04bc1334f787bb5bb2e034": {
       "name": "Lâmina Fantasma de Youmuu",
@@ -88,17 +88,17 @@
     "6a04bc1334f787bb5bb2e036": {
       "name": "Gume do Infinito",
       "description": "Infinito: Acertos críticos causam 230% de dano em vez de 200%.",
-      "source": "91c55626"
+      "source": "434e03a2"
     },
     "6a04bc1334f787bb5bb2e037": {
       "name": "Muramana",
       "description": "Reverência: Concede Dano de Ataque igual a 2% da Mana Máxima e restaura 15% de toda a Mana gasta.\nChoque: Quando um ataque atinge um campeão inimigo, drena 1,5% da Mana atual e causa dano físico adicional igual a 3,5% (corpo a corpo) / 3% (longo alcance) da Mana Máxima.",
-      "source": "6331fe58"
+      "source": "8d06163c"
     },
     "6a04bc1334f787bb5bb2e038": {
       "name": "Ruptor Divino",
       "description": "Lâmina Encantada: Após usar uma habilidade, seu próximo ataque em até 10s causa 10% da Vida Máxima do alvo como dano físico adicional (7% para ataques de longo alcance). Se o alvo for um campeão, cura 6% da Vida Máxima do alvo (2,5% para ataques de longo alcance) (1,5s de recarga). O dano é reduzido contra estruturas.",
-      "source": "8355b7f9"
+      "source": "d0483bb7"
     },
     "6a04bc1334f787bb5bb2e039": {
       "name": "Zelo",
@@ -121,7 +121,7 @@
     "6a04bc1334f787bb5bb2e03d": {
       "name": "Eclipse",
       "description": "Lua Sempre Crescente: Atingir um campeão inimigo com 2 ataques ou habilidades diferentes em 1,8s causa dano físico adicional igual a 7% da Vida Máxima do alvo (3,5% para campeões de longo alcance). Além disso, concede um escudo que absorve dano igual a 140 + 35% do Dano de Ataque adicional (70 + 18% do Dano de Ataque adicional para campeões de longo alcance) por 2s (6s de recarga).",
-      "source": "d8785cd7"
+      "source": "37c4738b"
     },
     "6a04bc1334f787bb5bb2e03e": {
       "name": "Garra de Na'Shor",
@@ -131,12 +131,12 @@
     "6a04bc1334f787bb5bb2e03f": {
       "name": "Furacão de Runaan",
       "description": "Fúria do Vento: Os ataques atingem 2 inimigos próximos adicionais, cada um causando 55% de dano físico. Esses ataques podem acertar criticamente e ativar efeitos ao atingir.",
-      "source": "53742682"
+      "source": "744d9076"
     },
     "6a04bc1334f787bb5bb2e040": {
       "name": "Presa da Serpente",
       "description": "Punhalada: +15 de Penetração de Armadura.\nSaqueador de Escudos: Causar dano a um campeão inimigo reduz os escudos que ele receber por 3s. Campeões corpo a corpo aplicam (10% do Dano de Ataque adicional + 40)% de redução de escudo, limitada a 60%; campeões de longo alcance aplicam (10% do Dano de Ataque adicional + 25)% de redução de escudo, limitada a 45%. Ao causar dano a um inimigo não afetado por Saqueador de Escudos, todos os escudos dele são reduzidos no mesmo valor.",
-      "source": "da201e76"
+      "source": "c48b013c"
     },
     "6a04bc1334f787bb5bb2e041": {
       "name": "Dança da Morte",
@@ -151,12 +151,12 @@
     "6a04bc1334f787bb5bb2e043": {
       "name": "Espada do Rei Destruído",
       "description": "Ataques Arruinados: Os ataques causam dano físico adicional ao atingir igual a 7% da Vida atual do inimigo (10% para ataques corpo a corpo). Dano mínimo: 15. Dano máximo contra monstros: 60.\nDrenar: Atingir o mesmo campeão inimigo 3 vezes com ataques básicos ou habilidades o desacelera em 30% por 1,5s (30s de recarga).",
-      "source": "6a483d06"
+      "source": "bf2958a0"
     },
     "6a04bc1334f787bb5bb2e044": {
       "name": "Lembrete Mortal",
       "description": "Último Sussurro: Concede 30% de Penetração de Armadura. Ataques que acertam criticamente recebem 6% de Penetração de Armadura adicional.\nSepse: Causar dano físico aplica 50% de Feridas Dolorosas a campeões inimigos por 3s.",
-      "source": "25f78792"
+      "source": "931ac768"
     },
     "6a04bc1334f787bb5bb2e045": {
       "name": "Lágrima da Deusa",
@@ -176,27 +176,27 @@
     "6a04bc1334f787bb5bb2e048": {
       "name": "Serrespada Quimiopunk",
       "description": "Surra: Causar dano físico a campeões inimigos aplica 50% de Feridas Dolorosas por 3s.",
-      "source": "28760ddf"
+      "source": "d4af1edb"
     },
     "6a04bc1334f787bb5bb2e049": {
       "name": "Quebracascos",
       "description": "A Todo Vapor: Concede 5% de Velocidade de Movimento.\nCapitão: A cada 4º ataque contra campeões e monstros épicos, causa dano físico adicional igual a 160% do Dano de Ataque base + 5% da Vida máxima (campeões de longo alcance causam 40% do dano), aumentando para 240% do Dano de Ataque base + 9% da Vida máxima contra estruturas (campeões de longo alcance causam 40% do dano).\nTripulação de Abordagem: Tropas de cerco e supertropas aliadas próximas recebem de 20 a 130 de Armadura (25% a mais se você for um campeão de longo alcance) e de 10 a 120 de Resistência Mágica (25% a mais se você for um campeão de longo alcance).",
-      "source": "4fd98e3a"
+      "source": "4b00e2dc"
     },
     "6a04bc1334f787bb5bb2e04a": {
       "name": "Lança de Shojin",
       "description": "Força do Dragão: Concede 20 de Aceleração de Habilidade para habilidades básicas.\nVontade Focada: Causar dano a inimigos ou monstros com habilidades aumenta o dano das habilidades e da passiva do seu campeão em 3% por 6s (acumula até 4 vezes). Vontade Focada só pode acumular uma vez por segundo a cada uso de habilidade.",
-      "source": "5aaba17e"
+      "source": "f6f669c2"
     },
     "6a04bc1334f787bb5bb2e04b": {
       "name": "Terminus",
       "description": "Sombra: Os ataques causam 30 de dano mágico adicional ao atingir.\nJustaposição: Os ataques alternam entre os efeitos ao atingir de Luz e Trevas. Ataques de Luz concedem de 5 a 8 de Armadura e Resistência Mágica por 5s ao atingir. Ataques de Trevas concedem 10% de Penetração de Armadura e 10% de Penetração Mágica por 5s ao atingir. Cada efeito ao atingir acumula até 3 vezes. Enquanto você tiver este item, a Penetração de Armadura e a Penetração Mágica adicionais concedidas por ele têm máximo de 40%.",
-      "source": "97a548b7"
+      "source": "99aadd13"
     },
     "6a04bc1334f787bb5bb2e04c": {
       "name": "Hidra Titânica",
       "description": "Fender: A cada 1,75s, seu próximo ataque causa dano físico adicional igual a 25 + 3% da sua Vida máxima adicional (também se aplica a torres) e gera uma onda de choque que causa dano físico igual a 80 + 10% da sua Vida máxima adicional aos inimigos atrás do alvo. Campeões de longo alcance causam 75% do dano.",
-      "source": "198afd20"
+      "source": "23960f3e"
     },
     "6a04bc1334f787bb5bb2e04d": {
       "name": "Fulgor",
@@ -206,7 +206,7 @@
     "6a04bc1334f787bb5bb2e04e": {
       "name": "Força da Trindade",
       "description": "Zelo: +5% de Velocidade de Movimento.\nLâmina Encantada: Após usar uma habilidade, o próximo ataque básico em até 10s causa dano físico adicional igual a 200% do Dano de Ataque base (1,5s de recarga). O dano é menor contra estruturas.",
-      "source": "d7dc6d85"
+      "source": "474e1c77"
     },
     "6a04bc1334f787bb5bb2e04f": {
       "name": "Rancor de Serylda",
@@ -216,7 +216,7 @@
     "6a04bc1334f787bb5bb2e050": {
       "name": "Cutelo Negro",
       "description": "Rasgar: Causar dano físico a um campeão reduz a Armadura dele em 6% por 6s, acumulando até 5 vezes para uma redução de 30%.\nPerseguição: Concede 20 de Velocidade de Movimento ao causar dano físico. Concede 40 de Velocidade de Movimento ao se mover em direção a campeões inimigos com 5 acúmulos de Rasgar. Campeões de longo alcance recebem metade desses bônus.",
-      "source": "95893ab2"
+      "source": "25403864"
     },
     "6a04bc1334f787bb5bb2e051": {
       "name": "Transferência de Alma",
@@ -226,7 +226,7 @@
     "6a04bc1334f787bb5bb2e052": {
       "name": "Crepúsculo de Draktharr",
       "description": "Navalha: +18 de Penetração de Armadura.\nEspreitador Noturno: O primeiro ataque contra um campeão causa de 60 a 160 de dano físico adicional e o desacelera em 99% por 0,35s (10s de recarga).\nAbates de campeões reiniciam a recarga.",
-      "source": "26d64964"
+      "source": "73245038"
     },
     "6a04bc1334f787bb5bb2e053": {
       "name": "Adagas Rápidas Navori",
@@ -236,7 +236,7 @@
     "6a04bc1334f787bb5bb2e054": {
       "name": "A Coletora",
       "description": "Assassino: +10 de Penetração de Armadura.\nMorte e Impostos: Causar dano que deixaria um campeão inimigo abaixo de (4% + 2% da Chance de Crítico) da Vida Máxima o executa, aumenta permanentemente o limite de execução em 0,1% da Vida Máxima e concede 25 de ouro adicional.",
-      "source": "3f1d7e02"
+      "source": "63b4f394"
     },
     "6a04bc1334f787bb5bb2e055": {
       "name": "Limiar da Noite",
@@ -256,7 +256,7 @@
     "6a04bc1334f787bb5bb2e058": {
       "name": "Céu Dividido",
       "description": "Golpe do Escudo de Luz: O primeiro ataque contra um campeão inimigo acerta criticamente (6s de recarga por alvo), causando 160% de dano e restaurando Vida igual a 125% do Dano de Ataque base + 6% da sua Vida perdida.",
-      "source": "c1b3b3c3"
+      "source": "fb401ca5"
     },
     "6a04bc1334f787bb5bb2e059": {
       "name": "Espada G. p. C."
@@ -269,12 +269,12 @@
     "6a04bc1334f787bb5bb2e05b": {
       "name": "Coroa da Rainha Despedaçada",
       "description": "Salvaguarda: Concede um escudo mágico que bloqueia a próxima habilidade inimiga. Quando o escudo acaba, o dano sofrido é reduzido em 40% por 1s (40s de recarga).\nElegância: O Poder de Habilidade aumenta em 20 enquanto Salvaguarda estiver ativa. Causar dano mágico a campeões inimigos com uma habilidade ativa reduz a recarga de Salvaguarda em 4s.",
-      "source": "2b191f67"
+      "source": "f6e6b60b"
     },
     "6a04bc1334f787bb5bb2e05c": {
       "name": "Foco do Horizonte",
       "description": "Hipertiro: Causar dano a um campeão inimigo com uma habilidade a 600 unidades de distância o revela por 8s e aumenta o dano causado a ele em 10%.\nConcentração: Ao ativar Hipertiro, revela todos os campeões inimigos a até 1200 unidades do alvo por 3s (12s de recarga).",
-      "source": "875f6927"
+      "source": "a1a4f71d"
     },
     "6a04bc1334f787bb5bb2e05d": {
       "name": "Pingente do Profeta",
@@ -301,22 +301,22 @@
     "6a04bc1334f787bb5bb2e063": {
       "name": "Tormento de Liandry",
       "description": "Tormento: Habilidades de dano e ataques potencializados causam 2% da Vida Máxima do alvo como dano mágico por segundo por 3s.\n\nLoucura: Ao lutar contra campeões inimigos, você causa 2% de dano adicional por segundo (até um máximo de 6%).",
-      "source": "1c90ba2c"
+      "source": "448c4590"
     },
     "6a04bc1334f787bb5bb2e064": {
       "name": "Fantasia de Bandópolis",
       "description": "Flor de Fogo: Ao causar dano a um campeão inimigo com uma habilidade ativa, uma armadilha surge aos pés dele. Após um breve atraso, a armadilha causa dano mágico igual a 105 + 15% do Poder de Habilidade aos inimigos dentro dela (8s de recarga por alvo). Se um alvo for atingido por mais de uma armadilha colocada pelo mesmo campeão em um curto período, as armadilhas após a primeira causam apenas 20% do dano.",
-      "source": "d6dba493"
+      "source": "0836b20b"
     },
     "6a04bc1334f787bb5bb2e065": {
       "name": "Juramento do Cavaleiro",
       "description": "Sacrifício: Enquanto seu aliado Digno estiver por perto, 12% do dano que ele sofre é redirecionado a você. Além disso, você cura 10% do dano a campeões causado pelo seu aliado Digno.\nJuramento: Ao comprar ou recomprar este item, você designa um aliado como Digno.",
-      "source": "569a5ad6"
+      "source": "992fa594"
     },
     "6a04bc1334f787bb5bb2e066": {
       "name": "Mata-Cráquens",
       "description": "Passo nas Nuvens: Concede 5% de Velocidade de Movimento.\nDerrube-o: A cada terceiro ataque, causa de 150 a 210 de dano físico adicional (de 120 a 168 para campeões de longo alcance), aumentado em 0,75% para cada 1% de Vida perdida do alvo. O dano físico adicional é limitado a 75%.",
-      "source": "8166c3c7"
+      "source": "28b7883d"
     },
     "6a04bc1334f787bb5bb2e067": {
       "name": "Capa da Agilidade"
@@ -324,7 +324,7 @@
     "6a04bc1334f787bb5bb2e068": {
       "name": "Chamado do Carrasco",
       "description": "Golpe Paralisante: Causar dano físico a campeões inimigos aplica 40% de Feridas Dolorosas por 3s.",
-      "source": "c36517d7"
+      "source": "f69bcf11"
     },
     "6a04bc1334f787bb5bb2e069": {
       "name": "Punho de Jaurim"
@@ -343,12 +343,12 @@
     "6a04bc1334f787bb5bb2e06d": {
       "name": "Alternador Hextec",
       "description": "Acelerado: Habilidades de dano e ataques potencializados contra campeões causam de 25 a 60 de dano mágico adicional (20s de recarga).",
-      "source": "11e0d1b9"
+      "source": "323fe4f5"
     },
     "6a04bc1334f787bb5bb2e06e": {
       "name": "Armadura de Espinhos",
       "description": "Espinhos: Ao ser atingido por um ataque, causa (20 + 6% da Armadura adicional + 1% da Vida adicional) de dano mágico ao atacante.\nEnredar: Ao ser atingido por um ataque de um campeão inimigo ou causar dano a ele, aplica 50% de Feridas Dolorosas por 3s.",
-      "source": "c1eeaf5d"
+      "source": "8b32a5ef"
     },
     "6a04bc1334f787bb5bb2e06f": {
       "name": "Armadura Sangrenta do Suserano",
@@ -358,12 +358,12 @@
     "6a04bc1334f787bb5bb2e070": {
       "name": "Escudo Relicário",
       "description": "Tributo: A cada 30s, você recebe 1 orbe de energia que orbita ao seu redor (máx. 3 orbes). Estando perto de um aliado, as ações a seguir ativam Tributo, consumindo 1 orbe de energia para conceder 65 de ouro e restaurar de 20 a 80 de Vida:\n1. Causar dano a campeões ou estruturas inimigas com habilidades ou ataques.\n2. Atacar tropas com menos de 65% de Vida. Isso também as executa, e o ouro desses abates de tropas vai para o aliado mais próximo.\n3. Ter 3 orbes e estar perto de uma tropa quando ela morrer.\nAo ativar Tributo, o aliado mais próximo recebe acúmulos de Tributo.\nGuardião: Causa 1 de dano adicional a Sentinelas reveladas pela Lente do Oráculo, Sentinelas de Controle e Broto Vidente.\nRestrição: Você não recebe ouro ao abater tropas, mas recebe ouro igual a 50% da recompensa. O ouro dos seus abates de tropas vai para o aliado mais próximo. Além disso, o ouro obtido ao abater monstros é reduzido em 50%.\nMissão: Obtenha 750 de ouro com este item para transformá-lo em Foice da Névoa Negra. Isso une você ao aliado com mais acúmulos de Tributo e torna vocês os melhores parceiros.",
-      "source": "27a53c24"
+      "source": "f47f75d4"
     },
     "6a04bc1334f787bb5bb2e071": {
       "name": "Botas de Mana",
       "description": "Ruptura Mágica: +8 de Penetração Mágica.\nEquilíbrio: Campeões sem mana recebem 75% de Regeneração de Vida adicional.\nValentão: Ataques e habilidades ativas causam 18 de dano físico adicional a tropas.",
-      "source": "50e14ae0"
+      "source": "f086f36c"
     },
     "6a04bc1334f787bb5bb2e072": {
       "name": "Gema Ardente"
@@ -402,7 +402,7 @@
     "6a04bc1334f787bb5bb2e07a": {
       "name": "Morellonomicon",
       "description": "Aflição: Causar dano mágico a campeões inimigos aplica 50% de Feridas Dolorosas por 3s.",
-      "source": "fabaac6f"
+      "source": "deb02249"
     },
     "6a04bc1334f787bb5bb2e07b": {
       "name": "Ladrão de Almas de Mejai",
@@ -422,12 +422,12 @@
     "6a04bc1334f787bb5bb2e07e": {
       "name": "Desespero Eterno",
       "description": "Angústia: A cada 4s em combate contra um campeão, causa 3% da sua Vida Máxima como dano mágico aos campeões inimigos próximos e cura 250% do dano causado. A Aceleração de Habilidade dos itens não afeta Angústia.",
-      "source": "421acf23"
+      "source": "33f08d8b"
     },
     "6a04bc1334f787bb5bb2e07f": {
       "name": "Resplendor Vazio",
       "description": "Imolação: Em combate, causa dano mágico igual a 20 a 30 + 1% da sua Vida adicional por segundo aos inimigos próximos por 5s. Causa 125% de dano a monstros e 200% de dano a tropas.\nDesolar: Ao abater um monstro neutro ou um inimigo, causa dano mágico igual a 30 + 2% da sua Vida adicional na área ao redor.",
-      "source": "b2604578"
+      "source": "e62d2546"
     },
     "6a04bc1334f787bb5bb2e080": {
       "name": "Dente de Na'Shor",
@@ -442,7 +442,7 @@
     "6a04bc1334f787bb5bb2e082": {
       "name": "Foice Espectral",
       "description": "Versátil: Concede 10 de Dano de Ataque ou 20 de Poder de Habilidade (adaptativo).\nTributo: A cada 30s, você recebe 1 orbe de energia que orbita ao seu redor (máx. 3 orbes). Estando perto de um aliado, as ações a seguir ativam Tributo, consumindo 1 orbe de energia para conceder 65 de ouro e restaurar de 20 a 80 de Vida:\n1. Causar dano a campeões ou estruturas inimigas com habilidades ou ataques.\n2. Atacar tropas com menos de 65% de Vida. Isso também as executa, e o ouro desses abates de tropas vai para o aliado mais próximo.\n3. Ter 3 orbes e estar perto de uma tropa quando ela morrer.\nAo ativar Tributo, o aliado mais próximo recebe acúmulos de Tributo.\nGuardião: Causa 1 de dano adicional a Sentinelas reveladas pela Lente do Oráculo, Sentinelas de Controle e Broto Vidente.\nRestrição: Você não recebe ouro ao abater tropas, mas recebe ouro igual a 50% da recompensa. O ouro dos seus abates de tropas vai para o aliado mais próximo. Além disso, o ouro obtido ao abater monstros é reduzido em 50%.\nMissão: Obtenha 750 de ouro com este item para transformá-lo em Foice da Névoa Negra. Isso une você ao aliado com mais acúmulos de Tributo e torna vocês os melhores parceiros.",
-      "source": "35328bee"
+      "source": "6d49df8e"
     },
     "6a04bc1334f787bb5bb2e083": {
       "name": "Bastão das Eras",
@@ -465,7 +465,7 @@
     "6a04bc1334f787bb5bb2e087": {
       "name": "Redenção",
       "description": "Intervenção: Selecione uma área grande como alvo. Após 2,5s, restaura de 150 a 350 de Vida (com base no nível do aliado) às unidades aliadas e causa 10% da Vida Máxima como dano verdadeiro aos campeões inimigos (60s de recarga). Pode ser usado mesmo morto.",
-      "source": "e6851cc2"
+      "source": "36c9a8ac"
     },
     "6a04bc1334f787bb5bb2e088": {
       "name": "Hexoplaca Experimental",
@@ -499,7 +499,7 @@
     "6a04bc1334f787bb5bb2e08f": {
       "name": "Lâmina da Fúria de Guinsoo",
       "description": "Ira: Os ataques causam 30 de Dano Mágico adicional.\nAtaque Furioso: Ataques básicos concedem 8% de Velocidade de Ataque, acumulando até 4 vezes. Com o máximo de acúmulos, cada terceiro ataque básico ativa um efeito ao atingir adicional.",
-      "source": "80c2fa7f"
+      "source": "b389414b"
     },
     "6a04bc1334f787bb5bb2e090": {
       "name": "Último Sussurro",
@@ -540,7 +540,7 @@
     "6a04bc1334f787bb5bb2e098": {
       "name": "Malevolência",
       "description": "Desprezo: Sua ultimate recebe 20 de Aceleração de Habilidade.\nCampo Tóxico: Causar dano a um campeão com sua ultimate queima o chão sob ele por 3s, causando dano mágico igual a 60 + 5% do Poder de Habilidade por segundo e reduzindo sua Resistência Mágica em 10. O raio da queimadura aumenta com o dano causado, atingindo o máximo com 800 de dano.",
-      "source": "b641169b"
+      "source": "f0322a33"
     },
     "6a04bc1334f787bb5bb2e099": {
       "name": "Capítulo Perdido",
@@ -550,7 +550,7 @@
     "6a04bc1334f787bb5bb2e09a": {
       "name": "Orbe do Oblívio",
       "description": "Feridas Dolorosas: Causar dano mágico a campeões inimigos aplica 40% de Feridas Dolorosas por 3s.",
-      "source": "7ed6beaf"
+      "source": "d8647359"
     },
     "6a04bc1334f787bb5bb2e09b": {
       "name": "Grevas Vorazes",
@@ -565,17 +565,17 @@
     "6a04bc1334f787bb5bb2e09d": {
       "name": "Orbe do Infinito",
       "description": "Destino: +5% de Velocidade de Movimento.\nEquilíbrio: +15 de Penetração Mágica.\nMorte Inevitável: Habilidades e ataques potencializados acertam criticamente, causando 20% de dano adicional contra inimigos com menos de 40% de Vida.",
-      "source": "73f2b809"
+      "source": "e066c355"
     },
     "6a04bc1334f787bb5bb2e09e": {
       "name": "Ímpeto Cósmico",
       "description": "Dança dos Feitiços: Causar dano mágico ou verdadeiro a campeões concede 30 de Velocidade de Movimento por 4s.",
-      "source": "951523f3"
+      "source": "2e62c5ff"
     },
     "6a04bc1334f787bb5bb2e09f": {
       "name": "Tridente da Oceânide",
       "description": "Arma Letal: Causar dano com habilidades a um campeão inimigo reduz qualquer escudo que ele receba por 3s. Habilidades em área aplicam (5% do Poder de Habilidade + 25)% de redução de escudo, limitada a 45%; habilidades de alvo único aplicam (5% do Poder de Habilidade + 40)% de redução de escudo, limitada a 60%. Ao causar dano a um inimigo não afetado por Arma Letal, todos os escudos dele são reduzidos no mesmo valor.",
-      "source": "993f5ab9"
+      "source": "5dd05ef9"
     },
     "6a04bc1334f787bb5bb2e0a0": {
       "name": "Projetor Psíquico",
@@ -585,7 +585,7 @@
     "6a04bc1334f787bb5bb2e0a1": {
       "name": "Ladrão de Almas Desperto",
       "description": "Caça às Almas: +15 de Penetração Mágica.\nAlma Errante: Sempre que você abater um campeão inimigo até 3s depois de causar dano a ele, as recargas das suas habilidades são reduzidas em 25%. Você rouba 10% da Velocidade de Movimento base dele por 10s e 50% da Aceleração de Habilidade dele até que ele renasça. A Aceleração de Habilidade roubada desta forma acumula.",
-      "source": "7348f661"
+      "source": "c24f6cbf"
     },
     "6a04bc1334f787bb5bb2e0a2": {
       "name": "Máscara Abissal",
@@ -595,17 +595,17 @@
     "6a04bc1334f787bb5bb2e0a3": {
       "name": "Presságio de Randuin",
       "description": "Contracorrente: Ao sofrer um acerto crítico de dano físico, recebe 1 acúmulo de Contracorrente. Cada acúmulo concede 5% de Velocidade de Movimento e 5% de Resistência a Lentidão. Máximo de 4 acúmulos.\nResiliência: Acertos críticos causam 30% menos dano físico a você.",
-      "source": "6eade03e"
+      "source": "c782ec78"
     },
     "6a04bc1334f787bb5bb2e0a4": {
       "name": "Centelha Resplandecente",
       "description": "Imolação: Causa de 5 a 10 de dano mágico por segundo aos inimigos próximos.",
-      "source": "35222729"
+      "source": "2ae607e5"
     },
     "6a04bc1334f787bb5bb2e0a5": {
       "name": "Couraça do Defunto",
       "description": "Implacável: +4% de Velocidade de Movimento.\nÍmpeto: Mover-se gera Ímpeto, concedendo até 40 de Velocidade de Movimento ao atingir 100 acúmulos. Atacar remove todos os acúmulos de Ímpeto. Os acúmulos decaem quando seu movimento é prejudicado.\nGolpe Esmagador: Os ataques causam até 100 de dano mágico adicional com base no Ímpeto acumulado. Ataques corpo a corpo que consomem o Ímpeto máximo também desaceleram em 75% por 1s.",
-      "source": "72f7b18a"
+      "source": "31c8f6e6"
     },
     "6a04bc1334f787bb5bb2e0a6": {
       "name": "Força da Natureza",
@@ -615,7 +615,7 @@
     "6a04bc1334f787bb5bb2e0a7": {
       "name": "Manto da Aurora",
       "description": "Portador da Aurora: Ao imobilizar um campeão ou ser imobilizado a até 400 unidades de um campeão inimigo, você recebe 20% de Armadura e Resistência Mágica, revela os campeões inimigos próximos por 3s e causa a eles dano mágico igual a 40 + 2,5% da Vida adicional (3s de recarga).",
-      "source": "4fa12eac"
+      "source": "bcf5aad8"
     },
     "6a04bc1334f787bb5bb2e0a8": {
       "name": "Manto da Meia-noite",
@@ -643,7 +643,7 @@
     "6a04bc1334f787bb5bb2e0ad": {
       "name": "Coração de Aço",
       "description": "Consumo Colossal: Estando a até 700 unidades de um campeão inimigo, carrega por 2,5s para desferir um golpe poderoso. Esse ataque carregado causa dano físico adicional igual a 140 + 3,5% da Vida máxima e concede Vida máxima igual a 15% do dano causado. 20s de recarga por alvo.",
-      "source": "d50dcca0"
+      "source": "6116ee0e"
     },
     "6a04bc1334f787bb5bb2e0ae": {
       "name": "Virtude Radiante",
@@ -668,12 +668,12 @@
     "6a04bc1334f787bb5bb2e0b2": {
       "name": "Lembranças do Lorde Dominik",
       "description": "Matador de Gigantes: Causa dano adicional com base na Vida adicional do campeão inimigo. O dano adicional é limitado a 12%, atingido ao atacar um campeão inimigo com 1200 de Vida adicional.",
-      "source": "738f4778"
+      "source": "f285533a"
     },
     "6a04bc1334f787bb5bb2e0b3": {
       "name": "Turíbulo Ardente",
       "description": "Turíbulo: Ao curar ou proteger com escudo um campeão aliado (que não seja você), esse campeão recebe 30% de Velocidade de Ataque e seus ataques causam 25 de dano mágico adicional por 6s. Esse dano pode acertar criticamente.",
-      "source": "d4588b2d"
+      "source": "83c4a867"
     },
     "6a04bc1334f787bb5bb2e0b4": {
       "name": "Capuz do Espectro",
@@ -698,7 +698,7 @@
     "6a04bc1334f787bb5bb2e0b8": {
       "name": "Coroa Abrasadora",
       "description": "Toque de Fogo: Após causar dano com um ataque ou habilidade, queima o alvo por 3s, causando 1,4% da Vida Máxima do alvo como dano mágico por segundo (reduzido para 0,7% para usuários de longo alcance). Causa 150% de dano a tropas e monstros. Máximo de 125 de dano contra monstros.",
-      "source": "acca125b"
+      "source": "f44dc17b"
     },
     "6a04bc1334f787bb5bb2e0b9": {
       "name": "Rookern Lamúrico",
@@ -708,7 +708,7 @@
     "6a04bc1334f787bb5bb2e0ba": {
       "name": "Colete Espinhoso",
       "description": "Espinhos: Ao ser atingido por um ataque de um campeão inimigo, causa 4 + 6% da Armadura adicional como dano mágico ao atacante.\nEnredar: Ao ser atingido por um ataque de um campeão inimigo ou causar dano a ele, aplica 40% de Feridas Dolorosas por 3s.",
-      "source": "ff08a1bf"
+      "source": "d597e76d"
     },
     "6a04bc1334f787bb5bb2e0bb": {
       "name": "Proteção Glacial"
@@ -740,7 +740,7 @@
     "6a04bc1334f787bb5bb2e0c2": {
       "name": "Brasa de Bami",
       "description": "Brasas: Causa de 10 a 20 de dano mágico por segundo aos inimigos próximos (causa 115% de dano a tropas e monstros).",
-      "source": "ee6c1dcf"
+      "source": "27b631b5"
     },
     "6a0a641493de40f0abdf74a2": {
       "name": "Ampulheta de Zhonya",
@@ -956,7 +956,7 @@
     "6a04bc5f681bf773dac12a8c": {
       "name": "Até a Morte",
       "description": "Com menos de 60% de Vida, seus ataques contra campeões inimigos causam de 5% a 11% de dano adaptativo adicional.\n\nVocê causa o dano adicional máximo com menos de 30% de Vida.",
-      "source": "c82d6a0c"
+      "source": "beea4d79"
     },
     "6a04bc5f681bf773dac12a8d": {
       "name": "Tempestade Crescente",
@@ -1001,7 +1001,7 @@
     "6a04bc5f681bf773dac12a95": {
       "name": "Ataque em Cadeia",
       "description": "Causar dano a um campeão inimigo com uma habilidade ativa aplica uma marca. Seus próximos 2 ataques ou usos de habilidades ativas contra ele causam dano adaptativo adicional igual a 12-38 + 3% do Dano de Ataque adicional + 1,5% do Poder de Habilidade (15s de recarga).",
-      "source": "cd8ebb4b"
+      "source": "f9dba130"
     },
     "6a04bc5f681bf773dac12a96": {
       "name": "Arrogância",
@@ -1016,7 +1016,7 @@
     "6a04bc5f681bf773dac12a98": {
       "name": "Osso Revestido",
       "description": "Ao sofrer dano de um campeão, a habilidade ou ataque atual e as 3 habilidades ou ataques seguintes desse campeão contra você em até 1,5s causam de 30 a 60 de dano a menos (40s de recarga).",
-      "source": "43176d3b"
+      "source": "12803d19"
     },
     "6a04bc5f681bf773dac12a99": {
       "name": "Invocar Aery",
@@ -1100,8 +1100,8 @@
     },
     "6a04bc5f681bf773dac12aa9": {
       "name": "Demolir",
-      "description": "Após atingir uma torre com 3 ataques básicos, campeões corpo a corpo causam 85 + 28% da Vida Máxima como dano físico adicional, enquanto campeões de longo alcance causam 50 + 20% da Vida Máxima como dano físico adicional.",
-      "source": "76d5ff95"
+      "description": "Seu terceiro ataque contra uma torre causa dano físico adicional (85 + 28% da Vida Máxima para campeões corpo a corpo; 50 + 20% da Vida Máxima para campeões de longo alcance). (30 s de recarga).",
+      "source": "ed7360c3"
     },
     "6a04bc5f681bf773dac12aaa": {
       "name": "Primeiro Ataque",
@@ -1116,12 +1116,12 @@
     "6a04bc5f681bf773dac12aac": {
       "name": "Triunfo",
       "description": "Ao abater campeões, recupera 10% da Vida perdida e 10% da Mana Máxima ou da Energia máxima. Além disso, concede 35 de Velocidade de Movimento por 2s.",
-      "source": "bda76ce7"
+      "source": "f7489823"
     },
     "6a04bc5f681bf773dac12aad": {
       "name": "Lenda: Espontaneidade",
       "description": "Concede 3% de Velocidade de Ataque. Abata monstros, campeões inimigos ou tropas para receber até 18% de Velocidade de Ataque adicional.",
-      "source": "a3b4f6c8"
+      "source": "b354207c"
     },
     "6a04bc5f681bf773dac12aae": {
       "name": "Ritmo Fatal",
@@ -1156,7 +1156,7 @@
     "6a04bc5f681bf773dac12ab4": {
       "name": "Dilacerar",
       "description": "Seus ataques e habilidades causam 6,5% de dano adaptativo adicional a campeões inimigos com mais de 60% de Vida.",
-      "source": "5802cb57"
+      "source": "e1e4c321"
     },
     "6a04bc5f681bf773dac12ab5": {
       "name": "Sentinela Zumbi",
