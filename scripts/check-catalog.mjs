@@ -42,7 +42,7 @@ const problems = [
   ...patchOverrideProblems({ label: 'Runa', base: baseRunes, patch: runePatch, key: 'rune_id' }),
 ];
 console.log('Perfil del Coach cargado:');
-Object.entries(catalogCoverage({ champions, runes, spells })).forEach(([label, value]) => console.log(`  ${label}: ${value}`));
+Object.entries(catalogCoverage({ champions, items, runes, spells })).forEach(([label, value]) => console.log(`  ${label}: ${value}`));
 console.log('');
 if (problems.length) {
   console.log(`${problems.length} problemas en el catálogo:\n`);

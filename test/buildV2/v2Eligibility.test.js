@@ -131,3 +131,18 @@ test('sin temática la IA solo ve piezas de la clase; con temática, todo', () =
   const few = { ...snapshot, coreItems: coreItems.slice(5), items: coreItems.slice(5) };
   assert.equal(createEligibleV2Snapshot(few, 'jinx', 'adc').coreItems.length, few.coreItems.length);
 });
+
+test('fits_classes del objeto manda sobre la deducción por tipo; sin cargar, se deduce', () => {
+  const champion = { id: 'kaisa', name: "Kai'Sa", roles: ['Tirador'], traits: ['rango'], item_scalings: ['daño_ataque'], damage_type: 'AD' };
+  const damage = n => ({ id: `d${n}`, name: `Daño ${n}`, category: 'Mejorado', type: ['Daño Fisico'], effect_tags: [], situational_role: ['ofensivo'] });
+  // Sterak: por tipo pasaría (Daño Físico + Defensa), pero está cargado solo para luchador.
+  const sterak = { id: 'sterak', name: 'Guantelete de Sterak', category: 'Mejorado', type: ['Daño Fisico', 'Defensa'], effect_tags: ['escudo'], situational_role: ['defensivo'], fits_classes: ['luchador'] };
+  // Un objeto de defensa marcado para tirador sí se muestra.
+  const tankForMarksman = { id: 'odd', name: 'Defensa rara', category: 'Mejorado', type: ['Defensa'], effect_tags: ['defensa_fisica'], situational_role: ['defensivo'], fits_classes: ['tirador'] };
+  const coreItems = [...Array.from({ length: 12 }, (_, n) => damage(n)), sterak, tankForMarksman];
+  const snapshot = { champions: [champion], items: coreItems, coreItems, movementItems: [], runes: [], spells: [] };
+  const ids = createEligibleV2Snapshot(snapshot, 'kaisa', 'adc').coreItems.map(item => item.id);
+  assert.equal(ids.includes('sterak'), false);
+  assert.equal(ids.includes('odd'), true);
+  assert.equal(ids.filter(id => id.startsWith('d')).length, 12);
+});

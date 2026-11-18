@@ -25,8 +25,12 @@ const hasOffensiveStats = row => ['attack_damage', 'attack_speed', 'ability_powe
 const isDefensiveItem = (profile, row) => (profile.types.includes('defensa') || profile.roles.has('defensivo'))
   && !(profile.roles.has('ofensivo') && hasOffensiveStats(row));
 const isDefensive = profile => isDefensiveItem(profile, profile.row);
-/** Objeto de tanque: defensa sin daño ni soporte (Corazón de Hielo, Cota de Espinas). */
-const isTankItem = profile => profile.types.includes('defensa') && !isDamage(profile) && !profile.types.includes('soporte');
+/**
+ * Objeto de tanque: defensa sin daño ni soporte (Corazón de Hielo, Cota de Espinas), salvo
+ * que fits_classes diga explícitamente que es para alguna clase que no sea tanque.
+ */
+const isTankItem = profile => profile.types.includes('defensa') && !isDamage(profile) && !profile.types.includes('soporte')
+  && !(profile.fitsClasses?.size && [...profile.fitsClasses].some(value => value !== 'tanque'));
 const isAntiheal = profile => profile.effects.has('anti_curacion');
 /** "A", "A y B", "A, B y C". */
 const listOf = names => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')}${tr('coachEngine.and')}${names.at(-1)}`);

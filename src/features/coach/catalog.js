@@ -3,6 +3,7 @@
 // Los valores de los tags son los guardados en la base (en español): current_champions
 // (traits, vulnerabilities, roles, damage_type, scaling), current_wr_items (effect_tags,
 // situational_role, type, category, good_against) y current_runes (trigger_tags, branch).
+import { FIT_CLASSES } from './taxonomy.js';
 
 /** Clave de comparación de nombres: sin acentos, minúsculas y espacios simples. */
 export function keyOf(value) {
@@ -200,6 +201,8 @@ export function itemProfile(row) {
     effects,
     types,
     roles: tagSet(row.situational_role),
+    /** Clases que arman el objeto (fits_classes, cargado a mano); vacío = se deduce del tipo. */
+    fitsClasses: tagSet(row.fits_classes),
     goodAgainst: asList(row.good_against).map(keyOf),
     final: isFinalItem(row),
     boots: isBoots(row),
@@ -319,9 +322,23 @@ function damageTypesFor(own, preferredTypes) {
  *   soporte o su tipo de daño (Zhonya o Banshee ya traen defensa; tanque puro, nunca);
  *   de pelea, soporte, su daño o defensa.
  */
+/** Clases (las de fits_classes) con las que juega el campeón en esta build. */
+export function ownClasses(own) {
+  const classes = new Set([...own.roles].filter(role => FIT_CLASSES.includes(role)));
+  if (own.buildClass === 'support') classes.add('soporte');
+  if (own.buildClass === 'tank') classes.add('tanque');
+  // Un tanque o un support armado de daño (Malphite mid full AP): su clase de daño.
+  if (own.buildClass === 'carry' && !['tirador', 'mago', 'asesino'].some(value => classes.has(value))) {
+    classes.add(own.damage === 'AP' ? 'mago' : 'asesino');
+  }
+  return classes;
+}
+
 export function fitsBuild(item, own, preferredTypes) {
   if (!item || !own) return false;
   if (item.boots) return true;
+  // Si el objeto tiene fits_classes cargado, manda eso por sobre la deducción por tipo.
+  if (item.fitsClasses?.size) return [...ownClasses(own)].some(value => item.fitsClasses.has(value));
   const damageTypes = damageTypesFor(own, preferredTypes);
   const ofDamage = item.types.some(type => damageTypes.includes(type));
   const support = item.types.includes('soporte');

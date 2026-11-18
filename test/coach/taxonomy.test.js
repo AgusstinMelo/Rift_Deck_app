@@ -37,3 +37,14 @@ test('trigger_tags y benefit_tags de runas usan la lista cerrada', () => {
   assert.ok(problems.some(problem => problem.includes('Electrocutar: runa clave sin trigger_tags')));
   assert.equal(problems.length, 2);
 });
+
+test('fits_classes de objetos: lista cerrada y cobertura de objetos terminados', async () => {
+  const { catalogProblems, catalogCoverage } = await import('../../src/features/coach/taxonomy.js');
+  const items = [
+    { name: 'Sterak', category: 'Mejorado', type: ['Daño Fisico'], effect_tags: ['escudo'], good_against: [], avoid_against: [], fits_classes: ['luchador'] },
+    { name: 'Raro', category: 'Mejorado', type: ['Daño Fisico'], effect_tags: ['escudo'], good_against: [], avoid_against: [], fits_classes: ['bruiser'] },
+    { name: 'Botas', category: 'Mejorado', type: ['Movimiento'], effect_tags: [], fits_classes: [] },
+  ];
+  assert.ok(catalogProblems({ items }).includes('Raro: fits_classes "bruiser" no está en la lista cerrada'));
+  assert.equal(catalogCoverage({ items })['Objetos terminados con clases'], '2/2');
+});

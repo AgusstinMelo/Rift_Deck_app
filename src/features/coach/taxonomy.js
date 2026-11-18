@@ -128,6 +128,7 @@ export function catalogProblems({ champions = [], items = [], runes = [], spells
   });
   items.forEach(item => {
     outside(item.name, 'effect_tags', item.effect_tags, ITEM_EFFECT_TAGS);
+    outside(item.name, 'fits_classes', item.fits_classes, FIT_CLASSES);
     outside(item.name, 'situational_role', item.situational_role, ITEM_SITUATIONAL_ROLES);
     if (item.category === 'Mejorado' && item.active !== false) {
       if (!(item.effect_tags || []).length) problems.push(`${item.name}: objeto terminado sin effect_tags (el Coach no sabe a qué responde)`);
@@ -207,12 +208,14 @@ export function patchOverrideProblems({ label, base = [], patch = [], key }) {
 }
 
 /** Cuánto del perfil del Coach está cargado (para ir completándolo a mano). */
-export function catalogCoverage({ champions = [], runes = [], spells = [] }) {
+export function catalogCoverage({ champions = [], items = [], runes = [], spells = [] }) {
   const filled = (rows, test) => `${rows.filter(test).length}/${rows.length}`;
   return {
     'Campeones con rol en la pelea': filled(champions, champ => (champ.team_roles || []).length),
     'Campeones con perfil 0-5 completo': filled(champions, champ => CHAMPION_SCORES.every(field => champ[field] != null)),
     // counters puede quedar vacío: una runa de daño puro no responde a nada del rival.
+    // Opcional: sin fits_classes, Build V2 deduce la clase del objeto por su tipo.
+    'Objetos terminados con clases': filled(items.filter(item => item.category === 'Mejorado' && item.active !== false && !(item.type || []).some(type => ['Movimiento', 'Encantamiento'].includes(type))), item => (item.fits_classes || []).length),
     'Runas clave con clases': filled(runes.filter(rune => rune.branch === 'Clave'), rune => (rune.fits_classes || []).length),
     'Runas con clases': filled(runes, rune => (rune.fits_classes || []).length),
     // Igual que las runas: Castigo o Teleportación no responden a nada del rival.
