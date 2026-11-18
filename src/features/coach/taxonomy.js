@@ -76,8 +76,12 @@ export function catalogProblems({ champions = [], items = [] }) {
   items.forEach(item => {
     outside(item.name, 'effect_tags', item.effect_tags, ITEM_EFFECT_TAGS);
     outside(item.name, 'situational_role', item.situational_role, ITEM_SITUATIONAL_ROLES);
-    if (item.category === 'Mejorado' && item.active !== false && !(item.effect_tags || []).length) {
-      problems.push(`${item.name}: objeto terminado sin effect_tags (el Coach no sabe a qué responde)`);
+    if (item.category === 'Mejorado' && item.active !== false) {
+      if (!(item.effect_tags || []).length) problems.push(`${item.name}: objeto terminado sin effect_tags (el Coach no sabe a qué responde)`);
+      ['good_against', 'avoid_against'].forEach(field => {
+        if (!(item[field] || []).length) problems.push(`${item.name}: objeto terminado sin ${field}`);
+        (item[field] || []).filter(value => !known.has(norm(value))).forEach(value => problems.push(`${item.name}: ${field} "${value}" no es un campeón del catálogo`));
+      });
     }
   });
   return problems;
