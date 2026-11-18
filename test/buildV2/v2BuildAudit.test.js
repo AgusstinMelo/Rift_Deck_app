@@ -194,3 +194,23 @@ test('resistencia del lado equivocado: contra un equipo físico, Al Filo de la C
   const mixed = draftFitContext({ snapshot: local, championId: 'kaisa', role: 'adc', allies: { adc: 'kaisa' }, enemies: { top: 'irelia', mid: 'akali', support: 'nautilus' } });
   assert.deepEqual(auditCoreItems({ coreItems: ['botrk', 'guinsoo', 'terminus', 'wits', 'ga'].map(id => ({ id, reason: id })), snapshot: local, fit: mixed }).notes, []);
 });
+
+test('kit_fit reconoce todos los valores de item_scalings de la lista cerrada', async () => {
+  const { CHAMPION_ITEM_SCALINGS } = await import('../../src/features/coach/taxonomy.js');
+  const { itemAnnotations } = await import('../../src/features/buildV2/v2BuildAudit.js');
+  // Un objeto "con todo": cada valor de la lista tiene que sumar.
+  const everything = item('all', 'Todo', {
+    attack_damage: 1, attack_speed: 1, ability_power: 1, ability_haste: 1, life: 1, armor: 1, magic_res: 1,
+    percentage_armor_penetration: 1, flat_armor_penetration: 1, percentage_magic_penetration: 1, flat_magic_penetration: 1,
+    physic_vamp: 1, magic_vamp: 1, percentage_movement: 1, critical_impact: 1, critical_damage: 1, mana: 1, mana_reg: 1,
+    healing_and_shield: 1, life_reg: 1, effect_tags: ['daño_on_hit'],
+  });
+  // Vida, armadura y resistencia mágica restan si el campeón no escala con ellas: se sacan
+  // salvo para el valor que se está probando.
+  const bulk = { vida: 'life', armadura: 'armor', resistencia_magica: 'magic_res' };
+  for (const scaling of CHAMPION_ITEM_SCALINGS) {
+    const row = { ...everything };
+    Object.entries(bulk).forEach(([key, field]) => { if (key !== scaling) row[field] = 0; });
+    assert.equal(itemAnnotations(row, { scalings: new Set([scaling]) }).kit_fit, 1, scaling);
+  }
+});

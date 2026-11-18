@@ -62,6 +62,15 @@ const SCALING_STATS = {
   penetracion_magica_plana: row => Number(row.flat_magic_penetration) > 0,
   vampirismo_fisico: row => Number(row.physic_vamp) > 0 || Number(row.lifesteal) > 0,
   velocidad_movimiento: row => Number(row.percentage_movement) > 0 || Number(row.flat_movement) > 0,
+  probabilidad_critico: row => Number(row.critical_impact) > 0,
+  daño_critico: (row, profile) => Number(row.critical_damage) > 0 || profile.effects.has('modificador_critico'),
+  mana: row => Number(row.mana) > 0,
+  regeneracion_mana: (row, profile) => Number(row.mana_reg) > 0 || profile.effects.has('sosten_mana'),
+  // Encantadores: el poder de curación y escudos de sus objetos.
+  poder_curacion: (row, profile) => Number(row.healing_and_shield) > 0 || profile.effects.has('curacion_aliada'),
+  poder_escudo: (row, profile) => Number(row.healing_and_shield) > 0 || profile.effects.has('escudo_aliado'),
+  vampirismo_magico: row => Number(row.magic_vamp) > 0,
+  regeneracion_vida: (row, profile) => Number(row.life_reg) > 0 || profile.effects.has('regeneracion_vida'),
 };
 /** Estadísticas de luchador o tanque: restan si el campeón no escala con ellas. */
 const BULK_STATS = ['vida', 'armadura', 'resistencia_magica'];
