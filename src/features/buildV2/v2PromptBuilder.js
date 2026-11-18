@@ -182,6 +182,8 @@ GUÍA OPCIONAL
 
 CONTRATO INNEGOCIABLE
 - 5 core_items distintos de CORE_ITEMS.
+- Las evoluciones no se compran (Muramaná sale de Manamune, Abrazo del Serafín del Báculo del Arcángel, Invierno Nórdico de Llegada del Invierno, Diadema Musical de Tiara Susurrante): el catálogo solo trae el objeto base. Como mucho un objeto de Lágrima de la Diosa por build (Manamune, Báculo del Arcángel, Llegada del Invierno o Tiara Susurrante).
+- En Support, el core_item 1 es siempre el objeto de soporte inicial: Guadaña de Niebla Oscura (supports de daño o poke) o Baluarte de la Montaña (tanques y encantadores). Uno solo.
 - 1 movement_item de MOVEMENT_ITEMS, fuera de los cinco core.
 - 1 keystone cuya branch sea Clave.
 - 3 primary_runes no-Clave, de una misma branch y en orden group 1, 2 y 3.

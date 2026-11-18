@@ -1793,7 +1793,13 @@
           "reason": "Takes the place of {removed}: its armor barely helps against a team that deals magic damage.",
           "note": "Rift Deck swapped {removed} for {item}: the enemy deals almost only magic damage, so its armor barely helps."
         }
-      }
+      },
+      "starterReason": "Support starter item: it gives gold and stats from the start and completes with its quest.",
+      "starterNote": "Rift Deck added {item} as the first item: in Support the starter item is always built first.",
+      "tearReason": "Takes the place of {removed}: you can only build one Tear of the Goddess item.",
+      "tearNote": "Rift Deck swapped {removed} for {item}: a build can only have one Tear of the Goddess item.",
+      "starterExtraReason": "Takes the place of {removed}: you only build one support starter item.",
+      "starterExtraNote": "Rift Deck swapped {removed} for {item}: you only build one support starter item."
     }
   },
   "stats": {

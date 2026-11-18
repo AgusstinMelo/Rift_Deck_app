@@ -1793,7 +1793,13 @@
           "reason": "Ocupa o lugar de {removed}: a armadura dele quase não protege contra um time que causa dano mágico.",
           "note": "O Rift Deck trocou {removed} por {item}: o rival causa quase só dano mágico e a armadura dele quase não ajuda."
         }
-      }
+      },
+      "starterReason": "Item inicial de suporte: dá ouro e atributos desde o começo e se completa com a missão.",
+      "starterNote": "O Rift Deck colocou {item} como primeiro item: no Suporte o item inicial é sempre comprado de cara.",
+      "tearReason": "Ocupa o lugar de {removed}: só dá para montar um item de Lágrima da Deusa.",
+      "tearNote": "O Rift Deck trocou {removed} por {item}: uma build só pode ter um item de Lágrima da Deusa.",
+      "starterExtraReason": "Ocupa o lugar de {removed}: só se monta um item inicial de suporte.",
+      "starterExtraNote": "O Rift Deck trocou {removed} por {item}: só se monta um item inicial de suporte."
     }
   },
   "stats": {

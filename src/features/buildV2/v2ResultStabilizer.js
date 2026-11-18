@@ -2,6 +2,7 @@ import { tr } from '../../i18n/uiI18n.js';
 import { runeBranchLabel } from '../../utils/runeBranches.js';
 import { fitOf } from './v2DraftProfile.js';
 import { auditCoreItems, auditRunesAndSpells } from './v2BuildAudit.js';
+import { itemRulesFor } from './v2ItemRules.js';
 
 const normalizeText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const STOP_WORDS = new Set(['para', 'como', 'esta', 'este', 'build', 'runa', 'objeto', 'daño', 'dano', 'enemigo', 'aliado', 'desde', 'entre']);
@@ -120,8 +121,11 @@ function stabilizeCoreItems(result, snapshot) {
     used.add(id);
     selected.push(selection);
   }
+  // Al completar no se suma un objeto de soporte inicial: ese lo decide la auditoría (slot 1).
+  const rules = itemRulesFor(snapshot.items || snapshot.coreItems);
+  const fillers = snapshot.coreItems.filter(item => !rules.isSupportStarter(item));
   while (selected.length < 5) {
-    const item = bestCandidate(snapshot.coreItems, result, used);
+    const item = bestCandidate(fillers, result, used);
     if (!item) break;
     const id = String(item.id);
     used.add(id);
@@ -274,7 +278,7 @@ export function stabilizeV2Result(rawValue, snapshot, context = {}) {
     snapshot, fit: context.fit, themed: Boolean(context.themed), role: context.role, nameOf,
   });
   const runes = pieces;
-  const audit = auditCoreItems({ coreItems: stabilizeCoreItems(result, snapshot), snapshot, fit: context.fit, themed: Boolean(context.themed), nameOf });
+  const audit = auditCoreItems({ coreItems: stabilizeCoreItems(result, snapshot), snapshot, fit: context.fit, themed: Boolean(context.themed), role: context.role, nameOf });
   const coreItems = audit.coreItems;
   // Para el registro de intervenciones (build_v2_audit_log).
   context.onAudit?.({ itemChanges: audit.changes, runeChanges: pieces.changes.runes, spellChanges: pieces.changes.spells });

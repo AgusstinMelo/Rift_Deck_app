@@ -1793,7 +1793,13 @@
           "reason": "Ocupa el lugar de {removed}: su armadura casi no protege contra un equipo que pega mágico.",
           "note": "Rift Deck cambió {removed} por {item}: el rival pega casi todo mágico y su armadura casi no sirve."
         }
-      }
+      },
+      "starterReason": "Objeto de soporte inicial: da oro y estadísticas desde el principio y se completa con la misión.",
+      "starterNote": "Rift Deck añadió {item} como primer objeto: en Support el objeto de soporte inicial se compra siempre de entrada.",
+      "tearReason": "Ocupa el lugar de {removed}: solo se puede comprar un objeto de Lágrima de la Diosa.",
+      "tearNote": "Rift Deck cambió {removed} por {item}: solo se puede tener un objeto de Lágrima de la Diosa por build.",
+      "starterExtraReason": "Ocupa el lugar de {removed}: solo se compra un objeto de soporte inicial.",
+      "starterExtraNote": "Rift Deck cambió {removed} por {item}: solo se compra un objeto de soporte inicial."
     }
   },
   "stats": {

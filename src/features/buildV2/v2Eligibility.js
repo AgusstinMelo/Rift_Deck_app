@@ -1,5 +1,6 @@
 import { championBuildFit, itemFitsChampion } from './v2BuildAudit.js';
 import { championClasses } from './v2DraftProfile.js';
+import { itemRulesFor } from './v2ItemRules.js';
 
 const normalizeText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const flattenText = values => normalizeText(values.flat(Infinity).filter(Boolean).join(' '));
@@ -60,8 +61,24 @@ export function spellFitsLane(spell, role) {
 export function createEligibleV2Snapshot(snapshot, championId, role = null, { themed = false } = {}) {
   const spells = (snapshot.spells || []).filter(spell => spellFitsLane(spell, role));
   const laneSnapshot = spells.length === (snapshot.spells || []).length ? snapshot : { ...snapshot, spells };
-  const eligible = withAllyHealShieldEligibility(laneSnapshot, championId);
+  const eligible = withGameItemRules(withAllyHealShieldEligibility(laneSnapshot, championId), role);
   return role && !themed ? withClassEligibility(eligible, championId, role) : eligible;
+}
+
+/**
+ * Reglas del juego (v2ItemRules.js), también con temática: las evoluciones (Muramaná,
+ * Abrazo del Serafín...) no se compran y salen del catálogo; en Support se suman los
+ * objetos de soporte inicial completados (Guadaña de Niebla Oscura, Baluarte de la
+ * Montaña), que el catálogo marca como "Básico".
+ */
+function withGameItemRules(snapshot, role) {
+  const rules = itemRulesFor(snapshot.items || []);
+  const coreItems = snapshot.coreItems.filter(item => !rules.isEvolved(item));
+  const starters = normalizeText(role) === 'support'
+    ? (snapshot.items || []).filter(item => item?.active !== false && rules.isSupportStarter(item) && !coreItems.some(core => String(core.id) === String(item.id)))
+    : [];
+  if (coreItems.length === snapshot.coreItems.length && !starters.length) return snapshot;
+  return { ...snapshot, coreItems: [...starters, ...coreItems] };
 }
 
 /** Objetos mínimos para que la IA tenga de dónde elegir; con menos, se muestra todo. */

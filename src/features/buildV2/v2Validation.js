@@ -1,5 +1,6 @@
 import { v2BuildSchema } from './v2Schema.js';
 import { isCoreItem, isImprovedMovementItem } from './v2CatalogNormalizer.js';
+import { itemRulesFor } from './v2ItemRules.js';
 
 const duplicates = ids => new Set(ids).size !== ids.length;
 
@@ -19,10 +20,23 @@ export function validateV2Result(value, snapshot, context = {}) {
   const spellIds = result.spells.map(x => x.id);
 
   if (duplicates(coreIds)) errors.push('Los 5 core_items deben ser únicos.');
+  const rules = itemRulesFor(snapshot.items);
+  const support = String(context.role || '').toLowerCase() === 'support';
   for (const id of coreIds) {
     const item = itemMap.get(id);
     if (!item) errors.push(`Item core inexistente en el snapshot: ${id}.`);
-    else if (!isCoreItem(item)) errors.push(`El item core ${id} no es un objeto final core válido.`);
+    else if (rules.isEvolved(item)) errors.push(`El item core ${id} es una evolución: no se compra, se arma el objeto base.`);
+    else if (!isCoreItem(item) && !(support && rules.isSupportStarter(item))) errors.push(`El item core ${id} no es un objeto final core válido.`);
+  }
+  // Reglas del juego (v2ItemRules.js): un solo objeto de Lágrima de la Diosa y, en Support,
+  // el objeto de soporte inicial en el slot 1.
+  const coreRows = coreIds.map(id => itemMap.get(id)).filter(Boolean);
+  if (coreRows.filter(rules.isTear).length > 1) errors.push('Solo puede haber un objeto de Lágrima de la Diosa (Manamune, Báculo del Arcángel, Llegada del Invierno, Tiara Susurrante).');
+  if (support) {
+    if (!coreRows[0] || !rules.isSupportStarter(coreRows[0])) errors.push('En Support, el core_item 1 debe ser el objeto de soporte inicial (Guadaña de Niebla Oscura o Baluarte de la Montaña).');
+    if (coreRows.filter(rules.isSupportStarter).length > 1) errors.push('Solo puede haber un objeto de soporte inicial.');
+  } else if (coreRows.some(rules.isSupportStarter)) {
+    errors.push('El objeto de soporte inicial solo se arma en Support.');
   }
 
   const movement = itemMap.get(result.movement_item.id);

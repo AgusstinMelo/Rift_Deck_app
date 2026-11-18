@@ -10,6 +10,7 @@
 // el usuario está "jugando" con la build y manda lo que pidió.
 import { tr } from '../../i18n/uiI18n.js';
 import { championProfile, fitsBuild, inLane, isEnchanter, itemProfile } from '../coach/catalog.js';
+import { itemRulesFor } from './v2ItemRules.js';
 
 const normalize = value => String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
 const isInfinity = row => normalize(row?.name) === 'filo del infinito';
@@ -154,12 +155,12 @@ const moveTo = (entries, entry, index) => {
  * @param {{
  *   coreItems: { id: string, reason: string }[], snapshot: any,
  *   fit?: { champion: any, lane: string, profile: { enemy_signals: { signal: string, champions: string[] }[] } } | null,
- *   themed?: boolean, nameOf?: (entity: any) => string,
- * }} input
+ *   themed?: boolean, role?: string, nameOf?: (entity: any) => string,
+ * }} input  `role`: la línea; en Support el slot 1 es el objeto de soporte inicial.
  * @returns {{ coreItems: { id: string, reason: string }[], notes: string[], changes: string[] }}
  *   `changes`: la regla de cada cambio (para el registro build_v2_audit_log).
  */
-export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false, nameOf = entity => entity?.name || '' }) {
+export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false, role = '', nameOf = entity => entity?.name || '' }) {
   const rows = new Map(snapshot.coreItems.map(row => [String(row.id), row]));
   let entries = coreItems
     .map(selection => ({ selection, row: rows.get(String(selection.id)) }))
@@ -178,8 +179,14 @@ export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false
   const healers = fit?.profile?.enemy_signals?.find(entry => entry.signal === 'curacion')?.champions || [];
   const needsAntiheal = !themed && own && healers.length > 0 && !isEnchanter(own) && own.buildClass !== 'support';
 
+  const rules = itemRulesFor(snapshot.items || snapshot.coreItems);
+  const support = normalize(role || fit?.lane) === 'support';
+
   const replace = (entry, need, reasonKey, noteKey) => {
-    const next = bestReplacement(snapshot, own, entries.filter(other => other !== entry), need, scalings);
+    // Un reemplazo nunca es un objeto de soporte inicial ni otra Lágrima de la Diosa si ya hay una.
+    const keepsTear = entries.some(other => other !== entry && rules.isTear(other.row));
+    const allowed = (profile, row) => !rules.isSupportStarter(row) && !(keepsTear && rules.isTear(row)) && need(profile, row);
+    const next = own && bestReplacement(snapshot, own, entries.filter(other => other !== entry), allowed, scalings);
     if (!next) return false;
     const vars = { removed: nameOf(entry.row), item: nameOf(next.row), names: listOf(healers) };
     entries = entries.map(other => (other === entry
@@ -189,6 +196,12 @@ export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false
     changes.push(ruleOf(reasonKey));
     return true;
   };
+
+  // Regla del juego (también con temática): un solo objeto de Lágrima de la Diosa.
+  // Primero uno del mismo tipo (daño mágico por daño mágico); si no hay, cualquiera que encaje.
+  entries.filter(entry => rules.isTear(entry.row)).slice(1).forEach(entry => replace(
+    entry, profile => profile.types.some(type => entry.profile.types.includes(type)), 'buildV2.audit.tearReason', 'buildV2.audit.tearNote',
+  ) || replace(entry, () => true, 'buildV2.audit.tearReason', 'buildV2.audit.tearNote'));
 
   if (!themed && own) {
     // Un carry no arma objetos de tanque.
@@ -266,6 +279,32 @@ export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false
   if (antihealLate) changes.push('antihealEarlier');
   delayed.forEach(entry => notes.push(tr('buildV2.audit.defenseLaterNote', { item: nameOf(entry.row), slot: slotOf(entry) })));
   if (antihealLate) notes.push(tr('buildV2.audit.antihealEarlierNote', { item: nameOf(antiheal.row), names: listOf(healers), slot: slotOf(antiheal) }));
+  // Regla del juego (también con temática): en Support, el objeto de soporte inicial va en el
+  // slot 1, y uno solo. Si la IA no lo puso: Baluarte de la Montaña para tanques y
+  // encantadores, Guadaña de Niebla Oscura para supports de daño (o el que diga fits_classes).
+  if (support) {
+    const placed = entries.filter(entry => rules.isSupportStarter(entry.row));
+    placed.slice(1).forEach(entry => replace(entry, () => true, 'buildV2.audit.starterExtraReason', 'buildV2.audit.starterExtraNote')
+      || (entries = entries.filter(other => other !== entry)));
+    let starter = placed[0];
+    if (!starter) {
+      const options = snapshot.coreItems.filter(row => rules.isSupportStarter(row));
+      // Por fits_classes, con la clase propia del campeón: "soporte" la tienen todos en esta línea.
+      const classes = new Set(own ? [...own.roles].filter(value => value !== 'soporte') : []);
+      const byClass = options.find(row => (row.fits_classes || []).some(value => classes.has(normalize(value))));
+      const wantsBulwark = !own || own.isTank || ['engage', 'enchanter'].includes(own.supportStyle);
+      const row = byClass || options.find(option => normalize(option.name).startsWith(wantsBulwark ? 'baluarte' : 'guadana')) || options[0];
+      if (row) {
+        starter = { selection: { id: String(row.id), reason: tr('buildV2.audit.starterReason') }, row, profile: withRow(itemProfile(row), row) };
+        entries = [starter, ...entries].slice(0, 5);
+        notes.push(tr('buildV2.audit.starterNote', { item: nameOf(row) }));
+        changes.push('supportStarter');
+      }
+    } else if (entries.indexOf(starter) !== 0) {
+      entries = [starter, ...entries.filter(entry => entry !== starter)];
+      changes.push('supportStarterSlot');
+    }
+  }
   return { coreItems: entries.map(entry => entry.selection), notes, changes };
 }
 
