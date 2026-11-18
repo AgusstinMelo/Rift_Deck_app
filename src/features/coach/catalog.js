@@ -40,6 +40,8 @@ function indexBy(rows) {
     if (row?.name) byName.set(keyOf(row.name), row);
     if (row?.original_name) byName.set(keyOf(row.original_name), row);
     if (row?.id != null) byId.set(String(row.id), row);
+    // Id del juego (los campeones también se referencian así: "10033").
+    if (row?.external_id != null) byId.set(String(row.external_id), row);
   });
   return {
     rows: rows || [],
@@ -54,8 +56,10 @@ const HEAL_TRAITS = ['autocuracion', 'curacion_aliada', 'dependiente_robo_vida']
 const SHIELD_TRAITS = ['escudo', 'escudo_aliado'];
 
 /** Perfil compacto de un campeón del catálogo. */
-export function championProfile(row) {
+export function championProfile(row, resolveName = name => name) {
   if (!row) return null;
+  // Relaciones con otros campeones: por nombre o por id del juego, siempre a nombre.
+  const champions = value => asList(value).map(entry => keyOf(resolveName(entry)));
   const traits = tagSet(row.traits);
   const roles = tagSet(row.roles);
   const damage = String(row.damage_type || '').toUpperCase();
@@ -71,14 +75,14 @@ export function championProfile(row) {
     supportStyle: isTank ? 'engage'
       : isSupport && !roles.has('tirador') && !roles.has('mago') ? 'enchanter'
         : roles.has('mago') ? 'mage' : 'fighter',
-    name: row.name,
+    name: String(row.name ?? '').trim(),
     traits,
     roles,
     vulnerabilities: asList(row.vulnerabilities).map(keyOf),
     /** Con qué estadísticas escala el kit (poder_habilidad, vida, armadura, poder_escudo...). */
     itemScalings: tagSet(row.item_scalings),
-    strongAgainst: asList(row.strong_against).map(keyOf),
-    weakAgainst: asList(row.weak_against).map(keyOf),
+    strongAgainst: champions(row.strong_against),
+    weakAgainst: champions(row.weak_against),
     scaling: keyOf(row.scaling), // earlygame | midgame | lategame
     damage, // AD | AP | HYBRID
     isTank,
@@ -402,7 +406,8 @@ export function buildCatalog({ champions = [], items = [], runes = [] } = {}) {
   const championIndex = indexBy(champions);
   const itemIndex = indexBy(items);
   const runeIndex = indexBy(runes);
-  const champion = memo('c', championProfile);
+  const resolveChampionName = value => championIndex.get(value, value)?.name ?? value;
+  const champion = memo('c', row => championProfile(row, resolveChampionName));
   const item = memo('i', itemProfile);
   const rune = memo('r', runeProfile);
   return {

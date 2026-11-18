@@ -246,3 +246,16 @@ test('carry: 59% sin defensa contra 80% en 5 partidas con defensa no alcanza par
   ];
   assert.equal(find(report(matches).insights, 'threat-physical'), undefined);
 });
+
+test('catálogo: las relaciones entre campeones se resuelven por nombre o por id del juego', () => {
+  const index = buildCatalog({
+    champions: [
+      { id: 'a', external_id: '10033', name: 'Blitzcrank', roles: ['Tanque'] },
+      { id: 'b', external_id: '10034', name: 'Seraphine\n', roles: ['Mago'], weak_against: ['10033', 'braum'], strong_against: ['Rakan'] },
+    ],
+  });
+  const seraphine = index.champion('Seraphine');
+  assert.equal(seraphine.name, 'Seraphine', 'sin saltos de línea en el nombre');
+  assert.deepEqual(seraphine.weakAgainst, ['blitzcrank', 'braum']);
+  assert.deepEqual(seraphine.strongAgainst, ['rakan']);
+});
