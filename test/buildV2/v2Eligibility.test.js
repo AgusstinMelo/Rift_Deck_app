@@ -146,3 +146,30 @@ test('fits_classes del objeto manda sobre la deducción por tipo; sin cargar, se
   assert.equal(ids.includes('odd'), true);
   assert.equal(ids.filter(id => id.startsWith('d')).length, 12);
 });
+
+test('piezas que se activan con el control del propio campeón: fuera si su kit no lo tiene', async () => {
+  const { championCrowdControl, requiresChampionCrowdControl } = await import('../../src/features/buildV2/v2Eligibility.js');
+  const mandate = { id: 'mandate', name: 'Mandato Imperial', category: 'Mejorado', type: ['Soporte'], description: 'Comando: Aplicar control de masas a un campeón enemigo lo marca durante 4 seg.' };
+  const glacial = { id: 'glacial', name: 'Soberano del Hielo', branch: 'Clave', group: 1, description: 'Inmovilizar a un campeón enemigo hace que se formen 3 rayos a su alrededor.' };
+  const dawn = { id: 'dawn', name: 'Velo del Amanecer', category: 'Mejorado', type: ['Defensa'], description: 'Cuando inmovilizas a un campeón o te inmovilizan a 400 unidades de distancia de un campeón enemigo obtienes armadura.' };
+  const cheap = { id: 'cheap', name: 'Golpe Bajo', branch: 'Dominación', group: 1, description: 'Inflige daño verdadero adicional a los enemigos cuyo movimiento esté limitado.' };
+  assert.equal(requiresChampionCrowdControl(mandate), 'any');
+  assert.equal(requiresChampionCrowdControl(glacial), 'hard');
+  assert.equal(requiresChampionCrowdControl(dawn), null);
+  assert.equal(requiresChampionCrowdControl(cheap), null);
+  const kaisa = { id: 'kaisa', name: "Kai'Sa", roles: ['Tirador'], traits: ['dependiente_autoataques', 'rango', 'dash'] };
+  const ashe = { id: 'ashe', name: 'Ashe', roles: ['Tirador'], traits: ['ralentizacion', 'rango'] };
+  const leona = { id: 'leona', name: 'Leona', roles: ['Tanque'], traits: ['stun', 'cc_duro'] };
+  assert.equal(championCrowdControl(kaisa), null);
+  assert.equal(championCrowdControl(ashe), 'soft');
+  assert.equal(championCrowdControl(leona), 'hard');
+  const snapshot = { champions: [kaisa, ashe, leona], items: [mandate, dawn], coreItems: [mandate, dawn], movementItems: [], runes: [glacial, cheap], spells: [] };
+  const ids = (id, themed = true) => {
+    const eligible = createEligibleV2Snapshot(snapshot, id, 'support', { themed });
+    return [...eligible.coreItems, ...eligible.runes].map(entity => entity.id);
+  };
+  // Con temática también: es una imposibilidad mecánica.
+  assert.deepEqual(ids('kaisa'), ['dawn', 'cheap']);
+  assert.deepEqual(ids('ashe'), ['mandate', 'dawn', 'cheap']);
+  assert.deepEqual(ids('leona'), ['mandate', 'dawn', 'glacial', 'cheap']);
+});

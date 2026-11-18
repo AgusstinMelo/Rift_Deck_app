@@ -190,6 +190,7 @@ CONTRATO INNEGOCIABLE
 - Copiá cada ID literalmente. Todos los textos y reasons son obligatorios. key_adaptations debe tener entre 2 y 4 textos.
 - Elegir Support como posición no otorga capacidades de soporte al campeón. Un objeto o runa que sólo se activa cuando el propio campeón cura o escuda aliados requiere que traits o item_scalings del campeón declaren literalmente curacion_aliada, escudo_aliado, poder_curacion o poder_escudo. El catálogo ya excluye esas piezas cuando el campeón no puede activarlas. No las reconstruyas ni las reemplaces por IDs ausentes.
 - Un objeto con activación propia que cura, escuda o protege aliados no necesita una habilidad previa del campeón y sigue siendo elegible.
+- Lo mismo con el control: una pieza que se activa cuando el propio campeón inmoviliza, ralentiza o aplica control (Mandato Imperial, Soberano del Hielo) requiere que su kit lo tenga. El catálogo ya excluye las que tu campeón no puede activar.
 
 CÓMO DECIDIR, EN ESTE ORDEN
 1. Plan de daño: con requested_theme, sus objetivos; sin ella, un único arquetipo desde item_scalings, traits, rol y draft. Elegí un camino (path): no mezcles una build al_impacto con un Filo del Infinito aislado.

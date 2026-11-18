@@ -103,12 +103,56 @@ function withClassEligibility(snapshot, championId, role) {
   };
 }
 
+// Control de masas del kit (traits). Duro: inmoviliza. Cualquiera: también ralentiza o silencia.
+const HARD_CC_TRAITS = ['cc_duro', 'stun', 'root', 'supresion', 'encanto', 'provocacion', 'miedo'];
+const ANY_CC_TRAITS = [...HARD_CC_TRAITS, 'cc_blando', 'ralentizacion', 'silencio'];
+
+/** 'hard' si el kit inmoviliza, 'soft' si solo ralentiza o silencia, null si no tiene control. */
+export function championCrowdControl(champion) {
+  const traits = new Set((champion?.traits || []).map(normalizeText));
+  if (HARD_CC_TRAITS.some(trait => traits.has(trait))) return 'hard';
+  if (ANY_CC_TRAITS.some(trait => traits.has(trait))) return 'soft';
+  return null;
+}
+
+/**
+ * Qué control tiene que aplicar el propio campeón para activar la pieza: 'hard' (Soberano
+ * del Hielo, Valor del Coloso: "inmovilizar a un campeón enemigo"), 'any' (Mandato
+ * Imperial, Trampa para Yordles, Invierno Nórdico: aplicar control, ralentizar o reducir el
+ * movimiento) o null. No cuentan las que también se activan sin que vos apliques control:
+ * Velo del Amanecer ("o te inmovilizan"), Golpe Bajo (vale el control de tus aliados).
+ */
+export function requiresChampionCrowdControl(entity) {
+  const description = normalizeText(entity?.description);
+  if (/(^|tras |\. )inmovilizar a un campeon enemigo/.test(description)) return 'hard';
+  if ([
+    /aplicar control de masas a un campeon enemigo/,
+    /al ralentizar o inmovilizar a un campeon enemigo/,
+    /reduzcas el movimiento de un campeon enemigo/,
+  ].some(pattern => pattern.test(description))) return 'any';
+  return null;
+}
+
+const canActivateCrowdControl = (entity, crowdControl) => {
+  const needed = requiresChampionCrowdControl(entity);
+  return !needed || crowdControl === 'hard' || (needed === 'any' && crowdControl === 'soft');
+};
+
+/**
+ * Sin las piezas que el campeón no puede activar con su kit: las de curar o escudar aliados
+ * (si no puede) y las que se activan cuando él aplica control (Mandato Imperial en Kai'Sa).
+ * Vale también con temática: es una imposibilidad mecánica, no un criterio.
+ */
 function withAllyHealShieldEligibility(snapshot, championId) {
   const champion = snapshot.champions.find(candidate => String(candidate.id) === String(championId));
-  if (!champion || championCanHealOrShieldAllies(champion)) return snapshot;
+  if (!champion) return snapshot;
+  const healsAllies = championCanHealOrShieldAllies(champion);
+  const crowdControl = championCrowdControl(champion);
+  const usable = entity => (healsAllies || !requiresChampionAllyHealOrShield(entity)) && canActivateCrowdControl(entity, crowdControl);
 
-  const coreItems = snapshot.coreItems.filter(item => !requiresChampionAllyHealOrShield(item));
-  const runes = snapshot.runes.filter(rune => !requiresChampionAllyHealOrShield(rune));
+  const coreItems = snapshot.coreItems.filter(usable);
+  const runes = snapshot.runes.filter(usable);
+  if (coreItems.length === snapshot.coreItems.length && runes.length === snapshot.runes.length) return snapshot;
   const eligibleCoreIds = new Set(coreItems.map(item => String(item.id)));
   const originalCoreIds = new Set(snapshot.coreItems.map(item => String(item.id)));
   const items = snapshot.items.filter(item =>
