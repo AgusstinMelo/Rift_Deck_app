@@ -47,6 +47,22 @@ export const ITEM_EFFECT_TAGS = [
   'velocidad_movimiento', 'velocidad_movimiento_combate', 'velocidad_movimiento_fuera_combate',
 ];
 
+/** Rol en la pelea (champions.team_roles). */
+export const TEAM_ROLES = ['frontline', 'iniciador', 'diver', 'protector', 'poke', 'daño_sostenido', 'split'];
+
+/** Perfil 0-5 de cada campeón (columnas champions.score_*); vacío = sin cargar. */
+export const CHAMPION_SCORES = [
+  'score_engage', 'score_peel', 'score_disengage', 'score_mobility', 'score_burst',
+  'score_sustained_damage', 'score_range', 'score_self_sustain', 'score_waveclear',
+];
+
+/** Clases para runas y hechizos (fits_classes). */
+export const FIT_CLASSES = ['tirador', 'mago', 'asesino', 'luchador', 'tanque', 'soporte'];
+export const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
+
+/** Contra qué responde una runa o un hechizo (counters). */
+export const COUNTER_TAGS = ['poke', 'desgaste', 'burst', 'asesinos', 'divers', 'cc', 'curacion', 'escudos', 'tanques', 'kiteo'];
+
 export const ITEM_SITUATIONAL_ROLES = ['core', 'counter', 'defensivo', 'early', 'escalado', 'late', 'ofensivo', 'snowball', 'utilidad'];
 
 /**
@@ -54,7 +70,7 @@ export const ITEM_SITUATIONAL_ROLES = ['core', 'counter', 'defensivo', 'early', 
  * espacios, relaciones entre campeones que no apuntan a un campeón y objetos terminados
  * sin effect_tags. Devuelve una lista de textos (vacía si está todo bien).
  */
-export function catalogProblems({ champions = [], items = [] }) {
+export function catalogProblems({ champions = [], items = [], runes = [], spells = [] }) {
   const problems = [];
   const norm = value => String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const known = new Set(champions.flatMap(champ => [norm(champ.name), String(champ.external_id)]));
@@ -68,6 +84,11 @@ export function catalogProblems({ champions = [], items = [] }) {
     outside(name, 'traits', champ.traits, CHAMPION_TRAITS);
     outside(name, 'vulnerabilities', champ.vulnerabilities, CHAMPION_VULNERABILITIES);
     outside(name, 'item_scalings', champ.item_scalings, CHAMPION_ITEM_SCALINGS);
+    outside(name, 'team_roles', champ.team_roles, TEAM_ROLES);
+    CHAMPION_SCORES.forEach(field => {
+      const value = champ[field];
+      if (value != null && !(Number.isInteger(value) && value >= 0 && value <= 5)) problems.push(`${name}: ${field} = ${value} (tiene que ser de 0 a 5)`);
+    });
     ['strong_against', 'weak_against', 'synergies'].forEach(field => (champ[field] || []).forEach(value => {
       if (!known.has(norm(value)) && !known.has(String(value))) problems.push(`${name}: ${field} "${value}" no es un campeón del catálogo`);
       else if (/^\d+$/.test(String(value))) problems.push(`${name}: ${field} "${value}" usa el id; guardá el nombre del campeón`);
@@ -84,5 +105,26 @@ export function catalogProblems({ champions = [], items = [] }) {
       });
     }
   });
+  runes.forEach(rune => {
+    outside(rune.name, 'fits_classes', rune.fits_classes, FIT_CLASSES);
+    outside(rune.name, 'counters', rune.counters, COUNTER_TAGS);
+  });
+  spells.forEach(spell => {
+    outside(spell.name, 'fits_classes', spell.fits_classes, FIT_CLASSES);
+    outside(spell.name, 'fits_lanes', spell.fits_lanes, LANES);
+    outside(spell.name, 'counters', spell.counters, COUNTER_TAGS);
+  });
   return problems;
+}
+
+/** Cuánto del perfil del Coach está cargado (para ir completándolo a mano). */
+export function catalogCoverage({ champions = [], runes = [], spells = [] }) {
+  const filled = (rows, test) => `${rows.filter(test).length}/${rows.length}`;
+  return {
+    'Campeones con rol en la pelea': filled(champions, champ => (champ.team_roles || []).length),
+    'Campeones con perfil 0-5 completo': filled(champions, champ => CHAMPION_SCORES.every(field => champ[field] != null)),
+    'Runas clave con clases y respuestas': filled(runes.filter(rune => rune.branch === 'Clave'), rune => (rune.fits_classes || []).length && (rune.counters || []).length),
+    'Runas con clases': filled(runes, rune => (rune.fits_classes || []).length),
+    'Hechizos completos': filled(spells, spell => (spell.fits_classes || []).length && (spell.fits_lanes || []).length && (spell.counters || []).length),
+  };
 }
