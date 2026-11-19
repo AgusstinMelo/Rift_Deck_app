@@ -32,6 +32,14 @@ export function validateV2Result(value, snapshot, context = {}) {
   // el objeto de soporte inicial en el slot 1.
   const coreRows = coreIds.map(id => itemMap.get(id)).filter(Boolean);
   if (coreRows.filter(rules.isTear).length > 1) errors.push('Solo puede haber un objeto de Lágrima de la Diosa (Manamune, Báculo del Arcángel, Llegada del Invierno, Tiara Susurrante).');
+  const byGroup = new Map();
+  coreRows.forEach(row => {
+    const group = rules.exclusiveGroup(row);
+    if (group) byGroup.set(group, [...(byGroup.get(group) || []), String(row.name).trim()]);
+  });
+  byGroup.forEach(names => {
+    if (names.length > 1) errors.push(`No se pueden combinar ${names.join(' y ')}: el juego no deja llevarlos juntos.`);
+  });
   if (support) {
     if (!coreRows[0] || !rules.isSupportStarter(coreRows[0])) errors.push('En Support, el core_item 1 debe ser el objeto de soporte inicial (Guadaña de Niebla Oscura o Baluarte de la Montaña).');
     if (coreRows.filter(rules.isSupportStarter).length > 1) errors.push('Solo puede haber un objeto de soporte inicial.');

@@ -11,6 +11,7 @@
 import { tr } from '../../i18n/uiI18n.js';
 import { championProfile, fitsBuild, inLane, isEnchanter, itemProfile } from '../coach/catalog.js';
 import { itemRulesFor } from './v2ItemRules.js';
+import { SIGNAL_ANSWERS } from './itemCounters.js';
 
 const normalize = value => String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
 const isInfinity = row => normalize(row?.name) === 'filo del infinito';
@@ -182,13 +183,16 @@ export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false
   const rules = itemRulesFor(snapshot.items || snapshot.coreItems);
   const support = normalize(role || fit?.lane) === 'support';
 
-  const replace = (entry, need, reasonKey, noteKey) => {
+  const replace = (entry, need, reasonKey, noteKey, extraVars = {}) => {
     // Un reemplazo nunca es un objeto de soporte inicial ni otra Lágrima de la Diosa si ya hay una.
+    // Tampoco uno que choque con otro que queda (Terminus con Rencor de Serylda, etc.).
     const keepsTear = entries.some(other => other !== entry && rules.isTear(other.row));
-    const allowed = (profile, row) => !rules.isSupportStarter(row) && !(keepsTear && rules.isTear(row)) && need(profile, row);
+    const keptGroups = new Set(entries.filter(other => other !== entry).map(other => rules.exclusiveGroup(other.row)).filter(Boolean));
+    const allowed = (profile, row) => !rules.isSupportStarter(row) && !(keepsTear && rules.isTear(row))
+      && !keptGroups.has(rules.exclusiveGroup(row)) && need(profile, row);
     const next = own && bestReplacement(snapshot, own, entries.filter(other => other !== entry), allowed, scalings);
     if (!next) return false;
-    const vars = { removed: nameOf(entry.row), item: nameOf(next.row), names: listOf(healers) };
+    const vars = { removed: nameOf(entry.row), item: nameOf(next.row), names: listOf(healers), ...extraVars };
     entries = entries.map(other => (other === entry
       ? { selection: { id: String(next.row.id), reason: tr(reasonKey, vars) }, row: next.row, profile: next.profile }
       : other));
@@ -202,6 +206,18 @@ export function auditCoreItems({ coreItems, snapshot, fit = null, themed = false
   entries.filter(entry => rules.isTear(entry.row)).slice(1).forEach(entry => replace(
     entry, profile => profile.types.some(type => entry.profile.types.includes(type)), 'buildV2.audit.tearReason', 'buildV2.audit.tearNote',
   ) || replace(entry, () => true, 'buildV2.audit.tearReason', 'buildV2.audit.tearNote'));
+
+  // Regla del juego (también con temática): de cada grupo excluyente, uno solo (se queda el
+  // primero). El reemplazo es del mismo tipo si hay; si no, cualquiera que encaje.
+  entries.forEach((entry, index) => {
+    const group = rules.exclusiveGroup(entry.row);
+    const first = group && entries.find(other => rules.exclusiveGroup(other.row) === group);
+    if (!group || first === entry || entries.indexOf(first) > index) return;
+    const vars = { other: nameOf(first.row) };
+    const sameType = profile => profile.types.some(type => entry.profile.types.includes(type));
+    const swap = need => replace(entry, need, 'buildV2.audit.exclusiveReason', 'buildV2.audit.exclusiveNote', vars);
+    swap(sameType) || swap(() => true);
+  });
 
   if (!themed && own) {
     // Un carry no arma objetos de tanque.
@@ -374,23 +390,6 @@ export function auditRunesAndSpells({ keystone, primaryRunes, secondaryRune, spe
     changes: { runes: runeChanges, spells: notes.length - runeChanges },
   };
 }
-
-/** Efectos de un objeto (effect_tags sin acentos) que responden a cada señal del draft. */
-const SIGNAL_ANSWERS = {
-  curacion: ['anti_curacion'],
-  escudos: ['anti_escudo'],
-  tanques: ['penetracion_armadura', 'penetracion_magica', 'dano_vida_porcentual', 'dano_vida_actual', 'reduccion_armadura', 'reduccion_resistencia_magica', 'dano_verdadero'],
-  burst: ['anti_burst', 'revivir', 'invulnerabilidad', 'escudo_hechizo', 'escudo', 'reduccion_dano'],
-  asesinos: ['anti_burst', 'revivir', 'invulnerabilidad', 'escudo_hechizo', 'escudo'],
-  divers: ['anti_burst', 'revivir', 'invulnerabilidad', 'escudo', 'reduccion_dano', 'ralentizacion'],
-  pick: ['limpieza_cc', 'inmunidad_cc', 'tenacidad', 'escudo_hechizo', 'revivir'],
-  engage: ['tenacidad', 'limpieza_cc', 'inmunidad_cc', 'anti_burst', 'reduccion_dano'],
-  cc: ['tenacidad', 'limpieza_cc', 'inmunidad_cc', 'escudo_hechizo'],
-  poke: ['regeneracion_vida', 'autocuracion', 'escudo'],
-  desgaste: ['regeneracion_vida', 'autocuracion', 'vampirismo_fisico', 'vampirismo_magico'],
-  dano_fisico: ['defensa_fisica'],
-  dano_magico: ['defensa_magica', 'escudo_hechizo'],
-};
 
 /**
  * Anotaciones de un objeto para el prompt, calculadas para este campeón y este draft:

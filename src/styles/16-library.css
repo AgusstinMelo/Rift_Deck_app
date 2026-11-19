@@ -1,0 +1,1749 @@
+/* Biblioteca (pública y privada) con la estética de la tarjeta para compartir.
+   - .rd-lib: estructura común (components/library/LibraryShell.jsx). Es contenedor de
+     container queries: las grillas se adaptan al ancho real de la biblioteca (con o sin
+     sidebar), no al de la pantalla.
+   - .rd-cd: ficha de campeón (components/library/ChampionDetail.jsx). Las de objeto y runa
+     (.rd-cd.rd-ed: ItemDetail.jsx y RuneDetail.jsx) reusan su héroe, tarjetas y grilla.
+   En escritorio todo entra en el alto de la ventana; en el celular la página scrollea y la
+   ficha muestra una sección por vez. */
+
+/* ── Estructura común ─────────────────────────────────────────────────────────── */
+
+.rd-lib {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1.6vh, 1rem);
+  container: rdlib / inline-size;
+}
+
+.rd-lib-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+}
+
+.rd-lib-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(226, 196, 106, 0.85);
+}
+
+.rd-lib-kicker::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(226, 196, 106, 0), rgba(226, 196, 106, 0.7));
+}
+
+.rd-lib-title {
+  margin-top: 0.15rem;
+  font-family: var(--font-rajdhani);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  color: #F4EFE3;
+}
+
+.rd-lib-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border: 1px solid var(--rd-card-border);
+  border-radius: 14px;
+  background: var(--rd-card-decor), var(--rd-card-bg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.rd-lib-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.rd-lib-tab:hover {
+  color: #F4EFE3;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.rd-lib-tab-active,
+.rd-lib-tab-active:hover {
+  color: #E2C46A;
+  background: rgba(212, 175, 55, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.32);
+}
+
+.rd-lib-body {
+  min-width: 0;
+}
+
+/* Escritorio: la biblioteca ocupa el alto visible y solo scrollea su contenido. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-main-content:has(.rd-lib) {
+    overflow: hidden;
+  }
+
+  .rd-lib {
+    height: 100%;
+    overflow: hidden;
+    padding-bottom: clamp(0.75rem, 1.6vh, 1.25rem);
+  }
+
+  .rd-lib-body {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+}
+
+/* Celular vertical: las pestañas ocupan todo el ancho. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-lib-bar {
+    align-items: stretch;
+  }
+
+  .rd-lib-tabs {
+    width: 100%;
+  }
+
+  .rd-lib-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    padding-inline: 0.5rem;
+  }
+}
+
+/* ── Ficha de campeón ─────────────────────────────────────────────────────────── */
+
+.rd-cd {
+  --rd-cd-gap: clamp(0.6rem, 1.4vh, 0.9rem);
+  --rd-cd-light-a: 212, 175, 55;
+  --rd-cd-light-b: 124, 58, 237;
+  --rd-cd-ink: #F4EFE3;
+  --rd-cd-gold: #E2C46A;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--rd-cd-gap);
+}
+
+/* Héroe: el splash a lo ancho con las luces del campeón, como la tarjeta para compartir. */
+.rd-cd-hero {
+  position: relative;
+  display: flex;
+  min-height: clamp(140px, 23vh, 240px);
+  flex-shrink: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  overflow: hidden;
+  padding: clamp(0.75rem, 1.8vh, 1.2rem) clamp(1rem, 2vw, 1.6rem);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 18px;
+  box-shadow:
+    0 0 40px rgba(var(--rd-cd-light-a), 0.12),
+    0 14px 40px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* Mosaico: un solo splash del tamaño de toda la ficha (ver ChampionDetail). El héroe lo
+   muestra fuerte; las tarjetas, detrás de un velo que se cierra hacia abajo para que el
+   texto se lea. Sin mosaico (celular, o mientras carga la imagen), el héroe usa el splash
+   a su propio tamaño y las tarjetas quedan como siempre. */
+.rd-cd-hero {
+  background: var(--rd-cd-splash, none) center 22% / cover no-repeat, #0B0F1A;
+}
+
+.rd-cd[data-mosaic="on"] .rd-cd-hero {
+  background: var(--rd-cd-splash) var(--rd-cd-bp) / var(--rd-cd-bs) no-repeat, #0B0F1A;
+}
+
+.rd-cd[data-mosaic="on"] .rd-cd-card {
+  --rd-cd-veil: calc(0.74 + var(--rd-cd-mt, 0.5) * 0.18);
+  background:
+    var(--rd-card-decor),
+    radial-gradient(120% 90% at 50% 0%, rgba(29, 37, 64, var(--rd-cd-veil)) 0%, rgba(11, 15, 26, var(--rd-cd-veil)) 62%, rgba(7, 9, 15, var(--rd-cd-veil)) 100%),
+    var(--rd-cd-splash) var(--rd-cd-bp) / var(--rd-cd-bs) no-repeat,
+    #070910;
+}
+
+.rd-cd-hero-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.07) 48%, transparent 58%),
+    radial-gradient(55% 90% at 100% 0%, rgba(var(--rd-cd-light-a), 0.3) 0%, rgba(var(--rd-cd-light-a), 0) 70%),
+    radial-gradient(60% 110% at 0% 100%, rgba(var(--rd-cd-light-b), 0.38) 0%, rgba(var(--rd-cd-light-b), 0) 70%),
+    linear-gradient(90deg, rgba(7, 9, 15, 0.92) 0%, rgba(7, 9, 15, 0.6) 34%, rgba(7, 9, 15, 0.1) 62%, rgba(7, 9, 15, 0.5) 100%),
+    linear-gradient(180deg, rgba(7, 9, 15, 0.25) 0%, rgba(7, 9, 15, 0) 38%, rgba(7, 9, 15, 0.85) 100%);
+}
+
+.rd-cd-back,
+.rd-cd-hero-main {
+  position: relative;
+  z-index: 1;
+}
+
+.rd-cd-back {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 999px;
+  background: rgba(7, 9, 15, 0.55);
+  backdrop-filter: blur(6px);
+  font-size: 0.75rem;
+  color: rgba(244, 239, 227, 0.85);
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.rd-cd-back:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  color: var(--rd-cd-gold);
+}
+
+.rd-cd-hero-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+}
+
+.rd-cd-identity {
+  min-width: 0;
+}
+
+.rd-cd-role {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--rd-cd-gold);
+}
+
+.rd-cd-name {
+  margin-top: 0.2rem;
+  font-family: var(--font-rajdhani);
+  font-size: clamp(2rem, min(5.4cqi, 8vh), 4.2rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  color: var(--rd-cd-ink);
+  text-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+}
+
+.rd-cd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.rd-cd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 999px;
+  background: rgba(7, 9, 15, 0.55);
+  backdrop-filter: blur(6px);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--rd-cd-ink);
+}
+
+.rd-cd-chip img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.rd-cd-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid rgba(212, 175, 55, 0.32);
+  border-radius: 14px;
+  background: rgba(7, 9, 15, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.rd-cd-hero-tier {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.rd-cd-hero-meta-label,
+.rd-cd-hero-rates dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-hero-meta-lane {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+  font-family: var(--font-rajdhani);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--rd-cd-ink);
+}
+
+.rd-cd-hero-rates {
+  display: flex;
+  gap: 0.95rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.rd-cd-hero-rates dd {
+  margin-top: 0.15rem;
+  font-family: var(--font-rajdhani);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--rd-cd-ink);
+}
+
+/* Grilla de tarjetas: una columna en el celular, dos en tablet y tres cuando hay lugar. */
+.rd-cd-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--rd-cd-gap);
+}
+
+@container rdlib (min-width: 700px) {
+  .rd-cd-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container rdlib (min-width: 900px) {
+  .rd-cd-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+      "profile matchups meta"
+      "stats notes side";
+  }
+
+  .rd-cd-profile { grid-area: profile; }
+  .rd-cd-matchups { grid-area: matchups; }
+  .rd-cd-meta { grid-area: meta; }
+  .rd-cd-stats { grid-area: stats; }
+  .rd-cd-notes { grid-area: notes; }
+  .rd-cd-personal,
+  .rd-cd-related { grid-area: side; }
+}
+
+/* Escritorio: la ficha ocupa el alto disponible y las dos filas de tarjetas se lo reparten. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  .rd-lib-body:has(> .rd-cd) {
+    overflow: hidden;
+    padding-right: 0;
+  }
+
+  .rd-cd {
+    height: 100%;
+  }
+
+  .rd-cd-grid {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  @container rdlib (min-width: 900px) {
+    .rd-cd-grid {
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* Si una tarjeta no entra (ventanas muy bajas), scrollea ella y no la página. */
+  .rd-cd-card {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
+
+.rd-cd-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1.2vh, 0.75rem);
+  padding: clamp(0.75rem, 1.6vh, 1rem) clamp(0.85rem, 1.2vw, 1.1rem);
+  border: 1px solid var(--rd-card-border);
+  border-radius: 16px;
+  background: var(--rd-card-decor), var(--rd-card-bg);
+  box-shadow: var(--rd-card-shadow);
+}
+
+.rd-cd-card-head {
+  display: flex;
+  min-height: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.rd-cd-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-rajdhani);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--rd-cd-ink);
+}
+
+.rd-cd-card-title::before {
+  content: "";
+  width: 1.25rem;
+  height: 1px;
+  background: rgba(212, 175, 55, 0.65);
+}
+
+.rd-cd-empty {
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Perfil: barras de 3 segmentos y tags. Las barras toman el alto libre de la tarjeta y se
+   reparten parejas en él (los tags quedan abajo). */
+.rd-cd-bars {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: space-evenly;
+  gap: clamp(0.45rem, 1.1vh, 0.7rem);
+}
+
+.rd-cd-bar {
+  --tone: #E2C46A;
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rd-cd-bar[data-tone="red"] { --tone: #F87171; }
+.rd-cd-bar[data-tone="blue"] { --tone: #60A5FA; }
+.rd-cd-bar[data-tone="green"] { --tone: #4ADE80; }
+
+.rd-cd-bar-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-bar-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.rd-cd-bar-track > span {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.rd-cd-bar-track > .rd-cd-bar-on {
+  background: var(--tone);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--tone) 55%, transparent);
+}
+
+.rd-cd-bar-value {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--rd-cd-ink);
+}
+
+.rd-cd-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+.rd-cd-tags li {
+  padding: 0.2rem 0.65rem;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.06);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--rd-cd-ink);
+}
+
+/* Matchups: tres filas compactas (etiqueta a la izquierda, caras a la derecha). El nombre
+   se ve debajo de cada cara cuando hay alto; si no, queda para el lector y el tooltip. */
+.rd-cd-matchups {
+  gap: clamp(0.35rem, 0.9vh, 0.55rem);
+}
+
+.rd-cd-matchup {
+  --tone: #4ADE80;
+  display: grid;
+  grid-template-columns: 6.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  padding: clamp(0.3rem, 0.8vh, 0.5rem) 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--tone) 16%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--tone) 5%, transparent);
+}
+
+.rd-cd-matchup .rd-cd-empty {
+  font-size: 0.75rem;
+}
+
+@media (max-height: 859px) {
+  .rd-cd-face-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+.rd-cd-matchup[data-tone="red"] { --tone: #F87171; }
+.rd-cd-matchup[data-tone="blue"] { --tone: #60A5FA; }
+
+.rd-cd-matchup-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tone);
+}
+
+/* Las caras se reparten parejas en todo el ancho de la fila, no pegadas a un lado. */
+.rd-cd-faces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 0.4rem;
+}
+
+.rd-cd-face {
+  display: flex;
+  width: 3.2rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.rd-cd-face img,
+.rd-cd-face-fallback {
+  display: grid;
+  width: clamp(30px, 4.2vh, 40px);
+  height: clamp(30px, 4.2vh, 40px);
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent);
+  border-radius: 10px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.rd-cd-face-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--muted-foreground));
+}
+
+a.rd-cd-face:hover img {
+  border-color: var(--tone);
+  transform: translateY(-1px);
+}
+
+a.rd-cd-face:hover .rd-cd-face-name {
+  color: var(--rd-cd-ink);
+}
+
+/* Meta del parche: tier, score, posición y evolución. */
+.rd-cd-lane-switch {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.rd-cd-lane-switch button {
+  opacity: 0.5;
+  transition: opacity 160ms ease;
+}
+
+.rd-cd-lane-switch button:hover,
+.rd-cd-lane-switch button[aria-selected="true"] {
+  opacity: 1;
+}
+
+.rd-cd-meta-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rd-cd-meta-score {
+  display: block;
+  font-family: var(--font-rajdhani);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--rd-cd-gold);
+}
+
+.rd-cd-meta-score-label {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-meta-position {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* WR / PR / BR del parche en una franja (antes estaban en el héroe). */
+.rd-cd-meta-rates {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.rd-cd-meta-rates > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: clamp(0.2rem, 0.6vh, 0.35rem) 0.6rem;
+  border: 1px solid rgba(212, 175, 55, 0.14);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rd-cd-meta-rates dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-meta-rates dd {
+  font-family: var(--font-rajdhani);
+  font-size: clamp(0.85rem, 1.9vh, 1.05rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--rd-cd-ink);
+}
+
+.rd-cd-evo {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rd-cd-evo-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* La tarjeta de meta suma WR / PR / BR: el gráfico cede alto en las ventanas bajas. */
+.rd-cd-meta {
+  gap: clamp(0.35rem, 0.9vh, 0.75rem);
+}
+
+.rd-cd-evo-chart {
+  position: relative;
+  min-height: 28px;
+  flex: 1 1 auto;
+}
+
+.rd-cd-evo-chart svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rd-cd-evo-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rd-cd-gold);
+  box-shadow: 0 0 8px rgba(226, 196, 106, 0.7);
+  transform: translate(-50%, -50%);
+}
+
+.rd-cd-evo-patches {
+  display: grid;
+  gap: 2px;
+}
+
+.rd-cd-evo-patches li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Estadísticas base: dos columnas con separadores punteados. */
+.rd-cd-stat-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25rem;
+}
+
+.rd-cd-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: clamp(0.25rem, 0.7vh, 0.45rem) 0;
+  border-bottom: 1px dashed rgba(212, 175, 55, 0.13);
+}
+
+.rd-cd-stat dt {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-stat dd {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--rd-cd-ink);
+}
+
+/* Notas estratégicas: cita con línea dorada. */
+.rd-cd-notes-text {
+  padding-left: 0.85rem;
+  border-left: 2px solid rgba(212, 175, 55, 0.55);
+  font-size: clamp(0.8rem, min(1.05vw, 1.75vh), 0.95rem);
+  line-height: 1.5;
+  color: var(--rd-cd-ink);
+}
+
+/* Rendimiento personal (biblioteca privada). */
+.rd-cd-personal-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.rd-cd-personal-summary {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.rd-cd-personal-wr {
+  font-family: var(--font-rajdhani);
+  flex-shrink: 0;
+  font-size: clamp(1.7rem, 4.2vh, 2.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: var(--rd-cd-gold);
+}
+
+.rd-cd-personal-record {
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-personal-projection {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* KDA y K/D/A en una línea debajo del récord: dejan la altura para el análisis. */
+.rd-cd-personal-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.8rem;
+  margin-top: 0.1rem;
+}
+
+.rd-cd-personal-metrics > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.rd-cd-personal-metrics dt {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-cd-personal-metrics dd {
+  font-family: var(--font-rajdhani);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--rd-cd-ink);
+}
+
+/* El análisis va como las notas (filete dorado, sin caja): ahorra el relleno del recuadro. */
+.rd-cd-personal-insight {
+  min-height: 0;
+  padding-left: 0.65rem;
+  border-left: 2px solid rgba(212, 175, 55, 0.55);
+  font-size: clamp(0.72rem, 1.6vh, 0.82rem);
+  line-height: 1.42;
+  color: rgba(244, 239, 227, 0.88);
+}
+
+.rd-cd-personal-warning {
+  font-size: 0.72rem;
+  color: #FACC15;
+}
+
+/* Campeones relacionados (biblioteca pública). */
+.rd-cd-related-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.rd-cd-related-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(212, 175, 55, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.rd-cd-related-item:hover {
+  border-color: rgba(212, 175, 55, 0.42);
+  background: rgba(212, 175, 55, 0.06);
+}
+
+.rd-cd-related-item img {
+  width: clamp(28px, 4vh, 36px);
+  height: clamp(28px, 4vh, 36px);
+  flex-shrink: 0;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.rd-cd-related-item h3 {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-rajdhani);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Celular: una sección por pantalla, con pestañas debajo del héroe. */
+.rd-cd-tabs {
+  flex-shrink: 0;
+}
+
+@container rdlib (max-width: 560px) {
+  .rd-cd-hero {
+    min-height: 200px;
+  }
+
+  .rd-cd-hero-meta {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .rd-cd-hero-rates {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.45rem 0 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.22);
+    border-left: 0;
+  }
+
+  .rd-cd-matchup {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+
+  .rd-cd-bar {
+    grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr) auto;
+  }
+}
+
+.rd-cd-hero-meta-lane {
+  white-space: nowrap;
+}
+
+/* Ventanas bajas de escritorio: notas y tarjetas con letra un poco más chica. */
+@media (min-width: 1024px) and (max-height: 720px) {
+  .rd-cd-notes-text {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .rd-cd-stat {
+    padding-block: 0.2rem;
+  }
+}
+
+/* El botón de volver va arriba a la derecha del héroe (esquina libre): no suma una fila. */
+.rd-cd-back {
+  position: absolute;
+  /* Por encima del bloque del nombre, que ocupa todo el ancho del héroe. */
+  z-index: 2;
+  top: clamp(0.6rem, 1.4vh, 0.95rem);
+  right: clamp(0.75rem, 1.4vw, 1.1rem);
+}
+
+.rd-cd-hero {
+  justify-content: flex-end;
+}
+
+.rd-cd-related-list {
+  grid-template-columns: repeat(auto-fill, minmax(7.25rem, 1fr));
+}
+
+/* Escritorio con poco alto (notebooks, escalado de Windows al 125 %): todo más compacto
+   para que entre sin scroll. */
+@media (min-width: 1024px) and (max-height: 760px) {
+  .rd-lib {
+    gap: 0.55rem;
+  }
+
+  .rd-lib-kicker {
+    display: none;
+  }
+
+  .rd-lib-title {
+    font-size: 1.5rem;
+  }
+
+  .rd-lib-tab {
+    padding-block: 0.35rem;
+  }
+
+  .rd-cd {
+    --rd-cd-gap: 0.55rem;
+  }
+
+  .rd-cd-hero {
+    min-height: 0;
+    padding-block: 0.7rem;
+  }
+
+  .rd-cd-chips {
+    margin-top: 0.45rem;
+  }
+
+  .rd-cd-card {
+    gap: 0.45rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .rd-cd-card-head {
+    min-height: 1.2rem;
+  }
+
+  .rd-cd-bars {
+    gap: 0.4rem;
+  }
+
+  .rd-cd-tags li {
+    padding-block: 0.1rem;
+  }
+
+  .rd-cd-matchup {
+    padding-block: 0.2rem;
+  }
+
+  .rd-cd-face img,
+  .rd-cd-face-fallback {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rd-cd-related-item {
+    padding: 0.25rem;
+  }
+}
+
+@media (min-width: 1024px) and (min-height: 501px) {
+  /* Las tres filas de matchups se reparten el alto de la tarjeta. */
+  .rd-cd-matchups > .rd-cd-matchup {
+    min-height: 0;
+    flex: 1 1 0;
+  }
+
+  /* Sin lugar para tres columnas (pantalla chica o biblioteca privada con sidebar): dos
+     columnas y scrollea la ficha entera, no cada tarjeta. */
+  @container rdlib (max-width: 899px) {
+    .rd-lib-body:has(> .rd-cd) {
+      overflow-y: auto;
+    }
+
+    .rd-cd {
+      height: auto;
+    }
+
+    .rd-cd-grid {
+      flex: none;
+    }
+
+    .rd-cd-card {
+      overflow: visible;
+    }
+
+    .rd-cd-matchups > .rd-cd-matchup {
+      flex: none;
+    }
+  }
+}
+
+/* Celular horizontal: héroe a la izquierda y la sección elegida a la derecha, así se ven
+   juntos en el poco alto que hay. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-lib {
+    gap: 0.5rem;
+  }
+
+  .rd-lib-kicker {
+    display: none;
+  }
+
+  .rd-lib-title {
+    font-size: 1.15rem;
+  }
+
+  .rd-lib-tab {
+    padding-block: 0.3rem;
+  }
+
+  .rd-cd[data-panels="on"] {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-hero {
+    position: sticky;
+    top: 0;
+    grid-row: 1 / 3;
+    min-height: 220px;
+    padding: 0.75rem;
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-tabs {
+    grid-column: 2;
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-grid {
+    grid-column: 2;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-name {
+    font-size: 1.9rem;
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-hero-meta {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-hero-rates {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.35rem 0 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.22);
+    border-left: 0;
+  }
+
+  .rd-cd[data-panels="on"] .rd-cd-back {
+    position: relative;
+    top: auto;
+    right: auto;
+    align-self: flex-start;
+    margin-bottom: auto;
+  }
+}
+
+/* ── Fichas de objeto y runa ──────────────────────────────────────────────────── */
+
+/* Héroe más bajo (no hay splash): el ícono grande a la izquierda y, de fondo, el mismo
+   ícono ampliado y desenfocado con las luces de sus colores (objeto) o de la rama (runa). */
+.rd-cd-hero.rd-ed-hero {
+  min-height: clamp(120px, 18vh, 180px);
+}
+
+.rd-ed-hero-glow {
+  position: absolute;
+  top: 50%;
+  right: 6%;
+  width: clamp(180px, 34vh, 320px);
+  height: clamp(180px, 34vh, 320px);
+  object-fit: contain;
+  opacity: 0.2;
+  filter: blur(2px) saturate(1.3);
+  transform: translateY(-50%) rotate(-8deg);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 35%, transparent 70%);
+}
+
+.rd-ed[data-kind="rune"] .rd-ed-hero-glow {
+  border-radius: 50%;
+}
+
+.rd-ed-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: clamp(0.8rem, 1.6vw, 1.4rem);
+}
+
+.rd-ed-icon {
+  display: grid;
+  width: clamp(64px, 11vh, 96px);
+  height: clamp(64px, 11vh, 96px);
+  flex-shrink: 0;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 18px;
+  background: rgba(7, 9, 15, 0.6);
+  box-shadow:
+    0 0 0 4px rgba(var(--rd-cd-light-a), 0.12),
+    0 0 40px rgba(var(--rd-cd-light-a), 0.35);
+  color: var(--rd-cd-gold);
+}
+
+.rd-ed-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rd-ed-icon-round {
+  border-radius: 50%;
+}
+
+.rd-cd-name.rd-ed-name {
+  font-size: clamp(1.6rem, min(4cqi, 6.2vh), 3.2rem);
+}
+
+.rd-ed-branch-chip {
+  border-color: rgba(var(--rd-cd-light-a), 0.6);
+  color: rgb(var(--rd-cd-light-a));
+}
+
+.rd-ed-price {
+  gap: 0.7rem;
+  color: var(--rd-cd-gold);
+}
+
+.rd-ed-price-value {
+  font-family: var(--font-rajdhani);
+  font-size: clamp(1.3rem, 3vh, 1.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--rd-cd-ink);
+}
+
+.rd-ed-price-value span {
+  font-family: Inter, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Grilla: objeto en tres columnas (Efectos ancho arriba, al lado de Estadísticas); runa en
+   tres (descripción, para quién y contra qué, árbol de la rama). */
+@container rdlib (min-width: 900px) {
+  .rd-ed[data-kind="item"] .rd-cd-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.85fr);
+    grid-template-areas:
+      "effects stats related"
+      "profile matchups related";
+  }
+
+  /* Texto largo: el mismo orden, con Efectos más ancho. */
+  .rd-ed[data-kind="item"][data-length="long"] .rd-cd-grid {
+    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  }
+
+  /* Sin estadísticas (objetos de soporte con misión, por ejemplo): esa tarjeta no va. */
+  .rd-ed[data-kind="item"][data-stats="none"] .rd-cd-grid {
+    grid-template-areas:
+      "effects effects related"
+      "profile matchups related";
+  }
+
+  /* Objeto con misión (texto muy largo): Efectos toma toda la izquierda y el medio apila el resto. */
+  .rd-ed[data-kind="item"][data-text="xlong"] .rd-cd-grid {
+    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      "effects stats related"
+      "effects profile related"
+      "effects matchups related";
+  }
+
+  .rd-ed[data-kind="item"][data-length="long"][data-stats="none"] .rd-cd-grid {
+    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+    grid-template-areas:
+      "effects profile"
+      "effects matchups";
+  }
+
+  .rd-ed[data-kind="rune"] .rd-cd-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
+    grid-template-areas: "effects profile tree";
+  }
+
+  .rd-ed-effects { grid-area: effects; }
+  .rd-ed-stats { grid-area: stats; }
+  .rd-ed-matchups { grid-area: matchups; }
+  .rd-ed-related { grid-area: related; }
+  .rd-ed-tree { grid-area: tree; }
+  .rd-ed-profile { grid-area: profile; }
+}
+
+@media (min-width: 1024px) and (min-height: 501px) {
+  @container rdlib (min-width: 900px) {
+    /* La fila de Efectos crece con el texto (hasta 62 % del alto); la de abajo toma el resto. */
+    .rd-ed[data-kind="item"] .rd-cd-grid {
+      grid-template-rows: fit-content(62%) minmax(0, 1fr);
+    }
+
+    .rd-ed[data-kind="item"][data-length="long"][data-stats="none"] .rd-cd-grid {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .rd-ed[data-kind="item"][data-text="xlong"][data-stats="yes"] .rd-cd-grid {
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .rd-ed[data-kind="rune"] .rd-cd-grid {
+      grid-template-rows: minmax(0, 1fr);
+    }
+  }
+}
+
+/* Efectos (pasivas del objeto, bonus de la runa): etiqueta dorada y filete del color. */
+.rd-ed-effect-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.45rem, 1.1vh, 0.75rem);
+  font-size: clamp(0.82rem, min(1.05vw, 1.9vh), 1rem);
+  line-height: 1.5;
+  color: rgba(244, 239, 227, 0.86);
+}
+
+.rd-ed-effect-list li {
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(var(--rd-cd-light-a), 0.7);
+}
+
+.rd-ed-effect-list li[data-labeled="no"] {
+  border-left-color: rgba(212, 175, 55, 0.18);
+}
+
+.rd-ed-effect-list strong {
+  display: block;
+  margin-bottom: 0.1rem;
+  font-family: var(--font-rajdhani);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--rd-cd-gold);
+}
+
+/* Estadísticas del objeto: una fila por estadística, el valor en el color de su familia. */
+.rd-ed-stat-list {
+  display: grid;
+  gap: clamp(0.25rem, 0.7vh, 0.4rem);
+}
+
+.rd-ed-stat {
+  --rd-ed-tone: #F4EFE3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: clamp(0.3rem, 0.9vh, 0.55rem) 0.7rem;
+  border: 1px solid rgba(212, 175, 55, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rd-ed-stat dt {
+  min-width: 0;
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-ed-stat dd {
+  font-family: var(--font-rajdhani);
+  font-size: clamp(0.95rem, 2.2vh, 1.2rem);
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--rd-ed-tone);
+}
+
+.rd-ed-stat[data-tone="life"] { --rd-ed-tone: #F87171; }
+.rd-ed-stat[data-tone="mana"] { --rd-ed-tone: #60A5FA; }
+.rd-ed-stat[data-tone="physical"] { --rd-ed-tone: #FB923C; }
+.rd-ed-stat[data-tone="magic"] { --rd-ed-tone: #C084FC; }
+.rd-ed-stat[data-tone="defense"] { --rd-ed-tone: #FCD34D; }
+.rd-ed-stat[data-tone="speed"] { --rd-ed-tone: #FACC15; }
+.rd-ed-stat[data-tone="move"] { --rd-ed-tone: #2DD4BF; }
+.rd-ed-stat[data-tone="crit"] { --rd-ed-tone: #FBBF24; }
+.rd-ed-stat[data-tone="vamp"] { --rd-ed-tone: #F472B6; }
+.rd-ed-stat[data-tone="haste"] { --rd-ed-tone: #22D3EE; }
+
+/* Objetos del mismo tipo (enlaces en la pública, botones en la privada). */
+.rd-ed-related-list {
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+}
+
+@container rdlib (min-width: 900px) {
+  /* Columna de la derecha de punta a punta: uno debajo del otro, con el nombre completo. */
+  .rd-ed-related-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+button.rd-cd-related-item {
+  width: 100%;
+  text-align: left;
+}
+
+.rd-ed-related-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  color: var(--rd-cd-gold);
+}
+
+/* Árbol de la rama: una fila por grupo y la runa actual resaltada con el color de la rama. */
+.rd-ed-tree-rows {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: clamp(0.5rem, 1.4vh, 0.9rem);
+}
+
+.rd-ed-tree-row {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.rd-ed-tree-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+/* auto-fit: las filas de 3 o 4 runas se estiran a todo el ancho; las 13 claves bajan de fila. */
+.rd-ed-tree-row ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.25rem, 1fr));
+  gap: 0.4rem;
+}
+
+.rd-ed-tree-node {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: clamp(0.3rem, 0.8vh, 0.5rem) 0.3rem;
+  border: 1px solid rgba(212, 175, 55, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.rd-ed-tree-node img,
+.rd-ed-tree-fallback {
+  display: grid;
+  width: clamp(32px, 5.2vh, 46px);
+  height: clamp(32px, 5.2vh, 46px);
+  place-items: center;
+  border-radius: 50%;
+  object-fit: cover;
+  opacity: 0.6;
+  filter: grayscale(0.55);
+  transition: opacity 160ms ease, filter 160ms ease;
+}
+
+a.rd-ed-tree-node:hover,
+button.rd-ed-tree-node:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.06);
+  color: var(--rd-cd-ink);
+}
+
+a.rd-ed-tree-node:hover img,
+button.rd-ed-tree-node:hover img {
+  opacity: 1;
+  filter: none;
+}
+
+.rd-ed-tree-node[aria-current] {
+  border-color: rgba(var(--rd-cd-light-a), 0.75);
+  background: rgba(var(--rd-cd-light-a), 0.12);
+  box-shadow: 0 0 22px rgba(var(--rd-cd-light-a), 0.22);
+  color: var(--rd-cd-ink);
+}
+
+.rd-ed-tree-node[aria-current] img {
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 0 2px rgba(var(--rd-cd-light-a), 0.85);
+}
+
+/* Filas de la rama (3 o 4 runas): siempre en una sola línea. */
+.rd-ed-tree-rows[data-keystone="no"] ul {
+  grid-template-columns: none;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+}
+
+.rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node img,
+.rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-fallback {
+  width: clamp(40px, 7vh, 64px);
+  height: clamp(40px, 7vh, 64px);
+}
+
+.rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-name {
+  font-size: 0.78rem;
+}
+
+/* Enfrentamientos del objeto: hay lugar para los nombres aunque la ventana sea baja. */
+.rd-ed .rd-cd-face-name {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+}
+
+/* Objetos con misión: Enfrentamientos queda más bajo; en ventanas bajas, sin nombres. */
+@media (max-height: 859px) {
+  .rd-ed[data-length="long"] .rd-cd-face-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip: rect(0 0 0 0);
+  }
+}
+
+/* Runa: la descripción suele ser corta, va con letra más grande, y el ícono de la runa
+   ampliado y tenue ocupa el fondo de la tarjeta. */
+.rd-ed[data-kind="rune"] .rd-ed-effects {
+  isolation: isolate;
+}
+
+.rd-ed[data-kind="rune"] .rd-ed-effects::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  width: min(70%, 320px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--rd-ed-art, none) center / cover no-repeat;
+  opacity: 0.09;
+  filter: saturate(1.2);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle, #000 45%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 45%, transparent 70%);
+}
+
+/* Runa: la descripción suele ser corta, va con letra más grande. */
+.rd-ed[data-kind="rune"] .rd-ed-effect-list {
+  font-size: clamp(0.88rem, min(1.2vw, 2.1vh), 1.08rem);
+}
+
+.rd-ed[data-length="long"] .rd-ed-effect-list {
+  gap: clamp(0.3rem, 0.8vh, 0.5rem);
+  font-size: clamp(0.76rem, min(0.95vw, 1.65vh), 0.9rem);
+  line-height: 1.4;
+}
+
+.rd-ed-tree-name {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+/* Ventanas bajas de escritorio: héroe al alto de su contenido. */
+@media (min-width: 1024px) and (max-height: 760px) {
+  .rd-cd-hero.rd-ed-hero {
+    min-height: 0;
+  }
+}
+
+/* Angosto (celular): el brillo de fondo más discreto y lugar arriba para el botón de volver. */
+@container rdlib (max-width: 560px) {
+  .rd-cd-hero.rd-ed-hero {
+    padding-top: 3rem;
+  }
+
+  .rd-ed-hero-glow {
+    right: -10%;
+    opacity: 0.14;
+  }
+}
+
+/* Para quién y contra qué (runa): las seis clases con las que le sirven resaltadas, y
+   contra qué rinde con una línea que explica cada caso. */
+.rd-ed-profile-block {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.rd-ed-profile-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-ed-classes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rd-ed-classes li {
+  padding: 0.2rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(244, 239, 227, 0.32);
+}
+
+.rd-ed-classes li[data-fit="yes"] {
+  border-color: rgba(var(--rd-cd-light-a), 0.6);
+  background: rgba(var(--rd-cd-light-a), 0.14);
+  color: var(--rd-cd-ink);
+}
+
+/* Qué te da (dorado) y cómo se activa (color de la rama): chips chicos. */
+.rd-ed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.rd-ed-tags li {
+  padding: 0.18rem 0.6rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.07);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--rd-cd-ink);
+}
+
+.rd-ed-tags[data-kind="trigger"] li {
+  border-color: rgba(var(--rd-cd-light-a), 0.4);
+  background: rgba(var(--rd-cd-light-a), 0.08);
+}
+
+.rd-ed-counters {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.rd-ed-counters li {
+  display: grid;
+  gap: 0.05rem;
+  padding: 0.35rem 0.6rem;
+  border-left: 2px solid rgba(var(--rd-cd-light-a), 0.7);
+  border-radius: 0 8px 8px 0;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rd-ed-counters strong {
+  font-family: var(--font-rajdhani);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--rd-cd-gold);
+}
+
+.rd-ed-counters span {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(244, 239, 227, 0.8);
+}
+
+/* Ventanas bajas: la tarjeta "Para quién y contra qué" se compacta para entrar sin scroll. */
+@media (min-width: 1024px) and (max-height: 760px) {
+  .rd-ed-profile {
+    gap: 0.4rem;
+  }
+
+  .rd-ed-profile-block {
+    gap: 0.25rem;
+  }
+
+  .rd-ed-classes li,
+  .rd-ed-tags li {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.68rem;
+  }
+
+  .rd-ed-counters {
+    gap: 0.25rem;
+  }
+
+  .rd-ed-counters li {
+    padding: 0.2rem 0.5rem;
+  }
+
+  .rd-ed-counters span {
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+}
+
+/* Objeto: "Rinde mejor contra" como chips (el texto que lo explica va en el title). */
+.rd-ed-tags[data-kind="counter"] li {
+  border-color: rgba(var(--rd-cd-light-a), 0.5);
+  background: rgba(var(--rd-cd-light-a), 0.1);
+  font-family: var(--font-rajdhani);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rd-cd-gold);
+}
+
+/* Objeto: el perfil comparte la fila de abajo; hasta 860 px de alto, chips compactos. */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .rd-ed[data-kind="item"] .rd-ed-profile {
+    gap: 0.4rem;
+  }
+
+  .rd-ed[data-kind="item"] .rd-ed-profile-block {
+    gap: 0.25rem;
+  }
+
+  .rd-ed[data-kind="item"] .rd-ed-classes li,
+  .rd-ed[data-kind="item"] .rd-ed-tags li {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.68rem;
+  }
+}
+
+/* Objeto: en Enfrentamientos la etiqueta va arriba de las caras, así las tres entran en una
+   fila en cualquier ancho de columna. */
+.rd-ed[data-kind="item"] .rd-cd-matchup {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 0.35rem;
+}
+
+/* Posición meta en ventanas bajas: las fechas de los parches quedan en el tooltip de cada
+   punto (no entran debajo de los badges) y el score se achica un poco. */
+@media (min-width: 1024px) and (max-height: 859px) {
+  .rd-cd-evo-date {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 760px) {
+  .rd-cd-meta-score {
+    font-size: 1.35rem;
+  }
+
+  .rd-cd-meta-score-label {
+    margin-top: 0.05rem;
+  }
+
+  .rd-cd-evo {
+    gap: 0.25rem;
+  }
+}

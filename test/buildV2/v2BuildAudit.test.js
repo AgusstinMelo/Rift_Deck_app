@@ -16,6 +16,8 @@ const coreItems = [
   item('guinsoo', 'Espadafuria de Guinsoo', { type: ['Daño Fisico', 'Daño Magico'], effect_tags: ['daño_on_hit', 'daño_sostenido', 'buff_velocidad_ataque'], situational_role: ['core', 'late'] }),
   item('mortal', 'Recordatorio Mortal', { effect_tags: ['penetracion_armadura', 'anti_curacion', 'modificador_critico'], situational_role: ['counter', 'late'], critical_impact: 25 }),
   item('terminus', 'Terminus', { effect_tags: ['daño_on_hit', 'buff_velocidad_ataque', 'penetracion_armadura'], situational_role: ['core', 'ofensivo'] }),
+  // Al impacto sin penetración: con Recordatorio Mortal en la build, Terminus no entra (no se combinan).
+  item('wits', 'Fin del Ingenio', { type: ['Daño Fisico', 'Daño Magico'], effect_tags: ['daño_on_hit', 'buff_velocidad_ataque'], situational_role: ['core', 'ofensivo'] }),
   item('navori', 'Cuchillas Raudas de Navori', { effect_tags: ['modificador_critico'], critical_impact: 25 }),
   item('phantom', 'Bailarín Espectral', { effect_tags: ['modificador_critico', 'velocidad_movimiento'], critical_impact: 25 }),
   item('thornmail', 'Cota de Espinas', { type: ['Defensa'], effect_tags: ['defensa_fisica', 'anti_curacion'], situational_role: ['counter', 'defensivo'], armor: 75 }),
@@ -39,7 +41,7 @@ const ids = result => result.coreItems.map(entry => entry.id);
 
 test('Kai\'Sa al impacto: Filo del Infinito aislado se cambia, el defensivo va al final y el antiheal 3º contra curaciones', () => {
   const result = auditCoreItems({ coreItems: ai, snapshot, fit: fit() });
-  assert.deepEqual(ids(result), ['botrk', 'terminus', 'mortal', 'guinsoo', 'ga']);
+  assert.deepEqual(ids(result), ['botrk', 'wits', 'mortal', 'guinsoo', 'ga']);
   assert.match(result.coreItems[1].reason, /Filo del Infinito/);
   assert.equal(result.notes.length, 3);
   assert.ok(result.notes.some(note => /Ángel Guardián al objeto 5/.test(note)));
@@ -50,7 +52,7 @@ test('Kai\'Sa al impacto: Filo del Infinito aislado se cambia, el defensivo va a
 
 test('sin curadores en el rival, el antiheal no se adelanta', () => {
   const result = auditCoreItems({ coreItems: ai, snapshot, fit: fit({ mid: 'akali', adc: 'ezreal', support: 'nautilus' }) });
-  assert.deepEqual(ids(result), ['botrk', 'terminus', 'guinsoo', 'ga', 'mortal']);
+  assert.deepEqual(ids(result), ['botrk', 'wits', 'guinsoo', 'ga', 'mortal']);
 });
 
 test('un Filo del Infinito con otros dos objetos de crítico se respeta', () => {
@@ -82,7 +84,7 @@ test('el estabilizador aplica la auditoría y la cuenta en las adaptaciones', ()
     core_items: ai, keystone: { id: 'k', reason: 'k' }, primary_runes: ['p1', 'p2', 'p3'].map(id => ({ id, reason: id })),
     secondary_rune: { id: 's1', reason: 's' }, spells: [], key_adaptations: ['a', 'b', 'c'], build_plan: {},
   }, { ...snapshot, runes, spells: [] }, { role: 'adc', fit: fit() });
-  assert.deepEqual(result.core_items.map(entry => entry.id), ['botrk', 'terminus', 'mortal', 'guinsoo', 'ga']);
+  assert.deepEqual(result.core_items.map(entry => entry.id), ['botrk', 'wits', 'mortal', 'guinsoo', 'ga']);
   assert.equal(result.key_adaptations.length, 4);
   assert.equal(result.key_adaptations[0], 'a');
   assert.match(result.key_adaptations.at(-1), /Rift Deck/);

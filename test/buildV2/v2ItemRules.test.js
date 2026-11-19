@@ -79,3 +79,46 @@ test('la validación rechaza evoluciones, dos lágrimas y Support sin objeto ini
   assert.doesNotMatch(errorsOf(['scythe', 'botrk', 'guinsoo', 'nashor', 'terminus'], 'support'), /soporte inicial|core válido/);
   assert.match(errorsOf(['scythe', 'botrk', 'guinsoo', 'nashor', 'terminus'], 'adc'), /solo se arma en Support/);
 });
+
+// Grupos que el juego no deja combinar (utils/exclusiveItems.js): penetración de armadura,
+// penetración mágica y Cimitarra Mercurial / Fuerza del Viento.
+const penItems = [
+  item('serylda', 'Rencor de Serylda', { armor_penetration: 30 }),
+  item('reminder', 'Recordatorio Mortal', { effect_tags: ['anti_curacion'] }),
+  item('dominik', 'Recuerdos de Lord Dominik'),
+  item('scimitar', 'Cimitarra Mercurial', { effect_tags: ['limpieza_cc'] }),
+  item('galeforce', 'Fuerza del Viento', { effect_tags: ['dash'] }),
+  item('bloodthirster', 'Bebedor de Sangre'),
+];
+const penSnapshot = { ...snapshot, items: [...snapshot.items, ...penItems], coreItems: [...coreItems, ...penItems] };
+
+test('grupos excluyentes: el armador bloquea y Build V2 corrige y valida', async () => {
+  const { exclusiveClash } = await import('../../src/utils/exclusiveItems.js');
+  assert.equal(exclusiveClash({ name: 'Terminus' }, [{ name: 'Rencor de Serylda' }])?.name, 'Rencor de Serylda');
+  assert.equal(exclusiveClash({ name: 'Criptorretoño' }, [{ name: 'Báculo del Vacío ' }])?.name, 'Báculo del Vacío ');
+  assert.equal(exclusiveClash({ name: 'Fuerza del Viento' }, [{ name: 'Cimitarra Mercurial' }])?.name, 'Cimitarra Mercurial');
+  assert.equal(exclusiveClash({ name: 'Manamune' }, [{ name: 'Tiara Susurrante' }])?.name, 'Tiara Susurrante');
+  assert.equal(exclusiveClash({ name: 'Terminus' }, [{ name: 'Báculo del Vacío' }, { name: 'Bebedor de Sangre' }]), null);
+
+  const eligible = createEligibleV2Snapshot(penSnapshot, 'kaisa', 'adc');
+  const fit = draftFitContext({ snapshot: eligible, championId: 'kaisa', role: 'adc', allies: { adc: 'kaisa' }, enemies: {} });
+  const ai = ['terminus', 'serylda', 'dominik', 'scimitar', 'galeforce'].map(id => ({ id, reason: id }));
+  const result = auditCoreItems({ coreItems: ai, snapshot: eligible, fit, role: 'adc' });
+  const order = ids(result.coreItems);
+  assert.equal(order.length, 5);
+  assert.equal(order[0], 'terminus');
+  assert.equal(order.filter(id => ['terminus', 'serylda', 'reminder', 'dominik'].includes(id)).length, 1);
+  assert.equal(order.filter(id => ['scimitar', 'galeforce'].includes(id)).length, 1);
+  assert.ok(result.notes.some(note => /Rencor de Serylda/.test(note) && /TERMINUS/.test(note)));
+
+  const base = {
+    build_theme: 't', matchup_read: 't', win_condition: 't', key_adaptations: ['a', 'b'],
+    composition_analysis: { allied_damage_profile: 't', enemy_priority_threats: ['a', 'b'], required_responses: ['a'], archetype_rationale: 't' },
+    build_plan: { primary_archetype: 't', target_damage_profile: 't', first_item_rationale: 't', transformation_audit: 't' },
+    movement_item: { id: 'boots', reason: 'r' }, keystone: { id: 'k', reason: 'r' },
+    primary_runes: ['p1', 'p2', 'p3'].map(id => ({ id, reason: 'r' })), secondary_rune: { id: 's', reason: 'r' },
+    spells: [{ id: 'f', reason: 'r' }, { id: 'h', reason: 'r' }],
+  };
+  const errors = validateV2Result({ ...base, core_items: ['botrk', 'serylda', 'reminder', 'guinsoo', 'nashor'].map(id => ({ id, reason: 'r' })) }, penSnapshot, { role: 'adc' }).validationErrors.join(' | ');
+  assert.match(errors, /No se pueden combinar Rencor de Serylda y Recordatorio Mortal/);
+});

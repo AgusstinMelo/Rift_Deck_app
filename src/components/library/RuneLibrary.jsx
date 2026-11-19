@@ -2,23 +2,15 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Rune } from '@/api/entitiesSupabase';
 
-import {
-  Search,
-  Sparkles,
-  Gem,
-  Shield,
-  Flame,
-  Wand2,
-  ArrowLeft,
-} from 'lucide-react';
+import { Gem, Search } from 'lucide-react';
 
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
-import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 import { runeBranchLabel } from '@/utils/runeBranches';
+import RuneDetail, { BRANCH_ICONS } from '@/components/library/RuneDetail';
 
 const BRANCH_COLORS = {
   Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
@@ -28,29 +20,14 @@ const BRANCH_COLORS = {
   Brujería: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
 };
 
-const BRANCH_ICONS = {
-  Clave: Sparkles,
-  Precisión: Gem,
-  Dominación: Flame,
-  Valor: Shield,
-  Brujería: Wand2,
-};
-
 const BRANCHES = ['Clave', 'Dominación', 'Precisión', 'Valor', 'Brujería'];
 
 export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onClearSelected, initialRunes, publicBasePath }) {
   const t = useT();
   const [search, setSearch] = useState('');
-  const [section, setSection] = useState('description');
   const [branchFilter, setBranchFilter] = useState('all');
-  const { entityName, entityDescription, matchesName, compareNames } = useCatalogText();
+  const { entityName, matchesName, compareNames } = useCatalogText();
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialRunes, selectedSlug) : null);
-  // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
-  const mediaOptions = { ssrSafe: Boolean(publicBasePath) };
-  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, mediaOptions);
-  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, mediaOptions);
-  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY, mediaOptions);
-
   const { data: runes = [], isLoading } = useQuery({
     queryKey: ['runes'],
     queryFn: () => Rune.list('branch'),
@@ -159,219 +136,21 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     return acc;
   }, {});
 
-  const relatedRunes = selected && publicBasePath
-    ? runes
-        .filter(rune => rune.id !== selected.id)
-        .filter(rune => {
-          const selectedBranches = getRuneBranches(selected.branch);
-          return getRuneBranches(rune.branch).some(branch => selectedBranches.includes(branch));
-        })
-        .sort(compareNames)
-        .slice(0, 6)
-    : [];
-
-  // En smartphone (vertical u horizontal) y en escritorio: el mismo "dossier" que objetos y
-  // campeones: identidad compacta y la descripción con todo el alto que queda. Sin pestañas
-  // (la runa solo tiene descripción), salvo en la ficha pública, que suma las runas de la
-  // misma rama.
-  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit)) {
-    const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
-    const sectionTabs = relatedRunes.length > 0
-      ? [['description', t('library.descripcion')], ['related', t('library.relacionadas')]]
-      : [];
-    const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
-
-    return (
-      <div className="rd-entity-detail">
-        {publicBasePath ? (
-          <Link to={publicBasePath} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft size={15} />
-           {t('library.volverARunas')}
-          </Link>
-        ) : (
-          <button
-            onClick={() => {
-              setSelected(null);
-              onClearSelected?.();
-            }}
-            className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft size={15} />
-           {t('library.volverARunas')}
-          </button>
-        )}
-
-        <div className="rd-card rd-entity-hero">
-          {selected.image_url
-            ? <img src={selected.image_url} alt={entityName(selected)} className="rd-entity-hero-img rd-entity-hero-img-round" />
-            : <div className="rd-entity-hero-img rd-entity-hero-img-round bg-secondary flex items-center justify-center"><BranchIcon size={26} className="text-primary" /></div>}
-          <div className="min-w-0">
-            {selected.branch && (
-              <div className="rd-entity-hero-pills">
-                <span className={`rd-entity-pill border ${BRANCH_COLORS[selected.branch] || 'bg-secondary border-border text-foreground'}`}>
-                  {runeBranchLabel(selected.branch)}
-                </span>
-              </div>
-            )}
-            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{entityName(selected)}</h1>
-          </div>
-        </div>
-
-        {sectionTabs.length > 0 && (
-          <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label={t('library.seccionesDeLaRuna')}>
-            {sectionTabs.map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={activeSection === id}
-                onClick={() => setSection(id)}
-                className={`rd-panel-tab ${activeSection === id ? 'rd-panel-tab-active' : ''}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="rd-card rd-entity-section">
-          <div className="rd-entity-section-head">
-            <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">{activeSection === 'related' ? t('library.runasDeLaMisma') : t('library.descripcion')}</h2>
-          </div>
-          {activeSection === 'related' ? (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {relatedRunes.map(rune => {
-                const RelatedIcon = BRANCH_ICONS[rune.branch] || Gem;
-                return (
-                  <Link
-                    key={rune.id}
-                    to={`${publicBasePath}/${entitySlug(rune.name)}`}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    {rune.image_url ? (
-                      <img src={rune.image_url} alt={t('library.enWildRift2', { entityName: entityName(rune) })} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
-                        <RelatedIcon size={16} className="text-primary" />
-                      </div>
-                    )}
-                    <h3 className="min-w-0 truncate pr-[0.15em] font-rajdhani text-base font-bold">{entityName(rune)}</h3>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : selected.description
-            ? <p className="rd-entity-desc whitespace-pre-line text-muted-foreground">{entityDescription(selected)}</p>
-            : <p className="text-sm text-muted-foreground">{t('library.sinDescripcion')}</p>}
-        </div>
-      </div>
-    );
-  }
-
   if (selected) {
-    const BranchIcon = BRANCH_ICONS[selected.branch] || Gem;
-
     return (
-      <div className="space-y-6">
-        {publicBasePath ? <Link
-          to={publicBasePath}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={15} />
-         {t('library.volverARunas')}
-        </Link> : <button
-          onClick={() => {
-            setSelected(null);
-            onClearSelected?.();
-          }}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={15} />
-         {t('library.volverARunas')}
-        </button>}
-
-        <div className="rd-card overflow-hidden relative">
-          <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.18),transparent_35%)]" />
-
-          <div className="relative p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="shrink-0">
-                {selected.image_url ? (
-                  <img
-                    src={selected.image_url}
-                    alt={entityName(selected)}
-                    className="w-24 h-24 rounded-3xl object-cover border border-primary/20 shadow-[0_0_25px_rgba(212,175,55,.10)]"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-3xl bg-secondary border border-border/50 flex items-center justify-center">
-                    <BranchIcon size={34} className="text-primary" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-3">
-                  {selected.branch && (
-                    <span
-                      className={`text-xs px-2.5 py-1 rounded-lg border uppercase tracking-[0.12em] ${
-                        BRANCH_COLORS[selected.branch] ||
-                        'bg-secondary border-border text-foreground'
-                      }`}
-                    >
-                      {runeBranchLabel(selected.branch)}
-                    </span>
-                  )}
-                </div>
-
-                <h1 className="font-rajdhani font-bold text-5xl tracking-[-0.08em] text-foreground uppercase">
-                  {entityName(selected)}
-                </h1>
-
-                {selected.description && (
-                  <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed mt-4 max-w-3xl">
-                    {entityDescription(selected)}
-                  </p>
-                )}
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {relatedRunes.length > 0 && (
-          <section className="rd-card p-5">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">{t('library.runasDeLaMisma')}</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-             {t('library.otrasRunasQueComparten')} {entityName(selected)}.
-            </p>
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-              {relatedRunes.map(rune => {
-                const RelatedIcon = BRANCH_ICONS[rune.branch] || Gem;
-                return (
-                  <Link
-                    key={rune.id}
-                    to={`${publicBasePath}/${entitySlug(rune.name)}`}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    {rune.image_url ? (
-                      <img src={rune.image_url} alt={t('library.enWildRift2', { entityName: entityName(rune) })} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-                    ) : (
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary">
-                        <RelatedIcon size={18} className="text-primary" />
-                      </div>
-                    )}
-                    <h3 className="min-w-0 truncate pr-[0.15em] font-rajdhani text-base font-bold">{entityName(rune)}</h3>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
-      </div>
+      <RuneDetail
+        rune={selected}
+        runes={runes}
+        publicBasePath={publicBasePath}
+        onBack={() => {
+          setSelected(null);
+          onClearSelected?.();
+        }}
+        onSelectRune={rune => {
+          setSelected(rune);
+          onSelectId?.(rune.id);
+        }}
+      />
     );
   }
 

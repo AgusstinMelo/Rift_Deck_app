@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
+import { exclusiveClash } from '@/utils/exclusiveItems';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 import { PRESS_PREVIEW_STYLE, usePressPreview } from '@/hooks/usePressPreview';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
@@ -125,6 +126,9 @@ function getLockReason(item, selectedItems) {
   if (item.category === 'Mejorado' && selectedItems.some(i => i?.id === item.id))
     return tr('builds.losItemsMejoradosNo');
 
+  const clash = exclusiveClash(item, selectedItems);
+  if (clash) return tr('builds.noSeCombinaCon', { item: clash.name?.trim() });
+
   return null;
 }
 
@@ -151,6 +155,8 @@ function canAddItem(item, selectedItems) {
   if (UNIQUE_ITEMS.includes(item?.name?.toLowerCase()) &&
       selectedItems.some(i => UNIQUE_ITEMS.includes(i?.name?.toLowerCase()))) return false;
   if (item.category === 'Mejorado' && selectedItems.some(i => i?.id === item.id)) return false;
+  // Objetos que el juego no deja combinar (penetración, Cimitarra/Fuerza del Viento, Lágrima).
+  if (exclusiveClash(item, selectedItems)) return false;
 
   return true;
 }

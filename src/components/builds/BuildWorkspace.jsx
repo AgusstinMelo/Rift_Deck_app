@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { exclusiveClash } from '@/utils/exclusiveItems';
 import EntityHoverCard from '@/components/ui/EntityHoverCard';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSpells } from '@/hooks/useSpells';
@@ -87,6 +88,9 @@ export default function BuildWorkspace({ champion, tierEntries, items, runes, pa
 
     // Unique group: mutually exclusive
     if (isUniqueItem(item) && selectedItems.some(i => isUniqueItem(i))) return false;
+
+    // Objetos que el juego no deja combinar (penetración, Cimitarra/Fuerza del Viento, Lágrima).
+    if (exclusiveClash(item, selectedItems)) return false;
 
     // Mejorado: no repeat
     if (item.category === 'Mejorado' && selectedItems.some(i => i?.id === item.id)) return false;

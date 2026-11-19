@@ -66,7 +66,7 @@ export const LANES = ['top', 'jungler', 'mid', 'adc', 'support'];
  * (para piezas así, ese es su único valor: si no, parecen útiles contra cualquier rival).
  * Ojo: en Wild Rift el escudo de Orbe de Anulación absorbe cualquier daño (en PC, solo mágico).
  */
-export const COUNTER_TAGS = ['poke', 'desgaste', 'burst', 'asesinos', 'divers', 'cc', 'curacion', 'escudos', 'tanques', 'kiteo', 'daño_magico', 'daño_fisico'];
+export const COUNTER_TAGS = ['poke', 'desgaste', 'burst', 'asesinos', 'divers', 'luchadores', 'squishies', 'engage', 'pick', 'cc', 'curacion', 'escudos', 'tanques', 'kiteo', 'daño_magico', 'daño_fisico'];
 
 /**
  * Qué activa una runa (runes.trigger_tags). El Coach (detectors/build.js) y Build V2

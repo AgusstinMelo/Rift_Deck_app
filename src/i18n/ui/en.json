@@ -780,7 +780,8 @@
     "recordVarias": "{games} matches · {wr}",
     "recordSinPartidas": "No linked matches",
     "recordAyuda": "Matches logged with this build applied (record {wins}-{losses}).",
-    "recordSinPartidasAyuda": "Apply this build when logging a match to see how it performs."
+    "recordSinPartidasAyuda": "Apply this build when logging a match to see how it performs.",
+    "noSeCombinaCon": "Can't be combined with {item}: the game doesn't allow both."
   },
   "coach": {
     "queMuestranLosDatos": "What the data shows",
@@ -1043,7 +1044,159 @@
     "posicionSiguiente": "Next position",
     "score3": "Score:",
     "campeonesDelMismoRol": "Champions with the same role or lane",
-    "opcionesRelacionadasPorLos": "Options related by the role and lane data recorded in Rift Deck."
+    "opcionesRelacionadasPorLos": "Options related by the role and lane data recorded in Rift Deck.",
+    "efectos": "Effects",
+    "precio": "Price",
+    "runasClave": "Keystones",
+    "filaRunas": "Row {n}",
+    "runePerfil": {
+      "titulo": "Who it's for and what it beats",
+      "leSirveA": "Classes that make the most of it",
+      "rindeContra": "Works best against",
+      "counters": {
+        "poke": {
+          "nombre": "Poke",
+          "texto": "Enemies who hit you from range with abilities before you can get close."
+        },
+        "desgaste": {
+          "nombre": "Attrition",
+          "texto": "Lanes full of trades where your health is chipped away little by little."
+        },
+        "burst": {
+          "nombre": "Burst",
+          "texto": "Combos that take almost all your health at once."
+        },
+        "asesinos": {
+          "nombre": "Assassins",
+          "texto": "Champions who jump in to delete a squishy target and get out."
+        },
+        "divers": {
+          "nombre": "Divers",
+          "texto": "Champions who dive into your backline to reach the carries."
+        },
+        "cc": {
+          "nombre": "Crowd control",
+          "texto": "Teams with lots of stuns, immobilizes and slows."
+        },
+        "curacion": {
+          "nombre": "Healing",
+          "texto": "Enemies who heal a lot during fights."
+        },
+        "escudos": {
+          "nombre": "Shields",
+          "texto": "Enemies protected by their own or their allies' shields."
+        },
+        "tanques": {
+          "nombre": "Tanks",
+          "texto": "Enemies with lots of health and resistances, hard to bring down."
+        },
+        "kiteo": {
+          "nombre": "Kiting",
+          "texto": "Enemies who keep you at a distance or slip away."
+        },
+        "daño_magico": {
+          "nombre": "Magic damage",
+          "texto": "Teams that deal mostly magic damage."
+        },
+        "daño_fisico": {
+          "nombre": "Physical damage",
+          "texto": "Teams that deal mostly physical damage."
+        },
+        "luchadores": {
+          "nombre": "Fighters",
+          "texto": "Melee champions who stick around in fights and win long duels."
+        },
+        "squishies": {
+          "nombre": "Squishies",
+          "texto": "Low-health marksmen, mages and assassins: they go down fast once you reach them."
+        },
+        "engage": {
+          "nombre": "Engage",
+          "texto": "Teams that start fights by jumping on you with crowd control."
+        },
+        "pick": {
+          "nombre": "Pick",
+          "texto": "Enemies who catch you alone and delete you before your team arrives."
+        }
+      },
+      "teDa": "What it gives you",
+      "seActiva": "How it triggers",
+      "beneficios": {
+        "aceleracion_habilidad": "Ability haste",
+        "armadura": "Armor",
+        "buff_aliado": "Buffs allies",
+        "curacion": "Healing",
+        "curacion_aliada": "Heals allies",
+        "daño_adaptativo": "Adaptive damage",
+        "daño_adicional": "Bonus damage",
+        "daño_burst": "Burst damage",
+        "daño_ejecucion": "Finishes off targets",
+        "daño_escalado": "Scaling damage",
+        "daño_on_hit": "On-hit damage",
+        "daño_sostenido": "Sustained damage",
+        "daño_verdadero": "True damage",
+        "debuff_enemigo": "Weakens enemies",
+        "defensa_escalada": "Scaling defense",
+        "escudo": "Shield",
+        "escudo_aliado": "Shields allies",
+        "estadisticas_permanentes": "Permanent stats",
+        "generacion_oro": "Extra gold",
+        "mana": "Mana",
+        "poder_all_in": "Strong all-ins",
+        "poder_teamfight": "Strong teamfights",
+        "poder_trade": "Strong trades",
+        "reduccion_daño": "Damage reduction",
+        "reduccion_enfriamiento": "Cooldown reduction",
+        "reduccion_enfriamiento_ulti": "Ultimate cooldown reduction",
+        "regeneracion_mana": "Mana regen",
+        "regeneracion_vida": "Health regen",
+        "resistencia_magica": "Magic resist",
+        "resistencia_ralentizacion": "Slow resist",
+        "sosten_linea": "Lane sustain",
+        "tenacidad": "Tenacity",
+        "velocidad_ataque": "Attack speed",
+        "velocidad_movimiento": "Move speed",
+        "vida_escalada": "Scaling health"
+      },
+      "activadores": {
+        "autoataque": "With basic attacks",
+        "blink": "When you blink",
+        "cerca_aliado": "Near an ally",
+        "combate_extendido": "In long fights",
+        "curar": "When you heal",
+        "dash": "When you dash",
+        "derribo": "On kills or assists",
+        "distancia_recorrida": "By traveling distance",
+        "enemigo_con_cc": "Against crowd-controlled enemies",
+        "enemigo_ralentizado": "Against slowed enemies",
+        "escalado_tiempo": "Over time",
+        "escudar": "When you shield",
+        "fuera_combate": "Out of combat",
+        "golpes_consecutivos": "With consecutive hits",
+        "golpes_mismo_objetivo": "Hitting the same enemy",
+        "golpes_multiples": "With several hits in a short time",
+        "impacto_campeon": "When you damage a champion",
+        "impacto_habilidad": "When you land abilities",
+        "lanzar_ulti": "When you cast your ultimate",
+        "movimiento": "While moving",
+        "nivel": "On level up",
+        "objetivo_vida_alta": "Against high-health enemies",
+        "objetivo_vida_baja": "Against low-health enemies",
+        "recibir_daño": "When you take damage",
+        "salto": "When you jump",
+        "sigilo": "When leaving stealth",
+        "trade_corto": "In short trades",
+        "vida_propia_baja": "When your health is low"
+      },
+      "cualquierRival": {
+        "nombre": "Any enemy",
+        "texto": "It doesn't depend on the enemy team: it pays off every game through what it gives your champion."
+      }
+    },
+    "itemPerfil": {
+      "leSirveA": "Classes that make the most of it",
+      "idealSupports": "Best for supports who play"
+    }
   },
   "matches": {
     "seleccionarBuildDe": "Select build for",
@@ -1799,7 +1952,9 @@
       "tearReason": "Takes the place of {removed}: you can only build one Tear of the Goddess item.",
       "tearNote": "Rift Deck swapped {removed} for {item}: a build can only have one Tear of the Goddess item.",
       "starterExtraReason": "Takes the place of {removed}: you only build one support starter item.",
-      "starterExtraNote": "Rift Deck swapped {removed} for {item}: you only build one support starter item."
+      "starterExtraNote": "Rift Deck swapped {removed} for {item}: you only build one support starter item.",
+      "exclusiveReason": "Takes the place of {removed}: it can't be combined with {other}.",
+      "exclusiveNote": "Rift Deck swapped {removed} for {item}: the game doesn't allow it together with {other}."
     }
   },
   "stats": {

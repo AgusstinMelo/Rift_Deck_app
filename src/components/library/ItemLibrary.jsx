@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Champion, WRItem } from '@/api/entitiesSupabase';
-import { Search, ArrowLeft, Coins, Sword, CheckCircle2, Ban } from 'lucide-react';
+import { Search, Sword } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
-import SimpleMarkdown from '@/components/ui/SimpleMarkdown';
 import { Link } from 'react-router-dom';
 import { entitySlug, findEntityBySlug } from '@/utils/entitySlug';
 import { publicCatalogQueryOptions } from '@/lib/publicCatalogQuery';
-import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
-import { DESKTOP_FIT_QUERY, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 import { itemCategoryLabel, itemTypeLabel } from '@/utils/itemLabels';
+import ItemDetail from '@/components/library/ItemDetail';
 
 const CATEGORY_LABELS = {
   get 'Básico'() { return itemCategoryLabel('Básico'); },
@@ -30,13 +28,7 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [selected, setSelected] = useState(() => selectedSlug ? findEntityBySlug(initialItems, selectedSlug) : null);
-  // La ficha pública se prerenderiza: arranca sin dossier y lo activa al montar.
-  const mediaOptions = { ssrSafe: Boolean(publicBasePath) };
-  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, mediaOptions);
-  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, mediaOptions);
-  const isDesktopFit = useMatchMedia(DESKTOP_FIT_QUERY, mediaOptions);
-  const [section, setSection] = useState('description');
-  const { entityName, entityDescription, matchesName, compareNames } = useCatalogText();
+  const { entityName, matchesName, compareNames } = useCatalogText();
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['writems'],
@@ -97,8 +89,6 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
       .replace(/[\u0300-\u036f]/g, '')
       .trim();
   };
-
-  const normalizeChampionName = (value) => normalizeKey(value).replace(/[^a-z0-9]/g, '');
 
   const getTypeOrder = (type) => {
     return TYPE_ORDER[normalizeKey(type)] ?? 999;
@@ -183,428 +173,22 @@ export default function ItemLibrary({ selectedId, selectedSlug, onSelectId, onCl
     return acc;
   }, {});
     
-  const STAT_CONFIG = [
-    { key: 'life', label: t('builds.vida'), color: 'text-red-400', unit: '' },
-    { key: 'life_reg', label: t('builds.regVida'), color: 'text-red-300', unit: '' },
-    { key: 'mana', label: t('builds.mana'), color: 'text-blue-400', unit: '' },
-    { key: 'mana_reg', label: t('builds.regMana'), color: 'text-blue-300', unit: '' },
-    { key: 'attack_damage', label: t('itemTypes.Daño Físico'), color: 'text-orange-400', unit: '' },
-    { key: 'attack_speed', label: t('library.velAtaque'), color: 'text-yellow-400', unit: '%' },
-    { key: 'ability_power', label: t('library.poderDeHabilidad'), color: 'text-purple-400', unit: '' },
-    { key: 'armor', label: t('builds.armadura'), color: 'text-yellow-300', unit: '' },
-    { key: 'magic_res', label: t('library.resistMagica'), color: 'text-indigo-400', unit: '' },
-    { key: 'flat_movement', label: t('library.velMov'), color: 'text-teal-400', unit: '' },
-    { key: 'percentage_movement', label: t('library.velMov2'), color: 'text-teal-300', unit: '%' },
-    { key: 'critical_impact', label: t('library.tasaDeCriticos'), color: 'text-amber-400', unit: '%' },
-    { key: 'critical_damage', label: t('library.danoCritico'), color: 'text-amber-300', unit: '%' },
-    { key: 'lifesteal', label: t('library.roboDeVida'), color: 'text-pink-400', unit: '%' },
-    { key: 'physic_vamp', label: t('library.vampFisico'), color: 'text-pink-400', unit: '%' },
-    { key: 'magic_vamp', label: t('library.vampMagico'), color: 'text-pink-300', unit: '%' },
-    { key: 'flat_armor_penetration', label: t('library.penArmadura'), color: 'text-red-300', unit: '' },
-    { key: 'percentage_armor_penetration', label: t('library.penArmadura2'), color: 'text-red-200', unit: '%' },
-    { key: 'flat_magic_penetration', label: t('library.penMagica'), color: 'text-violet-400', unit: '' },
-    { key: 'percentage_magic_penetration', label: t('library.penMagica2'), color: 'text-violet-300', unit: '%' },
-    { key: 'ability_haste', label: t('library.aceleracionDeHabilidad'), color: 'text-cyan-400', unit: '' },
-    { key: 'tenacity', label: t('builds.tenacidad'), color: 'text-green-400', unit: '%' },
-    { key: 'healing_and_shield', label: t('library.curacionEscudo'), color: 'text-emerald-400', unit: '%' },
-  ];
-
-  const activeStats = selected
-    ? STAT_CONFIG.filter(stat => {
-        const unifiedLifesteal = usesUnifiedLifesteal(selected.patch_version);
-        if (unifiedLifesteal && (stat.key === 'physic_vamp' || stat.key === 'magic_vamp')) return false;
-        if (!unifiedLifesteal && stat.key === 'lifesteal') return false;
-
-        const value = Number(selected[stat.key]);
-        return !Number.isNaN(value) && value !== 0;
-      })
-    : [];
-
-  const relatedItems = selected && publicBasePath
-    ? items
-        .filter(item => item.id !== selected.id)
-        .filter(item => {
-          const selectedTypes = getItemTypes(selected.type).map(normalizeKey);
-          return getItemTypes(item.type).some(type => selectedTypes.includes(normalizeKey(type)));
-        })
-        .sort(compareNames)
-        .slice(0, 6)
-    : [];
-
-  const championsByName = new Map(
-    champions.map(champion => [normalizeChampionName(champion.name), champion])
-  );
-  const resolveChampionList = values => (Array.isArray(values) ? values : [])
-    .map(name => championsByName.get(normalizeChampionName(name)))
-    .filter(Boolean);
-  const recommendedAgainst = selected ? resolveChampionList(selected.good_against) : [];
-  const avoidAgainst = selected ? resolveChampionList(selected.avoid_against) : [];
-
-  const clearSelected = () => {
-    setSelected(null);
-    setSection('description');
-    onClearSelected?.();
-  };
-
-  const itemImage = (className, iconSize) => (selected?.image_url ? (
-    <img src={selected.image_url} alt={entityName(selected)} className={className} />
-  ) : (
-    <div className={`${className} bg-secondary flex items-center justify-center`}>
-      <Sword size={iconSize} className="text-primary" />
-    </div>
-  ));
-
-  const itemDescription = selected?.description && (
-    <SimpleMarkdown
-      components={{
-        p: ({ children }) => <p className="my-1.5">{children}</p>,
-        strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
-      }}
-    >
-      {entityDescription(selected)}
-    </SimpleMarkdown>
-  );
-
-  // En smartphone (vertical u horizontal) y en escritorio la ficha es un "dossier" como la
-  // de campeón: identidad compacta, pestañas y una sección a la vez con todo el alto que queda.
-  // La ficha pública suma la pestaña con los objetos del mismo tipo.
-  if (selected && (isPhonePortrait || isPhoneLandscape || isDesktopFit)) {
-    const tags = (selected.tags || '').split(',').map(tag => tag.trim()).filter(Boolean);
-    const sectionTabs = [
-      ['description', t('library.detalle')],
-      ['matchups', t('library.enfrentamientos')],
-      ...(relatedItems.length > 0 ? [['related', t('library.relacionados')]] : []),
-    ];
-    const activeSection = sectionTabs.some(([id]) => id === section) ? section : 'description';
-    const matchupGroups = [
-      { id: 'good', title: t('library.recomendadoVs'), icon: CheckCircle2, champions: recommendedAgainst },
-      { id: 'avoid', title: t('library.evitarVs'), icon: Ban, champions: avoidAgainst },
-    ];
-
-    return (
-      <div className="rd-entity-detail">
-        {publicBasePath ? (
-          <Link to={publicBasePath} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft size={15} />
-           {t('library.volverAObjetos')}
-          </Link>
-        ) : (
-          <button onClick={clearSelected} className="rd-entity-back flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft size={15} />
-           {t('library.volverAObjetos')}
-          </button>
-        )}
-
-        <div className="rd-card rd-entity-hero">
-          {itemImage('rd-entity-hero-img', 26)}
-          <div className="min-w-0">
-            <div className="rd-entity-hero-pills">
-              {selected.category && (
-                <span className={`rd-entity-pill border ${CATEGORY_COLORS[selected.category] || 'bg-secondary border-border text-foreground'}`}>
-                  {CATEGORY_LABELS[selected.category] || selected.category}
-                </span>
-              )}
-              {selected.price && (
-                <span className="rd-status-pill">
-                  <Coins size={12} className="inline mr-1 text-primary" />
-                  {selected.price} {t('builds.oro')}
-                </span>
-              )}
-            </div>
-            <h1 className="font-rajdhani font-bold tracking-[-0.06em] text-foreground uppercase">{entityName(selected)}</h1>
-          </div>
-        </div>
-
-        <div className="rd-panel-tabs rd-entity-tabs" role="tablist" aria-label={t('library.seccionesDelObjeto')}>
-          {sectionTabs.map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={activeSection === id}
-              onClick={() => setSection(id)}
-              className={`rd-panel-tab ${activeSection === id ? 'rd-panel-tab-active' : ''}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="rd-card rd-entity-section">
-          <div className="rd-entity-section-head">
-            <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">{sectionTabs.find(([id]) => id === activeSection)[1]}</h2>
-          </div>
-
-          {activeSection === 'description' && (
-            <>
-              {/* Estadísticas como chips en una sola fila, antes de la descripción
-                  (si no entran, la fila se desliza de costado). */}
-              {activeStats.length > 0 && (
-                <div className="rd-entity-stats" aria-label={t('nav.stats')}>
-                  {activeStats.map(stat => (
-                    <span key={stat.key} className="rd-entity-stat" title={stat.label}>
-                      <span className="rd-entity-stat-label">{stat.label}</span>
-                      <strong className={`font-rajdhani ${stat.color}`}>+{selected[stat.key]}{stat.unit}</strong>
-                    </span>
-                  ))}
-                </div>
-              )}
-              {itemDescription
-                ? <div className="rd-entity-desc text-muted-foreground">{itemDescription}</div>
-                : <p className="text-sm text-muted-foreground">{t('library.sinDescripcion')}</p>}
-              {tags.length > 0 && (
-                <div className="rd-entity-tags">
-                  {tags.map(tag => <span key={tag} className="rd-status-pill">{tag}</span>)}
-                </div>
-              )}
-            </>
-          )}
-
-          {activeSection === 'matchups' && (
-            <div className="rd-entity-matchups">
-              {matchupGroups.map(({ id, title, icon: Icon, champions: groupChampions }) => (
-                <div key={id} className={`rd-mini-action rd-entity-matchup-${id}`}>
-                  <h3><Icon size={14} /> {title}</h3>
-                  {groupChampions.length > 0 ? (
-                    <div className="rd-entity-matchup-list">
-                      {groupChampions.map(champion => (
-                        <div key={champion.id}>
-                          {champion.image_url
-                            ? <img src={champion.image_url} alt={champion.name} />
-                            : <span className="rd-entity-matchup-fallback" />}
-                          <span>{champion.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeSection === 'related' && (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {relatedItems.map(item => (
-                <Link
-                  key={item.id}
-                  to={`${publicBasePath}/${entitySlug(item.name)}`}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
-                >
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={t('library.enWildRift2', { entityName: entityName(item) })} width="40" height="40" loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-                  ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                      <Sword size={16} className="text-primary" />
-                    </div>
-                  )}
-                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(item)}</h3>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   if (selected) {
     return (
-      <div className="space-y-6">
-        {publicBasePath ? <Link
-          to={publicBasePath}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={15} />
-         {t('library.volverAObjetos')}
-        </Link> : <button
-          onClick={() => {
-            setSelected(null);
-            onClearSelected?.();
-          }}
-          className="
-            flex items-center gap-2 text-sm
-            text-muted-foreground hover:text-foreground
-            transition-colors
-          "
-        >
-          <ArrowLeft size={15} />
-         {t('library.volverAObjetos')}
-        </button>}
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="rd-card overflow-hidden relative">
-          <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.18),transparent_35%)]" />
-
-          <div className="relative p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="shrink-0">
-                {selected.image_url ? (
-                  <img
-                    src={selected.image_url}
-                    alt={entityName(selected)}
-                    className="
-                      w-24 h-24 rounded-3xl object-cover
-                      border border-primary/20
-                      shadow-[0_0_25px_rgba(212,175,55,.10)]
-                    "
-                  />
-                ) : (
-                  <div
-                    className="
-                      w-24 h-24 rounded-3xl bg-secondary
-                      border border-border/50
-                      flex items-center justify-center
-                    "
-                  >
-                    <Sword size={34} className="text-primary" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-3">
-                  {selected.category && (
-                    <span
-                      className={`
-                        text-xs px-2.5 py-1 rounded-lg border uppercase tracking-[0.12em]
-                        ${CATEGORY_COLORS[selected.category] || 'bg-secondary border-border text-foreground'}
-                      `}
-                    >
-                      {CATEGORY_LABELS[selected.category] || selected.category}
-                    </span>
-                  )}
-
-                  {selected.price && (
-                    <span className="rd-status-pill">
-                      <Coins size={13} className="inline mr-1 text-primary" />
-                      {selected.price} {t('builds.oro')}
-                    </span>
-                  )}
-                </div>
-
-                <h1 className="font-rajdhani font-bold text-5xl tracking-[-0.08em] text-foreground uppercase">
-                  {entityName(selected)}
-                </h1>
-
-                {selected.description && (
-                  <div className="text-muted-foreground text-sm leading-relaxed mt-4 max-w-3xl prose prose-invert prose-p:my-2 prose-strong:text-foreground">
-                    {itemDescription}
-                  </div>
-                )}
-
-                {(selected.tags || '').length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-5">
-                    {selected.tags
-                      .split(',')
-                      .map(t => t.trim())
-                      .filter(Boolean)
-                      .map(t => (
-                        <span key={t} className="rd-status-pill">
-                          {t}
-                        </span>
-                      ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {activeStats.length > 0 && (
-              <div className="mt-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="w-6 h-px bg-primary/50" />
-                  <h2 className="rd-card-title">{t('library.estadisticasDelObjeto')}</h2>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-                  {activeStats.map(stat => {
-                    const value = selected[stat.key];
-
-                    return (
-                      <div key={stat.key} className="rd-mini-action">
-                        <p className="rd-label mb-1">
-                          {stat.label}
-                        </p>
-
-                        <p className={`text-lg font-bold ${stat.color}`}>
-                          +{value}{stat.unit}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <aside className="rd-card h-fit p-5">
-          <div className="flex items-center gap-2 mb-5">
-            <span className="w-6 h-px bg-primary/50" />
-            <h2 className="rd-card-title">{t('library.enfrentamientos')}</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="rd-mini-action">
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-green-400">
-                <CheckCircle2 size={15} /> {t('library.recomendadoVs')}
-              </h3>
-              <div className="space-y-2">
-                {recommendedAgainst.length > 0 ? recommendedAgainst.map(champion => (
-                  <div key={champion.id} className="flex items-center gap-2">
-                    {champion.image_url && <img src={champion.image_url} alt={champion.name} width="32" height="32" className="h-8 w-8 shrink-0 rounded-lg object-cover border border-green-500/20" />}
-                    <span className="truncate text-xs font-medium text-green-300">{champion.name}</span>
-                  </div>
-                )) : <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>}
-              </div>
-            </div>
-
-            <div className="rd-mini-action">
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
-                <Ban size={15} /> {t('library.evitarVs')}
-              </h3>
-              <div className="space-y-2">
-                {avoidAgainst.length > 0 ? avoidAgainst.map(champion => (
-                  <div key={champion.id} className="flex items-center gap-2">
-                    {champion.image_url && <img src={champion.image_url} alt={champion.name} width="32" height="32" className="h-8 w-8 shrink-0 rounded-lg object-cover border border-red-500/20" />}
-                    <span className="truncate text-xs font-medium text-red-300">{champion.name}</span>
-                  </div>
-                )) : <p className="text-sm text-muted-foreground">{t('library.sinDatos')}</p>}
-              </div>
-            </div>
-          </div>
-        </aside>
-        </div>
-
-        {relatedItems.length > 0 && (
-          <section className="rd-card p-5">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="w-6 h-px bg-primary/50" />
-              <h2 className="rd-card-title">{t('library.objetosDelMismoTipo')}</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-             {t('library.otrosObjetosQueComparten')} {entityName(selected)}.
-            </p>
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-              {relatedItems.map(item => (
-                <Link
-                  key={item.id}
-                  to={`${publicBasePath}/${entitySlug(item.name)}`}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
-                >
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={t('library.enWildRift2', { entityName: entityName(item) })} width="48" height="48" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
-                  ) : (
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                      <Sword size={18} className="text-primary" />
-                    </div>
-                  )}
-                  <h3 className="min-w-0 truncate font-rajdhani text-base font-bold">{entityName(item)}</h3>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
+      <ItemDetail
+        item={selected}
+        items={items}
+        champions={champions}
+        publicBasePath={publicBasePath}
+        onBack={() => {
+          setSelected(null);
+          onClearSelected?.();
+        }}
+        onSelectItem={item => {
+          setSelected(item);
+          onSelectId?.(item.id);
+        }}
+      />
     );
   }
 

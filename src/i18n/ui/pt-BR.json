@@ -780,7 +780,8 @@
     "recordVarias": "{games} partidas · {wr}",
     "recordSinPartidas": "Sem partidas vinculadas",
     "recordAyuda": "Partidas registradas aplicando esta build (campanha {wins}-{losses}).",
-    "recordSinPartidasAyuda": "Aplique esta build ao registrar uma partida para ver como ela rende."
+    "recordSinPartidasAyuda": "Aplique esta build ao registrar uma partida para ver como ela rende.",
+    "noSeCombinaCon": "Não pode ser combinado com {item}: o jogo não permite os dois juntos."
   },
   "coach": {
     "queMuestranLosDatos": "O que os dados mostram",
@@ -1043,7 +1044,159 @@
     "posicionSiguiente": "Próxima posição",
     "score3": "Score:",
     "campeonesDelMismoRol": "Campeões da mesma função ou rota",
-    "opcionesRelacionadasPorLos": "Opções relacionadas pelos dados de função e rota registrados no Rift Deck."
+    "opcionesRelacionadasPorLos": "Opções relacionadas pelos dados de função e rota registrados no Rift Deck.",
+    "efectos": "Efeitos",
+    "precio": "Preço",
+    "runasClave": "Runas-chave",
+    "filaRunas": "Linha {n}",
+    "runePerfil": {
+      "titulo": "Para quem e contra o quê",
+      "leSirveA": "Classes que aproveitam",
+      "rindeContra": "Rende melhor contra",
+      "counters": {
+        "poke": {
+          "nombre": "Poke",
+          "texto": "Rivais que te acertam de longe com habilidades antes que você consiga se aproximar."
+        },
+        "desgaste": {
+          "nombre": "Desgaste",
+          "texto": "Rotas cheias de trocas em que sua vida vai caindo aos poucos."
+        },
+        "burst": {
+          "nombre": "Burst",
+          "texto": "Combos que tiram quase toda a sua vida de uma vez."
+        },
+        "asesinos": {
+          "nombre": "Assassinos",
+          "texto": "Campeões que entram para eliminar um alvo frágil e saem."
+        },
+        "divers": {
+          "nombre": "Divers",
+          "texto": "Campeões que mergulham na linha de trás para chegar aos carries."
+        },
+        "cc": {
+          "nombre": "Controle",
+          "texto": "Times com muitos atordoamentos, imobilizações e lentidões."
+        },
+        "curacion": {
+          "nombre": "Cura",
+          "texto": "Rivais que se curam muito durante as lutas."
+        },
+        "escudos": {
+          "nombre": "Escudos",
+          "texto": "Rivais protegidos por escudos próprios ou dos aliados."
+        },
+        "tanques": {
+          "nombre": "Tanques",
+          "texto": "Rivais com muita vida e resistências, difíceis de derrubar."
+        },
+        "kiteo": {
+          "nombre": "Kite",
+          "texto": "Rivais que te mantêm à distância ou escapam."
+        },
+        "daño_magico": {
+          "nombre": "Dano mágico",
+          "texto": "Times que causam principalmente dano mágico."
+        },
+        "daño_fisico": {
+          "nombre": "Dano físico",
+          "texto": "Times que causam principalmente dano físico."
+        },
+        "luchadores": {
+          "nombre": "Lutadores",
+          "texto": "Campeões corpo a corpo que ficam na luta e vencem os duelos longos."
+        },
+        "squishies": {
+          "nombre": "Frágeis",
+          "texto": "Atiradores, magos e assassinos com pouca vida: caem rápido se você os alcança."
+        },
+        "engage": {
+          "nombre": "Engage",
+          "texto": "Times que iniciam as lutas pulando em você com controle."
+        },
+        "pick": {
+          "nombre": "Pick",
+          "texto": "Rivais que te pegam sozinho e te eliminam antes que seu time chegue."
+        }
+      },
+      "teDa": "O que ela te dá",
+      "seActiva": "Como é ativada",
+      "beneficios": {
+        "aceleracion_habilidad": "Aceleração de habilidade",
+        "armadura": "Armadura",
+        "buff_aliado": "Fortalece aliados",
+        "curacion": "Cura",
+        "curacion_aliada": "Cura aliados",
+        "daño_adaptativo": "Dano adaptável",
+        "daño_adicional": "Dano adicional",
+        "daño_burst": "Dano explosivo",
+        "daño_ejecucion": "Finaliza alvos",
+        "daño_escalado": "Dano que cresce",
+        "daño_on_hit": "Dano ao golpear",
+        "daño_sostenido": "Dano contínuo",
+        "daño_verdadero": "Dano verdadeiro",
+        "debuff_enemigo": "Enfraquece o rival",
+        "defensa_escalada": "Defesa que cresce",
+        "escudo": "Escudo",
+        "escudo_aliado": "Escudo para aliados",
+        "estadisticas_permanentes": "Atributos permanentes",
+        "generacion_oro": "Ouro extra",
+        "mana": "Mana",
+        "poder_all_in": "Forte no all-in",
+        "poder_teamfight": "Forte em lutas de equipe",
+        "poder_trade": "Forte em trocas",
+        "reduccion_daño": "Reduz o dano recebido",
+        "reduccion_enfriamiento": "Reduz recargas",
+        "reduccion_enfriamiento_ulti": "Reduz a recarga da ultimate",
+        "regeneracion_mana": "Regeneração de mana",
+        "regeneracion_vida": "Regeneração de vida",
+        "resistencia_magica": "Resistência mágica",
+        "resistencia_ralentizacion": "Resiste a lentidões",
+        "sosten_linea": "Sustentação na rota",
+        "tenacidad": "Tenacidade",
+        "velocidad_ataque": "Velocidade de ataque",
+        "velocidad_movimiento": "Velocidade de movimento",
+        "vida_escalada": "Vida que cresce"
+      },
+      "activadores": {
+        "autoataque": "Com ataques básicos",
+        "blink": "Ao se teleportar (blink)",
+        "cerca_aliado": "Perto de um aliado",
+        "combate_extendido": "Em lutas longas",
+        "curar": "Ao curar",
+        "dash": "Ao dar um avanço",
+        "derribo": "Ao conseguir abates ou assistências",
+        "distancia_recorrida": "Ao percorrer distância",
+        "enemigo_con_cc": "Contra rivais controlados",
+        "enemigo_ralentizado": "Contra rivais com lentidão",
+        "escalado_tiempo": "Com o passar do tempo",
+        "escudar": "Ao dar escudos",
+        "fuera_combate": "Fora de combate",
+        "golpes_consecutivos": "Com golpes seguidos",
+        "golpes_mismo_objetivo": "Golpeando o mesmo rival",
+        "golpes_multiples": "Com vários golpes em pouco tempo",
+        "impacto_campeon": "Ao causar dano a um campeão",
+        "impacto_habilidad": "Ao acertar habilidades",
+        "lanzar_ulti": "Ao usar a ultimate",
+        "movimiento": "Ao se mover",
+        "nivel": "Ao subir de nível",
+        "objetivo_vida_alta": "Contra rivais com muita vida",
+        "objetivo_vida_baja": "Contra rivais com pouca vida",
+        "recibir_daño": "Ao receber dano",
+        "salto": "Ao saltar",
+        "sigilo": "Ao sair da furtividade",
+        "trade_corto": "Em trocas curtas",
+        "vida_propia_baja": "Com sua vida baixa"
+      },
+      "cualquierRival": {
+        "nombre": "Qualquer rival",
+        "texto": "Não depende do time inimigo: rende em todas as partidas pelo que soma ao seu campeão."
+      }
+    },
+    "itemPerfil": {
+      "leSirveA": "Classes que aproveitam",
+      "idealSupports": "Ideal para suportes"
+    }
   },
   "matches": {
     "seleccionarBuildDe": "Selecionar build de",
@@ -1799,7 +1952,9 @@
       "tearReason": "Ocupa o lugar de {removed}: só dá para montar um item de Lágrima da Deusa.",
       "tearNote": "O Rift Deck trocou {removed} por {item}: uma build só pode ter um item de Lágrima da Deusa.",
       "starterExtraReason": "Ocupa o lugar de {removed}: só se monta um item inicial de suporte.",
-      "starterExtraNote": "O Rift Deck trocou {removed} por {item}: só se monta um item inicial de suporte."
+      "starterExtraNote": "O Rift Deck trocou {removed} por {item}: só se monta um item inicial de suporte.",
+      "exclusiveReason": "Ocupa o lugar de {removed}: não pode ser combinado com {other}.",
+      "exclusiveNote": "O Rift Deck trocou {removed} por {item}: o jogo não permite usá-lo junto com {other}."
     }
   },
   "stats": {

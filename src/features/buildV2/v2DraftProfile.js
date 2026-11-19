@@ -22,10 +22,15 @@ const isPeeler = champion => (score(champion, 'peel') != null
   ? atLeast(champion, 'peel', 3)
   : isTank(champion) || tags(champion.roles).has('soporte'));
 
+const SQUISHY_ROLES = ['tirador', 'mago', 'asesino'];
+const isSquishy = champion => !isTank(champion) && !tags(champion.roles).has('luchador') && SQUISHY_ROLES.some(role => tags(champion.roles).has(role));
+const isFighter = champion => !isTank(champion) && tags(champion.roles).has('luchador');
+// Kiteo: se te escapa (mucha movilidad) o te mantiene lejos (largo alcance y ralentiza).
+const isKiter = champion => atLeast(champion, 'mobility', 4) || (atLeast(champion, 'range', 4) && tags(champion.traits).has('ralentizacion'));
+
 /**
- * Señales del rival, con los nombres de `counters` (poke, desgaste, burst, asesinos,
- * divers, cc, curacion, escudos, tanques) más pick y engage, que no tienen runa propia
- * pero cambian cómo se juega. `min`: cuántos rivales hacen falta para que cuente.
+ * Señales del rival, con los nombres de `counters` de runas y hechizos (COUNTER_TAGS en
+ * coach/taxonomy.js). `min`: cuántos rivales hacen falta para que cuente.
  */
 const ENEMY_SIGNALS = [
   { signal: 'divers', min: 2, test: c => !isTank(c) && (tags(c.team_roles).size ? tags(c.team_roles).has('diver') : tags(c.roles).has('asesino')) },
@@ -39,6 +44,9 @@ const ENEMY_SIGNALS = [
   { signal: 'tanques', min: 2, test: isTank },
   { signal: 'pick', min: 2, test: c => tags(c.team_roles).has('pick') },
   { signal: 'engage', min: 2, test: c => atLeast(c, 'engage', 4) },
+  { signal: 'luchadores', min: 2, test: isFighter },
+  { signal: 'squishies', min: 3, test: isSquishy },
+  { signal: 'kiteo', min: 2, test: isKiter },
 ];
 
 /** Daño de un tipo (los híbridos cuentan medio) desde el que es señal para counters. */

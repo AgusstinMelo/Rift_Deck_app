@@ -30,7 +30,7 @@ if (!supabaseUrl || !anonKey) {
 }
 
 const publicColumns = [
-  'id', 'name', 'image_url', 'image_url_card', 'lane', 'roles', 'difficulty',
+  'id', 'name', 'image_url', 'image_url_card', 'image_url_splash', 'lane', 'roles', 'difficulty',
   'damage_type', 'scaling', 'strategic_notes', 'tags', 'life', 'mana', 'armor',
   'magic_res', 'attack_damage', 'attack_speed', 'movement', 'bonus_attack_speed',
   'life_reg', 'mana_reg', 'lifesteal', 'physic_vamp', 'magic_vamp', 'damage', 'survive',
@@ -55,14 +55,14 @@ const fetchPublicRows = async (table, columns, filters = '') => {
 };
 const itemColumns = [
   'id', 'name', 'image_url', 'price', 'description', 'category', 'type', 'tags', 'active',
-  'good_against', 'avoid_against',
+  'good_against', 'avoid_against', 'fits_classes', 'effect_tags',
   'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power',
   'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact',
   'critical_damage', 'lifesteal', 'physic_vamp', 'magic_vamp', 'flat_armor_penetration',
   'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration',
   'ability_haste', 'tenacity', 'healing_and_shield', 'updated_at',
 ];
-const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description', 'updated_at'];
+const runeColumns = ['id', 'name', 'image_url', 'branch', 'group', 'description', 'fits_classes', 'counters', 'benefit_tags', 'trigger_tags', 'updated_at'];
 const items = await fetchPublicRows('current_wr_items', itemColumns, '&active=eq.true');
 const runes = await fetchPublicRows('current_runes', runeColumns);
 const groupParams = new URLSearchParams({

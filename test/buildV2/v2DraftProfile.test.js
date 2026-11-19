@@ -31,6 +31,20 @@ test('señales del rival con los campeones que las forman', () => {
   assert.deepEqual(profile.ally_gaps, []);
 });
 
+test('señales de luchadores, squishies y kiteo', () => {
+  const darius = champ('darius', ['Luchador']);
+  const sion = champ('sion', ['Luchador', 'Tanque']);
+  const ezreal = champ('ezreal', ['Tirador'], { score_mobility: 4 });
+  const ashe = champ('ashe', ['Tirador'], { score_range: 5, traits: ['ralentizacion'] });
+  const by = (enemies, signal) => buildDraftProfile({ champion: jinx, role: 'adc', allies: [], enemies })
+    .enemy_signals.find(entry => entry.signal === signal)?.champions;
+  // Los tanques no cuentan como luchadores ni como squishies.
+  assert.deepEqual(by([darius, garen, sion], 'luchadores'), ['Darius', 'Garen']);
+  assert.deepEqual(by([zed, lux, ezreal, thresh], 'squishies'), ['Zed', 'Lux', 'Ezreal']);
+  assert.equal(by([zed, lux, darius], 'squishies'), undefined);
+  assert.deepEqual(by([ezreal, ashe, lux], 'kiteo'), ['Ezreal', 'Ashe']);
+});
+
 test('lo que le falta a tu equipo, y qué cubre tu campeón', () => {
   const asGaren = buildDraftProfile({ champion: garen, role: 'top', allies: [jinx, lux, ahri], enemies: [] });
   assert.deepEqual(asGaren.selected_covers, ['primera_linea']);

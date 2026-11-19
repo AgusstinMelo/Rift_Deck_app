@@ -2,8 +2,13 @@
 // - las evoluciones no se compran: Muramaná sale de Manamune al cargar maná, Abrazo del
 //   Serafín del Báculo del Arcángel, etc. Solo se arma el objeto base;
 // - los objetos de Lágrima de la Diosa (cargan maná) son excluyentes: uno por build;
+// - otros grupos que no se combinan (utils/exclusiveItems.js): Terminus, Recordatorio
+//   Mortal, Rencor de Serylda y Lord Dominik; Báculo del Vacío, Criptorretoño y Maldición
+//   de la Vampiresa; Cimitarra Mercurial y Fuerza del Viento;
 // - en Support, el primer objeto es el objeto de soporte inicial ya completado (Guadaña de
 //   Niebla Oscura o Baluarte de la Montaña), aunque en el catálogo figure como "Básico".
+
+import { exclusiveGroupOf } from '../../utils/exclusiveItems.js';
 
 const normalize = value => String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
 
@@ -49,6 +54,14 @@ export function itemRulesFor(items = []) {
     isEvolved: item => evolved.has(normalize(item?.name)),
     /** Objeto de Lágrima de la Diosa: carga maná y evoluciona. Uno por build. */
     isTear: item => evolutionOf.has(normalize(item?.name)) || /limitado a un solo objeto de lagrima/.test(normalize(item?.description)),
+    /**
+     * Grupo de objetos que el juego no deja combinar (utils/exclusiveItems.js), o null. La
+     * Lágrima de la Diosa va aparte (isTear), con su propia regla y mensaje.
+     */
+    exclusiveGroup: item => {
+      const group = exclusiveGroupOf(item);
+      return group && group !== 'lagrima' ? group : null;
+    },
     /** Objeto de soporte inicial completado (Guadaña de Niebla Oscura, Baluarte de la Montaña). */
     isSupportStarter: item => starters.has(normalize(item?.name)),
     evolutionName: item => {

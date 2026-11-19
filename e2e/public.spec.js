@@ -41,7 +41,7 @@ test('ficha de objeto prerenderizada muestra la descripción', async ({ page }) 
   const href = await firstItem.getAttribute('href');
   // Carga directa (HTML prerenderizado + hidratación), no navegación del cliente.
   await page.goto(href);
-  await expect(page.locator('p.my-1\\.5').first()).toBeVisible();
+  await expect(page.locator('.rd-ed-effect-list li').first()).toBeVisible();
   expect(errors.other).toEqual([]);
 });
 
