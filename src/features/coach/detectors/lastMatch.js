@@ -10,6 +10,8 @@ import { findDeathCeiling, survivalTip } from './performance.js';
 
 const THREAT_WEIGHT = { healing: 3, burst: 2.8, magic: 2.6, physical: 2.6, cc: 2.2, tanks: 2.2, shields: 1.6 };
 const RECENT_MS = 36 * 3600 * 1000;
+/** Amenazas que se responden para sobrevivir: si ganaste muriendo poco, no faltó la respuesta. */
+const SURVIVAL_THREATS = ['cc', 'burst', 'magic', 'physical'];
 
 /** Momento en que se cargó la partida (o se jugó, si no hay fecha de carga). */
 const loadedAt = match => new Date(match.raw.created_at || 0).getTime() || match.time;
@@ -19,12 +21,15 @@ export function detectLastMatch(ctx) {
   if (!match || ctx.matches.length < 3) return [];
   const flags = [];
   const praise = [];
+  // Ganaste muriendo poco: las amenazas que se responden para sobrevivir no te castigaron.
+  let survived = false;
 
   // Muertes: contra tu techo (si existe) o contra lo que promediás en tus victorias.
   if (match.hasKda) {
     const ceiling = findDeathCeiling(ctx.matches, ctx.base.wr)?.ceiling;
     const wins = summarize(ctx.matches.filter(row => row.won && row !== match));
     const limit = ceiling ?? (wins.kdaGames >= 5 ? Math.round(wins.avgDeaths + 1.5) : null);
+    survived = match.won && match.deaths <= (limit !== null ? Math.max(2, limit - 2) : 3);
     if (limit !== null && match.deaths > limit) {
       flags.push({
         weight: 3 + (match.deaths - limit) * 0.3,
@@ -50,6 +55,9 @@ export function detectLastMatch(ctx) {
   // Build contra la composición rival.
   Object.entries(match.threats).forEach(([id, threat]) => {
     if (coveredByReview.includes(id)) return;
+    // Defensa (control, burst, daño de un tipo) en una victoria con pocas muertes: no hizo
+    // falta. El antiheal o la penetración no dependen de cuánto moriste: esos sí se marcan.
+    if (threat.answered === false && survived && SURVIVAL_THREATS.includes(id)) return;
     if (threat.answered === false) {
       flags.push({
         weight: THREAT_WEIGHT[id] ?? 2,

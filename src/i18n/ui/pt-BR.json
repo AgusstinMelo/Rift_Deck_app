@@ -2199,12 +2199,13 @@
       },
       "cc": {
         "title": "O controle inimigo te pega sem tenacidade",
-        "present": "3 ou mais campeões com controle forte",
+        "present": "vários campeões com controle forte que iniciam lutas, buscam picks ou mergulham em você",
         "answer": "tenacidade ou limpeza de controle",
         "timing": "Pegue com as botas ou como 3º item, e não entre primeiro: deixe que gastem o controle na sua linha de frente.",
         "timingCarry": "Pegue tenacidade com as botas ou um item de dano com limpeza de controle, e não entre até que gastem o controle na sua linha de frente.",
         "timingTank": "Pegue com as botas ou como 3º item: como linha de frente, entre primeiro para que gastem o controle em você e seus carries lutem livres.",
-        "timingSupport": "Pegue tenacidade com as botas; se o controle inimigo cair no seu atirador, um item que limpe o controle aliado o salva mais do que a sua própria tenacidade."
+        "timingSupport": "Pegue tenacidade com as botas; se o controle inimigo cair no seu atirador, um item que limpe o controle aliado o salva mais do que a sua própria tenacidade.",
+        "timingEnchanter": "Você não precisa de tenacidade própria: se o controle inimigo cair no seu atirador, monte um item que limpe o controle aliado e guarde para o momento em que ele for pego."
       },
       "burst": {
         "title": "Os assassinos te apagam sem um item anti-burst",

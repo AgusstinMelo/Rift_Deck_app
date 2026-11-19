@@ -2199,12 +2199,13 @@
       },
       "cc": {
         "title": "Enemy crowd control catches you without tenacity",
-        "present": "3 or more champions with hard CC",
+        "present": "several champions with hard CC who start fights, look for picks or dive you",
         "answer": "tenacity or a CC cleanse",
         "timing": "Get it with your boots or as your 3rd item, and don't go in first: let them waste their CC on your frontline.",
         "timingCarry": "Get tenacity from your boots or a damage item with a CC cleanse, and don’t go in until they waste their CC on your frontline.",
         "timingTank": "Get it with your boots or as your 3rd item: as the frontline, go in first so they waste their CC on you and your carries fight freely.",
-        "timingSupport": "Get tenacity from your boots; if their CC lands on your marksman, an item that cleanses your ally saves them more than your own tenacity."
+        "timingSupport": "Get tenacity from your boots; if their CC lands on your marksman, an item that cleanses your ally saves them more than your own tenacity.",
+        "timingEnchanter": "You don't need tenacity yourself: if their CC lands on your marksman, build an item that cleanses your ally and save it for the moment they get caught."
       },
       "burst": {
         "title": "Assassins delete you without an anti-burst item",

@@ -52,7 +52,10 @@ function indexBy(rows) {
 
 // ---------------------------------------------------------------- Campeones
 
-const CC_TRAITS = ['cc_duro', 'stun', 'root', 'miedo', 'supresion', 'encanto', 'provocacion', 'silencio'];
+// Control duro: inmoviliza. El silencio cuenta como blando, igual que en el sugeridor (v2Eligibility.js).
+const CC_TRAITS = ['cc_duro', 'stun', 'root', 'miedo', 'supresion', 'encanto', 'provocacion'];
+/** Roles que hacen que el control caiga sobre vos (team_roles). */
+const CC_DELIVERY_ROLES = ['iniciador', 'pick', 'diver'];
 const HEAL_TRAITS = ['autocuracion', 'curacion_aliada', 'dependiente_robo_vida'];
 const SHIELD_TRAITS = ['escudo', 'escudo_aliado'];
 /** Puntajes 0-5 del perfil del Coach (columnas score_*). */
@@ -106,6 +109,12 @@ export function championProfile(row, resolveName = name => name) {
     isMage: roles.has('mago'),
     healer: hasAnyTag(traits, HEAL_TRAITS),
     hardCc: hasAnyTag(traits, CC_TRAITS),
+    /**
+     * Control duro que te llega: además de tenerlo, el campeón inicia peleas, busca picks o
+     * se tira encima (Leona, Morgana, Vi). El root de Jinx o el stun de Vayne no obligan a
+     * armar tenacidad.
+     */
+    ccThreat: hasAnyTag(traits, CC_TRAITS) && (hasAnyTag(tagSet(row.team_roles), CC_DELIVERY_ROLES) || scoreOf(row.score_engage) >= 3),
     burst: roles.has('asesino') || traits.has('dano_burst'),
     shields: hasAnyTag(traits, SHIELD_TRAITS),
     autoAttacker: traits.has('dependiente_autoataques') || traits.has('dependiente_on_hit'),
@@ -225,6 +234,19 @@ export function itemProfile(row) {
  * slots libres antes de eso no se puede afirmar que faltó: un carry arma su defensa de
  * 4º o 5º objeto, y en una partida corta todavía no había llegado.
  */
+/**
+ * Cómo le llega el control rival: 'frontline' (tiene que entrar: luchador, asesino, tanque,
+ * support de engage o de pelea), 'backline' (pelea de lejos: tirador, mago, support mago) o
+ * 'enchanter' (protege a su equipo).
+ */
+export function ccRole(own) {
+  if (!own) return null;
+  if (isEnchanter(own)) return 'enchanter';
+  if (own?.buildClass === 'support') return own.supportStyle === 'mage' ? 'backline' : 'frontline';
+  if (own?.buildClass === 'carry') return own.isAssassin ? 'frontline' : 'backline';
+  return 'frontline';
+}
+
 /** Defensa contra daño o burst: el carry la arma al final de su núcleo de daño. */
 const defenseDue = own => (own?.buildClass === 'carry' ? 5 : own?.buildClass === 'support' ? 4 : 3);
 
@@ -261,12 +283,18 @@ export const THREATS = [
     appliesTo: own => !isEnchanter(own),
   },
   {
+    // Cuenta el control que te llega (ccThreat), no el que existe. Quien tiene que entrar
+    // (luchador, asesino, tanque, support de engage) lo sufre desde 2; el de rango (tirador,
+    // mago, support mago) lo esquiva con posición y recién lo arma desde 3. La encantadora
+    // no arma tenacidad propia: su respuesta es limpiar el control de su aliado.
     id: 'cc',
     dueBy: () => 3,
     boots: true,
-    min: 3,
-    count: enemies => enemies.filter(enemy => enemy.hardCc).length,
-    answers: item => item.tenacity || ['tenacidad', 'limpieza_cc', 'inmunidad_cc', 'escudo_hechizo'].some(tag => item.effects.has(tag)),
+    min: own => (ccRole(own) === 'frontline' ? 2 : 3),
+    count: enemies => enemies.filter(enemy => enemy.ccThreat).length,
+    answers: (item, own) => (ccRole(own) === 'enchanter'
+      ? item.effects.has('limpieza_cc') && (item.fitsClasses.has('soporte') || item.types.includes('soporte'))
+      : item.tenacity || ['tenacidad', 'limpieza_cc', 'inmunidad_cc', 'escudo_hechizo'].some(tag => item.effects.has(tag))),
     appliesTo: () => true,
   },
   {

@@ -2,7 +2,7 @@
 // clave encaja con cómo hace daño el campeón. Todo se cruza con el catálogo.
 import { baseMessages, lookup, tr } from '../../../i18n/uiI18n.js';
 import { FAMILY, makeInsight } from '../card.js';
-import { THREATS, keyOf, preferredDamageTypes, suggestItems } from '../catalog.js';
+import { THREATS, isEnchanter, keyOf, preferredDamageTypes, suggestItems } from '../catalog.js';
 import { groupBy } from '../stats.js';
 import { pct, shrunkRate, summarize, twoProportionZ } from '../stats.js';
 
@@ -57,6 +57,9 @@ const TIMING_VARIANT = { carry: 'timingCarry', tank: 'timingTank', support: 'tim
  * cambia daño por defensa pura, el tanque entra primero y el support protege a su equipo.
  */
 function timingFor(threatId, own) {
+  // La encantadora tiene su propio texto donde hace falta (control: limpiar al aliado).
+  const enchanterKey = isEnchanter(own) && `coachEngine.threat.${threatId}.timingEnchanter`;
+  if (enchanterKey && lookup(baseMessages, enchanterKey)) return tr(enchanterKey);
   const variant = TIMING_VARIANT[own?.buildClass];
   const key = variant && `coachEngine.threat.${threatId}.${variant}`;
   if (key && lookup(baseMessages, key)) return tr(key);

@@ -2199,12 +2199,13 @@
       },
       "cc": {
         "title": "El control rival te encuentra sin tenacidad",
-        "present": "3 o más campeones con control duro",
+        "present": "varios campeones con control duro que inician peleas, buscan picks o se te lanzan encima",
         "answer": "tenacidad o limpieza de control",
         "timing": "Súmala con las botas o como 3º objeto, y no entres primero: deja que gasten el control en tu primera línea.",
         "timingCarry": "Suma tenacidad con las botas o un objeto de daño con limpieza de control, y no entres hasta que gasten su control en tu primera línea.",
         "timingTank": "Súmala con las botas o como 3º objeto: como primera línea, entra primero para que gasten su control en ti y tus carries peleen libres.",
-        "timingSupport": "Suma tenacidad con las botas; si el control rival cae sobre tu tirador, un objeto que limpie el control aliado lo salva más que tu propia tenacidad."
+        "timingSupport": "Suma tenacidad con las botas; si el control rival cae sobre tu tirador, un objeto que limpie el control aliado lo salva más que tu propia tenacidad.",
+        "timingEnchanter": "No hace falta tenacidad propia: si el control rival cae sobre tu tirador, construye un objeto que limpie el control aliado y guárdalo para el momento en que lo atrapen."
       },
       "burst": {
         "title": "Los asesinos te borran sin un objeto anti-burst",
