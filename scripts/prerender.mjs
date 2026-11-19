@@ -21,6 +21,7 @@ const renderHead = seo => {
     <meta property="og:description" content="${escapeHtml(seo.description)}" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Rift Deck" />
     <meta property="og:image" content="${escapeHtml(seo.image)}" />
     <meta property="og:image:alt" content="${escapeHtml(seo.imageAlt)}" />
     <meta name="twitter:card" content="summary_large_image" />

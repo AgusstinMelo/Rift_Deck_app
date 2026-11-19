@@ -14,6 +14,10 @@ const TABS = [
 // la pública reciba las mismas adaptaciones al viewport en escritorio y smartphone.
 export default function PublicLibraryLayout({ activeTab, isDetail = false, srTitle, children }) {
   const t = useT();
+  // Un solo <h1> por página: en una ficha es el nombre del campeón, objeto o runa (lo pone
+  // la ficha), y "Biblioteca" queda como título de sección con el mismo aspecto. En los
+  // listados, "Biblioteca" es el <h1>.
+  const TitleTag = isDetail ? 'p' : 'h1';
   return (
     <div className="relative z-10 flex h-dvh min-h-0 flex-col text-foreground">
       <PublicHeader />
@@ -29,10 +33,10 @@ export default function PublicLibraryLayout({ activeTab, isDetail = false, srTit
                 </span>
               </div>
 
-              <h1 className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
+              <TitleTag className="rd-page-title font-rajdhani font-bold text-4xl md:text-5xl text-foreground tracking-[-0.08em] uppercase">
                {t('nav.library')}
-                {srTitle && <span className="sr-only">: {srTitle}</span>}
-              </h1>
+                {!isDetail && srTitle && <span className="sr-only">: {srTitle}</span>}
+              </TitleTag>
 
               <p className="rd-page-subtitle text-muted-foreground text-sm mt-1">
                {t('library.archivoTacticoDeCampeones')}

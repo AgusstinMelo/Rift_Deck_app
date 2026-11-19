@@ -55,6 +55,7 @@ export default function Seo({
     setMeta('meta[property="og:description"]', { property: 'og:description', content: description });
     setMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl });
     setMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' });
+    setMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'Rift Deck' });
     setMeta('meta[property="og:image"]', { property: 'og:image', content: socialImage });
     setMeta('meta[property="og:image:alt"]', { property: 'og:image:alt', content: imageAlt });
     setMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
