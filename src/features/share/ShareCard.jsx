@@ -3,9 +3,10 @@
 // Estilos en línea a propósito: la imagen tiene que salir igual en cualquier pantalla,
 // sin depender de los breakpoints de la app. Look de carta de juego: marco dorado con
 // esquinas, destellos, título según el winrate y badges.
-import { forwardRef, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Crown, Crosshair, Flame, Skull, Swords, Trophy, Users } from 'lucide-react';
 import logo from '@/assets/riftdeck-logo-horizontal.png';
+import { DEFAULT_PALETTE, loadArtPalette, rgba } from './artPalette';
 
 export const CARD_SIZES = {
   story: { width: 1080, height: 1920 },
@@ -27,19 +28,32 @@ const BODY_FONT = "'Inter Variable', 'Inter', sans-serif";
 const GOLD_GRADIENT = `linear-gradient(135deg, #D9BC63 0%, #BF9B35 55%, #8A6C20 100%)`;
 const GLOW = '0 0 28px rgba(212,175,55,0.22)';
 
-/** Fondo: destellos de color, grilla triangular y rayos desde arriba. */
-function Backdrop() {
+/**
+ * Fondo: destellos de color, grilla triangular y rayos desde arriba. Las luces toman los
+ * colores del splash del campeón (artPalette.js): la de arriba y los rayos, el dominante;
+ * la de abajo a la izquierda y la del costado, el segundo. Sin campeón, dorado y violeta.
+ */
+function Backdrop({ palette }) {
   const layer = { position: 'absolute', inset: 0, pointerEvents: 'none' };
+  const custom = palette !== DEFAULT_PALETTE;
+  const top = palette.primary;
+  // Los rayos, un poco más claros que la luz de arriba (como el dorado claro original).
+  const rays = custom ? top.map(value => Math.round(value + (255 - value) * 0.3)) : [245, 215, 110];
+  const bottom = palette.secondary;
+  const side = custom ? palette.secondary : [56, 189, 248];
+  // Un color del campeón se lee menos que el dorado sobre el azul noche: un poco más de luz.
+  const [topAlpha, rayAlpha, bottomAlpha, sideAlpha] = custom ? [0.26, 0.1, 0.32, 0.12] : [0.12, 0.06, 0.28, 0.12];
+  const ray = alpha => rgba(rays, alpha);
   return (
     <>
-      <div style={{ ...layer, background: 'radial-gradient(60% 40% at 100% 0%, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0) 70%)' }} />
-      <div style={{ ...layer, background: 'radial-gradient(70% 45% at 0% 100%, rgba(124,58,237,0.28) 0%, rgba(124,58,237,0) 70%)' }} />
-      <div style={{ ...layer, background: 'radial-gradient(50% 30% at 0% 35%, rgba(56,189,248,0.12) 0%, rgba(56,189,248,0) 70%)' }} />
+      <div style={{ ...layer, background: `radial-gradient(60% 40% at 100% 0%, ${rgba(top, topAlpha)} 0%, ${rgba(top, 0)} 70%)` }} />
+      <div style={{ ...layer, background: `radial-gradient(70% 45% at 0% 100%, ${rgba(bottom, bottomAlpha)} 0%, ${rgba(bottom, 0)} 70%)` }} />
+      <div style={{ ...layer, background: `radial-gradient(50% 30% at 0% 35%, ${rgba(side, sideAlpha)} 0%, ${rgba(side, 0)} 70%)` }} />
       <div style={{
         ...layer, opacity: 0.55,
         background: 'repeating-linear-gradient(60deg, rgba(212,175,55,0.05) 0 2px, transparent 2px 36px), repeating-linear-gradient(-60deg, rgba(212,175,55,0.05) 0 2px, transparent 2px 36px)',
       }} />
-      <div style={{ ...layer, background: 'conic-gradient(from 180deg at 50% -10%, transparent 0deg, rgba(245,215,110,0.06) 8deg, transparent 16deg, transparent 28deg, rgba(245,215,110,0.05) 34deg, transparent 40deg, transparent 320deg, rgba(245,215,110,0.05) 326deg, transparent 332deg, transparent 344deg, rgba(245,215,110,0.06) 350deg, transparent 358deg)' }} />
+      <div style={{ ...layer, background: `conic-gradient(from 180deg at 50% -10%, transparent 0deg, ${ray(rayAlpha)} 8deg, transparent 16deg, transparent 28deg, ${ray(rayAlpha * 0.83)} 34deg, transparent 40deg, transparent 320deg, ${ray(rayAlpha * 0.83)} 326deg, transparent 332deg, transparent 344deg, ${ray(rayAlpha)} 350deg, transparent 358deg)` }} />
     </>
   );
 }
@@ -145,6 +159,14 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
   // Si el splash en alta no carga, se usa el arte del catálogo.
   const [failedArt, setFailedArt] = useState(null);
   const art = championArt && championArt !== failedArt ? championArt : fallbackArt;
+  // Luces con los colores del arte que se ve (memorizadas por URL: al exportar ya están).
+  const [palette, setPalette] = useState({ art: null, colors: DEFAULT_PALETTE });
+  useEffect(() => {
+    let active = true;
+    loadArtPalette(art).then(colors => { if (active) setPalette({ art, colors }); });
+    return () => { active = false; };
+  }, [art]);
+  const lights = palette.art === art ? palette.colors : DEFAULT_PALETTE;
   const { width, height } = CARD_SIZES[format];
   const story = format === 'story';
   // El arte del campeón ocupa el alto que dejan los demás bloques (con un mínimo): así
@@ -197,7 +219,7 @@ const ShareCard = forwardRef(function ShareCard({ summary, format, championArt, 
         color: INK, fontFamily: BODY_FONT, lineHeight: 1.2, letterSpacing: 'normal',
       }}
     >
-      <Backdrop />
+      <Backdrop palette={lights} />
       <Frame />
 
       <div style={{

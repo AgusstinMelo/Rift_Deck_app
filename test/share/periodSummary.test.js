@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { matchesInPeriod, summarizePeriod } from '../../src/features/share/periodSummary.js';
+import { matchesInPeriod, sharePatchOptions, summarizePeriod } from '../../src/features/share/periodSummary.js';
 
 const NOW = new Date(2026, 10, 16, 20, 0); // 16/11/2026, hora local
 let id = 0;
@@ -78,4 +78,16 @@ test('campeones usados: cuenta los distintos del período; los 3 más jugados va
   const summary = summarizePeriod(rows, { period: 'week', now });
   assert.equal(summary.championCount, 4);
   assert.deepEqual(summary.champions.map(entry => entry.name), ['Lux', 'Ahri', 'Jinx']);
+});
+
+test('parches para elegir: el activo y los anteriores con partidas, del más nuevo al más viejo', () => {
+  const matches = [
+    m('2026-11-10', 'win', { patch: '7.3b' }), m('2026-10-01', 'loss', { patch: '7.2' }),
+    m('2026-09-01', 'win', { patch: '6.10' }), m('2026-09-02', 'win', { patch: '6.9f' }),
+    m('2026-08-01', 'remake', { patch: '6.5' }),
+  ];
+  assert.deepEqual(sharePatchOptions(matches, '7.4'), ['7.4', '7.3', '7.2', '6.10', '6.9']);
+  assert.deepEqual(sharePatchOptions([], ''), []);
+  // Un parche anterior se resume completo, con todas sus letras.
+  assert.equal(matchesInPeriod(matches, { period: 'patch', patch: '6.9' }).rows.length, 1);
 });

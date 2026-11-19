@@ -37,6 +37,26 @@ export function matchesInPeriod(matches, { period, now = new Date(), patch = '',
   return { rows: valid.filter(match => dayOf(match) >= from && dayOf(match) <= to), from, to };
 }
 
+/**
+ * Parches que se pueden elegir para la tarjeta: el activo (aunque todavía no tenga
+ * partidas) y los anteriores con alguna partida terminada, del más nuevo al más viejo.
+ * Agrupados como en la tierlist: 7.3, 7.3b y 7.3f son "7.3".
+ * @param {any[]} matches
+ * @param {string} [currentPatch]
+ * @returns {string[]}
+ */
+export function sharePatchOptions(matches, currentPatch = '') {
+  const groups = new Set((matches || []).filter(isResult).map(match => getPatchGroup(match.patch)).filter(Boolean));
+  const current = getPatchGroup(currentPatch);
+  if (current) groups.add(current);
+  const version = group => group.split('.').map(Number);
+  return [...groups].sort((a, b) => {
+    const [majorA, minorA] = version(a);
+    const [majorB, minorB] = version(b);
+    return majorB - majorA || minorB - minorA;
+  });
+}
+
 /** Racha de victorias más larga, en orden cronológico. */
 function longestWinStreak(rows) {
   const ordered = [...rows].sort((a, b) => `${dayOf(a)} ${a.hour || ''} ${a.created_at || ''}`.localeCompare(`${dayOf(b)} ${b.hour || ''} ${b.created_at || ''}`));

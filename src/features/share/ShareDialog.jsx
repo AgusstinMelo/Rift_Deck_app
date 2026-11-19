@@ -9,13 +9,22 @@ import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/LocaleContext';
 import ShareCard, { CARD_SIZES } from './ShareCard';
-import { SHARE_PERIODS, summarizePeriod } from './periodSummary';
+import PatchSelect from './PatchSelect';
+import { SHARE_PERIODS, sharePatchOptions, summarizePeriod } from './periodSummary';
 import { championArtId, loadChampionIds, splashUrl } from './championArt';
 
 /** Título de la tarjeta según el winrate del período. */
 const tierOf = winrate => (winrate >= 65 ? 'legend' : winrate >= 58 ? 'unstoppable' : winrate >= 52 ? 'onFire' : winrate >= 45 ? 'inForm' : 'comeback');
 
 const PREVIEW_WIDTH = { story: 230, square: 300 };
+/** Alto de la vista previa de cada formato (ancho escalado al tamaño real de la tarjeta). */
+const PREVIEW_HEIGHT = Object.fromEntries(Object.entries(PREVIEW_WIDTH)
+  .map(([format, width]) => [format, Math.round((width / CARD_SIZES[format].width) * CARD_SIZES[format].height)]));
+/** Espacio de la vista previa: entra cualquier formato (Post es el más ancho; Historia, el más alto). */
+const PREVIEW_SLOT = {
+  width: Math.max(...Object.values(PREVIEW_WIDTH)),
+  height: Math.max(...Object.values(PREVIEW_HEIGHT)),
+};
 
 const dateLabel = iso => {
   if (!iso) return '';
@@ -62,9 +71,15 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  // Parche de la tarjeta: el activo por defecto, o uno anterior con partidas.
+  const patchOptions = useMemo(() => sharePatchOptions(matches, patch), [matches, patch]);
+  const currentPatch = getPatchGroup(patch);
+  const [pickedPatch, setPickedPatch] = useState(null);
+  const selectedPatch = patchOptions.includes(pickedPatch) ? pickedPatch : (currentPatch || patchOptions[0] || '');
+
   const summary = useMemo(
-    () => (open ? summarizePeriod(matches, { period, patch, types: matchTypes, now: new Date() }) : null),
-    [open, matches, period, patch, matchTypes],
+    () => (open ? summarizePeriod(matches, { period, patch: selectedPatch, types: matchTypes, now: new Date() }) : null),
+    [open, matches, period, selectedPatch, matchTypes],
   );
   // Campeón de la tarjeta: uno de los 3 más jugados del período (por defecto, el primero).
   // Si cambia el período o los tipos y el elegido ya no está entre los 3, vuelve al primero.
@@ -93,7 +108,7 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
   const championArt = storedSplash || (artId ? splashUrl(artId) : catalogArt);
 
   const periodText = !summary ? '' : period === 'patch'
-    ? t('share.card.periodPatch', { patch: getPatchGroup(patch) || patch })
+    ? t('share.card.periodPatch', { patch: selectedPatch })
     : t(period === 'week' ? 'share.card.periodWeek' : 'share.card.periodMonth', { from: dateLabel(summary.from), to: dateLabel(summary.to) });
 
   const texts = summary ? {
@@ -153,13 +168,22 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Sin rd-card: su position: relative le gana al fixed del diálogo y lo saca de lugar. */}
-      <DialogContent onOpenAutoFocus={event => event.preventDefault()} className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-3xl overflow-y-auto rounded-2xl border-primary/20 bg-card p-5 sm:p-6">
+      {/* Sin rd-card (su position: relative le gana al fixed del diálogo y lo saca de lugar): la estética de las tarjetas va en .rd-share-dialog. */}
+      <DialogContent onOpenAutoFocus={event => event.preventDefault()} className="rd-share-dialog max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-3xl overflow-y-auto rounded-2xl p-5 sm:p-6">
         {/* Escritorio: vista previa a la izquierda, opciones y botones a la derecha.
             Celular: opciones, vista previa y botones, en ese orden. */}
-        <div className="grid gap-5 md:grid-cols-[auto_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)_auto] md:gap-x-6">
+        {/* Escritorio: alto mínimo con todas las opciones a la vista (Campeón y Parche
+            aparecen según el período) y los botones fijos abajo: al aparecer una fila ocupa
+            el espacio libre y nada se mueve. */}
+        <div className="grid gap-5 md:min-h-[min(640px,calc(92dvh-3rem-2px))] md:gap-y-4 md:grid-cols-[auto_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)_auto] md:gap-x-6">
           {/* Vista previa escalada; la tarjeta mide su tamaño real adentro. */}
-          <div className="order-2 flex justify-center md:order-none md:col-start-1 md:row-span-2 md:row-start-1">
+          {/* Espacio fijo del tamaño de la vista previa más grande (Historia de alto, Post de
+              ancho): al cambiar formato, período o tipo solo cambia la tarjeta de adentro;
+              el diálogo y los botones no se mueven. */}
+          <div
+            style={{ width: PREVIEW_SLOT.width, height: PREVIEW_SLOT.height }}
+            className="order-2 mx-auto flex max-w-full items-center justify-center md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:self-center"
+          >
             {summary ? (
               <div style={{ width: width * scale, height: height * scale }} className="overflow-hidden rounded-xl border border-primary/20 shadow-[0_0_24px_rgba(212,175,55,.08)]">
                 <div style={{ width, height, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
@@ -177,18 +201,18 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
               </div>
             ) : (
               <div
-                style={{ width: PREVIEW_WIDTH[format], minHeight: 160 }}
-                className="flex items-center justify-center rounded-xl border border-border bg-secondary/40 p-6 text-center text-sm text-muted-foreground"
+                style={{ width: PREVIEW_WIDTH[format], height: PREVIEW_HEIGHT[format] }}
+                className="flex items-center justify-center rounded-xl border border-dashed border-primary/20 bg-secondary/30 p-6 text-center text-sm text-muted-foreground"
               >
                 {t('share.empty')}
               </div>
             )}
           </div>
 
-          <div className="order-1 flex min-w-0 flex-col gap-5 md:order-none md:col-start-2 md:row-start-1">
+          <div className="rd-share-options order-1 flex min-w-0 flex-col gap-5 md:gap-4 md:order-none md:col-start-2 md:row-start-1">
             <DialogHeader className="text-left">
               <DialogTitle className="font-rajdhani text-xl uppercase sm:text-2xl">{t('share.title')}</DialogTitle>
-              <DialogDescription>{t('share.description')}</DialogDescription>
+              <DialogDescription className="rd-share-description">{t('share.description')}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-2">
@@ -197,9 +221,26 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
                 label={t('share.periodLabel')}
                 value={period}
                 onChange={setPeriod}
-                options={SHARE_PERIODS.filter(id => id !== 'patch' || patch).map(id => [id, t(`share.period.${id}`)])}
+                options={SHARE_PERIODS.filter(id => id !== 'patch' || patchOptions.length).map(id => [id, t(`share.period.${id}`)])}
               />
             </div>
+
+            {/* Parche de la tarjeta: el activo o uno anterior en el que jugaste. */}
+            {period === 'patch' && patchOptions.length > 1 && (
+              <div className="space-y-2">
+                <p className="rd-label">{t('share.patchLabel')}</p>
+                {/* Desplegable: cerrado ocupa una línea aunque haya muchos parches. */}
+                <PatchSelect
+                  label={t('share.patchLabel')}
+                  value={selectedPatch}
+                  onChange={setPickedPatch}
+                  options={patchOptions}
+                  optionLabel={option => (option === currentPatch
+                    ? t('share.patchCurrent', { patch: option })
+                    : t('share.card.periodPatch', { patch: option }))}
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <p className="rd-label">{t('share.typeLabel')}</p>
@@ -269,7 +310,7 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
                   type="button"
                   onClick={() => run('share')}
                   disabled={!summary || busy}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Share2 size={16} /> {busy ? t('share.generating') : t('share.share')}
                 </button>
@@ -278,7 +319,7 @@ export default function ShareDialog({ open, onOpenChange, matches, champions, pa
                 type="button"
                 onClick={() => run('download')}
                 disabled={!summary || busy}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   canNativeShare ? 'border border-border text-foreground hover:border-primary/40' : 'bg-primary text-primary-foreground hover:bg-primary/90'
                 }`}
               >

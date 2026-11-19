@@ -1061,3 +1061,48 @@
     min-height: 2.6rem;
   }
 }
+
+/* Diálogo de compartir con la estética de las tarjetas de la app (la de la tarjeta para
+   compartir): fondo azul noche, resplandores dorado y violeta, grilla triangular, línea
+   dorada arriba y borde dorado. Sin .rd-card, que lo sacaría de su posición fija. */
+.rd-share-dialog {
+  border: 1px solid var(--rd-card-border);
+  background: var(--rd-card-decor), var(--rd-card-bg);
+  background-color: rgb(11, 15, 26);
+  box-shadow:
+    var(--rd-card-shadow),
+    0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* Diálogo de compartir en pantallas de escritorio bajas (o con zoom): se compacta para que
+   la vista previa, todas las opciones y los botones entren sin scrollear. */
+@media (min-width: 768px) and (max-height: 760px) {
+  .rd-share-dialog {
+    padding: 1rem 1.25rem;
+  }
+
+  .rd-share-dialog h2 {
+    font-size: 1.15rem;
+  }
+
+  .rd-share-description {
+    display: none;
+  }
+
+  .rd-share-options {
+    gap: 0.6rem;
+  }
+
+  .rd-share-options > .space-y-2 > * + * {
+    margin-top: 0.3rem;
+  }
+
+  .rd-share-dialog .rd-panel-tabs {
+    padding: 0.25rem;
+  }
+
+  .rd-share-dialog .rd-panel-tab {
+    min-height: 32px;
+    padding-block: 0.35rem;
+  }
+}

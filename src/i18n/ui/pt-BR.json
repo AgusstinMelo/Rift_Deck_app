@@ -2674,6 +2674,8 @@
     "error": "Não foi possível gerar a imagem. Tente de novo.",
     "shareText": "Meu resumo no Rift Deck · riftdeckapp.com",
     "periodLabel": "Período",
+    "patchLabel": "Patch",
+    "patchCurrent": "Patch {patch} · atual",
     "formatLabel": "Formato",
     "typeLabel": "Tipo de partida",
     "championLabel": "Campeão",

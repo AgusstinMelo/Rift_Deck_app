@@ -2674,6 +2674,8 @@
     "error": "The image couldn’t be generated. Try again.",
     "shareText": "My recap on Rift Deck · riftdeckapp.com",
     "periodLabel": "Period",
+    "patchLabel": "Patch",
+    "patchCurrent": "Patch {patch} · current",
     "formatLabel": "Format",
     "typeLabel": "Match type",
     "championLabel": "Champion",
