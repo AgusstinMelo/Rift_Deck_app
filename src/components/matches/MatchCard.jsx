@@ -4,6 +4,11 @@ import { getMatchTypeLabel } from '@/constants/matchTypes';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { matchTagLabel } from '@/components/matches/matchTags';
 
+// Campeón del catálogo por nombre, sin espacios ni saltos de línea en los extremos: un
+// nombre guardado con un Enter de más ("Yunara\n") no deja la tarjeta sin imagen.
+const sameName = (a, b) => String(a ?? '').trim() === String(b ?? '').trim();
+const findChampion = (champions, name) => champions.find(c => sameName(c.name, name));
+
 const isMovement = (item) =>
   item && Array.isArray(item.type) && item.type.includes('Movimiento');
 const isEnchantment = (item) =>
@@ -38,7 +43,7 @@ function ChampionIcon({
   size = 'w-10 h-10',
   highlight = false,
 }) {
-  const champ = champions.find(c => c.name === name);
+  const champ = findChampion(champions, name);
 
   return (
     <div
@@ -265,9 +270,7 @@ export default function MatchCard({
 
   const ownName = match.own_champion_name;
 
-  const myChamp = champions.find(
-    c => c.name === ownName
-  );
+  const myChamp = findChampion(champions, ownName);
 
   const ROLE_ORDER = ['top', 'jungler', 'mid', 'adc', 'support'];
 
