@@ -92,13 +92,25 @@
   }
 }
 
+/* Sidebar con la estética de la tarjeta para compartir (features/share/ShareCard.jsx),
+   llevada a un panel vertical: azul noche arriba que se oscurece hacia abajo, resplandor
+   dorado arriba a la derecha, celeste a media altura y violeta abajo, la grilla triangular
+   y una línea dorada en el borde que se desvanece en los extremos. Todo va en el fondo del
+   propio panel (no en un pseudo-elemento) para que quede fijo cuando el drawer scrollea. */
 .rd-sidebar {
+  --rd-sidebar-line: linear-gradient(90deg, rgba(226, 196, 106, 0) 4%, rgba(226, 196, 106, 0.6) 50%, rgba(226, 196, 106, 0) 96%);
   background:
-    linear-gradient(180deg, rgba(11, 15, 26, 1) 0%, rgba(15, 21, 36, 1) 100%);
-  border-right: 1px solid rgba(212, 175, 55, 0.12);
+    linear-gradient(180deg, rgba(226, 196, 106, 0) 4%, rgba(226, 196, 106, 0.5) 50%, rgba(226, 196, 106, 0) 96%) right / 1.5px 100% no-repeat,
+    radial-gradient(130% 28% at 100% 0%, rgba(212, 175, 55, 0.13) 0%, rgba(212, 175, 55, 0) 70%),
+    radial-gradient(110% 22% at 0% 42%, rgba(56, 189, 248, 0.06) 0%, rgba(56, 189, 248, 0) 70%),
+    radial-gradient(150% 32% at 0% 100%, rgba(124, 58, 237, 0.2) 0%, rgba(124, 58, 237, 0) 70%),
+    repeating-linear-gradient(60deg, rgba(212, 175, 55, 0.03) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(-60deg, rgba(212, 175, 55, 0.03) 0 1px, transparent 1px 26px),
+    radial-gradient(160% 55% at 50% 0%, #1D2540 0%, #0B0F1A 62%, #07090F 100%);
+  border-right: 1px solid rgba(212, 175, 55, 0.14);
   box-shadow:
     inset -1px 0 0 rgba(255, 255, 255, 0.02),
-    20px 0 50px rgba(0, 0, 0, 0.2);
+    20px 0 50px rgba(0, 0, 0, 0.28);
 }
 
 .rd-sidebar > * {
@@ -108,16 +120,35 @@
 
 .rd-sidebar-brand {
   padding: 18px 12px 16px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
-  background:
-    radial-gradient(circle at center top, rgba(77, 166, 255, 0.12), transparent 60%);
+}
+
+/* Divisores dorados que se desvanecen a los costados (la línea de arriba de las tarjetas). */
+.rd-sidebar-brand::after,
+.rd-sidebar-footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--rd-sidebar-line);
+  pointer-events: none;
+}
+
+.rd-sidebar-brand::after {
+  bottom: 0;
+}
+
+.rd-sidebar-footer::before {
+  top: 0;
+}
+
+.rd-sidebar-brand img {
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.18));
 }
 
 .rd-sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(212, 175, 55, 0.12);
-  background:
-    linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.03));
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.025), rgba(7, 9, 15, 0.35));
 }
 
 .rd-nav-item {
@@ -128,6 +159,7 @@
   min-height: 42px;
   padding: 10px 14px;
   margin-bottom: 4px;
+  border: 1px solid transparent;
   border-radius: 12px;
   transition: all 160ms ease;
 }
@@ -137,18 +169,29 @@
 }
 
 .rd-nav-item-idle:hover {
-  color: hsl(var(--foreground));
+  color: #F4EFE3;
   background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(212, 175, 55, 0.08);
 }
 
+.rd-nav-item-idle:hover > svg {
+  color: #E2C46A;
+}
+
+/* Activo: como el período de la tarjeta (dorado translúcido con borde dorado). */
 .rd-nav-item-active {
-  color: hsl(var(--foreground));
+  color: #F4EFE3;
   background:
-    linear-gradient(90deg, rgba(212, 175, 55, 0.18), rgba(212, 175, 55, 0.04));
-  border: 1px solid rgba(212, 175, 55, 0.18);
+    linear-gradient(90deg, rgba(212, 175, 55, 0.17) 0%, rgba(212, 175, 55, 0.03) 100%);
+  border-color: rgba(212, 175, 55, 0.34);
   box-shadow:
     0 0 24px rgba(212, 175, 55, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.rd-nav-item-active > svg {
+  color: #E2C46A;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.35));
 }
 
 .rd-nav-active-bar {

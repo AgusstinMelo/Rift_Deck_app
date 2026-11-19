@@ -149,10 +149,10 @@ function SidebarSearch({ collapsed, onNavigate, onExpand }) {
         onFocus={() => setOpen(true)}
         placeholder={t('common.searchPlaceholder')}
         className="
-          w-full h-10 rounded-xl border border-primary/10
-          bg-secondary/50 pl-9 pr-3 text-sm text-foreground
+          w-full h-10 rounded-xl border border-primary/25
+          bg-primary/[0.05] pl-9 pr-3 text-sm text-foreground
           placeholder:text-muted-foreground outline-none
-          focus:border-primary/35 focus:ring-2 focus:ring-primary/10
+          focus:border-primary/45 focus:bg-primary/[0.08] focus:ring-2 focus:ring-primary/10
           transition-all
         "
       />
