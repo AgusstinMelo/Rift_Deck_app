@@ -110,6 +110,32 @@
   }
 }
 
+/* Celular (vertical y horizontal), catálogo: título y pestañas fijos arriba y scrollea solo
+   el catálogo (con sus filtros pegados arriba, ver 10-library.css). El <main> no scrollea
+   (.rd-main-content:has(.rd-library-catalog) en 10-library.css), así que la biblioteca
+   tiene que ocupar su alto y darle al catálogo el que sobra; si no, no scrollea nadie.
+   Las fichas siguen scrolleando con la página. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-lib[data-view="catalog"] {
+    height: 100%;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .rd-lib[data-view="catalog"] > .rd-lib-bar {
+    flex: none;
+  }
+
+  .rd-lib[data-view="catalog"] > .rd-library-catalog {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
 /* Celular vertical: las pestañas ocupan todo el ancho. */
 @media (orientation: portrait) and (max-width: 639px) {
   .rd-lib-bar {

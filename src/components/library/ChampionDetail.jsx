@@ -373,7 +373,8 @@ function MetaEvolution({ points }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 // Secciones de la ficha en el celular (una por pantalla). En escritorio se ven todas.
-const PHONE_PANEL = { profile: 'profile', notes: 'profile', matchups: 'matchups', meta: 'meta', stats: 'stats', personal: 'personal', related: 'related' };
+// Las notas van en su propia pestaña: junto al perfil no entraban sin scroll en el celular.
+const PHONE_PANEL = { profile: 'profile', notes: 'notes', matchups: 'matchups', meta: 'meta', stats: 'stats', personal: 'personal', related: 'related' };
 
 export default function ChampionDetail({
   champion,
@@ -565,6 +566,7 @@ export default function ChampionDetail({
   }, [mosaic, artSize]);
   const panelTabs = [
     ['profile', t('bugReport.pages.Perfil')],
+    ...(champion.strategic_notes ? [['notes', t('matches.notas')]] : []),
     ['matchups', t('dashboard.slides.matchups')],
     ...(tierData.length > 0 ? [['meta', t('goals.target')]] : []),
     ['stats', t('nav.stats')],
