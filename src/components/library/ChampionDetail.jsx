@@ -17,7 +17,7 @@ import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/ho
 import { DAMAGE_LABELS, LANE_IMAGES, LANE_LABELS, getChampionLanes } from '@/utils/championPresentation';
 import { DEFAULT_PALETTE, loadArtPalette } from '@/features/share/artPalette';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
-import { CardTitle, MatchupRow } from '@/components/library/detailParts';
+import { CardTitle, MatchupRow, useFitCount } from '@/components/library/detailParts';
 import { labels, tr } from '@/i18n/uiI18n';
 import { championTagLabel } from '@/utils/itemLabels';
 
@@ -391,6 +391,9 @@ export default function ChampionDetail({
   const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, { ssrSafe: publicMode });
   const [section, setSection] = useState('profile');
   const [metaIndex, setMetaIndex] = useState(null);
+  // Campeones del mismo rol o línea: tantos como filas completas entren en la tarjeta.
+  const relatedListRef = useRef(null);
+  const visibleRelated = relatedChampions.slice(0, useFitCount(relatedListRef, relatedChampions.length, 6));
 
   const { data: allChampions = [] } = useQuery({
     queryKey: ['champions'],
@@ -730,8 +733,8 @@ export default function ChampionDetail({
         {publicMode && relatedChampions.length > 0 && show('related') && (
           <section className="rd-cd-card rd-cd-related">
             <CardTitle>{t('library.campeonesDelMismoRol')}</CardTitle>
-            <ul className="rd-cd-related-list">
-              {relatedChampions.map(related => (
+            <ul ref={relatedListRef} className="rd-cd-related-list">
+              {visibleRelated.map(related => (
                 <li key={related.id}>
                   <Link to={`/campeones/${championSlug(related.name)}`} className="rd-cd-related-item">
                     {related.image_url && <img src={related.image_url} alt={t('library.enWildRift', { name: related.name })} width="40" height="40" loading="lazy" />}

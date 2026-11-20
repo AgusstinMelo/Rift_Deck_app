@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Rune } from '@/api/entitiesSupabase';
+import { Champion, Rune, WRItem } from '@/api/entitiesSupabase';
 
 import { Gem, Search } from 'lucide-react';
 
@@ -12,12 +12,14 @@ import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { runeBranchLabel } from '@/utils/runeBranches';
 import RuneDetail, { BRANCH_ICONS } from '@/components/library/RuneDetail';
 
+// Colores de rama (los mismos que las luces de RuneDetail): claves blanco, Dominación rojo,
+// Precisión amarillo, Valor verde y Brujería azul.
 const BRANCH_COLORS = {
-  Clave: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-  Precisión: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+  Clave: 'text-white bg-white/10 border-white/25',
+  Precisión: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
   Dominación: 'text-red-400 bg-red-500/10 border-red-500/20',
   Valor: 'text-green-400 bg-green-500/10 border-green-500/20',
-  Brujería: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+  Brujería: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
 };
 
 const BRANCHES = ['Clave', 'Dominación', 'Precisión', 'Valor', 'Brujería'];
@@ -35,6 +37,20 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
     ...(publicBasePath ? publicCatalogQueryOptions : {
       staleTime: initialRunes ? 5 * 60 * 1000 : undefined,
     }),
+  });
+
+  // La ficha muestra campeones que la aprovechan y objetos que la potencian.
+  const { data: champions = [] } = useQuery({
+    queryKey: ['champions'],
+    queryFn: () => Champion.list('name'),
+    enabled: Boolean(selected),
+    ...(publicBasePath ? publicCatalogQueryOptions : {}),
+  });
+  const { data: items = [] } = useQuery({
+    queryKey: ['writems'],
+    queryFn: () => WRItem.list('type'),
+    enabled: Boolean(selected),
+    ...(publicBasePath ? publicCatalogQueryOptions : {}),
   });
 
   useEffect(() => {
@@ -141,6 +157,8 @@ export default function RuneLibrary({ selectedId, selectedSlug, onSelectId, onCl
       <RuneDetail
         rune={selected}
         runes={runes}
+        champions={champions}
+        items={items}
         publicBasePath={publicBasePath}
         onBack={() => {
           setSelected(null);

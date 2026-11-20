@@ -192,13 +192,17 @@ const EVALUATORS = {
     if (facts.fedDivers.length) guard.push(fedReason(facts, 1.5));
     if (facts.enemyBurst >= 2 && facts.ownExposed) guard.push(reason(0.5, 'burst'));
     if (!facts.peeler && facts.divers.length) guard.push(reason(0.5, 'noPeel'));
+    // Daño rival casi todo de un tipo: el defensivo que lo resiste (Filo de la Cordura contra
+    // magos) rinde el doble. Pesa más si el que armaste resiste justo ese daño.
+    const side = damageSide(facts);
+    const resistsSide = side === 'magic' ? resistsMagic : side === 'physical' ? resistsPhysical : null;
+    if (resistsSide) guard.push(sideReason(facts, side, match.finals.some(item => isGuardItem(item) && resistsSide(item)) ? 2 : 1));
     const failed = match.hasKda && match.deaths >= DIED && facts.divers.length > 0;
     if (failed) guard.push(reason(1, 'selfDied', { deaths: match.deaths }));
     if (!facts.divers.length) fullDamage.push(reason(1.5, 'noDive'));
     const peel = facts.peeler;
     if (peel && facts.divers.length <= 1) fullDamage.push(reason(0.5, 'peel', { name: peel.name }));
     if (facts.allyCarries <= 1) fullDamage.push(reason(1, 'fewCarries'));
-    const side = damageSide(facts);
     return {
       built, reasons: { guard, fullDamage }, threshold: 2, defensive: ['guard'], covers: {},
       worked: match.hasKda && match.deaths <= SURVIVED ? { key: 'selfSurvived', vars: { deaths: match.deaths } } : null,
@@ -332,7 +336,15 @@ export function reviewBuild(ctx, match) {
   // Armaste lo que pedía la partida, o las dos temáticas eran válidas.
   if (!wanted || wanted === built.theme) {
     if (!reasons[built.theme].length) return tip ? { verdict: 'good', text: null, tip } : null;
-    return { verdict: 'good', text: tr('coachEngine.review.good', { built: label(built.theme), reasons: reasonText(reasons[built.theme]) }), tip };
+    // El defensivo de un carry se nombra: "daño con un objeto defensivo (Filo de la Cordura)".
+    const named = built.theme === 'guard' && built.items.length;
+    return {
+      verdict: 'good',
+      text: tr(named ? 'coachEngine.review.goodItems' : 'coachEngine.review.good', {
+        built: label(built.theme), items: named ? listOf(built.items.slice(0, 2)) : '', reasons: reasonText(reasons[built.theme]),
+      }),
+      tip,
+    };
   }
 
   // Pedía defensa y no está, pero quedaban slots antes de cuando le toca: pudo venir después.

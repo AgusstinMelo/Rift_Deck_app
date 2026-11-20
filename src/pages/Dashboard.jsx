@@ -27,7 +27,7 @@ import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
 import { useCoachReport } from '@/hooks/useCoachReport';
 import { filterByPatch, getPatchGroup, patchMatchesSelection } from '@/utils/patches';
-import { averageMatchKda, matchRowKda } from '@/domain/matchStats';
+import { averageMatchKda, championPool, matchRowKda } from '@/domain/matchStats';
 import { matchesInPeriod } from '@/features/share/periodSummary';
 import GoalsDashboardWidget from '@/features/goals/components/GoalsDashboardWidget';
 
@@ -245,6 +245,8 @@ export default function Dashboard() {
     if (match.result === 'win') stats[match.build_id].wins += 1;
     return stats;
   }, {});
+  // Tu pool de la semana: los campeones que más jugaste en los últimos 7 días.
+  const weeklyPool = championPool(recentSevenDayMatches, 4);
   const buildsWithStats = builds.map(build => ({
     ...build,
     wr: buildMatchStats[build.id]
@@ -563,8 +565,14 @@ export default function Dashboard() {
 
             <article className="rd-card rd-card-watermark p-4 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2"><h2 className="rd-card-title">{t('dashboard.ultimasBuilds')}</h2><Link to="/build-calculator" className="rd-link">{t('dashboard.verTodas')}</Link></div>
-              {buildsWithStats.length ? <div className="rd-dashboard-list">
-                {buildsWithStats.slice(0, 5).map(build => {
+              {/* Con partidas esta semana, la columna se comparte: las builds guardadas arriba
+                  (hasta 2, o una línea si no hay) y abajo tu pool de la semana. */}
+              {weeklyPool.length > 0 && !buildsWithStats.length ? (
+                <p className="rd-dashboard-builds-empty">
+                  {t('dashboard.noHayBuildsCreadas')} <Link to="/build-calculator" className="rd-link">{t('dashboard.crearBuild')}</Link>
+                </p>
+              ) : buildsWithStats.length ? <div className={`rd-dashboard-list ${weeklyPool.length ? 'rd-dashboard-builds-compact' : ''}`}>
+                {buildsWithStats.slice(0, weeklyPool.length ? 2 : 5).map(build => {
                   const keystone = runes.find(rune => rune.branch === 'Clave' && (build.additional_runes || []).includes(rune.name));
                   const itemSlots = Array.from({ length: 6 }, (_, index) => build.items?.[index] || null);
                   const spellSlots = Array.from({ length: 2 }, (_, index) => build.spells?.[index] || null);
@@ -604,6 +612,32 @@ export default function Dashboard() {
                   </div>;
                 })}
               </div> : <p className={ACTIVITY_EMPTY}>{t('dashboard.noHayBuildsCreadas')}</p>}
+
+              {weeklyPool.length > 0 && (
+                <div className="rd-dashboard-pool">
+                  <div className="rd-dashboard-pool-head">
+                    <h3 className="rd-card-title">{t('dashboard.tuPoolDeLaSemana')}</h3>
+                    <span>{t('dashboard.ultimos7Dias')}</span>
+                  </div>
+                  <div className="rd-dashboard-list">
+                    {weeklyPool.map(entry => (
+                      <div key={entry.champion} className="font-rajdhani rd-dashboard-row rd-dashboard-pool-row">
+                        {renderChampionAvatar(entry.champion, 'w-9 h-9')}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold truncate">{entry.champion}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {t(entry.games === 1 ? 'dashboard.poolPartida' : 'dashboard.poolPartidas', { games: entry.games, kda: entry.kda.toFixed(2) })}
+                          </p>
+                        </div>
+                        <div className="rd-dashboard-pool-wr">
+                          <span className={entry.wr >= 50 ? 'text-green-400' : 'text-red-400'}>{entry.wr.toFixed(0)}%</span>
+                          <span className="rd-dashboard-pool-bar" aria-hidden="true"><span style={{ width: `${entry.wr}%` }} data-tone={entry.wr >= 50 ? 'win' : 'loss'} /></span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </article>
 
             <article className="rd-card p-4 flex flex-col min-h-0 overflow-hidden">

@@ -266,6 +266,17 @@ test('build: carry con defensivo cuando nadie lo alcanzaba y tenía tanque → p
   assert.match(card.action, /Cambialo por otro objeto de daño/);
 });
 
+test('build: carry con un defensivo mágico contra un equipo casi todo AP → elogia el objeto y el daño mágico', () => {
+  const kaisa = fields => match({ own_champion_name: "Kai'Sa", lane: 'adc', enemy_champion_name: 'Kayle', ...fields });
+  const card = lastCard(kaisa({
+    id: 'kai-mr', ...recent, result: 'win', kills: 6, deaths: 0, assists: 4,
+    ally_champions: ['Malphite', 'Garen', 'Darius', 'Soraka'],
+    enemy_champions: ['Lux', 'Ahri', 'Annie', 'Akali', 'Kayle'], items_used: ['Hidra Titánica', 'Filo Infinito', 'Fauces de Malmortius'],
+  }), kaisa);
+  assert.match(card.thesis, /tu build de daño con un objeto defensivo \(Fauces de Malmortius\) era la indicada, porque el daño rival era casi todo mágico \(Lux, Ahri y Annie\)/);
+  assert.doesNotMatch(card.thesis, /0 veces/);
+});
+
 test('build: luchador full daño sin tanque en su equipo contra daño físico → pedía resistencias', () => {
   const garen = fields => match({ own_champion_name: 'Garen', lane: 'top', ...fields });
   const card = lastCard(garen({

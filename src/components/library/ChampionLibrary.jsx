@@ -40,6 +40,9 @@ const normalizeLane = (lane) =>
 
 // Modo público (publicBasePath): la selección viene del slug de la URL, las tarjetas son
 // enlaces y los datos iniciales llegan prerenderizados (initialChampions / initialTierlist).
+/** Campeones relacionados candidatos de la ficha pública (se muestran los que entren). */
+const MAX_RELATED = 30;
+
 export default function ChampionLibrary({
   selectedId,
   selectedSlug,
@@ -105,17 +108,22 @@ export default function ChampionLibrary({
     const tierData = getTierEntriesForChampion(selected, currentTierlist);
 
     if (publicBasePath) {
+      // Del mismo rol o línea, los más parecidos primero: roles y líneas en común y mismo
+      // tipo de daño. La ficha muestra los que entren en la tarjeta (hasta MAX_RELATED).
       const lanes = getChampionLanes(selected);
+      const roleList = value => (Array.isArray(value) ? value : String(value || '').split(/[,/]/)).map(role => String(role).trim().toLowerCase()).filter(Boolean);
+      const roles = roleList(selected.roles);
       const relatedChampions = champions
         .filter(candidate => candidate.id !== selected.id)
         .map(candidate => {
-          const sharedLane = getChampionLanes(candidate).some(lane => lanes.includes(lane));
-          const sharedRole = Boolean(selected.roles && candidate.roles === selected.roles);
-          return { candidate, score: Number(sharedLane) + Number(sharedRole) };
+          const sharedLanes = getChampionLanes(candidate).filter(lane => lanes.includes(lane)).length;
+          const sharedRoles = roleList(candidate.roles).filter(role => roles.includes(role)).length;
+          const sameDamage = candidate.damage_type && candidate.damage_type === selected.damage_type ? 0.5 : 0;
+          return { candidate, related: sharedLanes + sharedRoles > 0, score: sharedLanes + sharedRoles + sameDamage };
         })
-        .filter(({ score }) => score > 0)
+        .filter(({ related }) => related)
         .sort((a, b) => b.score - a.score || a.candidate.name.localeCompare(b.candidate.name))
-        .slice(0, 6)
+        .slice(0, MAX_RELATED)
         .map(({ candidate }) => candidate);
 
       return (

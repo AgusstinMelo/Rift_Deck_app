@@ -1196,7 +1196,27 @@
     "itemPerfil": {
       "leSirveA": "Classes that make the most of it",
       "idealSupports": "Best for supports who play"
-    }
+    },
+    "campeonesQueLoAprovechan": "Champions who make the most of it",
+    "campeonesQueLaAprovechan": "Champions who make the most of it",
+    "objetosQueLaPotencian": "Items that power it up",
+    "contraObjeto": {
+      "titulo": "How to counter it",
+      "curacion": "Against its healing",
+      "escudos": "Against its shields",
+      "armadura": "Against its armor",
+      "resistenciaMagica": "Against its magic resist",
+      "vida": "Against its health",
+      "danoMagico": "Against its magic damage",
+      "danoFisico": "Against its physical damage"
+    },
+    "uso": {
+      "sinPartidas": "It doesn't show up in your logged matches yet.",
+      "record": "{games} matches · {wins}W / {losses}L",
+      "sinEl": "In your other matches: {wr} ({games})",
+      "campeon": "{games} · {wr}"
+    },
+    "sinergias": "Synergies"
   },
   "matches": {
     "seleccionarBuildDe": "Select build for",
@@ -1709,7 +1729,12 @@
       "matches": "Matches",
       "builds": "Builds",
       "matchups": "Matchups"
-    }
+    },
+    "crearBuild": "Create build",
+    "tuPoolDeLaSemana": "Your pool this week",
+    "ultimos7Dias": "Last 7 days",
+    "poolPartidas": "{games} matches · KDA {kda}",
+    "poolPartida": "1 match · KDA {kda}"
   },
   "tierlist": {
     "dia": "day",
@@ -2482,6 +2507,8 @@
       "deathsCeiling": "You died {deaths} times: past your limit of {ceiling}, the point from which you lose most games.",
       "deathsWins": "You died {deaths} times; in your wins you average {avg}.",
       "praiseDeaths": "you only died {deaths} times",
+      "praiseDeathsOne": "you only died once",
+      "praiseDeathsNone": "you didn't die once",
       "threat": "The enemy had {threat} and you didn't build {answer}.",
       "praiseThreat": "you built {answer} against {threat}",
       "matchupRecord": "Against {enemy} with {champion} you're now {wins}-{losses}.",
@@ -2700,6 +2727,7 @@
         "coverTank": "with {champion}, health and resistances also raise your damage"
       },
       "good": "your {built} build was the right call, because {reasons}",
+      "goodItems": "your {built} build ({items}) was the right call, because {reasons}",
       "shift": "You built {built} ({items}), but the game called for {wanted}: {reasons}.",
       "itemsAction": "One example with {champion}: {items}.",
       "play": {

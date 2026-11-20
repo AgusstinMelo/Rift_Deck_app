@@ -1,13 +1,18 @@
 // Ficha de objeto, con el mismo lenguaje que la de campeón (styles/16-library.css):
 // héroe con el ícono y luces sacadas de sus colores, y debajo Efectos, Estadísticas,
 // Enfrentamientos y objetos del mismo tipo. En escritorio entra todo sin scroll.
+import { useMemo, useRef } from 'react';
 import { ArrowLeft, Ban, CheckCircle2, Coins, Sword } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { entitySlug } from '@/utils/entitySlug';
 import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { itemCategoryLabel, itemTypeLabel } from '@/utils/itemLabels';
-import { CardTitle, MatchupRow, splitEffects, useArtLights } from '@/components/library/detailParts';
+import {
+  CardTitle, FaceList, FillSpace, ItemIconList, MatchupRow, PersonalUsageBlock, splitEffects, useArtLights, useFitCount, usePersonalMatches,
+} from '@/components/library/detailParts';
+import { championsForItem, inferredItemClasses, itemCountersFor, personalUsage } from '@/features/library/entityInsights';
+import { itemProfile } from '@/features/coach/catalog';
 import { COUNTER_TAGS, FIT_CLASSES } from '@/features/coach/taxonomy';
 import { itemCounters } from '@/features/buildV2/itemCounters';
 
@@ -36,6 +41,11 @@ const STAT_KEYS = [
   ['tenacity', 'builds.tenacidad', 'life', '%'],
   ['healing_and_shield', 'library.curacionEscudo', 'life', '%'],
 ];
+
+/** Candidatos a "objetos del mismo tipo": la columna muestra los que entren. */
+const MAX_RELATED = 24;
+/** Campeones que lo aprovechan (una fila: se ven los que entren según el ancho). */
+const MAX_FANS = 12;
 
 const normalizeKey = value => String(value ?? '')
   .toLowerCase()
@@ -78,7 +88,7 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
   const description = entityDescription(item) || '';
   const effects = splitEffects(description);
   // Objetos con misión (soporte): textos de más de 900 caracteres; Efectos toma toda la columna.
-  const longText = description.length > 470;
+  const longText = description.length > 400;
   // Objetos con misión (soporte, más de 900 caracteres): Efectos todavía más ancho y, sin
   // estadísticas, sin la tarjeta de relacionados (no queda alto para ella).
   const veryLongText = description.length > 900;
@@ -89,8 +99,10 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
   // para qué tipo de support son (Build V2 elige con eso el inicial), así que van aparte,
   // como "Ideal para supports".
   const supportItem = SUPPORT_STARTERS.includes(normalizeKey(item.name));
+  // Botas sin fits_classes cargado: las clases se deducen de lo que dan (inferredItemClasses).
   const loadedClasses = new Set(item.fits_classes || []);
-  const fitClasses = supportItem ? new Set(['soporte']) : loadedClasses;
+  const fitClasses = supportItem ? new Set(['soporte'])
+    : !loadedClasses.size && itemProfile(item)?.boots ? inferredItemClasses(item) : loadedClasses;
   const supportKinds = supportItem ? FIT_CLASSES.filter(cls => cls !== 'soporte' && loadedClasses.has(cls)) : [];
   const counters = itemCounters(item, COUNTER_TAGS);
 
@@ -99,13 +111,43 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
     .map(name => championsByName.get(normalizeKey(name)))
     .filter(Boolean);
 
-  // Objetos que comparten algún tipo; primero los de la misma categoría.
-  const related = items
-    .filter(other => other.id !== item.id && other.active !== false)
-    .filter(other => getItemTypes(other.type).some(type => typeKeys.includes(normalizeKey(type))))
-    .sort((a, b) => Number(b.category === item.category) - Number(a.category === item.category) || compareNames(a, b))
-    // Columna de la derecha de punta a punta: 6.
-    .slice(0, 6);
+  // Objetos que comparten algún tipo, del más parecido al menos: misma categoría, tipos,
+  // clases a las que sirve y efectos en común. Se muestran tantos como entren en la columna.
+  const relatedCandidates = useMemo(() => {
+    const ownClasses = item.fits_classes || [];
+    const ownEffects = item.effect_tags || [];
+    const shared = (list, own) => (Array.isArray(list) ? list.filter(value => own.includes(value)).length : 0);
+    const affinity = other => (other.category === item.category ? 4 : 0)
+      + 2 * getItemTypes(other.type).filter(type => typeKeys.includes(normalizeKey(type))).length
+      + shared(other.fits_classes, ownClasses)
+      + shared(other.effect_tags, ownEffects);
+    return items
+      .filter(other => other.id !== item.id && other.active !== false)
+      .filter(other => getItemTypes(other.type).some(type => typeKeys.includes(normalizeKey(type))))
+      .map(other => ({ other, score: affinity(other) }))
+      .sort((a, b) => b.score - a.score || compareNames(a.other, b.other))
+      .slice(0, MAX_RELATED)
+      .map(entry => entry.other);
+  }, [item, items, compareNames]);
+  // Campeones que lo aprovechan, cómo se contrarresta y tu rendimiento con él.
+  const fans = useMemo(() => championsForItem(item, champions, MAX_FANS), [item, champions]);
+  const answers = useMemo(() => itemCountersFor(item, items), [item, items]);
+  const answersBlock = answers.length > 0 && (
+    <div className="rd-ed-profile-block rd-ed-answers">
+      <p className="rd-ed-profile-label">{t('library.contraObjeto.titulo')}</p>
+      {answers.map(group => (
+        <div key={group.key} className="rd-ed-answer">
+          <p>{t(`library.contraObjeto.${group.key}`)}</p>
+          <ItemIconList items={group.items} publicMode={publicMode} nameOf={entityName} onSelect={onSelectItem} />
+        </div>
+      ))}
+    </div>
+  );
+  const matches = usePersonalMatches(publicMode);
+  const usage = useMemo(() => (publicMode ? null : personalUsage(matches, item.name, 'items_used')), [publicMode, matches, item.name]);
+
+  const relatedListRef = useRef(null);
+  const related = relatedCandidates.slice(0, useFitCount(relatedListRef, relatedCandidates.length, 8));
 
   const icon = (src, size) => (src
     ? <img src={src} alt="" width={size} height={size} />
@@ -178,10 +220,10 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
         {stats.length > 0 && (
         <section className="rd-cd-card rd-ed-stats">
           <CardTitle>{t('library.estadisticasDelObjeto')}</CardTitle>
-            <dl className="rd-ed-stat-list">
+            <dl className="rd-ed-stat-list" data-many={stats.length > 3 ? 'yes' : undefined}>
               {stats.map(([key, label, tone, unit]) => (
                 <div key={key} className="rd-ed-stat" data-tone={tone}>
-                  <dt>{t(label)}</dt>
+                  <dt title={t(label)}>{t(label)}</dt>
                   <dd>+{item[key]}{unit}</dd>
                 </div>
               ))}
@@ -219,6 +261,14 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
               )}
             </ul>
           </div>
+          {fans.length > 0 && (
+            <FillSpace>
+              <div className="rd-ed-profile-block rd-ed-fans">
+                <p className="rd-ed-profile-label">{t('library.campeonesQueLoAprovechan')}</p>
+                <FaceList champions={fans} publicMode={publicMode} />
+              </div>
+            </FillSpace>
+          )}
         </section>
 
         <section className="rd-cd-card rd-cd-matchups rd-ed-matchups">
@@ -227,10 +277,13 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
           <MatchupRow icon={Ban} tone="red" label={t('library.evitarVs')} champions={resolveChampions(item.avoid_against)} publicMode={publicMode} emptyLabel={t('library.sinDatos')} />
         </section>
 
-        {related.length > 0 && !(veryLongText && !stats.length) && (
+        {/* Columna de la derecha: objetos del mismo tipo (tantos como entren), cómo se
+            contrarresta y tu rendimiento. Es la que absorbe el alto: lo nuevo nunca agranda
+            las filas de las otras tarjetas. */}
+        {(related.length > 0 || answersBlock || usage) && !(veryLongText && !stats.length) && (
           <section className="rd-cd-card rd-ed-related">
-            <CardTitle>{t('library.objetosDelMismoTipo')}</CardTitle>
-            <ul className="rd-cd-related-list rd-ed-related-list">
+            {related.length > 0 && <CardTitle>{t('library.objetosDelMismoTipo')}</CardTitle>}
+            <ul ref={relatedListRef} className="rd-cd-related-list rd-ed-related-list">
               {related.map(other => {
                 const content = (
                   <>
@@ -249,6 +302,8 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
                 );
               })}
             </ul>
+            {answersBlock}
+            {usage && <div className="rd-ed-foot"><PersonalUsageBlock usage={usage} champions={champions} /></div>}
           </section>
         )}
       </div>

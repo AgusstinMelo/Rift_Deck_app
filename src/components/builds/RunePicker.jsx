@@ -5,12 +5,14 @@ import { Rune } from '@/api/entitiesSupabase';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { runeBranchLabel } from '@/utils/runeBranches';
 
+// Colores de rama (los mismos que la Biblioteca): claves blanco, Dominación rojo, Precisión
+// amarillo, Valor verde y Brujería azul.
 const BRANCH_COLORS = {
-  'Clave': 'border-yellow-400/70 shadow-yellow-400/40',
-  'Precisión': 'border-blue-400/70 shadow-blue-400/40',
+  'Clave': 'border-white/70 shadow-white/40',
+  'Precisión': 'border-yellow-400/70 shadow-yellow-400/40',
   'Dominación': 'border-red-400/70 shadow-red-400/40',
   'Valor': 'border-green-400/70 shadow-green-400/40',
-  'Brujería': 'border-purple-400/70 shadow-purple-400/40',
+  'Brujería': 'border-blue-400/70 shadow-blue-400/40',
 };
 
 function RuneIcon({ rune, selected, onClick, size = 'w-9 h-9', imageClassName = '' }) {

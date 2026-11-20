@@ -40,7 +40,8 @@ export function detectLastMatch(ctx) {
         action: survivalTip(match.lane, match.own),
       });
     } else if (limit !== null && match.deaths <= Math.max(1, limit - 2)) {
-      praise.push(tr('coachEngine.last.praiseDeaths', { deaths: match.deaths }));
+      const suffix = match.deaths === 0 ? 'None' : match.deaths === 1 ? 'One' : '';
+      praise.push(tr(`coachEngine.last.praiseDeaths${suffix}`, { deaths: match.deaths }));
     }
   }
 

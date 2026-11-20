@@ -1196,7 +1196,27 @@
     "itemPerfil": {
       "leSirveA": "Classes que aproveitam",
       "idealSupports": "Ideal para suportes"
-    }
+    },
+    "campeonesQueLoAprovechan": "Campeões que aproveitam",
+    "campeonesQueLaAprovechan": "Campeões que aproveitam",
+    "objetosQueLaPotencian": "Itens que a potencializam",
+    "contraObjeto": {
+      "titulo": "Como contra-atacar",
+      "curacion": "Contra a cura",
+      "escudos": "Contra os escudos",
+      "armadura": "Contra a armadura",
+      "resistenciaMagica": "Contra a resistência mágica",
+      "vida": "Contra a vida",
+      "danoMagico": "Contra o dano mágico",
+      "danoFisico": "Contra o dano físico"
+    },
+    "uso": {
+      "sinPartidas": "Ainda não aparece nas suas partidas registradas.",
+      "record": "{games} partidas · {wins}V / {losses}D",
+      "sinEl": "Nas suas outras partidas: {wr} ({games})",
+      "campeon": "{games} · {wr}"
+    },
+    "sinergias": "Sinergias"
   },
   "matches": {
     "seleccionarBuildDe": "Selecionar build de",
@@ -1709,7 +1729,12 @@
       "matches": "Partidas",
       "builds": "Builds",
       "matchups": "Matchups"
-    }
+    },
+    "crearBuild": "Criar build",
+    "tuPoolDeLaSemana": "Seu pool da semana",
+    "ultimos7Dias": "Últimos 7 dias",
+    "poolPartidas": "{games} partidas · KDA {kda}",
+    "poolPartida": "1 partida · KDA {kda}"
   },
   "tierlist": {
     "dia": "dia",
@@ -2482,6 +2507,8 @@
       "deathsCeiling": "Você morreu {deaths} vezes: passou do seu limite de {ceiling}, o ponto a partir do qual mais perde partidas.",
       "deathsWins": "Você morreu {deaths} vezes; nas vitórias sua média é {avg}.",
       "praiseDeaths": "você morreu só {deaths} vezes",
+      "praiseDeathsOne": "você morreu só 1 vez",
+      "praiseDeathsNone": "você não morreu nenhuma vez",
       "threat": "O inimigo tinha {threat} e você não montou {answer}.",
       "praiseThreat": "você montou {answer} contra {threat}",
       "matchupRecord": "Contra {enemy} com {champion} você já está {wins}-{losses}.",
@@ -2700,6 +2727,7 @@
         "coverTank": "com {champion}, vida e resistências também aumentam seu dano"
       },
       "good": "sua build de {built} era a certa, porque {reasons}",
+      "goodItems": "sua build de {built} ({items}) era a certa, porque {reasons}",
       "shift": "Você montou {built} ({items}), mas a partida pedia {wanted}: {reasons}.",
       "itemsAction": "Um exemplo com {champion}: {items}.",
       "play": {

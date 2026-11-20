@@ -7,7 +7,11 @@ import { Link } from 'react-router-dom';
 import { entitySlug } from '@/utils/entitySlug';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { runeBranchLabel } from '@/utils/runeBranches';
-import { CardTitle, splitEffects } from '@/components/library/detailParts';
+import { useMemo } from 'react';
+import {
+  CardTitle, FaceList, FillSpace, ItemIconList, PersonalUsageBlock, splitEffects, useArtLights, usePersonalMatches,
+} from '@/components/library/detailParts';
+import { championsForRune, itemsForRune, personalUsage } from '@/features/library/entityInsights';
 import { COUNTER_TAGS, FIT_CLASSES, RUNE_BENEFIT_TAGS, RUNE_TRIGGER_TAGS } from '@/features/coach/taxonomy';
 
 export const BRANCH_ICONS = {
@@ -18,30 +22,52 @@ export const BRANCH_ICONS = {
   Brujería: Wand2,
 };
 
-// Luces de cada rama (RGB): el color de la rama y uno de acompañamiento.
+// Luces de cada rama (RGB): el color de la rama y uno de acompañamiento. Las runas clave
+// toman los colores de su propio ícono (useArtLights); el blanco es solo mientras carga.
 const BRANCH_LIGHTS = {
-  Clave: [[234, 179, 8], [212, 175, 55]],
-  Precisión: [[59, 130, 246], [212, 175, 55]],
-  Dominación: [[239, 68, 68], [124, 58, 237]],
-  Valor: [[34, 197, 94], [212, 175, 55]],
-  Brujería: [[168, 85, 247], [59, 130, 246]],
+  Clave: [[244, 244, 245], [212, 212, 216]],
+  Precisión: [[234, 179, 8], [212, 175, 55]],
+  Dominación: [[239, 68, 68], [185, 28, 28]],
+  Valor: [[34, 197, 94], [21, 128, 61]],
+  Brujería: [[59, 130, 246], [37, 99, 235]],
 };
+
+/** Campeones que la aprovechan y objetos que la potencian que se muestran. */
+// Se muestran en una fila: los que entren según el ancho (styles/16-library.css).
+const MAX_FANS = 12;
+const MAX_SYNERGY = 12;
+/** Descripción larga (letra más chica): con tu rendimiento debajo, desde menos caracteres. */
+const LONG_DESCRIPTION = 550;
+const LONG_DESCRIPTION_WITH_USAGE = 380;
 
 /**
  * @param {{
- *   rune: object, runes: object[], publicBasePath?: string,
+ *   rune: object, runes: object[], champions?: object[], items?: object[], publicBasePath?: string,
  *   onBack: () => void, onSelectRune: (rune: object) => void,
  * }} props
  */
-export default function RuneDetail({ rune, runes, publicBasePath, onBack, onSelectRune }) {
+export default function RuneDetail({ rune, runes, champions = [], items = [], publicBasePath, onBack, onSelectRune }) {
   const t = useT();
   const { entityName, entityDescription, compareNames } = useCatalogText();
   const publicMode = Boolean(publicBasePath);
+  // Campeones que la aprovechan, objetos que la potencian y tu rendimiento con ella.
+  const fans = useMemo(() => championsForRune(rune, champions, MAX_FANS), [rune, champions]);
+  const synergy = useMemo(() => itemsForRune(rune, items, MAX_SYNERGY), [rune, items]);
+  const matches = usePersonalMatches(publicMode);
+  const usage = useMemo(() => (publicMode ? null : personalUsage(matches, rune.name, 'runes_used')), [publicMode, matches, rune.name]);
+  const synergyBlock = synergy.length > 0 && (
+    <div className="rd-ed-profile-block rd-ed-synergy">
+      <p className="rd-ed-profile-label">{t('library.objetosQueLaPotencian')}</p>
+      <ItemIconList items={synergy} publicMode={publicMode} nameOf={entityName} />
+    </div>
+  );
   const BranchIcon = BRANCH_ICONS[rune.branch] || Gem;
   const lights = BRANCH_LIGHTS[rune.branch];
+  // Claves: los colores dominantes de su ícono. Ramas: el color fijo de la rama.
+  const iconLights = useArtLights(rune.branch === 'Clave' ? rune.image_url : null, lights);
   const lightStyle = {
     ...(rune.image_url ? { '--rd-ed-art': `url(${JSON.stringify(rune.image_url)})` } : {}),
-    ...(lights ? {
+    ...(rune.branch === 'Clave' ? iconLights : lights ? {
       '--rd-cd-light-a': lights[0].join(', '),
       '--rd-cd-light-b': lights[1].join(', '),
     } : {}),
@@ -75,7 +101,7 @@ export default function RuneDetail({ rune, runes, publicBasePath, onBack, onSele
     .sort(([a], [b]) => a - b);
 
   return (
-    <article className="rd-cd rd-ed" data-kind="rune" data-length={description.length > 550 ? "long" : "normal"} data-branch={rune.branch || undefined} style={lightStyle}>
+    <article className="rd-cd rd-ed" data-kind="rune" data-length={description.length > (usage ? LONG_DESCRIPTION_WITH_USAGE : LONG_DESCRIPTION) ? "long" : "normal"} data-branch={rune.branch || undefined} style={lightStyle}>
       <header className="rd-cd-hero rd-ed-hero">
         {rune.image_url && <img className="rd-ed-hero-glow" src={rune.image_url} alt="" aria-hidden="true" />}
         <div className="rd-cd-hero-shade" aria-hidden="true" />
@@ -123,6 +149,14 @@ export default function RuneDetail({ rune, runes, publicBasePath, onBack, onSele
             </ul>
           ) : (
             <p className="rd-cd-empty">{t('library.sinDescripcion')}</p>
+          )}
+          {/* Pie: tu rendimiento (privada); los objetos que la potencian van en el perfil, salvo que no haya. */}
+          {usage && (
+            <FillSpace className="rd-ed-fill-end">
+              <div className="rd-ed-foot">
+                <PersonalUsageBlock usage={usage} champions={champions} />
+              </div>
+            </FillSpace>
           )}
         </section>
 
@@ -209,6 +243,20 @@ export default function RuneDetail({ rune, runes, publicBasePath, onBack, onSele
             ))}
           </div>
         </section>
+
+        {/* Sinergias: siempre a la vista, debajo del árbol (que va compacto). */}
+        {(fans.length > 0 || synergyBlock) && (
+          <section className="rd-cd-card rd-ed-kit">
+            <CardTitle>{t('library.sinergias')}</CardTitle>
+            {fans.length > 0 && (
+              <div className="rd-ed-profile-block rd-ed-fans">
+                <p className="rd-ed-profile-label">{t('library.campeonesQueLaAprovechan')}</p>
+                <FaceList champions={fans} publicMode={publicMode} />
+              </div>
+            )}
+            {synergyBlock}
+          </section>
+        )}
       </div>
     </article>
   );

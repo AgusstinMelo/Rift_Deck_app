@@ -41,6 +41,30 @@ export function averageMatchKda(matches) {
 }
 
 /**
+ * Pool de campeones de un grupo de partidas (el Dashboard lo usa con las de los últimos
+ * 7 días): los más jugados primero y, a igual cantidad, el de mejor winrate.
+ * @returns {{ champion: string, games: number, wins: number, wr: number, kda: number }[]}
+ */
+export function championPool(matches, limit = 4) {
+  const byChampion = new Map();
+  (matches || []).forEach(match => {
+    const champion = String(match?.own_champion_name || '').trim();
+    if (!champion) return;
+    const key = champion.toLowerCase();
+    const entry = byChampion.get(key) || { champion, rows: [] };
+    entry.rows.push(match);
+    byChampion.set(key, entry);
+  });
+  return [...byChampion.values()]
+    .map(({ champion, rows }) => {
+      const wins = rows.filter(row => row.result === 'win').length;
+      return { champion, games: rows.length, wins, wr: winratePct(wins, rows.length), kda: averageMatchKda(rows) };
+    })
+    .sort((a, b) => b.games - a.games || b.wr - a.wr || b.kda - a.kda)
+    .slice(0, limit);
+}
+
+/**
  * Récord de cada build guardada con las partidas vinculadas (matches.build_id):
  * Map(id de la build → { games, wins, losses }).
  */

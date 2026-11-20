@@ -278,6 +278,81 @@
   text-align: right;
 }
 
+/* Columna de builds compartida: las guardadas arriba (hasta 2, o una línea si no hay) y
+   "Lo que mejor te funciona" (builds sacadas de tus partidas) ocupando el resto. */
+.rd-dashboard-builds-empty {
+  padding-bottom: 0.35rem;
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-dashboard-builds-compact {
+  flex: none;
+  grid-template-rows: none;
+  grid-auto-rows: 3.1rem;
+}
+
+.rd-dashboard-pool {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed hsl(var(--primary) / 0.25);
+}
+
+.rd-dashboard-pool-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.rd-dashboard-pool-head span {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-dashboard-pool .rd-dashboard-list {
+  grid-template-rows: none;
+  grid-auto-rows: minmax(2.6rem, 3.6rem);
+  align-content: space-evenly;
+}
+
+/* Winrate de la semana con una barra chica debajo. */
+.rd-dashboard-pool-wr {
+  display: grid;
+  width: 3.4rem;
+  justify-items: end;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.rd-dashboard-pool-bar {
+  display: block;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: hsl(var(--secondary));
+}
+
+.rd-dashboard-pool-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #4ADE80;
+}
+
+.rd-dashboard-pool-bar > span[data-tone="loss"] {
+  background: #F87171;
+}
+
 .rd-dashboard-meta {
   display: grid;
   grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.85fr);

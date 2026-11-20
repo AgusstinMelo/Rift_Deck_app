@@ -145,7 +145,7 @@
 .rd-cd-hero {
   position: relative;
   display: flex;
-  min-height: clamp(140px, 23vh, 240px);
+  min-height: clamp(140px, 20vh, 220px);
   flex-shrink: 0;
   flex-direction: column;
   justify-content: space-between;
@@ -361,34 +361,48 @@
   .rd-cd-related { grid-area: side; }
 }
 
-/* Escritorio: la ficha ocupa el alto disponible y las dos filas de tarjetas se lo reparten. */
+/* Escritorio: la ficha ocupa el alto disponible y las dos filas de tarjetas se lo reparten.
+   Cada fila mide al menos lo que pide su contenido (el texto nunca queda cortado ni con
+   scroll dentro de la tarjeta) y el alto que sobra se reparte entre las dos. Solo si la
+   ventana es tan baja que ni así entra, scrollea la ficha entera. */
 @media (min-width: 1024px) and (min-height: 501px) {
   .rd-lib-body:has(> .rd-cd) {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding-right: 0;
+    scrollbar-width: thin;
   }
 
   .rd-cd {
-    height: 100%;
+    min-height: 100%;
   }
 
+  /* Base 0 y sin mínimo automático: toma exactamente el alto disponible y las filas
+     (minmax(min-content, 1fr)) se lo reparten. Con base auto o con el mínimo automático,
+     Chrome mide las filas fr con el contenido máximo (las listas que llenan el espacio,
+     como relacionados) y la grilla crece de más: la página scrollearía. */
   .rd-cd-grid {
-    flex: 1 1 0;
     min-height: 0;
+    flex: 1 0 0;
   }
 
   @container rdlib (min-width: 900px) {
     .rd-cd-grid {
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(min-content, 1fr));
     }
   }
+}
 
-  /* Si una tarjeta no entra (ventanas muy bajas), scrollea ella y no la página. */
-  .rd-cd-card {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-  }
+/* El contenido de cada tarjeta se estira hasta llenarla: la lista de estadísticas reparte
+   sus filas y el filete dorado de las notas y del análisis llega hasta abajo. */
+.rd-cd-stat-list,
+.rd-cd-notes-text,
+.rd-cd-personal-insight {
+  flex: 1 0 auto;
+}
+
+.rd-cd-stat-list {
+  grid-auto-rows: 1fr;
 }
 
 .rd-cd-card {
@@ -753,7 +767,7 @@ a.rd-cd-face:hover .rd-cd-face-name {
 
 .rd-cd-stat {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   padding: clamp(0.25rem, 0.7vh, 0.45rem) 0;
@@ -965,6 +979,20 @@ a.rd-cd-face:hover .rd-cd-face-name {
   grid-template-columns: repeat(auto-fill, minmax(7.25rem, 1fr));
 }
 
+/* Escritorio a tres columnas: la lista toma el alto de la tarjeta y ChampionDetail muestra
+   tantos campeones como filas completas entren (useFitCount); las filas se reparten el alto
+   (la primera arriba, la última abajo) para que no quede una franja vacía al pie. */
+@media (min-width: 1024px) and (min-height: 501px) {
+  @container rdlib (min-width: 900px) {
+    .rd-cd-related .rd-cd-related-list {
+      min-height: 0;
+      flex: 1 1 0;
+      align-content: space-between;
+      overflow: hidden;
+    }
+  }
+}
+
 /* Escritorio con poco alto (notebooks, escalado de Windows al 125 %): todo más compacto
    para que entre sin scroll. */
 @media (min-width: 1024px) and (max-height: 760px) {
@@ -1032,8 +1060,7 @@ a.rd-cd-face:hover .rd-cd-face-name {
 @media (min-width: 1024px) and (min-height: 501px) {
   /* Las tres filas de matchups se reparten el alto de la tarjeta. */
   .rd-cd-matchups > .rd-cd-matchup {
-    min-height: 0;
-    flex: 1 1 0;
+    flex: 1 0 auto;
   }
 
   /* Sin lugar para tres columnas (pantalla chica o biblioteca privada con sidebar): dos
@@ -1043,16 +1070,8 @@ a.rd-cd-face:hover .rd-cd-face-name {
       overflow-y: auto;
     }
 
-    .rd-cd {
-      height: auto;
-    }
-
     .rd-cd-grid {
       flex: none;
-    }
-
-    .rd-cd-card {
-      overflow: visible;
     }
 
     .rd-cd-matchups > .rd-cd-matchup {
@@ -1260,9 +1279,54 @@ a.rd-cd-face:hover .rd-cd-face-name {
       "effects matchups";
   }
 
+  /* Runa: a la derecha, el árbol de la rama compacto arriba y las sinergias debajo. */
   .rd-ed[data-kind="rune"] .rd-cd-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
-    grid-template-areas: "effects profile tree";
+    grid-template-areas:
+      "effects profile tree"
+      "effects profile kit";
+  }
+
+  .rd-ed-kit { grid-area: kit; }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-rows {
+    flex: none;
+    justify-content: flex-start;
+    gap: clamp(0.35rem, 0.9vh, 0.55rem);
+  }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-row {
+    gap: 0.25rem;
+  }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-row ul {
+    grid-template-columns: repeat(auto-fit, minmax(4.4rem, 1fr));
+    gap: 0.3rem;
+  }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-rows[data-keystone="no"] ul {
+    grid-template-columns: none;
+  }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-node {
+    gap: 0.15rem;
+    padding: 0.25rem 0.05rem;
+    border-radius: 10px;
+  }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"] .rd-ed-tree-fallback,
+  .rd-ed[data-kind="rune"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-fallback {
+    width: clamp(26px, 3.6vh, 34px);
+    height: clamp(26px, 3.6vh, 34px);
+  }
+
+  .rd-ed[data-kind="rune"] .rd-ed-tree-name,
+  .rd-ed[data-kind="rune"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-name {
+    max-width: 100%;
+    font-size: 0.61rem;
+    letter-spacing: -0.02em;
   }
 
   .rd-ed-effects { grid-area: effects; }
@@ -1275,21 +1339,28 @@ a.rd-cd-face:hover .rd-cd-face-name {
 
 @media (min-width: 1024px) and (min-height: 501px) {
   @container rdlib (min-width: 900px) {
-    /* La fila de Efectos crece con el texto (hasta 62 % del alto); la de abajo toma el resto. */
-    .rd-ed[data-kind="item"] .rd-cd-grid {
-      grid-template-rows: fit-content(62%) minmax(0, 1fr);
-    }
-
+    /* La fila de Efectos mide lo que pide el texto; la de abajo toma el resto (nunca menos
+       que su contenido: nada queda cortado ni con scroll dentro de la tarjeta). */
+    .rd-ed[data-kind="item"] .rd-cd-grid,
     .rd-ed[data-kind="item"][data-length="long"][data-stats="none"] .rd-cd-grid {
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
     }
 
     .rd-ed[data-kind="item"][data-text="xlong"][data-stats="yes"] .rd-cd-grid {
-      grid-template-rows: auto auto minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr;
     }
 
     .rd-ed[data-kind="rune"] .rd-cd-grid {
-      grid-template-rows: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+    }
+
+    /* Objetos del mismo tipo: la lista toma el alto que le deja la tarjeta (no lo empuja) y
+       ItemDetail muestra tantos como entren (useFitCount). */
+    .rd-ed-related-list {
+      min-height: 0;
+      flex: 1 1 0;
+      align-content: space-between;
+      overflow: hidden;
     }
   }
 }
@@ -1328,6 +1399,23 @@ a.rd-cd-face:hover .rd-cd-face-name {
 .rd-ed-stat-list {
   display: grid;
   gap: clamp(0.25rem, 0.7vh, 0.4rem);
+}
+
+/* Más de tres estadísticas: dos columnas, para no subir la fila de Efectos. */
+.rd-ed-stat-list[data-many="yes"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rd-ed-stat-list[data-many="yes"] .rd-ed-stat {
+  gap: 0.4rem;
+  padding-inline: 0.55rem;
+}
+
+.rd-ed-stat-list[data-many="yes"] .rd-ed-stat dt {
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rd-ed-stat {
@@ -1661,7 +1749,7 @@ button.rd-ed-tree-node:hover img {
 }
 
 /* Ventanas bajas: la tarjeta "Para quién y contra qué" se compacta para entrar sin scroll. */
-@media (min-width: 1024px) and (max-height: 760px) {
+@media (min-width: 1024px) and (max-height: 860px) {
   .rd-ed-profile {
     gap: 0.4rem;
   }
@@ -1688,6 +1776,186 @@ button.rd-ed-tree-node:hover img {
     font-size: 0.7rem;
     line-height: 1.3;
   }
+}
+
+/* Bloques que completan las fichas de objeto y runa: campeones que lo aprovechan, cómo se
+   contrarresta, objetos que potencian la runa y tu rendimiento. Los que cierran una tarjeta
+   (contrarresta, potencian) van al pie con un separador: llenan el hueco de los textos cortos. */
+.rd-ed-fans,
+.rd-ed-usage {
+  --tone: var(--rd-cd-gold);
+}
+
+/* Bloques opcionales (FillSpace en detailParts.jsx): en escritorio solo toman el alto que
+   le sobra a la tarjeta; el que no entra entero se oculta desde JS. */
+.rd-ed-fill {
+  display: grid;
+  align-content: start;
+  gap: clamp(0.5rem, 1.2vh, 0.75rem);
+}
+
+/* Pie (tu rendimiento en la runa): pegado abajo de la tarjeta. */
+.rd-ed-fill-end {
+  align-content: end;
+}
+
+.rd-ed-fill-end > .rd-ed-foot {
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) and (min-height: 501px) {
+  @container rdlib (min-width: 900px) {
+    .rd-ed-fill {
+      min-height: 0;
+      flex: 1 1 0;
+      overflow: hidden;
+    }
+  }
+}
+
+/* Una sola fila: entran las caras o íconos que da el ancho (los primeros, que son los más
+   afines) y el resto queda en filas de alto cero, ocultas. Así nunca empujan la tarjeta. */
+.rd-ed-fans .rd-cd-faces,
+.rd-ed-usage-faces,
+.rd-ed-synergy .rd-ed-icon-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
+  grid-template-rows: auto;
+  grid-auto-rows: 0;
+  row-gap: 0;
+  overflow: hidden;
+  justify-items: center;
+}
+
+.rd-ed-synergy .rd-ed-icon-list {
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+}
+
+.rd-ed-usage-faces {
+  grid-template-columns: repeat(auto-fill, minmax(3.6rem, 1fr));
+}
+
+.rd-ed-answers,
+.rd-ed-foot {
+  margin-top: auto;
+  padding-top: clamp(0.5rem, 1.2vh, 0.75rem);
+  border-top: 1px dashed rgba(212, 175, 55, 0.18);
+}
+
+/* Pie de la tarjeta con más de un bloque (runa: tu rendimiento y objetos que la potencian). */
+.rd-ed-foot {
+  display: grid;
+  gap: clamp(0.5rem, 1.2vh, 0.75rem);
+}
+
+/* Cómo se contrarresta: una grilla de dos columnas para todos los grupos, así los íconos
+   arrancan en la misma vertical; cada grupo en una sola fila de íconos. */
+.rd-ed-answers {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+.rd-ed-answers > .rd-ed-profile-label {
+  grid-column: 1 / -1;
+}
+
+.rd-ed-answer {
+  display: contents;
+}
+
+.rd-ed-answer > p {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: rgba(244, 239, 227, 0.78);
+}
+
+.rd-ed-answer .rd-ed-icon-list {
+  flex-wrap: nowrap;
+}
+
+.rd-ed-icon-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rd-ed-icon-link {
+  display: grid;
+  place-items: center;
+}
+
+.rd-ed-icon-link img,
+.rd-ed-icon-fallback {
+  display: grid;
+  width: clamp(30px, 4.2vh, 38px);
+  height: clamp(30px, 4.2vh, 38px);
+  place-items: center;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 9px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--rd-cd-gold);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+a.rd-ed-icon-link:hover img,
+button.rd-ed-icon-link:hover img {
+  border-color: rgba(212, 175, 55, 0.75);
+  transform: translateY(-1px);
+}
+
+/* Tu rendimiento en una sola franja: porcentaje y récord a la izquierda, campeones a la
+   derecha (los que entren). En columnas angostas los campeones bajan a otra línea. */
+.rd-ed-usage-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+}
+
+.rd-ed-usage-head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rd-ed-usage-faces {
+  min-width: 10rem;
+  flex: 1 1 0;
+}
+
+.rd-ed-usage-wr {
+  font-family: var(--font-rajdhani);
+  font-size: clamp(1.5rem, 3.6vh, 2.1rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--rd-cd-gold);
+}
+
+.rd-ed-usage-record {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--rd-cd-ink);
+}
+
+.rd-ed-usage-compare {
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-ed-usage-compare[data-trend="up"] { color: #4ADE80; }
+.rd-ed-usage-compare[data-trend="down"] { color: #F87171; }
+
+.rd-cd-face-caption {
+  font-size: 9.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--rd-cd-gold);
 }
 
 /* Objeto: "Rinde mejor contra" como chips (el texto que lo explica va en el title). */

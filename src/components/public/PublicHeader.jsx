@@ -15,7 +15,7 @@ export default function PublicHeader() {
         {/* En smartphone el logo va más chico y el idioma solo con la bandera: si no, en
             360-420 px el logo se pisaba con el selector de idioma. */}
         <a href="/" className="flex shrink-0 items-center" aria-label={t('nav.home')}>
-          <img src={logoHorizontalUrl} alt="Rift Deck" width="174" height="22" className="h-[16px] w-auto object-contain min-[400px]:h-[18px] sm:h-[22px]" />
+          <img src={logoHorizontalUrl} alt="Rift Deck" width="174" height="22" className="h-[16px] w-auto object-contain [@media(min-width:400px)_and_(max-width:639px)]:h-[18px] sm:h-[22px]" />
         </a>
         <div className="flex min-w-0 items-center gap-3 whitespace-nowrap text-[13px] sm:gap-4 sm:text-sm">
           {/* En smartphone ya están las pestañas Campeones / Objetos / Runas de la biblioteca. */}

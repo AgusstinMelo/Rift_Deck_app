@@ -4,6 +4,12 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
+      // `land:` y `short:` van como screens (no como variantes de plugin) para que se generen
+      // DESPUÉS de sm/md/lg y les ganen en el celular: en la portada hay decenas de pares como
+      // `md:mt-10 land:mt-4`. Un screen { raw } desactiva las variantes min-* y max-* de
+      // Tailwind (de ahí el aviso "min-* and max-* variants are not supported" en dev/build):
+      // no usar min-[...]: ni max-[...]:; para un rango, una variante arbitraria
+      // [@media(min-width:400px)_and_(max-width:639px)]:...
       screens: {
         // Smartphone horizontal (mismo criterio que PHONE_LANDSCAPE_QUERY en useMatchMedia).
         land: { raw: '(orientation: landscape) and (max-height: 500px)' },
