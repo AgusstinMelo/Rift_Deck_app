@@ -259,3 +259,18 @@ test('catálogo: las relaciones entre campeones se resuelven por nombre o por id
   assert.deepEqual(seraphine.weakAgainst, ['blitzcrank', 'braum']);
   assert.deepEqual(seraphine.strongAgainst, ['rakan']);
 });
+
+test('muertes: como mucho dos tarjetas sobre el mismo tema (última partida, techo y seguimiento)', () => {
+  const before = [...many(10, { deaths: 2, result: 'win' }), ...many(10, { deaths: 7, result: 'loss' }, 11)];
+  const after = Array.from({ length: 6 }, (_, index) => match({
+    date: '2026-11-1' + index, created_at: `2026-11-1${index}T12:00:00Z`, deaths: 2, result: 'win',
+  }));
+  const latest = match({ id: 'latest', date: '2026-11-17', created_at: '2026-11-17T10:00:00Z', result: 'loss', deaths: 9 });
+  const history = [{ insight_key: 'deaths-ceiling', track: { kind: 'deathsOver', ceiling: 3 }, first_seen_at: '2026-11-05T00:00:00Z' }];
+  const matches = [...before, ...after, latest];
+  const { insights } = report(matches, { history, now: new Date('2026-11-17T12:00:00Z') });
+  // Las tres candidatas existen, pero salen dos: la última partida (va primero) y una más.
+  assert.equal(insights[0].id, 'last-latest');
+  assert.equal(insights[0].topic, 'muertes');
+  assert.equal(insights.filter(card => card.topic === 'muertes').length, 2);
+});

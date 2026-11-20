@@ -31,6 +31,13 @@ export const FAMILY = Object.freeze({
   STRENGTH: 'strength',
 });
 
+/**
+ * Tema de una tarjeta, para que el informe no repita lo mismo con distintas familias
+ * (última partida, techo de muertes, tendencia y seguimiento pueden hablar todas de muertes).
+ */
+const DEATH_TRACKS = new Set(['deathsOver', 'avgDeaths', 'deathShare']);
+export const topicOfTrack = track => (DEATH_TRACKS.has(track?.kind) ? 'muertes' : null);
+
 export function confidenceLabel(value) {
   if (value >= 0.72) return tr('home.confianzaAlta');
   if (value >= 0.45) return tr('home.confianzaMedia');
@@ -48,7 +55,7 @@ export function confidenceLabel(value) {
  */
 export function makeInsight({
   key, family, tone = 'neutral', title, thesis, action, evidence = [], z = 0, sample = 0,
-  corroborated = false, confidence, priority, impact = 0, entities = [], track = null, goal = null,
+  corroborated = false, confidence, priority, impact = 0, entities = [], track = null, goal = null, topic,
 }) {
   const certainty = confidence ?? confidenceOf({ z, games: sample, corroborated });
   return {
@@ -66,6 +73,8 @@ export function makeInsight({
     // Prioridad editorial + confianza + impacto (partidas afectadas por el patrón).
     score: priority + certainty * 25 + Math.min(impact, 20),
     entities: entities.filter(Boolean),
+    // Sin tema explícito, el de su métrica de seguimiento (si es de muertes).
+    topic: topic ?? topicOfTrack(track),
     track,
     goal,
     isNew: false,

@@ -33,6 +33,7 @@ export function detectLastMatch(ctx) {
     if (limit !== null && match.deaths > limit) {
       flags.push({
         weight: 3 + (match.deaths - limit) * 0.3,
+        topic: 'muertes',
         text: ceiling !== undefined
           ? tr('coachEngine.last.deathsCeiling', { deaths: match.deaths, ceiling })
           : tr('coachEngine.last.deathsWins', { deaths: match.deaths, avg: fixed(wins.avgDeaths) }),
@@ -146,5 +147,7 @@ export function detectLastMatch(ctx) {
     // Una sola partida: la confianza viene de que el patrón ya está medido en tu historial.
     confidence: 0.62, sample: 1, priority: recent ? 104 : 45, impact: flags.length * 3,
     entities: [match.champion, match.enemy],
+    // Si habla de tus muertes (una de las dos señales principales), cuenta para ese tema.
+    topic: flags.slice(0, 2).find(flag => flag.topic)?.topic ?? null,
   })];
 }

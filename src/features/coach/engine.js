@@ -27,18 +27,23 @@ const FAMILY_CAP = { [FAMILY.BUILD]: 2, [FAMILY.PREP]: 2 };
  */
 const ENTITY_EXEMPT = new Set([FAMILY.LAST_MATCH, FAMILY.FOLLOW_UP, FAMILY.PLAN, FAMILY.STRENGTH, FAMILY.WEEKLY_PICKS]);
 const ENTITY_CAP = 3;
+/** Tarjetas sobre un mismo tema (card.topic, p. ej. muertes), aunque sean de familias distintas. */
+const TOPIC_CAP = 2;
 
 function selectEditorially(candidates, limit) {
   const sorted = [...candidates].sort((a, b) => b.score - a.score);
   const selected = [];
   const familyCount = new Map();
   const entityCount = new Map();
+  const topicCount = new Map();
   for (const card of sorted) {
     if ((familyCount.get(card.family) || 0) >= (FAMILY_CAP[card.family] ?? 1)) continue;
+    if (card.topic && (topicCount.get(card.topic) || 0) >= TOPIC_CAP) continue;
     const counted = !ENTITY_EXEMPT.has(card.family);
     if (counted && card.entities.some(entity => (entityCount.get(entity) || 0) >= ENTITY_CAP)) continue;
     selected.push(card);
     familyCount.set(card.family, (familyCount.get(card.family) || 0) + 1);
+    if (card.topic) topicCount.set(card.topic, (topicCount.get(card.topic) || 0) + 1);
     if (counted) card.entities.forEach(entity => entityCount.set(entity, (entityCount.get(entity) || 0) + 1));
     if (selected.length >= limit) break;
   }

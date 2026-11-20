@@ -2,7 +2,7 @@
 // consejo ya se mostró (coach_insight_log), se compara esa métrica en las partidas
 // cargadas desde entonces contra las anteriores.
 import { tr } from '../../i18n/uiI18n.js';
-import { FAMILY, makeInsight } from './card.js';
+import { FAMILY, makeInsight, topicOfTrack } from './card.js';
 import { sessionize } from './detectors/performance.js';
 import { fixed, pct, summarize } from './stats.js';
 
@@ -144,5 +144,6 @@ export function detectFollowUps(ctx, history, current) {
     confidence: Math.min(0.9, 0.4 + best.games / 30 + best.magnitude * 0.05),
     sample: best.games, priority: 90, impact: best.games,
     entities: [best.track.championName, best.track.enemyName],
+    topic: topicOfTrack(best.track),
   })];
 }
