@@ -31,6 +31,53 @@ export async function consumeSuggesterRun(userId: string, feature: SuggesterFeat
   return data as { allowed: boolean; reason?: string; used: number; limit: number | null };
 }
 
+export type SuggesterRunStatus = "running" | "success" | "failed" | "usage_limit";
+
+export interface SuggesterRunRecord {
+  status: SuggesterRunStatus;
+  errorKind?: string | null;
+  errorMessage?: string | null;
+  model?: string | null;
+  durationMs?: number | null;
+  meta?: Record<string, unknown>;
+}
+
+/**
+ * Registro de la ejecución en suggester_runs (202611200025_suggester_runs.sql). Nunca rompe
+ * la respuesta al usuario: si falla, solo queda en los logs de la función.
+ */
+export async function recordSuggesterRun(userId: string, feature: SuggesterFeature, requestId: string, run: SuggesterRunRecord) {
+  try {
+    const { error } = await getAdminClient().rpc("record_suggester_run", {
+      p_user_id: userId,
+      p_feature: feature,
+      p_request_id: requestId,
+      p_status: run.status,
+      p_error_kind: run.errorKind ?? null,
+      p_error_message: run.errorMessage ?? null,
+      p_model: run.model ?? null,
+      p_duration_ms: run.durationMs == null ? null : Math.round(run.durationMs),
+      p_meta: run.meta ?? {},
+    });
+    if (error) console.error("record_suggester_run failed", { feature, requestId, error });
+  } catch (error) {
+    console.error("record_suggester_run failed", { feature, requestId, error });
+  }
+}
+
+/** Solo los datos de contexto conocidos y cortos que manda el cliente (campeón, línea...). */
+export function runMeta(value: unknown) {
+  if (!value || typeof value !== "object") return {};
+  const source = value as Record<string, unknown>;
+  const text = (key: string) => (typeof source[key] === "string" ? String(source[key]).slice(0, 60) : undefined);
+  return {
+    champion: text("champion"),
+    role: text("role"),
+    patch_version: text("patch_version"),
+    themed: typeof source.themed === "boolean" ? source.themed : undefined,
+  };
+}
+
 export async function refundSuggesterRun(userId: string, feature: SuggesterFeature, requestId: string) {
   const { error } = await getAdminClient().rpc("refund_suggester_run", {
     p_user_id: userId,

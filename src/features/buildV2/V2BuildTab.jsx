@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BrainCircuit, Check, ChevronDown, ChevronLeft, ChevronRight, Loader2, Search, Sparkles, Swords, Users } from 'lucide-react';
 import { loadV2Snapshot } from './v2DataLoader';
 import { buildV2Prompt, estimatePromptTokens } from './v2PromptBuilder';
-import { requestV2Build } from './v2AiClient';
+import { finishV2BuildRun, requestV2Build } from './v2AiClient';
 import { validateV2Result } from './v2Validation';
 import { stabilizeV2Result } from './v2ResultStabilizer';
 import { createEligibleV2Snapshot } from './v2Eligibility';
@@ -198,7 +198,11 @@ export default function V2BuildTab({ tabSelector }) {
       let prompt = buildV2Prompt(requestContext);
       let lastValidation = null;
       const showResult = data => {
-        setResult({ ...resolveV2Result(data, generationSnapshot), champion: snapshot.champions.find(c => String(c.id) === championId), role });
+        // draft: amenazas del rival y con qué escala tu campeón, para la línea "Responde a" de
+        // cada pieza (V2BuildResult), calculada igual que el responds_to del prompt.
+        const selected = snapshot.champions.find(c => String(c.id) === championId);
+        const draft = { profile: fit.profile, scalings: new Set((selected?.item_scalings || []).map(value => String(value).trim().toLowerCase())) };
+        setResult({ ...resolveV2Result(data, generationSnapshot), champion: selected, role, draft });
         setState('success');
       };
 
@@ -206,7 +210,10 @@ export default function V2BuildTab({ tabSelector }) {
         if (import.meta.env.DEV) console.debug('[Build IA V2] request', { attempt, counts: { champions: generationSnapshot.champions.length, coreItems: generationSnapshot.coreItems.length, movementItems: generationSnapshot.movementItems.length, runes: generationSnapshot.runes.length, spells: generationSnapshot.spells.length }, promptLength: prompt.length, estimatedTokens: estimatePromptTokens(prompt) });
         let response;
         try {
-          response = await requestV2Build(prompt, aliases.snapshot, { role, attempt, requestId });
+          response = await requestV2Build(prompt, aliases.snapshot, {
+            role, attempt, requestId,
+            runContext: { champion: snapshot.champions.find(c => String(c.id) === championId)?.name, role, patch_version: snapshot.patchVersion, themed },
+          });
         } catch (cause) {
           if (attempt === 1 && cause.retryable) {
             await new Promise(resolve => setTimeout(resolve, 1200));
@@ -251,6 +258,8 @@ export default function V2BuildTab({ tabSelector }) {
         }
       }
 
+      // La IA respondió, pero ni con la corrección la build pasó la validación local.
+      finishV2BuildRun(requestId, 'failed', 'validation_error');
       setState('validation_error');
       setError(t('buildV2.invalidBuild'));
     } catch (cause) { setState(cause.kind === 'malformed_response' ? 'malformed_response' : 'provider_error'); setError(cause.message); if (import.meta.env.DEV) console.debug('[Build IA V2] error', { kind: cause.kind, raw: cause.raw, message: cause.message, details: cause.details }); }

@@ -13,6 +13,8 @@ export async function requestV2Build(prompt, snapshot, context = {}) {
     response_json_schema: createV2BuildJsonSchema(snapshot, context),
     provider_attempt: context.attempt || 1,
     request_id: context.requestId,
+    // Qué se pidió, para el registro de ejecuciones (suggester_runs).
+    run_context: context.runContext,
   };
   const { data, error } = await supabase.functions.invoke('suggest-build-v2', { body });
   const temporaryFailure = Boolean(error) || (!data?.ok && isTemporaryProviderFailure(data));
@@ -39,4 +41,20 @@ export async function requestV2Build(prompt, snapshot, context = {}) {
     });
   }
   return data;
+}
+
+/**
+ * Cierra la ejecución en suggester_runs con el resultado final: la IA pudo responder bien y
+ * la build no pasar la validación local. Nunca rompe la pantalla si falla.
+ */
+export async function finishV2BuildRun(requestId, status, errorKind = null) {
+  if (!requestId) return;
+  try {
+    const { error } = await supabase.rpc('finish_suggester_run', {
+      p_feature: 'build', p_request_id: requestId, p_status: status, p_error_kind: errorKind,
+    });
+    if (error && import.meta.env.DEV) console.debug('[Build IA V2] finish_suggester_run', error);
+  } catch (cause) {
+    if (import.meta.env.DEV) console.debug('[Build IA V2] finish_suggester_run', cause);
+  }
 }
