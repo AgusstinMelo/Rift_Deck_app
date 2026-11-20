@@ -23,17 +23,75 @@
 
 /* Explicaciones de objetos, runas y hechizos: se recortan para que el panel entre
    sin scroll; el texto completo queda en el tooltip. */
-.rd-v2-reason {
+.rd-v2-reason,
+.rd-v2-intro {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
-@media (max-height: 820px) {
-  .rd-v2-reason {
-    -webkit-line-clamp: 2;
-  }
+/* Fila de cada pieza: nombre, etiqueta y, en la misma línea, por qué encaja en esta partida. */
+.rd-v2-row-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Por qué encaja (calculado, no de la IA): a qué amenazas del rival responde, o con qué
+   escala tu campeón. Chips en UNA línea: los que no entran bajan a una segunda línea que
+   queda oculta (se ocultan enteros, nunca con "…"); el detalle va en el tooltip. */
+.rd-v2-facts {
+  --chip-h: 1.15rem;
+  display: flex;
+  min-width: 0;
+  max-height: var(--chip-h);
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0 0.25rem;
+  overflow: hidden;
+  color: hsl(var(--primary));
+}
+
+.rd-v2-facts > svg,
+.rd-v2-facts > em {
+  height: var(--chip-h);
+  flex-shrink: 0;
+}
+
+/* "vs." delante de las amenazas que responde la pieza. */
+.rd-v2-facts > em {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.rd-v2-facts > span {
+  display: inline-flex;
+  height: var(--chip-h);
+  align-items: center;
+  padding: 0 0.4rem;
+  border: 1px solid hsl(var(--primary) / 0.35);
+  border-radius: 999px;
+  background: hsl(var(--primary) / 0.08);
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rd-v2-facts[data-kind="kit"] {
+  color: hsl(var(--muted-foreground));
+}
+
+.rd-v2-facts[data-kind="kit"] > span {
+  border-color: hsl(var(--border));
+  background: hsl(var(--secondary) / 0.5);
+  color: rgba(244, 239, 227, 0.75);
 }
 
 .rd-v2-build-aside,
@@ -128,7 +186,46 @@
     overscroll-behavior: contain;
     padding-right: 0.35rem;
   }
+
+  /* Lectura del draft y Adaptaciones entran sin scroll: el contenido ocupa exactamente el
+     panel, los recuadros de consejos toman el alto que queda y las entradas que no entran
+     enteras se ocultan (InsightList, con el texto completo en el tooltip). */
+  .rd-v2-draft {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .rd-v2-tips {
+    min-height: 0;
+    flex: 1 1 0;
+  }
+
+  .rd-v2-tip-box {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .rd-v2-tip-box > .rd-v2-insights {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow: hidden;
+  }
 }
+
+/* Textos de la IA con máximo de líneas (el completo, en el tooltip). */
+.rd-v2-clamp-1,
+.rd-v2-clamp-2,
+.rd-v2-clamp-3 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.rd-v2-clamp-1 { -webkit-line-clamp: 1; }
+.rd-v2-clamp-2 { -webkit-line-clamp: 2; }
+.rd-v2-clamp-3 { -webkit-line-clamp: 3; }
 
 @media (min-width: 1280px) and (min-height: 501px) and (max-height: 820px) {
   .rd-v2-build-aside-scroll > .rd-card {
@@ -713,11 +810,27 @@
 
   /* Explicación de objetos, runas y hechizos completa (sin "…"): el panel ya
      tiene scroll propio si hace falta. */
+  .rd-v2-build-page .rd-v2-clamp-1,
+  .rd-v2-build-page .rd-v2-clamp-2,
+  .rd-v2-build-page .rd-v2-clamp-3,
+  .rd-v2-build-page .rd-v2-intro,
   .rd-v2-build-page .rd-v2-reason {
     display: block;
     overflow: visible;
     -webkit-line-clamp: unset;
     line-clamp: unset;
+  }
+
+  /* Celular: los chips bajan debajo del nombre y se ven todos. */
+  .rd-v2-build-page .rd-v2-row-head {
+    flex-wrap: wrap;
+  }
+
+  .rd-v2-build-page .rd-v2-facts {
+    max-height: none;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: 0.2rem 0.25rem;
   }
 
   /* Con el texto completo, cada fila toma su alto (auto-rows-fr las igualaba a la

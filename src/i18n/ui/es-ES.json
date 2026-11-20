@@ -1980,6 +1980,12 @@
       "starterExtraNote": "Rift Deck cambió {removed} por {item}: solo se compra un objeto de soporte inicial.",
       "exclusiveReason": "Ocupa el lugar de {removed}: no se puede combinar con {other}.",
       "exclusiveNote": "Rift Deck cambió {removed} por {item}: el juego no permite llevarlo junto con {other}."
+    },
+    "facts": {
+      "respondeA": "Responde a",
+      "escalaConTuKit": "Escala con tu kit:",
+      "alImpacto": "Efectos al impacto",
+      "vs": "vs."
     }
   },
   "stats": {

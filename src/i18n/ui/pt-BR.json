@@ -1980,6 +1980,12 @@
       "starterExtraNote": "O Rift Deck trocou {removed} por {item}: só se monta um item inicial de suporte.",
       "exclusiveReason": "Ocupa o lugar de {removed}: não pode ser combinado com {other}.",
       "exclusiveNote": "O Rift Deck trocou {removed} por {item}: o jogo não permite usá-lo junto com {other}."
+    },
+    "facts": {
+      "respondeA": "Responde a",
+      "escalaConTuKit": "Escala com seu kit:",
+      "alImpacto": "Efeitos ao acertar",
+      "vs": "vs."
     }
   },
   "stats": {

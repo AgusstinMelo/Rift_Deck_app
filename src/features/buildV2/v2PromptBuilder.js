@@ -1,13 +1,14 @@
 const FIELD_SETS = {
   champion: ['id', 'name', 'roles', 'damage_type', 'scaling', 'strategic_notes', 'attack_type', 'range_type', 'attack_range', 'traits', 'item_scalings', 'vulnerabilities', 'team_roles',
     'score_engage', 'score_peel', 'score_disengage', 'score_mobility', 'score_burst', 'score_sustained_damage', 'score_range', 'score_self_sustain', 'score_waveclear', 'tags', 'description'],
-  item: ['id', 'name', 'answers', 'kit_fit', 'path', 'fits_classes', 'type', 'description', 'tags', 'effect_tags', 'trigger_tags', 'situational_role', 'price', 'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power', 'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact', 'critical_damage', 'lifesteal', 'physic_vamp', 'magic_vamp', 'ability_haste', 'tenacity', 'healing_and_shield', 'adaptable_ad', 'adaptable_ap', 'flat_armor_penetration', 'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration', 'good_against', 'avoid_against'],
-  rune: ['id', 'name', 'branch', 'group', 'description', 'tags', 'trigger_tags', 'benefit_tags', 'fits_classes', 'counters', 'mana_reg', 'attack_damage', 'attack_speed', 'life', 'flat_armor_penetration', 'percentage_movement', 'percentage_armor_penetration', 'critical_damage', 'tenacity', 'percentage_magic_penetration', 'life_reg', 'ability_power', 'ability_haste', 'critical_impact', 'flat_magic_penetration', 'magic_res', 'lifesteal', 'physic_vamp', 'armor', 'mana', 'healing_and_shield', 'flat_movement', 'magic_vamp'],
-  spell: ['id', 'name', 'description', 'effect', 'tags', 'cooldown', 'fits_classes', 'fits_lanes', 'counters'],
+  item: ['id', 'name', 'responds_to', 'kit_fit', 'path', 'fits_classes', 'type', 'description', 'tags', 'effect_tags', 'trigger_tags', 'situational_role', 'price', 'life', 'life_reg', 'mana', 'mana_reg', 'attack_damage', 'attack_speed', 'ability_power', 'armor', 'magic_res', 'flat_movement', 'percentage_movement', 'critical_impact', 'critical_damage', 'lifesteal', 'physic_vamp', 'magic_vamp', 'ability_haste', 'tenacity', 'healing_and_shield', 'adaptable_ad', 'adaptable_ap', 'flat_armor_penetration', 'percentage_armor_penetration', 'flat_magic_penetration', 'percentage_magic_penetration', 'good_against', 'avoid_against'],
+  rune: ['id', 'name', 'branch', 'group', 'responds_to', 'description', 'tags', 'trigger_tags', 'benefit_tags', 'fits_classes', 'counters', 'mana_reg', 'attack_damage', 'attack_speed', 'life', 'flat_armor_penetration', 'percentage_movement', 'percentage_armor_penetration', 'critical_damage', 'tenacity', 'percentage_magic_penetration', 'life_reg', 'ability_power', 'ability_haste', 'critical_impact', 'flat_magic_penetration', 'magic_res', 'lifesteal', 'physic_vamp', 'armor', 'mana', 'healing_and_shield', 'flat_movement', 'magic_vamp'],
+  spell: ['id', 'name', 'responds_to', 'description', 'effect', 'tags', 'cooldown', 'fits_classes', 'fits_lanes', 'counters'],
 };
 
 import { buildDraftProfile, fitHints } from './v2DraftProfile.js';
 import { itemAnnotations } from './v2BuildAudit.js';
+import { pieceDraftFacts, respondsToText } from './v2DraftReasons.js';
 
 const hasValue = value => value !== null && value !== undefined && value !== '' && value !== 0 && (!Array.isArray(value) || value.length > 0);
 
@@ -130,17 +131,22 @@ export function buildV2Prompt({ snapshot, championId, role, allies, enemies, bui
     signals: draftProfile.enemy_signals,
     scalings: new Set((selected.item_scalings || []).map(value => String(value).trim().toLowerCase())),
   };
+  // responds_to: a qué amenazas del rival responde cada pieza y quiénes las forman, ya armado
+  // para que el motivo lo cite (y la pantalla del resultado muestra lo mismo).
+  const draftFacts = { profile: draftProfile, scalings: annotationContext.scalings };
+  const respondsTo = (entity, kind) => respondsToText(pieceDraftFacts(entity, kind, draftFacts));
   const forDraft = item => ({
     ...item,
     ...itemAnnotations(item, annotationContext),
+    responds_to: respondsTo(item, 'item'),
     good_against: (item.good_against || []).filter(name => enemyNames.has(normalizeText(name).trim())),
     avoid_against: (item.avoid_against || []).filter(name => enemyNames.has(normalizeText(name).trim())),
   });
   const catalogs = {
     CORE_ITEMS: compactTable(snapshot.coreItems.map(forDraft), FIELD_SETS.item),
     MOVEMENT_ITEMS: compactTable(snapshot.movementItems.map(forDraft), FIELD_SETS.item),
-    RUNES: compactTable(snapshot.runes, FIELD_SETS.rune),
-    SPELLS: compactTable(snapshot.spells, FIELD_SETS.spell),
+    RUNES: compactTable(snapshot.runes.map(rune => ({ ...rune, responds_to: respondsTo(rune, 'rune') })), FIELD_SETS.rune),
+    SPELLS: compactTable(snapshot.spells.map(spell => ({ ...spell, responds_to: respondsTo(spell, 'spell') })), FIELD_SETS.spell),
   };
   const themeHints = createThemeHints(themeGuidance, snapshot.coreItems, 20);
   const answerHints = fitHints(snapshot, { champion: selected, role, profile: draftProfile });
@@ -168,7 +174,7 @@ DATOS DEL DRAFT
 - allies y enemies pueden estar completos, parciales o vacíos: tratá los espacios faltantes como desconocidos y nunca inventes integrantes, amenazas ni necesidades. Con integrantes faltantes no afirmes un perfil global del equipo (físico, mágico, frágil). Si no hay enemigos cargados, basá la build en el campeón, el rol, sus traits, item_scalings y vulnerabilities.
 - team_roles dice cómo pelea cada campeón (frontline, iniciador, diver, protector, poke, pick, daño_sostenido, split) y los score_* lo miden de 0 a 5. Son evidencia del kit, junto con traits.
 - draft_profile ya resume el draft cargado y es la evidencia principal: enemy_signals (amenazas del rival y quiénes las forman), enemy_damage (daño físico y mágico del rival), ally_gaps (lo que le falta a tu equipo; sólo con 3 o más aliados cargados) y selected_covers (lo que le falta a tu equipo y aporta tu campeón). Respondé a esas señales y no inventes otras.
-- Columnas calculadas para esta partida en CORE_ITEMS: answers (señales de enemy_signals a las que responde el objeto), kit_fit (cuánto aprovecha tu campeón sus estadísticas según item_scalings: más alto, mejor; negativo, estadísticas que no usa; vacío, neutro) y path (critico o al_impacto). good_against y avoid_against ya vienen filtrados a los rivales de este draft. Decidí sobre estas columnas y usá description para confirmar detalles.
+- Columnas calculadas para esta partida en CORE_ITEMS: responds_to (amenazas de enemy_signals a las que responde el objeto y qué enemigos las forman; RUNES y SPELLS también la traen), kit_fit (cuánto aprovecha tu campeón sus estadísticas según item_scalings: más alto, mejor; negativo, estadísticas que no usa; vacío, neutro) y path (critico o al_impacto). good_against y avoid_against ya vienen filtrados a los rivales de este draft. Decidí sobre estas columnas y usá description para confirmar detalles.
 
 GUÍA OPCIONAL
 - requested_theme es orientativa: puede ser una temática, una estadística, una combinación abreviada o una idea informal. theme_guidance traduce expresiones frecuentes a objetivos concretos.
@@ -197,7 +203,7 @@ CONTRATO INNEGOCIABLE
 CÓMO DECIDIR, EN ESTE ORDEN
 1. Plan de daño: con requested_theme, sus objetivos; sin ella, un único arquetipo desde item_scalings, traits, rol y draft. Elegí un camino (path): no mezcles una build al_impacto con un Filo del Infinito aislado.
 2. Núcleo: sin requested_theme, los objetos de mejor kit_fit dentro del plan; con ella, los que mejor cumplen la temática, ordenados por valor temprano, piezas del motor y multiplicadores. Filo del Infinito nunca va en los slots 1 o 2 y sólo se elige si la build suma al menos otros dos objetos con critical_impact. Los objetos con situational_role late o tardío van después de los habilitadores tempranos.
-3. Lo que pide la partida, con answers como guía:
+3. Lo que pide la partida, con responds_to como guía:
    - Curación: si enemy_signals incluye curacion, un objeto con anti_curacion de tu clase a más tardar en el slot 3 (salvo un support encantador).
    - Defensa: un objeto defensivo nunca es obligatorio: depende de la partida. Un carry (tirador, mago o asesino) lleva uno cuando algo lo amenaza: enemy_signals incluye divers, asesinos, burst, pick o engage; ally_gaps incluye peel (nadie lo cuida); o hay 2 enemigos cargados o menos y no se sabe qué trae el rival. Si nada de eso pasa, la mejor build puede ser full daño: decilo en build_plan y no agregues defensa por costumbre. Cuando lleva defensa, un carry se defiende con objetos de daño que también protegen (anti_burst, revivir, invulnerabilidad, escudo_hechizo), nunca con objetos de tanque, en el slot 4 o 5, y del lado del daño que lo amenaza (enemy_damage): contra daño físico, armadura o revivir; contra daño mágico, resistencia mágica o escudo_hechizo.
    - Tu rol en la pelea: si selected_covers incluye primera_linea, tu campeón es quien aguanta adelante y prioriza supervivencia aunque sea luchador; si incluye peel, o el rival tiene divers o pick y tu campeón es protector, priorizá piezas que protejan aliados. Contra pick o engage, valorá lo que salve a tu campeón de ser atrapado (movilidad, tenacidad, limpieza de control, escudos). Si ally_gaps marca algo, la build no lo reemplaza: adaptá supervivencia o posicionamiento y nunca recomiendes otro pick ni cambios en el draft.
@@ -206,8 +212,14 @@ CÓMO DECIDIR, EN ESTE ORDEN
 
 CONTENIDO DE LA RESPUESTA
 - Razones breves, concretas y basadas en datos; no expongas deliberación interna.
-- Los textos los lee el jugador: nunca escribas nombres de campos ni valores internos de los datos (al_impacto, critico, kit_fit, answers, enemy_signals, draft_profile, team_roles, daño_sostenido, anti_curacion...). Decilos en lenguaje natural: "al impacto", "crítico", "daño sostenido", "heridas graves".
-- Cada reason de core_items, movement_item, keystone, primary_runes, secondary_rune y spells debe justificar POR QUÉ se elige esa pieza en esta partida: qué parte del kit del campeón potencia, qué amenaza enemiga responde, qué sinergia tiene con otros objetos/runas o en qué momento de la partida rinde. Nunca copies ni parafrasees la description del catálogo, y no empieces repitiendo el nombre de la pieza.
+- Los textos los lee el jugador: nunca escribas nombres de campos ni valores internos de los datos (al_impacto, critico, kit_fit, responds_to, enemy_signals, draft_profile, team_roles, daño_sostenido, anti_curacion...). Decilos en lenguaje natural: "al impacto", "crítico", "daño sostenido", "heridas graves".
+- Cada reason de core_items, movement_item, keystone, primary_runes, secondary_rune y spells explica POR QUÉ esa pieza en ESTA partida, siempre en este orden: primero el motivo de la partida y después, en pocas palabras, qué hace la pieza para cumplirlo. El motivo de la partida se elige así:
+  1. Si la pieza tiene responds_to: arrancá por esa amenaza nombrando a los enemigos que la forman ("Contra el burst de Zed y Talon: si te alcanzan, revivís y seguís en la pelea.").
+  2. Si requested_theme tiene texto y la pieza la cumple: arrancá por la temática ("Para la build de penetración que pediste: ...").
+  3. Si no, por el plan y el kit de tu campeón en esta partida: el arquetipo, la estadística con la que escala o el momento en que rinde ("Núcleo del plan al impacto: con la velocidad de ataque Kai'Sa llega antes a evolucionar la W.").
+  Nunca justifiques sólo con lo que hace la pieza ("te revive", "da velocidad de ataque"): eso es el complemento, no el motivo. Nunca copies ni parafrasees la description del catálogo, y no empieces repitiendo el nombre de la pieza.
+  Ejemplo incorrecto: "Ofrece una oportunidad de supervivencia crucial." Correcto: "Contra el burst de Zed y Akali: si te alcanzan, revivís y seguís pegando."
+- Sin enemigos cargados no hay amenazas que citar: el motivo sale de la temática (si la hay) o del plan y el kit; nunca inventes rivales.
 - Cada reason debe tener 1 o 2 frases y como máximo 150 caracteres.
 - composition_analysis: perfil aliado, amenazas, respuestas y encaje del arquetipo.
 - enemy_priority_threats: a pesar del nombre, son los RIESGOS DE LA PROPIA BUILD Y DEL CAMPEÓN, no de campeones enemigos. Entre 2 y 3 entradas con el formato "Debilidad: por qué es un riesgo en esta partida y cómo manejarlo" (por ejemplo, "Pico tardío: ...", "Sin defensas: ...", "Dependencia del primer objeto: ..."). Pueden mencionar el draft como contexto, pero el título nunca es el nombre de un enemigo; las amenazas de cada enemigo van en enemy_tips.

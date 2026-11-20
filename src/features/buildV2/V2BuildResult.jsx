@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { AlertTriangle, CircleCheck, Loader2, Package, ShieldAlert, Sparkles, Swords, Users, Zap } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { AlertTriangle, CircleCheck, Loader2, Package, ShieldAlert, Sparkles, Swords, TrendingUp, Users, Zap } from 'lucide-react';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
+import { pieceDraftFacts } from './v2DraftReasons';
 
 function EntityIcon({ selection, label, badge, round = false, featured = false, small = false }) {
   const entity = selection.entity;
@@ -26,13 +27,52 @@ function IconGroup({ icon: Icon, title, columns, className = '', children }) {
 // Algunas descripciones llegan con saltos de línea escapados ("\n" literal).
 const cleanText = text => String(text || '').replace(/\\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
 
-function ReasonRow({ selection, label, badge, round = false, featured = false, className = '' }) {
+/** Etiqueta de cada valor de item_scalings (las estadísticas de la ficha del objeto). */
+const SCALING_LABELS = {
+  daño_ataque: 'library.danoDeAtaque', velocidad_ataque: 'library.velAtaque', on_hit: 'buildV2.facts.alImpacto',
+  poder_habilidad: 'library.poderDeHabilidad', aceleracion_habilidad: 'library.aceleracionDeHabilidad',
+  vida: 'builds.vida', armadura: 'builds.armadura', resistencia_magica: 'library.resistMagica',
+  penetracion_armadura_porcentual: 'library.penArmadura', penetracion_armadura_plana: 'library.penArmadura',
+  penetracion_magica_porcentual: 'library.penMagica', penetracion_magica_plana: 'library.penMagica',
+  vampirismo_fisico: 'library.vampFisico', vampirismo_magico: 'library.vampMagico', velocidad_movimiento: 'library.velMov',
+  probabilidad_critico: 'library.tasaDeCriticos', daño_critico: 'library.danoCritico',
+  mana: 'builds.mana', regeneracion_mana: 'builds.regMana', regeneracion_vida: 'builds.regVida',
+  poder_curacion: 'library.curacionEscudo', poder_escudo: 'library.curacionEscudo',
+};
+
+/**
+ * Por qué encaja en esta partida, calculado localmente (pieceDraftFacts, lo mismo que recibe
+ * la IA): las amenazas del rival a las que responde y quiénes las forman; si no responde a
+ * ninguna, con qué estadísticas de tu campeón escala. No depende de que la IA lo mencione.
+ */
+function DraftFacts({ facts }) {
+  const t = useT();
+  // Chips en una sola línea al lado del nombre: los que no entran se ocultan enteros (sin
+  // "…"); el detalle completo, con quiénes forman cada amenaza, queda en el tooltip.
+  if (facts.answers.length) {
+    const label = signal => t(`library.runePerfil.counters.${signal}.nombre`);
+    const full = facts.answers.map(({ signal, champions }) => `${label(signal)}${champions.length ? ` (${champions.join(', ')})` : ''}`).join(' · ');
+    return <span className="rd-v2-facts" data-kind="answers" title={`${t('buildV2.facts.respondeA')}: ${full}`}>
+      <em>{t('buildV2.facts.vs')}</em>
+      {facts.answers.map(({ signal }) => <span key={signal}>{label(signal)}</span>)}
+    </span>;
+  }
+  const scalings = [...new Set(facts.scalings.map(key => SCALING_LABELS[key]).filter(Boolean))].map(key => t(key));
+  if (!scalings.length) return null;
+  return <span className="rd-v2-facts" data-kind="kit" title={`${t('buildV2.facts.escalaConTuKit')} ${scalings.join(' · ')}`}>
+    <TrendingUp size={11} aria-hidden="true" />
+    {scalings.map(text => <span key={text}>{text}</span>)}
+  </span>;
+}
+
+function ReasonRow({ selection, label, badge, round = false, featured = false, className = '', kind, draft }) {
   const entity = selection.entity;
   const { entityName } = useCatalogText();
+  const facts = draft && entity ? pieceDraftFacts(entity, kind, draft) : null;
   return <li className={`flex items-center gap-2.5 border-b border-border/30 py-1.5 ${className}`}>
     <EntityIcon selection={selection} label={label} badge={badge} round={round} featured={featured} small />
-    <div className="min-w-0 text-[13px] leading-snug">
-      <p><span className="font-semibold text-foreground">{entityName(entity)}</span><span className="ml-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">{label}</span></p>
+    <div className="min-w-0 flex-1 text-[13px] leading-snug">
+      <p className="rd-v2-row-head"><span className="shrink-0 font-semibold text-foreground">{entityName(entity)}</span><span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">{label}</span>{facts && <DraftFacts facts={facts} />}</p>
       <p title={cleanText(selection.reason)} className="rd-v2-reason whitespace-pre-line">{cleanText(selection.reason)}</p>
     </div>
   </li>;
@@ -43,13 +83,40 @@ function ReasonList({ children }) {
   return <ul className="grid flex-1 auto-rows-fr gap-x-5 md:grid-cols-2">{children}</ul>;
 }
 
+/**
+ * Oculta los hijos de una lista que no entran enteros en su alto. Solo actúa si la lista
+ * tiene alto fijo (overflow hidden, en escritorio: styles/11-suggester.css): así un texto
+ * largo de la IA nunca obliga a scrollear ni queda cortado a la mitad.
+ */
+function useHideOverflowing(ref) {
+  useLayoutEffect(() => {
+    const list = ref.current;
+    if (!list || typeof ResizeObserver === 'undefined') return undefined;
+    const measure = () => {
+      const clipped = getComputedStyle(list).overflowY === 'hidden';
+      const bottom = list.getBoundingClientRect().bottom + 1;
+      [...list.children].forEach(child => {
+        // visibility no cambia el layout: medir y ocultar no se realimenta.
+        child.style.visibility = !clipped || child.getBoundingClientRect().bottom <= bottom ? '' : 'hidden';
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  });
+}
+
 // Entradas "Título: explicación" de la IA: el título se resalta y el texto se muestra
-// completo. Por defecto máximo 3 por recuadro (los consejos de composición admiten 5).
+// completo. Por defecto máximo 3 por recuadro (los consejos de composición admiten 5); en
+// escritorio, las que no entran en el alto del recuadro se ocultan (el resto, en el tooltip).
 function InsightList({ items, tone, limit = 3 }) {
-  return <ul className="space-y-1.5">{items.slice(0, limit).map((text, index) => {
+  const ref = useRef(null);
+  useHideOverflowing(ref);
+  return <ul ref={ref} className="rd-v2-insights space-y-1.5">{items.slice(0, limit).map((text, index) => {
     const separator = text.indexOf(':');
     const hasTitle = separator > 0 && separator <= 40;
-    return <li key={index} className="text-[13px] leading-snug">
+    return <li key={index} className="text-[13px] leading-snug" title={text}>
       {hasTitle ? <><span className={`font-semibold ${tone}`}>{text.slice(0, separator)}</span>{text.slice(separator)}</> : text}
     </li>;
   })}</ul>;
@@ -73,29 +140,33 @@ function AnalysisPanel({ result, items, itemLabel, runes, runeLabel }) {
       {ANALYSIS_TABS.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${tab === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{t(label)}</button>)}
     </div>
     <div role="tabpanel" className="rd-v2-build-analysis-body text-sm leading-relaxed text-muted-foreground">
-      {tab === 'draft' && <div className="flex min-h-full flex-col gap-3">
-        <div className="space-y-2"><p className="font-semibold text-foreground">{result.build_theme}</p><p className="text-[13px] leading-snug">{result.matchup_read}</p><p className="text-[13px] leading-snug">{result.composition_analysis.archetype_rationale}</p></div>
-        {(allyTips.length > 0 || enemyTips.length > 0) && <div className="grid flex-1 gap-2.5 md:grid-cols-2">
-          {allyTips.length > 0 && <div className="rounded-xl border border-sky-500/20 bg-sky-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-sky-400"><Users size={14} /><span className="rd-label text-sky-400">{t('buildV2.conTuEquipo')}</span></div><InsightList items={allyTips} tone="text-sky-400" limit={5} /></div>}
-          {enemyTips.length > 0 && <div className="rounded-xl border border-orange-500/20 bg-orange-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-orange-400"><Swords size={14} /><span className="rd-label text-orange-400">{t('buildV2.contraElRival')}</span></div><InsightList items={enemyTips} tone="text-orange-400" limit={5} /></div>}
+      {tab === 'draft' && <div className="rd-v2-draft flex min-h-full flex-col gap-3">
+        <div className="space-y-2">
+          <p className="rd-v2-clamp-1 font-semibold text-foreground" title={result.build_theme}>{result.build_theme}</p>
+          <p className="rd-v2-clamp-3 text-[13px] leading-snug" title={result.matchup_read}>{result.matchup_read}</p>
+          <p className="rd-v2-clamp-2 text-[13px] leading-snug" title={result.composition_analysis.archetype_rationale}>{result.composition_analysis.archetype_rationale}</p>
+        </div>
+        {(allyTips.length > 0 || enemyTips.length > 0) && <div className="rd-v2-tips grid flex-1 gap-2.5 md:grid-cols-2">
+          {allyTips.length > 0 && <div className="rd-v2-tip-box rounded-xl border border-sky-500/20 bg-sky-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-sky-400"><Users size={14} /><span className="rd-label text-sky-400">{t('buildV2.conTuEquipo')}</span></div><InsightList items={allyTips} tone="text-sky-400" limit={5} /></div>}
+          {enemyTips.length > 0 && <div className="rd-v2-tip-box rounded-xl border border-orange-500/20 bg-orange-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-orange-400"><Swords size={14} /><span className="rd-label text-orange-400">{t('buildV2.contraElRival')}</span></div><InsightList items={enemyTips} tone="text-orange-400" limit={5} /></div>}
         </div>}
       </div>}
-      {tab === 'adaptations' && <div className="flex min-h-full flex-col gap-2.5">
-        <ol className="grid gap-2.5 md:grid-cols-2">{result.key_adaptations.map((text, index) => <li key={index} className="flex items-start gap-2.5 rounded-xl border border-border/50 bg-secondary/20 px-3 py-2 text-[13px] leading-snug"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">{index + 1}</span><span>{text}</span></li>)}</ol>
-        <div className="grid flex-1 gap-2.5 md:grid-cols-3">
-          <div className="rounded-xl border border-green-500/20 bg-green-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-green-400"><CircleCheck size={14} /><span className="rd-label text-green-400">{t('buildV2.fortalezas')}</span></div><InsightList items={[t('buildV2.tuDano', { target_damage_profile: result.build_plan.target_damage_profile }), t('buildV2.tuEquipo', { allied_damage_profile: result.composition_analysis.allied_damage_profile })]} tone="text-green-400" /></div>
-          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-yellow-400"><AlertTriangle size={14} /><span className="rd-label text-yellow-400">{t('buildV2.requerimientos')}</span></div><InsightList items={result.composition_analysis.required_responses} tone="text-yellow-400" /></div>
-          <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-red-400"><ShieldAlert size={14} /><span className="rd-label text-red-400">{t('buildV2.riesgos')}</span></div><InsightList items={result.composition_analysis.enemy_priority_threats} tone="text-red-400" /></div>
+      {tab === 'adaptations' && <div className="rd-v2-draft flex min-h-full flex-col gap-2.5">
+        <ol className="grid gap-2.5 md:grid-cols-2">{result.key_adaptations.map((text, index) => <li key={index} className="flex items-start gap-2.5 rounded-xl border border-border/50 bg-secondary/20 px-3 py-2 text-[13px] leading-snug"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">{index + 1}</span><span className="rd-v2-clamp-3" title={text}>{text}</span></li>)}</ol>
+        <div className="rd-v2-tips grid flex-1 gap-2.5 md:grid-cols-3">
+          <div className="rd-v2-tip-box rounded-xl border border-green-500/20 bg-green-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-green-400"><CircleCheck size={14} /><span className="rd-label text-green-400">{t('buildV2.fortalezas')}</span></div><InsightList items={[t('buildV2.tuDano', { target_damage_profile: result.build_plan.target_damage_profile }), t('buildV2.tuEquipo', { allied_damage_profile: result.composition_analysis.allied_damage_profile })]} tone="text-green-400" /></div>
+          <div className="rd-v2-tip-box rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-yellow-400"><AlertTriangle size={14} /><span className="rd-label text-yellow-400">{t('buildV2.requerimientos')}</span></div><InsightList items={result.composition_analysis.required_responses} tone="text-yellow-400" /></div>
+          <div className="rd-v2-tip-box rounded-xl border border-red-500/20 bg-red-500/[0.06] px-3 py-2.5"><div className="mb-1.5 flex items-center gap-2 text-red-400"><ShieldAlert size={14} /><span className="rd-label text-red-400">{t('buildV2.riesgos')}</span></div><InsightList items={result.composition_analysis.enemy_priority_threats} tone="text-red-400" /></div>
         </div>
       </div>}
       {tab === 'why' && <div className="flex min-h-full flex-col gap-2">
-        <div className="space-y-1.5 text-[13px] leading-snug"><p>{result.win_condition}</p><p>{result.build_plan.first_item_rationale}</p></div>
-        <ReasonList>{items.map((item, index) => <ReasonRow key={item.id} selection={item} {...itemLabel(index)} />)}</ReasonList>
+        <div className="space-y-1.5 text-[13px] leading-snug"><p className="rd-v2-intro" title={result.win_condition}>{result.win_condition}</p><p className="rd-v2-intro" title={result.build_plan.first_item_rationale}>{result.build_plan.first_item_rationale}</p></div>
+        <ReasonList>{items.map((item, index) => <ReasonRow key={item.id} selection={item} {...itemLabel(index)} kind="item" draft={result.draft} />)}</ReasonList>
       </div>}
       {tab === 'loadout' && <div className="flex min-h-full flex-col">
         <ReasonList>
-          {runes.map((rune, index) => <ReasonRow key={rune.id} selection={rune} label={runeLabel(index)} round featured={index === 0} className={index === 0 ? 'md:col-span-2' : ''} />)}
-          {result.spells.map((spell, index) => <ReasonRow key={spell.id} selection={spell} label={t('buildV2.hechizo', { value: index + 1 })} />)}
+          {runes.map((rune, index) => <ReasonRow key={rune.id} selection={rune} label={runeLabel(index)} round featured={index === 0} className={index === 0 ? 'md:col-span-2' : ''} kind="rune" draft={result.draft} />)}
+          {result.spells.map((spell, index) => <ReasonRow key={spell.id} selection={spell} label={t('buildV2.hechizo', { value: index + 1 })} kind="spell" draft={result.draft} />)}
         </ReasonList>
       </div>}
     </div>

@@ -1980,6 +1980,12 @@
       "starterExtraNote": "Rift Deck swapped {removed} for {item}: you only build one support starter item.",
       "exclusiveReason": "Takes the place of {removed}: it can't be combined with {other}.",
       "exclusiveNote": "Rift Deck swapped {removed} for {item}: the game doesn't allow it together with {other}."
+    },
+    "facts": {
+      "respondeA": "Answers",
+      "escalaConTuKit": "Scales with your kit:",
+      "alImpacto": "On-hit effects",
+      "vs": "vs."
     }
   },
   "stats": {

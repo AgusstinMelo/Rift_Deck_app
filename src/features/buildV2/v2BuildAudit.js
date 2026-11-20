@@ -85,6 +85,13 @@ const BULK_STATS = ['vida', 'armadura', 'resistencia_magica'];
  * Cuánto aprovecha el campeón las estadísticas del objeto (item_scalings): suma por cada
  * una con la que escala y resta las de aguante que no usa (La Cuchilla Oscura en Kai'Sa).
  */
+/** Valores de item_scalings del campeón que el objeto alimenta (en el orden de SCALING_STATS). */
+export function matchedScalings(row, scalings) {
+  const profile = itemProfile(row);
+  if (!profile || !scalings?.size) return [];
+  return Object.entries(SCALING_STATS).filter(([key, has]) => scalings.has(key) && has(row, profile)).map(([key]) => key);
+}
+
 export function scalingFit(row, profile, scalings) {
   if (!scalings.size) return 0;
   const matched = Object.entries(SCALING_STATS).filter(([key, has]) => scalings.has(key) && has(row, profile)).length;
