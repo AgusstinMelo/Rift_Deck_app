@@ -7,9 +7,10 @@ import { Link } from 'react-router-dom';
 import { entitySlug } from '@/utils/entitySlug';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { runeBranchLabel } from '@/utils/runeBranches';
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 import {
-  CardTitle, FaceList, FillSpace, ItemIconList, PersonalUsageBlock, splitEffects, useArtLights, usePersonalMatches,
+  CardTitle, FaceList, FillSpace, ItemIconList, PersonalUsageBlock, splitEffects, useArtLights, useFitText, usePersonalMatches,
 } from '@/components/library/detailParts';
 import { championsForRune, itemsForRune, personalUsage } from '@/features/library/entityInsights';
 import { COUNTER_TAGS, FIT_CLASSES, RUNE_BENEFIT_TAGS, RUNE_TRIGGER_TAGS } from '@/features/coach/taxonomy';
@@ -50,6 +51,12 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
   const t = useT();
   const { entityName, entityDescription, compareNames } = useCatalogText();
   const publicMode = Boolean(publicBasePath);
+  // Celular: pestañas con una o dos tarjetas (como las fichas de campeón y objeto), todo dentro
+  // de la pantalla. La ficha pública se prerenderiza: arranca en escritorio y ajusta al montar.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, { ssrSafe: publicMode });
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, { ssrSafe: publicMode });
+  const usePanels = isPhoneLandscape || isPhonePortrait;
+  const [section, setSection] = useState('effects');
   // Campeones que la aprovechan, objetos que la potencian y tu rendimiento con ella.
   const fans = useMemo(() => championsForRune(rune, champions, MAX_FANS), [rune, champions]);
   const synergy = useMemo(() => itemsForRune(rune, items, MAX_SYNERGY), [rune, items]);
@@ -84,6 +91,7 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
 
   const description = entityDescription(rune) || '';
   const effects = splitEffects(description);
+  const longDescription = description.length > (usage ? LONG_DESCRIPTION_WITH_USAGE : LONG_DESCRIPTION);
   const isKeystone = rune.branch === 'Clave';
   const rowLabel = group => (isKeystone ? t('library.runasClave') : t('library.filaRunas', { n: group }));
 
@@ -100,8 +108,51 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
     .map(([group, list]) => [Number(group), [...list].sort(compareNames)])
     .sort(([a], [b]) => a - b);
 
+  // Celular: la descripción y el árbol, cada uno con toda la pantalla; el perfil con contra
+  // qué rinde, y las sinergias con tu rendimiento, de a dos. Orden: descripción, perfil,
+  // sinergias y rama.
+  const hasKit = fans.length > 0 || Boolean(synergyBlock);
+  const phonePanel = { effects: 'effects', profile: 'profile', counters: 'profile', tree: 'tree', kit: 'kit', personal: 'kit' };
+  const panelTabs = [
+    ['effects', t('library.descripcion')],
+    ...(hasProfile ? [['profile', t('bugReport.pages.Perfil')]] : []),
+    ...(hasKit || usage ? [['kit', hasKit ? t('library.sinergias') : t('library.rendimiento')]] : []),
+    ['tree', t('library.rama')],
+  ];
+  const activePanel = panelTabs.some(([id]) => id === section) ? section : 'effects';
+  const show = id => !usePanels || phonePanel[id] === activePanel;
+  // Celular: la letra de la descripción, del perfil y de contra qué rinde se ajusta para
+  // llenar su tarjeta sin scroll.
+  const effectsRef = useRef(null);
+  const profileRef = useRef(null);
+  const countersRef = useRef(null);
+  useFitText(effectsRef, { enabled: usePanels, min: 9, max: 18, deps: [activePanel, description] });
+  useFitText(profileRef, { enabled: usePanels, min: 9, max: 17, deps: [activePanel, rune.id] });
+  useFitText(countersRef, { enabled: usePanels, min: 9, max: 17, deps: [activePanel, rune.id] });
+  const countersList = (
+    <ul className="rd-ed-counters">
+      {counters.length > 0 ? counters.map(tag => (
+        <li key={tag}>
+          <strong>{t(`library.runePerfil.counters.${tag}.nombre`)}</strong>
+          <span>{t(`library.runePerfil.counters.${tag}.texto`)}</span>
+        </li>
+      )) : (
+        // Sin counters del catálogo: rinde contra cualquier equipo, por lo que le da a tu campeón.
+        <li>
+          <strong>{t('library.runePerfil.cualquierRival.nombre')}</strong>
+          <span>{t('library.runePerfil.cualquierRival.texto')}</span>
+        </li>
+      )}
+    </ul>
+  );
+  const usageBlock = usage && (
+    <div className="rd-ed-foot">
+      <PersonalUsageBlock usage={usage} champions={champions} />
+    </div>
+  );
+
   return (
-    <article className="rd-cd rd-ed" data-kind="rune" data-length={description.length > (usage ? LONG_DESCRIPTION_WITH_USAGE : LONG_DESCRIPTION) ? "long" : "normal"} data-branch={rune.branch || undefined} style={lightStyle}>
+    <article className="rd-cd rd-ed" data-panels={usePanels ? 'on' : 'off'} data-kind="rune" data-length={longDescription ? "long" : "normal"} data-branch={rune.branch || undefined} style={lightStyle}>
       <header className="rd-cd-hero rd-ed-hero">
         {rune.image_url && <img className="rd-ed-hero-glow" src={rune.image_url} alt="" aria-hidden="true" />}
         <div className="rd-cd-hero-shade" aria-hidden="true" />
@@ -135,11 +186,22 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
         </div>
       </header>
 
+      {usePanels && (
+        <div className="rd-panel-tabs rd-cd-tabs" role="tablist" aria-label={t('library.seccionesDeLaRuna')}>
+          {panelTabs.map(([id, label]) => (
+            <button key={id} type="button" role="tab" aria-selected={activePanel === id} onClick={() => setSection(id)} className={`rd-panel-tab ${activePanel === id ? 'rd-panel-tab-active' : ''}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="rd-cd-grid">
+        {show('effects') && (
         <section className="rd-cd-card rd-ed-effects">
           <CardTitle>{t('library.descripcion')}</CardTitle>
           {effects.length ? (
-            <ul className="rd-ed-effect-list">
+            <ul ref={effectsRef} className="rd-ed-effect-list">
               {effects.map((effect, index) => (
                 <li key={index} data-labeled={effect.label ? 'yes' : 'no'}>
                   {effect.label && <strong>{effect.label}</strong>}
@@ -150,18 +212,13 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
           ) : (
             <p className="rd-cd-empty">{t('library.sinDescripcion')}</p>
           )}
-          {/* Pie: tu rendimiento (privada); los objetos que la potencian van en el perfil, salvo que no haya. */}
-          {usage && (
-            <FillSpace className="rd-ed-fill-end">
-              <div className="rd-ed-foot">
-                <PersonalUsageBlock usage={usage} champions={champions} />
-              </div>
-            </FillSpace>
-          )}
+          {/* Pie: tu rendimiento (privada). En el celular va en su propia pestaña. */}
+          {usageBlock && !usePanels && <FillSpace className="rd-ed-fill-end">{usageBlock}</FillSpace>}
         </section>
+        )}
 
-        {hasProfile && (
-          <section className="rd-cd-card rd-ed-profile">
+        {hasProfile && show('profile') && (
+          <section ref={profileRef} className="rd-cd-card rd-ed-profile">
             <CardTitle>{t('library.runePerfil.titulo')}</CardTitle>
             {fitClasses.size > 0 && (
               <div className="rd-ed-profile-block">
@@ -189,26 +246,24 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
                 </ul>
               </div>
             )}
-            <div className="rd-ed-profile-block">
-              <p className="rd-ed-profile-label">{t('library.runePerfil.rindeContra')}</p>
-              <ul className="rd-ed-counters">
-                {counters.length > 0 ? counters.map(tag => (
-                  <li key={tag}>
-                    <strong>{t(`library.runePerfil.counters.${tag}.nombre`)}</strong>
-                    <span>{t(`library.runePerfil.counters.${tag}.texto`)}</span>
-                  </li>
-                )) : (
-                  // Sin counters del catálogo: rinde contra cualquier equipo, por lo que le da a tu campeón.
-                  <li>
-                    <strong>{t('library.runePerfil.cualquierRival.nombre')}</strong>
-                    <span>{t('library.runePerfil.cualquierRival.texto')}</span>
-                  </li>
-                )}
-              </ul>
-            </div>
+            {/* En el celular, contra qué rinde va en su propia tarjeta. */}
+            {!usePanels && (
+              <div className="rd-ed-profile-block">
+                <p className="rd-ed-profile-label">{t('library.runePerfil.rindeContra')}</p>
+                {countersList}
+              </div>
+            )}
           </section>
         )}
 
+        {hasProfile && usePanels && show('counters') && (
+          <section ref={countersRef} className="rd-cd-card rd-ed-counters-card">
+            <CardTitle>{t('library.runePerfil.rindeContra')}</CardTitle>
+            {countersList}
+          </section>
+        )}
+
+        {show('tree') && (
         <section className="rd-cd-card rd-ed-tree">
           <CardTitle>{t('library.runasDeLaMisma')}</CardTitle>
           <div className="rd-ed-tree-rows" data-keystone={isKeystone ? 'yes' : 'no'}>
@@ -243,9 +298,10 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
             ))}
           </div>
         </section>
+        )}
 
         {/* Sinergias: siempre a la vista, debajo del árbol (que va compacto). */}
-        {(fans.length > 0 || synergyBlock) && (
+        {(fans.length > 0 || synergyBlock) && show('kit') && (
           <section className="rd-cd-card rd-ed-kit">
             <CardTitle>{t('library.sinergias')}</CardTitle>
             {fans.length > 0 && (
@@ -255,6 +311,13 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
               </div>
             )}
             {synergyBlock}
+          </section>
+        )}
+
+        {usageBlock && usePanels && show('personal') && (
+          <section className="rd-cd-card rd-ed-personal">
+            <CardTitle>{t('library.rendimiento')}</CardTitle>
+            {usageBlock}
           </section>
         )}
       </div>

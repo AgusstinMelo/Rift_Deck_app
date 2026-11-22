@@ -17,7 +17,7 @@ import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/ho
 import { DAMAGE_LABELS, LANE_IMAGES, LANE_LABELS, getChampionLanes } from '@/utils/championPresentation';
 import { DEFAULT_PALETTE, loadArtPalette } from '@/features/share/artPalette';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
-import { CardTitle, MatchupRow, useFitCount } from '@/components/library/detailParts';
+import { CardTitle, MatchupRow, useFitCount, useFitText } from '@/components/library/detailParts';
 import { labels, tr } from '@/i18n/uiI18n';
 import { championTagLabel } from '@/utils/itemLabels';
 
@@ -373,8 +373,9 @@ function MetaEvolution({ points }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 // Secciones de la ficha en el celular (una por pantalla). En escritorio se ven todas.
-// Las notas van en su propia pestaña: junto al perfil no entraban sin scroll en el celular.
-const PHONE_PANEL = { profile: 'profile', notes: 'notes', matchups: 'matchups', meta: 'meta', stats: 'stats', personal: 'personal', related: 'related' };
+// De a dos por pantalla: perfil con estadísticas, notas con matchups y meta con tu rendimiento
+// (en la ficha pública, que no lo tiene, meta con los campeones relacionados).
+const PHONE_PANEL = { profile: 'profile', stats: 'profile', notes: 'matchups', matchups: 'matchups', meta: 'meta', personal: 'meta', related: 'meta' };
 
 export default function ChampionDetail({
   champion,
@@ -566,15 +567,17 @@ export default function ChampionDetail({
   }, [mosaic, artSize]);
   const panelTabs = [
     ['profile', t('bugReport.pages.Perfil')],
-    ...(champion.strategic_notes ? [['notes', t('matches.notas')]] : []),
-    ['matchups', t('dashboard.slides.matchups')],
-    ...(tierData.length > 0 ? [['meta', t('goals.target')]] : []),
-    ['stats', t('nav.stats')],
-    ...(publicMode ? [] : [['personal', t('library.rendimiento')]]),
-    ...(publicMode && relatedChampions.length > 0 ? [['related', t('library.relacionados')]] : []),
+    ['matchups', champion.strategic_notes ? t('library.notasYMatchups') : t('dashboard.slides.matchups')],
+    ...(tierData.length > 0 || !publicMode || relatedChampions.length > 0 ? [['meta', tierData.length > 0
+      ? t('goals.target')
+      : publicMode ? t('library.relacionados') : t('library.rendimiento')]] : []),
   ];
   const activePanel = panelTabs.some(([id]) => id === section) ? section : 'profile';
   const show = id => !usePanels || PHONE_PANEL[id] === activePanel;
+  // Celular: la letra de las notas se ajusta a su extensión y llena el espacio de la tarjeta.
+  const notesRef = useRef(null);
+  const notesText = champion.strategic_notes ? championNotes(champion) : '';
+  useFitText(notesRef, { enabled: usePanels, min: 10, max: 17, deps: [activePanel, notesText] });
 
   const lanes = getChampionLanes(champion);
   const strong = resolveList(champion.strong_against);
@@ -703,7 +706,7 @@ export default function ChampionDetail({
         {champion.strategic_notes && show('notes') && (
           <section className="rd-cd-card rd-cd-notes">
             <CardTitle>{t('builds.notasEstrategicas')}</CardTitle>
-            <p className="rd-cd-notes-text">{championNotes(champion)}</p>
+            <p ref={notesRef} className="rd-cd-notes-text">{notesText}</p>
           </section>
         )}
 

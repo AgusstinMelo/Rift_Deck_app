@@ -11,27 +11,25 @@ import { championSlug } from '@/utils/championSlug';
 import { entitySlug } from '@/utils/entitySlug';
 import { DEFAULT_PALETTE, loadArtPalette } from '@/features/share/artPalette';
 
-const DESKTOP_QUERY = '(min-width: 1024px) and (min-height: 501px)';
-
 /**
  * Cuántos elementos de una lista en grilla entran en el alto que le deja su tarjeta
- * (columnas × filas completas), para llenar el espacio sin scroll. Solo en escritorio, donde
- * la lista tiene alto fijo (styles/16-library.css: flex 1 1 0 con min-height 0); en tablet y
- * celular la lista crece con su contenido y se muestran `fallback`.
+ * (columnas × filas completas), para llenar el espacio sin scroll. Mide cuando la lista tiene
+ * alto fijo (styles/16-library.css: flex 1 1 0, min-height 0 y overflow hidden; en escritorio
+ * y en las fichas del celular); si crece con su contenido (tablet) se muestran `fallback`.
  * @param {{ current: HTMLElement | null }} ref la lista (grid; sus hijos, una celda cada uno)
  * @param {number} total candidatos disponibles
+ * @param {unknown[]} [deps] lo que cambia si la lista se monta (la pestaña del celular)
  */
-export function useFitCount(ref, total, fallback) {
+export function useFitCount(ref, total, fallback, deps = []) {
   const [count, setCount] = useState(Math.min(total, fallback));
   useLayoutEffect(() => {
     const list = ref.current;
     if (!list || typeof ResizeObserver === 'undefined') return undefined;
-    const desktop = window.matchMedia(DESKTOP_QUERY);
     const measure = () => {
       const style = getComputedStyle(list);
       const first = list.firstElementChild;
       // Sin alto fijo (overflow visible) la lista crece: no hay espacio que llenar.
-      if (!desktop.matches || !first || style.overflowY !== 'hidden') {
+      if (!first || style.overflowY !== 'hidden') {
         setCount(Math.min(total, fallback));
         return;
       }
@@ -43,12 +41,8 @@ export function useFitCount(ref, total, fallback) {
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(list);
-    desktop.addEventListener('change', measure);
-    return () => {
-      observer.disconnect();
-      desktop.removeEventListener('change', measure);
-    };
-  }, [ref, total, fallback]);
+    return () => observer.disconnect();
+  }, [ref, total, fallback, ...deps]);
   return count;
 }
 
@@ -248,4 +242,71 @@ export function splitEffects(text) {
       const match = line.match(/^([^:.\d][^:]{1,38}):\s+(.+)$/);
       return match ? { label: match[1].trim(), text: match[2].trim() } : { label: null, text: line };
     });
+}
+
+/**
+ * Dónde partir una lista de efectos en dos páginas: en el efecto con título cuyo corte deja
+ * las dos mitades de texto más parejas; si ninguno tiene título, entre párrafos (0 si es uno solo).
+ */
+export function effectsSplitIndex(effects) {
+  const sizes = effects.map(effect => (effect.label?.length || 0) + effect.text.length);
+  const total = sizes.reduce((sum, size) => sum + size, 0);
+  let best = 0;
+  let bestGap = Infinity;
+  let before = 0;
+  const anyBoundary = !effects.some((effect, index) => index > 0 && effect.label);
+  sizes.forEach((size, index) => {
+    if (index > 0 && (anyBoundary || effects[index].label)) {
+      const gap = Math.abs(total - 2 * before);
+      if (gap < bestGap) { best = index; bestGap = gap; }
+    }
+    before += size;
+  });
+  return best;
+}
+
+/**
+ * Letra que llena su caja: busca el tamaño más grande (entre `min` y `max`, en px) con el que
+ * el texto entra sin scroll en el alto que el layout le da al elemento, y lo recalcula cuando
+ * cambia ese alto. La caja tiene que tener alto propio (no crecer con el texto). Con
+ * `enabled` en false deja el tamaño del CSS. `onOverflow` se llama si ni con `min` entra.
+ * @param {{ current: HTMLElement | null }} ref
+ * @param {{ enabled: boolean, min?: number, max?: number, deps?: unknown[], onOverflow?: () => void }} options
+ */
+export function useFitText(ref, { enabled, min = 10, max = 18, deps = [], onOverflow }) {
+  useLayoutEffect(() => {
+    const box = ref.current;
+    if (!box) return undefined;
+    if (!enabled || typeof ResizeObserver === 'undefined') {
+      box.style.fontSize = '';
+      return undefined;
+    }
+    let lastHeight = -1;
+    let lastWidth = -1;
+    const fit = () => {
+      const { clientHeight: height, clientWidth: width } = box;
+      if (!height || (height === lastHeight && width === lastWidth)) return;
+      lastHeight = height;
+      lastWidth = width;
+      // Búsqueda binaria en medios píxeles: el tamaño más grande que no desborda.
+      let low = min * 2;
+      let high = max * 2;
+      while (low < high) {
+        const mid = Math.ceil((low + high) / 2);
+        box.style.fontSize = `${mid / 2}px`;
+        if (box.scrollHeight <= box.clientHeight + 1 && box.scrollWidth <= box.clientWidth + 1) low = mid;
+        else high = mid - 1;
+      }
+      box.style.fontSize = `${low / 2}px`;
+      if (onOverflow && (box.scrollHeight > box.clientHeight + 1 || box.scrollWidth > box.clientWidth + 1)) onOverflow();
+    };
+    fit();
+    // El tamaño de la caja no depende de la letra (alto fijo): observarla no se realimenta.
+    const observer = new ResizeObserver(fit);
+    observer.observe(box);
+    return () => {
+      observer.disconnect();
+      box.style.fontSize = '';
+    };
+  }, [ref, enabled, min, max, ...deps]);
 }

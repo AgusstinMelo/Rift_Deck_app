@@ -1868,6 +1868,14 @@ button.rd-ed-tree-node:hover img {
   border-top: 1px dashed rgba(212, 175, 55, 0.18);
 }
 
+/* Celular (una sección por pestaña): tu rendimiento va solo en la suya, sin el separador
+   ni el empuje hacia abajo del pie. */
+.rd-ed[data-panels="on"] .rd-ed-foot {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 /* Pie de la tarjeta con más de un bloque (runa: tu rendimiento y objetos que la potencian). */
 .rd-ed-foot {
   display: grid;
@@ -2039,5 +2047,1893 @@ button.rd-ed-icon-link:hover img {
 
   .rd-cd-evo {
     gap: 0.25rem;
+  }
+}
+
+/* ── Fichas de objeto y runa en el celular ────────────────────────────────────────
+   Una sección por pestaña (ItemDetail/RuneDetail, data-panels="on") y cada una tiene que
+   entrar sin scroll: fuera el título "Biblioteca" (el nombre ya está en el héroe), héroe
+   compacto y listas más densas. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-ed[data-panels="on"]) {
+    gap: 0.5rem;
+  }
+
+  .rd-lib:has(.rd-ed[data-panels="on"]) .rd-lib-heading {
+    display: none;
+  }
+
+  .rd-lib:has(.rd-ed[data-panels="on"]) .rd-lib-tab {
+    padding-block: 0.35rem;
+  }
+
+  .rd-ed[data-panels="on"] {
+    --rd-cd-gap: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-tabs {
+    padding: 0.25rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-tabs .rd-panel-tab {
+    min-height: 2rem;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-card {
+    gap: 0.5rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  /* Objetos del mismo tipo: dos columnas de filas bajas. */
+  .rd-ed[data-panels="on"] .rd-ed-related-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-related-item {
+    gap: 0.4rem;
+    padding: 0.25rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-related-item img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-related-item h3 {
+    font-size: 0.74rem;
+  }
+
+  /* Árbol de la rama: las 13 claves en filas de cuatro; las filas de la rama, más bajas. */
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-row {
+    gap: 0.3rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] ul {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-node {
+    gap: 0.2rem;
+    padding: 0.3rem 0.15rem;
+    border-radius: 10px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-node img,
+  .rd-ed[data-panels="on"] .rd-ed-tree-fallback {
+    width: 32px;
+    height: 32px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node img,
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-fallback {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-name,
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-name {
+    font-size: 0.62rem;
+    line-height: 1.1;
+    /* Nombres largos de una palabra (Fortalecimiento, Electrocutar): cortan con guion. */
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  /* Objetos con misión: aun repartidos en dos pestañas, con letra un poco más chica. */
+  .rd-ed[data-panels="on"][data-text="xlong"] .rd-ed-effect-list {
+    gap: 0.35rem;
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
+  /* Para quién y contra qué: chips y explicaciones más compactos. */
+  .rd-ed[data-panels="on"] .rd-ed-profile-block {
+    gap: 0.3rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-classes li,
+  .rd-ed[data-panels="on"] .rd-ed-tags li {
+    padding: 0.12rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-counters {
+    gap: 0.3rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-counters li {
+    padding: 0.25rem 0.55rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-counters span {
+    font-size: 0.74rem;
+    line-height: 1.3;
+  }
+}
+
+/* Celular vertical: héroe en una franja baja, con el ícono chico y el volver solo con la flecha. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-ed[data-panels="on"] .rd-cd-hero.rd-ed-hero {
+    min-height: 0;
+    gap: 0.5rem;
+    padding: 0.7rem 3.2rem 0.7rem 0.75rem;
+    border-radius: 16px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-hero-glow {
+    width: 150px;
+    height: 150px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-back {
+    top: 0.6rem;
+    right: 0.6rem;
+    gap: 0;
+    padding: 0.45rem;
+    font-size: 0;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-hero-main {
+    gap: 0.5rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-identity {
+    gap: 0.75rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-icon-round {
+    border-radius: 50%;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-role {
+    font-size: 9px;
+    letter-spacing: 0.24em;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-name.rd-ed-name {
+    margin-top: 0.1rem;
+    font-size: 1.45rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-chips {
+    gap: 0.25rem;
+    margin-top: 0.4rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-chip {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.66rem;
+  }
+
+  /* Precio: una línea al pie del héroe. */
+  .rd-ed[data-panels="on"] .rd-ed-price {
+    width: auto;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-price svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-price > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-price-value {
+    font-size: 1.1rem;
+  }
+}
+
+/* Celular horizontal: casi no hay alto. La ficha va sin la barra de la biblioteca (se vuelve
+   con el botón del héroe), el héroe angosto a la izquierda y la sección elegida con más
+   ancho a la derecha, con las grillas en más columnas para que entre en pocas filas. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-ed[data-panels="on"]) {
+    padding-block: 0.5rem;
+  }
+
+  .rd-lib:has(.rd-ed[data-panels="on"]) > .rd-lib-bar {
+    display: none;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-card {
+    padding-block: 0.55rem;
+  }
+
+  /* Contra qué y descripciones largas o de varios efectos: en dos columnas, que ancho sobra. */
+  .rd-ed[data-panels="on"] .rd-ed-counters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rd-ed[data-panels="on"][data-length="long"] .rd-ed-effect-list,
+  .rd-ed[data-panels="on"] .rd-ed-effect-list:has(> li:nth-child(3)) {
+    display: block;
+    columns: 2;
+    column-gap: 1rem;
+  }
+
+  /* Un efecto largo puede seguir en la otra columna: si no, queda todo de un lado. */
+  .rd-ed[data-panels="on"][data-length="long"] .rd-ed-effect-list li,
+  .rd-ed[data-panels="on"] .rd-ed-effect-list:has(> li:nth-child(3)) li {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-ed[data-panels="on"][data-text="xlong"] .rd-ed-effect-list {
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+
+  /* Héroe: volver solo con la flecha, en la esquina (no suma una fila), y el precio sin su rótulo. */
+  .rd-cd.rd-ed[data-panels="on"] .rd-cd-back {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    gap: 0;
+    margin: 0;
+    padding: 0.4rem;
+    font-size: 0;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-price .rd-cd-hero-meta-label {
+    display: none;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-chip {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.66rem;
+  }
+
+  /* Relacionados: la lista y cómo se contrarresta, lado a lado. */
+  .rd-ed[data-panels="on"] .rd-ed-related:has(> .rd-ed-answers) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    column-gap: 0.9rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-related:has(> .rd-ed-answers) > .rd-cd-card-head {
+    grid-column: 1 / -1;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-related:has(> .rd-ed-answers) > .rd-ed-related-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-related > .rd-ed-answers {
+    align-self: start;
+    margin-top: 0;
+    padding-top: 0;
+    padding-left: 0.9rem;
+    border-top: 0;
+    border-left: 1px dashed rgba(212, 175, 55, 0.18);
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node {
+    padding-block: 0.2rem;
+  }
+
+  .rd-cd.rd-ed[data-panels="on"] {
+    grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
+  }
+
+  .rd-cd.rd-ed[data-panels="on"] .rd-cd-hero.rd-ed-hero {
+    min-height: 0;
+    gap: 0.6rem;
+    padding: 0.7rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-identity {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-name.rd-ed-name {
+    font-size: 1.4rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-cd-chips {
+    margin-top: 0.4rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-price {
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-price-value {
+    font-size: 1.1rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-related-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] ul {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows {
+    gap: 0.35rem;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-node img,
+  .rd-ed[data-panels="on"] .rd-ed-tree-fallback,
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node img,
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-fallback {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.35rem;
+    text-align: left;
+  }
+
+  .rd-ed[data-panels="on"] .rd-ed-effect-list {
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+}
+
+/* ── Ficha de campeón en el celular ───────────────────────────────────────────────
+   Dos tarjetas por pestaña (ChampionDetail: perfil + estadísticas, notas + matchups, meta +
+   tu rendimiento) y todo dentro de la pantalla: la biblioteca toma el alto del <main>, la
+   ficha el que queda y las tarjetas se lo reparten. Si una no entra (las notas, que son
+   texto largo), scrollea por dentro con la barra dorada; la página no. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) {
+    height: 100%;
+    padding-bottom: 0.6rem;
+    overflow: hidden;
+  }
+
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) > .rd-lib-bar {
+    flex: none;
+  }
+
+  .rd-lib-body:has(> .rd-cd[data-panels="on"]:not(.rd-ed)) {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) {
+    --rd-cd-gap: 0.5rem;
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 0.5rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) > .rd-cd-grid {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  /* Cada tarjeta mide lo que pide y, si no entran las dos, se achican; las notas primero
+     (antes que los matchups) y son las que ceden el alto. */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card {
+    min-height: 0;
+    flex: 0 1 auto;
+    gap: 0.45rem;
+    padding: 0.7rem 0.8rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes {
+    order: -1;
+    flex: 0 100 auto;
+    overflow: hidden;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    min-height: 2.5rem;
+    flex: 0 1 auto;
+    padding-right: 0.4rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Barra dorada fina en lo que scrollea por dentro. */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    scrollbar-color: hsl(var(--primary) / 0.7) transparent;
+    scrollbar-width: thin;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card::-webkit-scrollbar,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card::-webkit-scrollbar-thumb,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-stat-list,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-insight {
+    flex: none;
+  }
+}
+
+/* Celular vertical: el héroe con el splash, un poco más bajo. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-hero {
+    min-height: 150px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-name {
+    font-size: 2rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-chips {
+    margin-top: 0.45rem;
+  }
+}
+
+/* Celular horizontal: héroe a la izquierda de punta a punta y, a la derecha, las pestañas y
+   las dos tarjetas en el alto que queda. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-hero {
+    position: relative;
+    min-height: 0;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-tabs {
+    align-self: start;
+  }
+}
+
+/* Ficha de campeón en el celular, compacta: sin el título "Biblioteca" (el nombre ya está en
+   el héroe), volver solo con la flecha y tarjetas más densas para que entren de a dos. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) {
+    gap: 0.5rem;
+  }
+
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) .rd-lib-heading {
+    display: none;
+  }
+
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) .rd-lib-tab {
+    padding-block: 0.35rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-back {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    gap: 0;
+    margin: 0;
+    padding: 0.45rem;
+    font-size: 0;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-chip {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.66rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-chips {
+    gap: 0.25rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-tabs {
+    padding: 0.25rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-tabs .rd-panel-tab {
+    min-height: 2rem;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  /* El contenido no se encoge (se encimaría): si no entra, scrollea la tarjeta. */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card > * {
+    flex-shrink: 0;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes > .rd-cd-notes-text {
+    flex-shrink: 1;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-bars {
+    gap: 0.4rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-tags {
+    gap: 0.25rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-tags li {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.66rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-stat {
+    padding-block: 0.2rem;
+  }
+
+  /* Matchups: la etiqueta al lado de las caras, en una fila baja cada uno. */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-matchups {
+    gap: 0.35rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-matchup {
+    grid-template-columns: 6.2rem minmax(0, 1fr);
+    gap: 0.4rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-matchup-label {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-face img,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-face-fallback {
+    width: 32px;
+    height: 32px;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+}
+
+/* Ficha de campeón, celular horizontal: sin la barra de la biblioteca (se vuelve con la
+   flecha), el héroe angosto y las dos tarjetas de la pestaña lado a lado. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) {
+    padding-block: 0.5rem;
+  }
+
+  .rd-lib:has(.rd-cd[data-panels="on"]:not(.rd-ed)) > .rd-lib-bar {
+    display: none;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) {
+    grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-hero {
+    padding: 0.7rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-name {
+    font-size: 1.6rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) > .rd-cd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    grid-auto-flow: column;
+    align-items: stretch;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card {
+    padding: 0.55rem 0.7rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    flex: 1 1 0;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-stat dt,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-stat dd {
+    font-size: 0.7rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-stat {
+    padding-block: 0.12rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-bars {
+    gap: 0.3rem;
+  }
+
+  /* Matchups: la etiqueta arriba de las caras (la columna es angosta). */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-matchup {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-face img,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-face-fallback {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* Ficha de campeón en el celular: las seis tarjetas miden lo mismo. Cada pestaña parte el
+   alto en dos mitades iguales (vertical: una arriba de la otra; horizontal: lado a lado) y
+   cada tarjeta ocupa la suya, aunque la pestaña tenga una sola (Meta o Relacionados en la
+   ficha pública). Lo que no entra en su mitad scrollea por dentro con la barra dorada. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) > .rd-cd-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    align-items: stretch;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card,
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes {
+    height: 100%;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    flex: 1 1 0;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) > .rd-cd-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* Meta en su mitad de pantalla: el gráfico de evolución toma el alto que sobra (sin las
+   fechas de los parches, que quedan en el tooltip de cada punto). */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta {
+    gap: 0.4rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta > .rd-cd-evo {
+    min-height: 0;
+    flex: 1 1 0;
+    gap: 0.25rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-evo-date {
+    display: none;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-summary {
+    gap: 0.6rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates > div {
+    padding-block: 0.2rem;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-score {
+    font-size: 1.35rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates > div {
+    gap: 0.25rem;
+    padding-inline: 0.4rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates dt {
+    letter-spacing: 0.08em;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates dd {
+    font-size: 0.85rem;
+  }
+}
+
+/* Relacionados (ficha pública) en su mitad: dos columnas de filas bajas. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-related-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-related-item {
+    gap: 0.4rem;
+    padding: 0.25rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-related-item img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-related-item h3 {
+    font-size: 0.74rem;
+  }
+}
+
+/* Meta con varias líneas: el título en un renglón y los botones de línea más chicos. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta .rd-cd-card-title {
+    white-space: nowrap;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-lane-switch {
+    flex-wrap: nowrap;
+    gap: 0.15rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-lane-switch > button > * {
+    padding: 0.1rem 0.35rem;
+    font-size: 0.65rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta .rd-cd-card-head {
+    flex-wrap: wrap;
+    row-gap: 0.3rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta {
+    gap: 0.3rem;
+  }
+}
+
+/* Tu rendimiento en su mitad de pantalla: el porcentaje y el resumen más chicos, y el análisis
+   con letra chica toma el alto que queda (si aun así no entra, scrollea solo el análisis, con
+   la barra dorada, como las notas). Las notas, con letra un poco más chica. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal {
+    overflow: hidden;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-head {
+    gap: 0.6rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-wr {
+    font-size: 1.85rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-record {
+    font-size: 0.7rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-metrics {
+    gap: 0 0.6rem;
+    margin-top: 0;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-metrics dd {
+    font-size: 0.74rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-projection {
+    margin-top: 0;
+    font-size: 0.74rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal > .rd-cd-personal-insight {
+    min-height: 2rem;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    padding-right: 0.4rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    font-size: 0.7rem;
+    line-height: 1.38;
+    scrollbar-color: hsl(var(--primary) / 0.7) transparent;
+    scrollbar-width: thin;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-insight::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-insight::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-warning {
+    font-size: 0.66rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    font-size: 0.74rem;
+    line-height: 1.4;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  /* Títulos de las tarjetas en un renglón (en horizontal las columnas son angostas). */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card-head {
+    min-height: 0;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-card-title {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Resumen de tu rendimiento en dos líneas: partidas y proyección, y debajo KDA y K/D/A. */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.5rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-projection {
+    order: -1;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-record {
+    order: -2;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-metrics {
+    width: 100%;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal > .rd-cd-personal-insight {
+    font-size: 0.68rem;
+    line-height: 1.36;
+  }
+}
+
+/* Celular horizontal (columnas angostas): KDA y K/D/A en una línea, WR/PR/BR sin encimarse. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-wr {
+    font-size: 1.6rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-metrics {
+    flex-wrap: nowrap;
+    gap: 0 0.45rem;
+    white-space: nowrap;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-metrics dt {
+    letter-spacing: 0.06em;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates {
+    gap: 0.25rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates > div {
+    padding-inline: 0.3rem;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-meta-rates dd {
+    font-size: 0.75rem;
+  }
+}
+
+/* Celular vertical chico: el análisis de tu rendimiento con letra apenas más chica. */
+@media (orientation: portrait) and (max-width: 639px) and (max-height: 760px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal > .rd-cd-personal-insight {
+    font-size: 0.66rem;
+    line-height: 1.34;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  /* "10.7/4.0/4.6" se entiende sin su rótulo, y así KDA y K/D/A entran en una línea. */
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal-metrics > div:nth-child(2) dt {
+    display: none;
+  }
+
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-personal > .rd-cd-personal-insight {
+    line-height: 1.32;
+  }
+}
+
+/* Notas: el tamaño de letra lo calcula ChampionDetail (useFitText) para llenar la tarjeta. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-cd[data-panels="on"]:not(.rd-ed) .rd-cd-notes-text {
+    line-height: 1.45;
+  }
+}
+
+/* ── Ficha de objeto en el celular: dos tarjetas por pestaña, del mismo tamaño ───────
+   ItemDetail: efectos + estadísticas, perfil + cómo se contrarresta, enfrentamientos + tu
+   rendimiento (o los objetos del mismo tipo). Como la de campeón: la ficha toma el alto que
+   queda en la pantalla y cada pestaña lo parte en dos mitades iguales (vertical: una arriba
+   de la otra; horizontal: lado a lado). Una tarjeta sola en su pestaña ocupa todo. Los
+   efectos ajustan su letra para llenar la tarjeta (useFitText); lo que igual no entre
+   scrollea dentro de su tarjeta, con la barra dorada. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-ed[data-kind="item"][data-panels="on"]) {
+    height: 100%;
+    padding-bottom: 0.6rem;
+    overflow: hidden;
+  }
+
+  .rd-lib:has(.rd-ed[data-kind="item"][data-panels="on"]) > .rd-lib-bar {
+    flex: none;
+  }
+
+  .rd-lib-body:has(> .rd-ed[data-kind="item"][data-panels="on"]) {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] > .rd-cd-grid {
+    display: grid;
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] > .rd-cd-grid > .rd-cd-card:only-child {
+    grid-row: 1 / -1;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-card {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: hsl(var(--primary) / 0.7) transparent;
+    scrollbar-width: thin;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-card::-webkit-scrollbar,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effect-list::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-card::-webkit-scrollbar-thumb,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effect-list::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  /* El contenido no se encoge (se encimaría): si no entra, scrollea la tarjeta. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-card > * {
+    flex-shrink: 0;
+  }
+
+  /* Efectos: la lista toma el alto de la tarjeta y su letra se ajusta para llenarlo. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effects {
+    overflow: hidden;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effects > .rd-ed-effect-list {
+    display: flex;
+    min-height: 2rem;
+    flex: 1 1 0;
+    flex-direction: column;
+    padding-right: 0.3rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    columns: auto;
+    line-height: 1.4;
+    scrollbar-color: hsl(var(--primary) / 0.7) transparent;
+    scrollbar-width: thin;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effects > .rd-ed-effect-list li {
+    margin-bottom: 0;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effect-list strong {
+    font-size: 0.85em;
+  }
+
+  /* Cómo se contrarresta, en su tarjeta: sin el separador del pie. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card > .rd-ed-answers {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-hero.rd-ed-hero {
+    position: relative;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-tabs {
+    align-self: start;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] > .rd-cd-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] > .rd-cd-grid > .rd-cd-card:only-child {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+
+  /* Sola en su pestaña (texto muy largo, sin estadísticas): los efectos en dos columnas. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effects:only-child > .rd-ed-effect-list {
+    display: block;
+    columns: 2;
+    column-gap: 1rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-effects:only-child > .rd-ed-effect-list li {
+    margin-bottom: 0.35rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-related-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Ficha de objeto en el celular: tarjetas más densas para que cada una entre en su mitad. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-card-head {
+    min-height: 0;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-card-title {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Perfil: chips chicos. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-profile {
+    gap: 0.4rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-profile-block {
+    gap: 0.25rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-classes,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-tags {
+    gap: 0.25rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-classes li,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-tags li {
+    padding: 0.08rem 0.45rem;
+    font-size: 0.62rem;
+  }
+
+  /* Enfrentamientos: la etiqueta al lado de las caras y sin los nombres (van en el tooltip). */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-matchups {
+    gap: 0.4rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-matchup {
+    grid-template-columns: 6.2rem minmax(0, 1fr);
+    gap: 0.4rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-matchup-label {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-face-name {
+    display: none;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-face img,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-face-fallback {
+    width: 32px;
+    height: 32px;
+  }
+
+
+  /* Cómo se contrarresta: íconos un poco más chicos. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card .rd-ed-icon-list img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Horizontal: las columnas son angostas; enfrentamientos con la etiqueta arriba. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-matchup {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-face img,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-face-fallback {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Perfil del objeto en el celular: "campeones que lo aprovechan" usa solo el alto que sobra
+   y, si no entra entero, no se muestra (FillSpace), como en escritorio. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-profile {
+    overflow: hidden;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-profile > .rd-ed-fill {
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+}
+
+/* Efectos que no entran en su mitad ni con la letra más chica (ItemDetail: data-effects=
+   "tight"): las estadísticas se achican a lo que ocupan y los efectos toman el resto. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-ed[data-kind="item"][data-panels="on"][data-effects="tight"] > .rd-cd-grid:has(> .rd-ed-stats) {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"][data-effects="tight"] > .rd-cd-grid:has(> .rd-ed-stats) {
+    grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr);
+  }
+}
+
+/* Ficha de objeto en el celular: estadísticas en filas bajas y el nombre largo de una sola
+   palabra (Rompecascos) sin pisar el botón de volver. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list {
+    gap: 0.25rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat {
+    padding: 0.2rem 0.55rem;
+    border-radius: 8px;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat dt {
+    font-size: 0.7rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat dd {
+    font-size: 0.95rem;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-name.rd-ed-name {
+    font-size: min(1.45rem, 5.6vw);
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Estadísticas en la columna angosta (efectos que no entran): rótulo arriba del valor. */
+  .rd-ed[data-kind="item"][data-panels="on"][data-effects="tight"] .rd-ed-stat {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"][data-effects="tight"] .rd-ed-stat dt {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Nombres largos de una palabra (Rompecascos): entran en la columna del héroe. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-cd-name.rd-ed-name {
+    font-size: min(1.4rem, 2.2vw);
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Ficha de objeto en el celular: cada tarjeta llena su mitad.
+   - Estadísticas: el nombre completo (baja de renglón si hace falta) y las filas se reparten
+     el alto de la tarjeta.
+   - Cómo se contrarresta y Enfrentamientos: una caja por fila que se reparten el alto, con
+     íconos y caras más grandes (y los nombres de los campeones).
+   - Tu rendimiento: el porcentaje grande arriba y tus campeones abajo, repartidos. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  /* Estadísticas */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stats > .rd-ed-stat-list {
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list .rd-ed-stat dt {
+    overflow: visible;
+    line-height: 1.2;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat dd {
+    flex-shrink: 0;
+    font-size: 1.05rem;
+  }
+
+  /* Cómo se contrarresta */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card > .rd-ed-answers {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card .rd-ed-answer {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid rgba(212, 175, 55, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card .rd-ed-answer > p {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--rd-cd-ink);
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card .rd-ed-icon-list {
+    flex-shrink: 0;
+    gap: 0.45rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card .rd-ed-icon-list img,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card .rd-ed-icon-fallback {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Enfrentamientos */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-matchups > .rd-cd-matchup {
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.6rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-matchups .rd-cd-matchup-label {
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-matchups .rd-cd-face img,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-matchups .rd-cd-face-fallback {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-matchups .rd-cd-face-name {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    clip: auto;
+    font-size: 10px;
+  }
+
+  /* Tu rendimiento */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card > .rd-ed-foot {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage > .rd-ed-profile-label {
+    display: none;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-body {
+    flex: 1 1 auto;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: space-evenly;
+    gap: 0.6rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-wr {
+    font-size: 2.6rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-record {
+    font-size: 0.9rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-compare {
+    font-size: 0.78rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-faces {
+    flex: none;
+    min-width: 0;
+    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+    justify-items: start;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-cd-face img,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-cd-face-fallback {
+    width: 44px;
+    height: 44px;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-cd-face-caption {
+    font-size: 10.5px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-answers-card > .rd-ed-answers {
+    align-items: stretch;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  /* Nombres largos de una palabra (Curación/Escudo) bajan de renglón en vez de pisar el valor. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list .rd-ed-stat dt {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+  }
+
+  /* Cantidad impar en dos columnas: la última ocupa todo el ancho (no queda un hueco). */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list[data-many="yes"] > .rd-ed-stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-wr {
+    font-size: 2rem;
+  }
+
+  /* Columna angosta: el resumen debajo del porcentaje. */
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-usage-card .rd-ed-usage-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+/* Estadísticas achicadas a lo que ocupan (data-effects="tight"): las filas no se estiran. */
+@media (orientation: portrait) and (max-width: 639px) {
+  .rd-ed[data-kind="item"][data-panels="on"][data-effects="tight"] .rd-ed-stats > .rd-ed-stat-list {
+    flex: none;
+  }
+}
+
+/* Ficha de objeto en el celular:
+   - Estadísticas siempre en lista (una por fila); las filas se reparten el alto de la tarjeta,
+     así con pocas quedan altas y con muchas, más bajas.
+   - Objetos del mismo tipo: la lista toma el alto de la tarjeta y ItemDetail muestra tantos
+     como filas completas entren (useFitCount), repartidas de arriba a abajo. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list,
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list[data-many="yes"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list[data-many="yes"] > .rd-ed-stat:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list[data-many="yes"] .rd-ed-stat {
+    padding-inline: 0.7rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-stat-list .rd-ed-stat dt {
+    font-size: 0.78rem;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-related > .rd-ed-related-list {
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    align-content: space-between;
+    overflow: hidden;
+  }
+
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-related {
+    overflow: hidden;
+  }
+}
+
+/* Celular (vertical y horizontal): objetos del mismo tipo en una sola columna, con el nombre
+   completo. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="item"][data-panels="on"] .rd-ed-related > .rd-ed-related-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Ficha de runa en el celular: tarjetas del mismo tamaño ─────────────────────────
+   RuneDetail: descripción (sola), perfil + contra qué rinde, árbol de la rama (solo),
+   sinergias + tu rendimiento. Como las de campeón y objeto: la ficha toma el alto que queda
+   en la pantalla y cada pestaña lo parte en dos mitades iguales (vertical: una arriba de la
+   otra; horizontal: lado a lado); una tarjeta sola ocupa todo. La descripción, el perfil y
+   contra qué rinde ajustan su letra para llenar la tarjeta (useFitText): por eso acá los
+   tamaños van en em, relativos a la letra que les toca. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-lib:has(.rd-ed[data-kind="rune"][data-panels="on"]) {
+    height: 100%;
+    padding-bottom: 0.6rem;
+    overflow: hidden;
+  }
+
+  .rd-lib:has(.rd-ed[data-kind="rune"][data-panels="on"]) > .rd-lib-bar {
+    flex: none;
+  }
+
+  .rd-lib-body:has(> .rd-ed[data-kind="rune"][data-panels="on"]) {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] > .rd-cd-grid {
+    display: grid;
+    min-height: 0;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] > .rd-cd-grid > .rd-cd-card:only-child {
+    grid-row: 1 / -1;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-card {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-card > * {
+    flex-shrink: 0;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-card-head {
+    min-height: 0;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-card-title {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Descripción: la lista toma el alto de la tarjeta. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-effects > .rd-ed-effect-list {
+    min-height: 2rem;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    line-height: 1.45;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-effect-list strong {
+    font-size: 0.8em;
+  }
+
+  /* Perfil: rótulos y chips proporcionales a la letra de la tarjeta, repartidos en su alto. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile {
+    justify-content: space-evenly;
+    gap: 0.6em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile > .rd-cd-card-head {
+    margin-bottom: auto;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-profile-block {
+    gap: 0.4em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-profile-label {
+    font-size: 0.62em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-classes,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-tags {
+    gap: 0.35em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-classes li,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-tags li {
+    padding: 0.2em 0.7em;
+    font-size: 0.8em;
+  }
+
+  /* Contra qué rinde: las cajas se reparten el alto de la tarjeta. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-counters-card > .rd-ed-counters {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-counters-card .rd-ed-counters li {
+    flex: 1 1 auto;
+    align-content: center;
+    gap: 0.15em;
+    padding: 0.35em 0.7em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-counters-card .rd-ed-counters strong {
+    font-size: 0.85em;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-counters-card .rd-ed-counters span {
+    font-size: 0.9em;
+    line-height: 1.35;
+  }
+
+  /* Árbol de la rama (toda la pantalla): las filas se reparten el alto, con íconos grandes. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree > .rd-ed-tree-rows {
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    justify-content: space-evenly;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-fallback {
+    width: 52px;
+    height: 52px;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-fallback {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-name {
+    font-size: 0.7rem;
+  }
+
+  /* Sinergias: los bloques se reparten el alto, con caras e íconos más grandes. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit {
+    justify-content: space-evenly;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit > .rd-cd-card-head {
+    margin-bottom: auto;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit > .rd-ed-synergy {
+    margin-top: 0;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-face img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-face-fallback,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-ed-icon-list img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-ed-icon-fallback {
+    width: 42px;
+    height: 42px;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-face-name {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    clip: auto;
+    font-size: 10px;
+  }
+
+  /* Tu rendimiento: el porcentaje grande arriba y tus campeones abajo, repartidos. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal > .rd-ed-foot {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage > .rd-ed-profile-label {
+    display: none;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage-body {
+    flex: 1 1 auto;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: space-evenly;
+    gap: 0.6rem;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage-wr {
+    font-size: 2.6rem;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage-record {
+    font-size: 0.9rem;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage-faces {
+    flex: none;
+    min-width: 0;
+    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+    justify-items: start;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-cd-face img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-cd-face-fallback {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="rune"][data-panels="on"] {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-hero.rd-ed-hero {
+    position: relative;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-tabs {
+    align-self: start;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] > .rd-cd-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] > .rd-cd-grid > .rd-cd-card:only-child {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="no"] .rd-ed-tree-fallback,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-fallback {
+    width: 30px;
+    height: 30px;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage-wr {
+    font-size: 2rem;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-personal .rd-ed-usage-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-face img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-face-fallback,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-ed-icon-list img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-ed-icon-fallback {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Ficha de runa en el celular: ajustes para que el contenido llene cada tarjeta. */
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-profile .rd-ed-profile-label {
+    font-size: 0.72em;
+  }
+
+  /* Sinergias: el título arriba y cada bloque se reparte el alto que queda, centrado. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit {
+    justify-content: flex-start;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit > .rd-cd-card-head {
+    margin-bottom: 0;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit > .rd-ed-profile-block {
+    min-height: 0;
+    flex: 1 1 0;
+    flex-shrink: 1;
+    align-content: center;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* Sola en su pestaña (sin tu rendimiento): las caras y los íconos bajan de fila y se ven
+     todos. Con tu rendimiento al lado, una fila de cada uno. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit:only-child .rd-cd-faces,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit:only-child .rd-ed-icon-list {
+    grid-auto-rows: auto;
+    row-gap: 0.6rem;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-ed-icon-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
+    grid-template-rows: auto;
+    grid-auto-rows: 0;
+    row-gap: 0;
+    overflow: hidden;
+    justify-items: center;
+  }
+
+  /* Árbol de la rama, runas clave (una sola fila de 13): la grilla llena la tarjeta. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] > .rd-ed-tree-row {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-direction: column;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] > .rd-ed-tree-row > ul {
+    min-height: 0;
+    flex: 1 1 0;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-node {
+    justify-content: center;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-fallback {
+    width: 44px;
+    height: 44px;
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-name {
+    font-size: 0.66rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-node img,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-tree-rows[data-keystone="yes"] .rd-ed-tree-fallback {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  /* Sinergias sola: más caras e íconos por fila, así entran todos. */
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit:only-child .rd-cd-faces,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit:only-child .rd-ed-icon-list {
+    grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+  }
+
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-face {
+    width: 100%;
+  }
+}
+
+/* Celular horizontal: nombres largos de una palabra (Conquistador) entran en el héroe. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-cd-name.rd-ed-name {
+    font-size: min(1.4rem, 2.2vw);
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Descripción en dos columnas: el título de un efecto no queda solo al pie de la primera. */
+.rd-ed[data-panels="on"] .rd-ed-effect-list strong {
+  break-after: avoid;
+}
+
+/* Celular horizontal: sinergias con más caras e íconos por fila. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-cd-faces,
+  .rd-ed[data-kind="rune"][data-panels="on"] .rd-ed-kit .rd-ed-icon-list {
+    grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
   }
 }

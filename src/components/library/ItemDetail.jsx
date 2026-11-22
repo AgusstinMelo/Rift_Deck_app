@@ -1,7 +1,8 @@
 // Ficha de objeto, con el mismo lenguaje que la de campeón (styles/16-library.css):
 // héroe con el ícono y luces sacadas de sus colores, y debajo Efectos, Estadísticas,
 // Enfrentamientos y objetos del mismo tipo. En escritorio entra todo sin scroll.
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
 import { ArrowLeft, Ban, CheckCircle2, Coins, Sword } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { entitySlug } from '@/utils/entitySlug';
@@ -9,7 +10,7 @@ import { usesUnifiedLifesteal } from '@/lib/gamePatch';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { itemCategoryLabel, itemTypeLabel } from '@/utils/itemLabels';
 import {
-  CardTitle, FaceList, FillSpace, ItemIconList, MatchupRow, PersonalUsageBlock, splitEffects, useArtLights, useFitCount, usePersonalMatches,
+  CardTitle, FaceList, FillSpace, ItemIconList, MatchupRow, PersonalUsageBlock, effectsSplitIndex, splitEffects, useArtLights, useFitCount, useFitText, usePersonalMatches,
 } from '@/components/library/detailParts';
 import { championsForItem, inferredItemClasses, itemCountersFor, personalUsage } from '@/features/library/entityInsights';
 import { itemProfile } from '@/features/coach/catalog';
@@ -73,6 +74,12 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
   const { entityName, entityDescription, compareNames } = useCatalogText();
   const publicMode = Boolean(publicBasePath);
   const lightStyle = useArtLights(item.image_url);
+  // Celular: pestañas con dos tarjetas cada una (como la ficha de campeón), todo dentro de la
+  // pantalla. La ficha pública se prerenderiza: arranca en escritorio y ajusta al montar.
+  const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY, { ssrSafe: publicMode });
+  const isPhonePortrait = useMatchMedia(PHONE_PORTRAIT_QUERY, { ssrSafe: publicMode });
+  const usePanels = isPhoneLandscape || isPhonePortrait;
+  const [section, setSection] = useState('effects');
 
   const unifiedLifesteal = usesUnifiedLifesteal(item.patch_version);
   const stats = STAT_KEYS.filter(([key]) => {
@@ -132,9 +139,11 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
   // Campeones que lo aprovechan, cómo se contrarresta y tu rendimiento con él.
   const fans = useMemo(() => championsForItem(item, champions, MAX_FANS), [item, champions]);
   const answers = useMemo(() => itemCountersFor(item, items), [item, items]);
-  const answersBlock = answers.length > 0 && (
+  // En escritorio va al pie de la columna de relacionados (con su rótulo); en el celular es
+  // una tarjeta propia, con el rótulo como título.
+  const answersList = withLabel => answers.length > 0 && (
     <div className="rd-ed-profile-block rd-ed-answers">
-      <p className="rd-ed-profile-label">{t('library.contraObjeto.titulo')}</p>
+      {withLabel && <p className="rd-ed-profile-label">{t('library.contraObjeto.titulo')}</p>}
       {answers.map(group => (
         <div key={group.key} className="rd-ed-answer">
           <p>{t(`library.contraObjeto.${group.key}`)}</p>
@@ -143,18 +152,61 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
       ))}
     </div>
   );
+  const answersBlock = answersList(true);
   const matches = usePersonalMatches(publicMode);
   const usage = useMemo(() => (publicMode ? null : personalUsage(matches, item.name, 'items_used')), [publicMode, matches, item.name]);
 
   const relatedListRef = useRef(null);
-  const related = relatedCandidates.slice(0, useFitCount(relatedListRef, relatedCandidates.length, 8));
+  // La pestaña del celular se conoce más abajo; con `section` alcanza para volver a medir
+  // cuando la lista se monta al cambiar de pestaña.
+  const related = relatedCandidates.slice(0, useFitCount(relatedListRef, relatedCandidates.length, 8, [section, usePanels]));
 
   const icon = (src, size) => (src
     ? <img src={src} alt="" width={size} height={size} />
     : <Sword size={Math.round(size / 2.5)} aria-hidden="true" />);
 
+  // En escritorio la tarjeta de la derecha no va con texto muy largo y sin estadísticas (no
+  // queda alto).
+  const showRelatedCard = !(veryLongText && !stats.length);
+  // Celular: de a dos tarjetas por pestaña (efectos con estadísticas, perfil con cómo se
+  // contrarresta, enfrentamientos con tu rendimiento). Sin rendimiento (ficha pública, u
+  // objeto que no usaste), enfrentamientos va con los objetos del mismo tipo; si no, esos
+  // tienen su pestaña. Una tarjeta sola en su pestaña ocupa todo el alto.
+  const phonePanel = {
+    effects: 'effects', stats: 'effects', profile: 'profile', answers: 'profile',
+    matchups: 'matchups', usage: 'matchups', related: usage ? 'related' : 'matchups',
+  };
+  // Objetos con misión (más de 900 caracteres, sin estadísticas): ni con la letra más chica
+  // entran; los efectos se reparten en dos pestañas, cortando donde quedan más parejas.
+  const effectsSplit = usePanels && veryLongText ? effectsSplitIndex(effects) : 0;
+  const shownEffects = effectsSplit
+    ? (activePanelId => (activePanelId === 'effectsMore' ? effects.slice(effectsSplit) : effects.slice(0, effectsSplit)))
+    : () => effects;
+  const panelTabs = [
+    ['effects', t('library.efectos')],
+    ...(effectsSplit ? [['effectsMore', t('library.masEfectos')]] : []),
+    ['profile', t('bugReport.pages.Perfil')],
+    ['matchups', t('library.enfrentamientos')],
+    ...(usage && related.length > 0 ? [['related', t('library.relacionados')]] : []),
+  ];
+  const activePanel = panelTabs.some(([id]) => id === section) ? section : 'effects';
+  const show = id => !usePanels || phonePanel[id] === activePanel;
+  // Celular: la letra de los efectos se ajusta a su extensión y llena el espacio de la tarjeta.
+  const effectsRef = useRef(null);
+  // Si ni con la letra más chica entran en su mitad, las estadísticas se achican a lo que
+  // ocupan y le dejan el resto a los efectos (data-effects="tight"). Queda así hasta cambiar
+  // de objeto: si volviera atrás al agrandarse la caja, se realimentaría.
+  const [tightEffects, setTightEffects] = useState(null);
+  useFitText(effectsRef, {
+    enabled: usePanels,
+    min: tightEffects === item.id ? 9 : 10,
+    max: 16,
+    deps: [activePanel, description],
+    onOverflow: () => setTightEffects(item.id),
+  });
+
   return (
-    <article className="rd-cd rd-ed" data-kind="item" data-length={longText ? "long" : "normal"} data-text={veryLongText ? "xlong" : undefined} data-stats={stats.length ? "yes" : "none"} style={lightStyle}>
+    <article className="rd-cd rd-ed" data-panels={usePanels ? 'on' : 'off'} data-kind="item" data-length={longText ? "long" : "normal"} data-text={veryLongText ? "xlong" : undefined} data-stats={stats.length ? "yes" : "none"} data-effects={tightEffects === item.id ? 'tight' : undefined} style={lightStyle}>
       <header className="rd-cd-hero rd-ed-hero">
         {item.image_url && <img className="rd-ed-hero-glow" src={item.image_url} alt="" aria-hidden="true" />}
         <div className="rd-cd-hero-shade" aria-hidden="true" />
@@ -195,12 +247,23 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
         </div>
       </header>
 
+      {usePanels && (
+        <div className="rd-panel-tabs rd-cd-tabs" role="tablist" aria-label={t('library.seccionesDelObjeto')}>
+          {panelTabs.map(([id, label]) => (
+            <button key={id} type="button" role="tab" aria-selected={activePanel === id} onClick={() => setSection(id)} className={`rd-panel-tab ${activePanel === id ? 'rd-panel-tab-active' : ''}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="rd-cd-grid">
+        {(show('effects') || (effectsSplit > 0 && activePanel === 'effectsMore')) && (
         <section className="rd-cd-card rd-ed-effects">
           <CardTitle>{t('library.efectos')}</CardTitle>
           {effects.length ? (
-            <ul className="rd-ed-effect-list">
-              {effects.map((effect, index) => (
+            <ul ref={effectsRef} className="rd-ed-effect-list">
+              {shownEffects(activePanel).map((effect, index) => (
                 <li key={index} data-labeled={effect.label ? 'yes' : 'no'}>
                   {effect.label && <strong>{effect.label}</strong>}
                   <span>{effect.text}</span>
@@ -210,16 +273,17 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
           ) : (
             <p className="rd-cd-empty">{t('library.sinDescripcion')}</p>
           )}
-          {tags.length > 0 && (
+          {tags.length > 0 && !(effectsSplit > 0 && activePanel === 'effects') && (
             <ul className="rd-cd-tags">
               {tags.map(tag => <li key={tag}>{tag}</li>)}
             </ul>
           )}
         </section>
+        )}
 
-        {stats.length > 0 && (
+        {stats.length > 0 && show('stats') && (
         <section className="rd-cd-card rd-ed-stats">
-          <CardTitle>{t('library.estadisticasDelObjeto')}</CardTitle>
+          <CardTitle>{usePanels ? t('nav.stats') : t('library.estadisticasDelObjeto')}</CardTitle>
             <dl className="rd-ed-stat-list" data-many={stats.length > 3 ? 'yes' : undefined}>
               {stats.map(([key, label, tone, unit]) => (
                 <div key={key} className="rd-ed-stat" data-tone={tone}>
@@ -231,6 +295,7 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
         </section>
         )}
 
+        {show('profile') && (
         <section className="rd-cd-card rd-ed-profile">
           <CardTitle>{t('library.runePerfil.titulo')}</CardTitle>
           {fitClasses.size > 0 && (
@@ -270,19 +335,39 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
             </FillSpace>
           )}
         </section>
+        )}
 
+        {show('matchups') && (
         <section className="rd-cd-card rd-cd-matchups rd-ed-matchups">
           <CardTitle>{t('library.enfrentamientos')}</CardTitle>
           <MatchupRow icon={CheckCircle2} tone="green" label={t('library.recomendadoVs')} champions={resolveChampions(item.good_against)} publicMode={publicMode} emptyLabel={t('library.sinDatos')} />
           <MatchupRow icon={Ban} tone="red" label={t('library.evitarVs')} champions={resolveChampions(item.avoid_against)} publicMode={publicMode} emptyLabel={t('library.sinDatos')} />
         </section>
+        )}
+
+        {/* Celular: cómo se contrarresta y tu rendimiento, cada uno en su tarjeta. */}
+        {usePanels && answers.length > 0 && show('answers') && (
+          <section className="rd-cd-card rd-ed-answers-card">
+            <CardTitle>{t('library.contraObjeto.titulo')}</CardTitle>
+            {answersList(false)}
+          </section>
+        )}
+
+        {usePanels && usage && show('usage') && (
+          <section className="rd-cd-card rd-ed-usage-card">
+            <CardTitle>{t('library.rendimiento')}</CardTitle>
+            <div className="rd-ed-foot"><PersonalUsageBlock usage={usage} champions={champions} /></div>
+          </section>
+        )}
 
         {/* Columna de la derecha: objetos del mismo tipo (tantos como entren), cómo se
             contrarresta y tu rendimiento. Es la que absorbe el alto: lo nuevo nunca agranda
-            las filas de las otras tarjetas. */}
-        {(related.length > 0 || answersBlock || usage) && !(veryLongText && !stats.length) && (
+            las filas de las otras tarjetas. En el celular va solo la lista (lo demás tiene su
+            tarjeta). */}
+        {(usePanels ? related.length > 0 && show('related') : showRelatedCard && (related.length > 0 || answersBlock || usage)) && (
           <section className="rd-cd-card rd-ed-related">
             {related.length > 0 && <CardTitle>{t('library.objetosDelMismoTipo')}</CardTitle>}
+            {related.length > 0 && (
             <ul ref={relatedListRef} className="rd-cd-related-list rd-ed-related-list">
               {related.map(other => {
                 const content = (
@@ -302,8 +387,9 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
                 );
               })}
             </ul>
-            {answersBlock}
-            {usage && <div className="rd-ed-foot"><PersonalUsageBlock usage={usage} champions={champions} /></div>}
+            )}
+            {!usePanels && answersBlock}
+            {!usePanels && usage && <div className="rd-ed-foot"><PersonalUsageBlock usage={usage} champions={champions} /></div>}
           </section>
         )}
       </div>
