@@ -266,6 +266,18 @@ test('build: carry con defensivo cuando nadie lo alcanzaba y tenía tanque → p
   assert.match(card.action, /Cambialo por otro objeto de daño/);
 });
 
+test('build: carry full daño con luchadores aliados → no dice que su equipo tenía poco daño', () => {
+  const kaisa = fields => match({ own_champion_name: "Kai'Sa", lane: 'adc', enemy_champion_name: 'Jinx', ...fields });
+  const card = lastCard(kaisa({
+    id: 'kai-bruisers', ...recent, result: 'win', kills: 11, deaths: 1, assists: 5,
+    ally_champions: ['Garen', 'Darius', 'Sett', 'Janna'],
+    enemy_champions: ['Zed', 'Jinx', 'Lux', 'Malphite', 'Soraka'],
+    items_used: ['Hidra Titánica', 'Filo Infinito', 'Cuchilla Negra', 'Recordatorio Mortal', 'Hoja del Rey Arruinado'],
+  }), kaisa);
+  assert.match(card.thesis, /full daño era la indicada, porque Janna te cuidaba/);
+  assert.doesNotMatch(card.thesis, /poco daño/);
+});
+
 test('build: carry con un defensivo mágico contra un equipo casi todo AP → elogia el objeto y el daño mágico', () => {
   const kaisa = fields => match({ own_champion_name: "Kai'Sa", lane: 'adc', enemy_champion_name: 'Kayle', ...fields });
   const card = lastCard(kaisa({

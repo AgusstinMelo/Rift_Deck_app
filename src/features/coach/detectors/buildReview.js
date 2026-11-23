@@ -106,7 +106,8 @@ function compFacts(ctx, match) {
     wardDeaths: ward ? players.deathsOf(ward.name) : null,
     tank: allies.find(isFrontline),
     peeler: allies.find(isPeeler),
-    allyCarries: allies.filter(ally => ally.buildClass === 'carry').length,
+    // Quién más pega en tu equipo: carries y también luchadores (Darius, Olaf, Jax hacen daño).
+    allyCarries: allies.filter(ally => ['carry', 'fighter'].includes(ally.buildClass)).length,
     allyMagic: sum(allies, magicOf),
     enemyCarries: enemies.filter(enemy => enemy.buildClass === 'carry').length,
     enemyPhysical: sum(enemies, physicalOf),
