@@ -76,8 +76,7 @@ export function detectLastMatch(ctx) {
   // Matchup directo: historial y plan contra el rival.
   if (match.enemy && match.champion && !match.won) {
     const versus = summarize(ctx.matches.filter(row => row.championKey === match.championKey && row.enemyKey === match.enemyKey));
-    const { known, exploitable } = vulnerabilityPlan(match.own, match.enemyProfile);
-    const lead = exploitable[0] || known[0];
+    const { lead } = vulnerabilityPlan(match.own, match.enemyProfile);
     if (versus.games >= 3 && versus.wr < 0.5) {
       flags.push({
         weight: 1.8,

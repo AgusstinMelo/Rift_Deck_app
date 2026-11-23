@@ -39,11 +39,16 @@ const VULNERABILITIES = {
   revelado_vision: { tools: null },
 };
 
-/** Vulnerabilidades conocidas del rival, separando las que tu campeón aprovecha. */
+/**
+ * Vulnerabilidades conocidas del rival, separando las que tu campeón aprovecha. `lead`: la
+ * que conviene usar de consejo, una que tu kit aprovecha o, si no, una que se responde con
+ * la build (antiheal, penetración); nunca una que pide herramientas que no tenés.
+ */
 export function vulnerabilityPlan(own, enemy) {
   const known = (enemy?.vulnerabilities || []).filter(tag => VULNERABILITIES[tag]);
   const exploitable = own ? known.filter(tag => VULNERABILITIES[tag].tools?.(own)) : [];
-  return { known, exploitable };
+  const lead = exploitable[0] || known.find(tag => !VULNERABILITIES[tag].tools) || null;
+  return { known, exploitable, lead };
 }
 
 const vulnList = tags => tags.slice(0, 3).map(tag => tr(`coachEngine.vuln.${tag}`)).join(', ');
@@ -91,7 +96,7 @@ export function detectMatchups(ctx) {
   const enemy = first.enemy;
   const own = first.own;
   const enemyProfile = first.enemyProfile;
-  const { known, exploitable } = vulnerabilityPlan(own, enemyProfile);
+  const { known, exploitable, lead } = vulnerabilityPlan(own, enemyProfile);
   const habits = ctx.buildHabits.get(first.championKey);
   const items = own ? itemsGoodAgainst(ctx.catalog, own, enemy, { preferredTypes: habits?.damageTypes || [] }) : [];
   const boughtInMatchup = items.filter(item => pair.rows.some(row => row.itemKeys.has(keyOf(item))));
@@ -113,7 +118,6 @@ export function detectMatchups(ctx) {
   }
 
   const actions = [];
-  const lead = exploitable[0] || known.find(tag => !VULNERABILITIES[tag].tools);
   if (lead) actions.push(tr(`coachEngine.vulnAction.${lead}`, { enemy }));
   if (items.length && !boughtInMatchup.length) actions.push(tr('coachEngine.matchup.buyAction', { item: items[0], enemy }));
   if (counter) actions.push(tr('coachEngine.matchup.counterAction', { counter: counter.name, enemy, wr: pct(counter.stats.wr), games: counter.stats.games }));

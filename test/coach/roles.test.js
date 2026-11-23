@@ -309,3 +309,24 @@ test('build: tanque con armadura contra un equipo de daño mágico → pedía re
   assert.match(card.thesis, /Armaste armadura .*pero la partida pedía resistencia mágica: el daño rival era casi todo mágico/);
   assert.match(card.action, /Priorizá resistencia mágica/);
 });
+
+test('preparación: nunca pide herramientas que tu campeón no tiene', () => {
+  const champion = (name, vulnerabilities) => ({
+    id: name.toLowerCase(), name, roles: ['Tirador'], traits: ['rango'], vulnerabilities, strong_against: [], weak_against: [], damage_type: 'AD', scaling: 'midgame',
+  });
+  // Kai'Sa no tiene control duro: contra una rival débil al control, el consejo sale de la build.
+  const champions = [...catalog.champions, champion('Samira', ['cc_duro', 'anti_curacion']), champion('Sivir', ['cc_duro'])];
+  const kaisa = (enemy, day) => match({
+    own_champion_name: "Kai'Sa", lane: 'adc', enemy_champion_name: enemy, result: day % 2 ? 'win' : 'loss',
+    date: `2026-11-${String(day).padStart(2, '0')}`, created_at: `2026-11-${String(day).padStart(2, '0')}T12:00:00Z`,
+  });
+  const report = enemy => computeCoachReport({
+    matches: [1, 2, 3, 4, 5].map(day => kaisa(enemy, day)), ...catalog, champions, now: new Date('2026-11-16T12:00:00Z'), limit: 30,
+  }).insights.find(card => card.family === 'prep');
+  const samira = report('Samira');
+  assert.ok(samira);
+  assert.doesNotMatch(samira.action, /Guardá tu control/);
+  assert.match(samira.action, /antiheal/);
+  // Sin nada que el kit o la build aprovechen (y sin objetos del catálogo contra ella), no hay tarjeta.
+  assert.equal(report('Sivir'), undefined);
+});

@@ -9,33 +9,35 @@ import { fixed, groupBy, pct, shrunkRate, summarize } from '../stats.js';
 import { vulnerabilityPlan } from './matchups.js';
 
 /**
- * Cómo jugarle a los rivales directos que más te tocan (hasta 2), con lo que el catálogo
- * dice de ellos y los objetos que encajan con tu build.
+ * Cómo jugarle al rival directo que más te toca (a igual cantidad de partidas, el que peor
+ * te va), con lo que el catálogo dice de él y los objetos que encajan con tu build. Si el
+ * primero no tiene datos en el catálogo, prueba con el siguiente.
  * @param {any} ctx
  * @param {Set<string>} coveredEnemies  Rivales que ya tienen tarjeta de matchup.
  */
 export function detectRivalPrep(ctx, coveredEnemies = new Set()) {
   const rivals = [...groupBy(ctx.matches.filter(match => match.enemyKey && match.own), match => match.enemyKey)]
     .filter(([key, rows]) => rows.length >= 3 && !coveredEnemies.has(key))
-    .sort((a, b) => b[1].length - a[1].length);
+    .sort((a, b) => b[1].length - a[1].length || summarize(a[1]).wr - summarize(b[1]).wr);
   const cards = [];
   for (const [enemyKey, rows] of rivals) {
-    if (cards.length >= 2) break;
+    if (cards.length >= 1) break;
     const enemy = rows[0].enemy;
     const enemyProfile = rows[0].enemyProfile;
     // Tu campeón más usado contra ese rival.
     const [championKey, championRows] = [...groupBy(rows, row => row.championKey)].sort((a, b) => b[1].length - a[1].length)[0];
     const own = championRows[0].own;
     const champion = championRows[0].champion;
-    const { known, exploitable } = vulnerabilityPlan(own, enemyProfile);
+    const { known, exploitable, lead } = vulnerabilityPlan(own, enemyProfile);
     if (!known.length) continue;
     const habits = ctx.buildHabits.get(championKey);
     const items = itemsGoodAgainst(ctx.catalog, own, enemy, { preferredTypes: habits?.damageTypes || [] });
     const bought = items.filter(item => rows.some(row => row.itemKeys.has(keyOf(item))));
     const stats = summarize(rows);
-    const lead = exploitable[0] || known[0];
+    // Sin nada que tu kit o tu build aprovechen, no hay consejo concreto: probá con el siguiente rival.
+    if (!lead && !items.length) continue;
 
-    const actions = [tr(`coachEngine.vulnAction.${lead}`, { enemy })];
+    const actions = lead ? [tr(`coachEngine.vulnAction.${lead}`, { enemy })] : [];
     if (items.length) {
       actions.push(tr(bought.length ? 'coachEngine.prep.itemsKeep' : 'coachEngine.prep.itemsTry', { items: items.join(tr('coachEngine.or')), enemy }));
     }
@@ -69,7 +71,7 @@ export function detectRivalPrep(ctx, coveredEnemies = new Set()) {
  */
 export function detectChampionPlan(ctx) {
   const groups = [...groupBy(ctx.matches.filter(match => match.own), match => match.championKey)]
-    .sort((a, b) => b[1].length - a[1].length);
+    .sort((a, b) => b[1].length - a[1].length || summarize(a[1]).wr - summarize(b[1]).wr);
   const [championKey, rows] = groups[0] || [];
   if (!rows || rows.length < 5) return [];
   const row = ctx.catalog.champions.get(rows[0].champion, rows[0].raw.own_champion_id);

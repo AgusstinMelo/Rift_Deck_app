@@ -21,7 +21,7 @@ import { normalizeMatches } from './normalize.js';
 import { fixed, pct, summarize } from './stats.js';
 
 /** Cuántas tarjetas de una misma familia pueden salir (las de build cubren amenazas distintas). */
-const FAMILY_CAP = { [FAMILY.BUILD]: 2, [FAMILY.PREP]: 2, [FAMILY.IMPACT]: 2 };
+const FAMILY_CAP = { [FAMILY.BUILD]: 2, [FAMILY.IMPACT]: 2 };
 /**
  * No cuentan para la diversidad por entidad: la última partida y el seguimiento hablan de
  * algo puntual, y el plan y la fortaleza son, por definición, sobre tu campeón principal.
