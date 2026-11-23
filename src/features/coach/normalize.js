@@ -54,8 +54,9 @@ export function assessThreats({ own, enemyProfiles, itemProfiles, compKnown, bui
     const min = typeof threat.min === 'function' ? threat.min(own) : threat.min;
     if (count < min || !threat.appliesTo(own)) return;
     // Solo cuentan objetos terminados (y botas donde son respuesta): un componente camino a
-    // Zhonya no es "armaste armadura".
-    const hasAnswer = itemProfiles.some(item => (item.final || (threat.boots && item.boots)) && threat.answers(item, own));
+    // Zhonya no es "armaste armadura". Salvo donde el componente ya da la respuesta (antiheal).
+    const hasAnswer = itemProfiles.some(item => (item.final || threat.components || (threat.boots && item.boots))
+      && threat.answers(item, own));
     // Sin la respuesta pero con slots libres antes de cuando le toca: pudo venir después
     // (la partida terminó antes), así que no se cuenta como que faltó.
     const due = itemSlots >= threat.dueBy(own);

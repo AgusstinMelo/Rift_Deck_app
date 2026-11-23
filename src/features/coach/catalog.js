@@ -255,6 +255,9 @@ export const THREATS = [
     id: 'healing',
     dueBy: () => 3,
     min: 2,
+    // El componente (Llamado del Verdugo, Orbe del Olvido, Vesta Espinosa) ya aplica heridas
+    // graves: cuenta como respuesta aunque la build no lo haya terminado.
+    components: true,
     count: enemies => enemies.filter(enemy => enemy.healer).length,
     answers: item => item.effects.has('anti_curacion'),
     // El encantador no tiene antiheal que armar: lo aporta su tirador.

@@ -68,6 +68,8 @@ export const items = [
   item('Báculo de Agua Fluyente', { type: ['Soporte'], effect_tags: ['curacion_aliada', 'escudo_aliado', 'buff_aliado'], situational_role: ['utilidad'] }),
   // Componente con armadura camino a Zhonya: no es un objeto terminado.
   item('Brazal del Buscador', { category: 'Nivel Medio', type: ['Daño Magico', 'Defensa'], armor: 20 }),
+  // Componente que ya da antiheal (como en el catálogo real).
+  item('El Llamado del Verdugo', { category: 'Nivel Medio', effect_tags: ['anti_curacion', 'debuff_enemigo'] }),
 ];
 
 export const runes = [

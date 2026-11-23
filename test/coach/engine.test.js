@@ -20,6 +20,9 @@ test('catálogo: perfiles, amenazas y respuesta de la build', () => {
   assert.equal(row.threats.healing.answered, false);
   const answered = normalizeMatch(match({ enemy_champions: HEALERS, items_used: ['Recordatorio Mortal', 'Hidra Titánica', 'Filo Infinito'] }), index);
   assert.equal(answered.threats.healing.answered, true);
+  // El componente (Llamado del Verdugo) ya aplica heridas graves: cuenta como antiheal.
+  const component = normalizeMatch(match({ enemy_champions: HEALERS, items_used: ['Hidra Titánica', 'Filo Infinito', 'El Llamado del Verdugo'] }), index);
+  assert.equal(component.threats.healing.answered, true);
   // Con menos de 3 objetos no se puede afirmar que no respondió.
   const short = normalizeMatch(match({ enemy_champions: HEALERS, items_used: ['Hidra Titánica'] }), index);
   assert.equal(short.threats.healing.answered, null);
