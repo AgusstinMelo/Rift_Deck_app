@@ -2318,7 +2318,14 @@
       "evidencePrevious": "Anteriores {games}: {deaths} mortes · {wr}",
       "deathsDownTitle": "Sua melhora recente vem de morrer menos",
       "deathsDownThesis": "Nas suas últimas {games} partidas você passou de {previous} para {recent} mortes por partida e o winrate foi de {wrPrevious} para {wrRecent}.",
-      "deathsDownAction": "O que você está fazendo funciona: continue priorizando sobreviver em vez de correr atrás de abates. O próximo passo é transformar essa segurança em pressão: quando você estiver vivo e o inimigo não, empurre uma torre ou pegue um objetivo."
+      "deathsDownAction": "O que você está fazendo funciona: continue priorizando sobreviver em vez de correr atrás de abates. O próximo passo é transformar essa segurança em pressão: quando você estiver vivo e o inimigo não, empurre uma torre ou pegue um objetivo.",
+      "damageUpTitle": "Seu dano está subindo",
+      "damageUpThesis": "Nas suas últimas {games} partidas você causou {recent} do dano do seu time, contra {previous} nas {previousGames} anteriores ({winsRecent} vitórias em {games}).",
+      "damageUpAction": "O que você mudou nas lutas está funcionando: continue entrando com seu time e batendo no inimigo mais próximo, sem passar à frente da sua linha de frente.",
+      "damageDownTitle": "Seu dano está caindo",
+      "damageDownThesis": "Nas suas últimas {games} partidas você causou {recent} do dano do seu time, contra {previous} nas {previousGames} anteriores ({winsRecent} vitórias em {games}).",
+      "evidenceDamageRecent": "Últimas {games}: {recent} do dano do time",
+      "evidenceDamagePrevious": "Anteriores {previousGames}: {previous}"
     },
     "teamplay": {
       "feedingTitle": "Você é uma parte grande das mortes do seu time",
@@ -2529,7 +2536,37 @@
       "wonBut": "Você venceu, mas há algo para corrigir. ",
       "evidenceKda": "KDA {kda}",
       "evidenceDuration": "{minutes} min",
-      "evidenceMore": "+{count} sinais"
+      "evidenceMore": "+{count} sinais",
+      "n": {
+        "habitualChampion": "seus {value} habituais com {champion}",
+        "habitual": "seus {value} habituais",
+        "topDamage": "você causou mais dano que qualquer um do seu time ({share} do total)",
+        "moreDamage": "você causou {share} do dano do seu time, acima dos {habitual}",
+        "lowDamageHabitual": "Você causou {share} do dano do seu time, abaixo dos {habitual}.",
+        "lowDamage": "Você causou só {share} do dano do seu time ({rank}º de 5).",
+        "lowDamageAction": {
+          "backline": "Seu dano tem que aparecer nas lutas: bata no inimigo mais próximo por trás da sua linha de frente em vez de esperar o alvo perfeito, e chegue a cada objetivo junto com seu time, não atrasado.",
+          "diver": "Entre quando o inimigo tiver gastado o controle e escolha um alvo que você alcance; se a luta não deixar você entrar, pressione uma rota lateral em vez de ficar de fora sem causar dano."
+        },
+        "beatRivalDamage": "você causou {times} vezes o dano de {enemy}",
+        "exposedTop": "Você recebeu mais dano que qualquer um do seu time ({share} do total), e você bate de trás.",
+        "exposed": "Você recebeu {share} do dano do seu time, acima dos {habitual}: você bate de trás e estava absorvendo.",
+        "exposedAction": "Bata da borda da luta: deixe sua linha de frente ser a primeira coisa que o inimigo vê e se mova para sempre ter um aliado entre você e quem pode pular em você. Se não houver ninguém na frente, dê um passo para trás antes de bater.",
+        "safeDamage": "você bateu de trás: recebeu só {share} do dano do seu time",
+        "absorbed": "você absorveu {share} do dano do seu time",
+        "lowAbsorb": "Você recebeu só {share} do dano do seu time: como linha de frente, o dano que você não absorveu foi para os seus carregadores.",
+        "protected": "você deu {share} da cura e dos escudos do seu time",
+        "lowProtect": "Você deu só {share} da cura e dos escudos do seu time.",
+        "fewFightsHabitual": "Você esteve em {fights}% das lutas, quando o habitual para você é {habitual}%.",
+        "fewFights": "Você esteve em só {fights}% das lutas.",
+        "manyFights": "você esteve em {fights}% das lutas",
+        "goldAhead": "você abriu {gold}k de ouro sobre {enemy}",
+        "goldBehind": "Você terminou com {gold}k de ouro a menos que {enemy}, seu rival de rota.",
+        "evidenceDamage": "Dano: {share} do time",
+        "evidenceTaken": "Recebido: {share} do time",
+        "evidenceHeal": "Cura: {share} do time",
+        "evidenceFights": "Lutas: {fights}%"
+      }
     },
     "follow": {
       "improvedTitle": "Você melhorou em {topic}",
@@ -2665,6 +2702,23 @@
           "action": "Você tem os itens mas não está usando na luta: bata da borda da luta em quem estiver mais perto, em vez de esperar o alvo perfeito, e chegue a cada objetivo com o time.",
           "evidence": "Dano por mil de ouro: {mine} contra {theirs} do seu rival ({games} partidas)"
         }
+      },
+      "carryLoad": {
+        "title": "Você perde partidas em que coloca o dano",
+        "thesis": "Em {carried} das suas {losses} derrotas você causou mais dano que qualquer um do seu time (em média, {share} do total): o dano não é o que falta, a partida escapa em outro lugar.",
+        "action": {
+          "deaths": "Nessas derrotas você morre {deaths} vezes em média: ganha as lutas mas cai no final. Quando seu dano já fez a parte dele, não persiga quem foge: recue com seu time e pegue a torre ou o dragão.",
+          "objectives": "Transforme cada luta ganha em algo que fique: depois da luta, não persiga nem volte para a base na hora; leve seu time para a torre ou o dragão mais próximo enquanto o inimigo renasce."
+        },
+        "evidence": "Maior dano do time em {carried} de {losses} derrotas",
+        "evidenceDeaths": "Mortes nessas derrotas: {deaths}"
+      },
+      "exposed": {
+        "title": "De trás, você recebe dano demais",
+        "thesis": "Você bate de trás mas recebe {share} do dano do seu time ({games} partidas); para um atirador ou mago, o esperado é menos de um quinto.{split}",
+        "split": " Nas derrotas, {loss}; nas vitórias, {win}.",
+        "evidence": "Dano recebido: {share} do time ({games} partidas)",
+        "evidenceSplit": "Vitórias: {win} · Derrotas: {loss}"
       }
     },
     "laneEdge": {

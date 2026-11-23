@@ -2318,7 +2318,14 @@
       "evidencePrevious": "Anteriores {games}: {deaths} muertes · {wr}",
       "deathsDownTitle": "Tu mejora reciente viene de morir menos",
       "deathsDownThesis": "En tus últimas {games} partidas bajaste de {previous} a {recent} muertes por partida y el winrate pasó de {wrPrevious} a {wrRecent}.",
-      "deathsDownAction": "Lo que estás haciendo funciona: seguí priorizando sobrevivir antes que perseguir kills. El siguiente paso es convertir esa seguridad en presión: cuando vos estés vivo y el rival no, empujá una torre o tomá un objetivo."
+      "deathsDownAction": "Lo que estás haciendo funciona: seguí priorizando sobrevivir antes que perseguir kills. El siguiente paso es convertir esa seguridad en presión: cuando vos estés vivo y el rival no, empujá una torre o tomá un objetivo.",
+      "damageUpTitle": "Tu daño viene en subida",
+      "damageUpThesis": "En tus últimas {games} partidas hiciste el {recent} del daño de tu equipo, contra el {previous} de las {previousGames} anteriores ({winsRecent} victorias de {games}).",
+      "damageUpAction": "Lo que cambiaste en las peleas está funcionando: seguí entrando con tu equipo y pegándole al rival más cercano, sin adelantarte a tu primera línea.",
+      "damageDownTitle": "Tu daño viene en bajada",
+      "damageDownThesis": "En tus últimas {games} partidas hiciste el {recent} del daño de tu equipo, contra el {previous} de las {previousGames} anteriores ({winsRecent} victorias de {games}).",
+      "evidenceDamageRecent": "Últimas {games}: {recent} del daño del equipo",
+      "evidenceDamagePrevious": "Anteriores {previousGames}: {previous}"
     },
     "teamplay": {
       "feedingTitle": "Sos una parte grande de las muertes de tu equipo",
@@ -2529,7 +2536,37 @@
       "wonBut": "Ganaste, pero hay algo para corregir. ",
       "evidenceKda": "KDA {kda}",
       "evidenceDuration": "{minutes} min",
-      "evidenceMore": "+{count} señales más"
+      "evidenceMore": "+{count} señales más",
+      "n": {
+        "habitualChampion": "tu {value} habitual con {champion}",
+        "habitual": "tu {value} habitual",
+        "topDamage": "hiciste más daño que nadie en tu equipo ({share} del total)",
+        "moreDamage": "hiciste el {share} del daño de tu equipo, por encima de {habitual}",
+        "lowDamageHabitual": "Hiciste el {share} del daño de tu equipo, por debajo de {habitual}.",
+        "lowDamage": "Hiciste solo el {share} del daño de tu equipo (quedaste {rank}º de 5).",
+        "lowDamageAction": {
+          "backline": "Tu daño tiene que aparecer en las peleas: pegale al rival más cercano desde detrás de tu primera línea en lugar de esperar el blanco perfecto, y llegá a cada objetivo junto con tu equipo, no tarde.",
+          "diver": "Entrá cuando el rival haya gastado su control y elegí un blanco que puedas alcanzar; si la pelea no te deja entrar, presioná una línea lateral en vez de quedarte afuera sin pegar."
+        },
+        "beatRivalDamage": "hiciste {times} veces el daño de {enemy}",
+        "exposedTop": "Recibiste más daño que nadie en tu equipo ({share} del total), y pegás desde atrás.",
+        "exposed": "Recibiste el {share} del daño de tu equipo, por encima de {habitual}: pegás desde atrás y estabas absorbiendo.",
+        "exposedAction": "Pegá desde el borde de la pelea: dejá que tu primera línea sea lo primero que vea el rival y movete para que siempre haya un aliado entre vos y quien te puede saltar. Si no hay nadie adelante, retrocedé un paso antes de pegar.",
+        "safeDamage": "pegaste desde atrás: recibiste solo el {share} del daño de tu equipo",
+        "absorbed": "absorbiste el {share} del daño de tu equipo",
+        "lowAbsorb": "Recibiste solo el {share} del daño de tu equipo: como primera línea, el daño que no absorbiste lo recibieron tus carries.",
+        "protected": "diste el {share} de la curación y los escudos de tu equipo",
+        "lowProtect": "Diste solo el {share} de la curación y los escudos de tu equipo.",
+        "fewFightsHabitual": "Estuviste en el {fights}% de las peleas, cuando lo habitual para vos es el {habitual}%.",
+        "fewFights": "Estuviste solo en el {fights}% de las peleas.",
+        "manyFights": "estuviste en el {fights}% de las peleas",
+        "goldAhead": "le sacaste {gold}k de oro a {enemy}",
+        "goldBehind": "Terminaste con {gold}k de oro menos que {enemy}, tu rival de línea.",
+        "evidenceDamage": "Daño: {share} del equipo",
+        "evidenceTaken": "Recibido: {share} del equipo",
+        "evidenceHeal": "Curación: {share} del equipo",
+        "evidenceFights": "Peleas: {fights}%"
+      }
     },
     "follow": {
       "improvedTitle": "Mejoraste en {topic}",
@@ -2665,6 +2702,23 @@
           "action": "Tenés los objetos pero no los estás usando en la pelea: buscá pegar desde el borde de la pelea al que tengas más cerca, en lugar de esperar el blanco perfecto, y llegá a cada objetivo con tu equipo.",
           "evidence": "Daño por cada mil de oro: {mine} contra {theirs} de tu rival ({games} partidas)"
         }
+      },
+      "carryLoad": {
+        "title": "Perdés partidas en las que ponés el daño",
+        "thesis": "En {carried} de tus {losses} derrotas hiciste más daño que nadie en tu equipo (en promedio, el {share} del total): el daño no es lo que falta, la partida se escapa en otra parte.",
+        "action": {
+          "deaths": "En esas derrotas morís {deaths} veces en promedio: ganás las peleas pero caés al final. Cuando tu daño ya hizo su parte, no persigas al que escapa: retrocedé con tu equipo y cobrá la torre o el dragón.",
+          "objectives": "Convertí cada pelea ganada en algo que quede: después de la pelea, no persigas ni vuelvas a la base enseguida; llevá a tu equipo a la torre o al dragón más cercano mientras el rival reaparece."
+        },
+        "evidence": "Máximo daño del equipo en {carried} de {losses} derrotas",
+        "evidenceDeaths": "Muertes en esas derrotas: {deaths}"
+      },
+      "exposed": {
+        "title": "Desde atrás, recibís demasiado daño",
+        "thesis": "Pegás desde atrás pero recibís el {share} del daño de tu equipo ({games} partidas); para un tirador o un mago, lo esperable es menos de un quinto.{split}",
+        "split": " En las derrotas, el {loss}; en las victorias, el {win}.",
+        "evidence": "Daño recibido: {share} del equipo ({games} partidas)",
+        "evidenceSplit": "Victorias: {win} · Derrotas: {loss}"
       }
     },
     "laneEdge": {

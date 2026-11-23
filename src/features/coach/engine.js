@@ -8,6 +8,7 @@ import { buildCatalog } from './catalog.js';
 import { buildHabitsOf, detectRuneFit, detectSavedBuilds, detectThreatGaps } from './detectors/build.js';
 import { detectCompPlans } from './detectors/comp.js';
 import { detectLastMatch } from './detectors/lastMatch.js';
+import { detectNumberTrends } from './detectors/matchNumbers.js';
 import { detectParticipantInsights } from './detectors/participants.js';
 import { detectMatchups, detectPool } from './detectors/matchups.js';
 import {
@@ -20,15 +21,19 @@ import { normalizeMatches } from './normalize.js';
 import { fixed, pct, summarize } from './stats.js';
 
 /** Cuántas tarjetas de una misma familia pueden salir (las de build cubren amenazas distintas). */
-const FAMILY_CAP = { [FAMILY.BUILD]: 2, [FAMILY.PREP]: 2 };
+const FAMILY_CAP = { [FAMILY.BUILD]: 2, [FAMILY.PREP]: 2, [FAMILY.IMPACT]: 2 };
 /**
  * No cuentan para la diversidad por entidad: la última partida y el seguimiento hablan de
  * algo puntual, y el plan y la fortaleza son, por definición, sobre tu campeón principal.
  */
 const ENTITY_EXEMPT = new Set([FAMILY.LAST_MATCH, FAMILY.FOLLOW_UP, FAMILY.PLAN, FAMILY.STRENGTH, FAMILY.WEEKLY_PICKS]);
 const ENTITY_CAP = 3;
-/** Tarjetas sobre un mismo tema (card.topic, p. ej. muertes), aunque sean de familias distintas. */
-const TOPIC_CAP = 2;
+/**
+ * Tarjetas sobre un mismo tema (card.topic, p. ej. muertes), aunque sean de familias
+ * distintas: una por tema, para que el informe no hable solo de muertes. La última partida
+ * no cuenta (habla de esa partida, no de una tendencia).
+ */
+const TOPIC_CAP = 1;
 
 function selectEditorially(candidates, limit) {
   const sorted = [...candidates].sort((a, b) => b.score - a.score);
@@ -38,12 +43,13 @@ function selectEditorially(candidates, limit) {
   const topicCount = new Map();
   for (const card of sorted) {
     if ((familyCount.get(card.family) || 0) >= (FAMILY_CAP[card.family] ?? 1)) continue;
-    if (card.topic && (topicCount.get(card.topic) || 0) >= TOPIC_CAP) continue;
+    const topic = card.family === FAMILY.LAST_MATCH ? null : card.topic;
+    if (topic && (topicCount.get(topic) || 0) >= TOPIC_CAP) continue;
     const counted = !ENTITY_EXEMPT.has(card.family);
     if (counted && card.entities.some(entity => (entityCount.get(entity) || 0) >= ENTITY_CAP)) continue;
     selected.push(card);
     familyCount.set(card.family, (familyCount.get(card.family) || 0) + 1);
-    if (card.topic) topicCount.set(card.topic, (topicCount.get(card.topic) || 0) + 1);
+    if (topic) topicCount.set(topic, (topicCount.get(topic) || 0) + 1);
     if (counted) card.entities.forEach(entity => entityCount.set(entity, (entityCount.get(entity) || 0) + 1));
     if (selected.length >= limit) break;
   }
@@ -108,6 +114,8 @@ export function computeCoachReport({
     ...detectSavedBuilds(ctx),
     // Con los 10 jugadores (solo partidas cargadas con capturas).
     ...detectParticipantInsights(ctx),
+    // Tendencias con sus números: perder siendo el máximo daño, exponerse desde atrás, tu daño reciente.
+    ...detectNumberTrends(ctx),
   ];
   // Preparación (prioridad baja): rivales frecuentes que no tengan ya tarjeta de matchup,
   // plan con el main y fortaleza.

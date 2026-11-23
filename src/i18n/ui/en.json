@@ -2318,7 +2318,14 @@
       "evidencePrevious": "Previous {games}: {deaths} deaths · {wr}",
       "deathsDownTitle": "Your recent improvement comes from dying less",
       "deathsDownThesis": "In your last {games} matches you went from {previous} to {recent} deaths per game and your winrate went from {wrPrevious} to {wrRecent}.",
-      "deathsDownAction": "What you're doing works: keep prioritizing survival over chasing kills. The next step is turning that safety into pressure: when you're alive and the enemy isn't, push a tower or take an objective."
+      "deathsDownAction": "What you're doing works: keep prioritizing survival over chasing kills. The next step is turning that safety into pressure: when you're alive and the enemy isn't, push a tower or take an objective.",
+      "damageUpTitle": "Your damage is going up",
+      "damageUpThesis": "In your last {games} games you dealt {recent} of your team's damage, versus {previous} in the previous {previousGames} ({winsRecent} wins out of {games}).",
+      "damageUpAction": "What you changed in fights is working: keep going in with your team and hitting the closest enemy, without getting ahead of your frontline.",
+      "damageDownTitle": "Your damage is going down",
+      "damageDownThesis": "In your last {games} games you dealt {recent} of your team's damage, versus {previous} in the previous {previousGames} ({winsRecent} wins out of {games}).",
+      "evidenceDamageRecent": "Last {games}: {recent} of team damage",
+      "evidenceDamagePrevious": "Previous {previousGames}: {previous}"
     },
     "teamplay": {
       "feedingTitle": "You account for a big share of your team's deaths",
@@ -2529,7 +2536,37 @@
       "wonBut": "You won, but there is something to fix. ",
       "evidenceKda": "KDA {kda}",
       "evidenceDuration": "{minutes} min",
-      "evidenceMore": "+{count} more signals"
+      "evidenceMore": "+{count} more signals",
+      "n": {
+        "habitualChampion": "your usual {value} on {champion}",
+        "habitual": "your usual {value}",
+        "topDamage": "you dealt more damage than anyone on your team ({share} of the total)",
+        "moreDamage": "you dealt {share} of your team's damage, above {habitual}",
+        "lowDamageHabitual": "You dealt {share} of your team's damage, below {habitual}.",
+        "lowDamage": "You dealt only {share} of your team's damage (#{rank} of 5).",
+        "lowDamageAction": {
+          "backline": "Your damage has to show up in fights: hit the closest enemy from behind your frontline instead of waiting for the perfect target, and reach every objective together with your team, not late.",
+          "diver": "Go in once the enemy has used their crowd control and pick a target you can reach; if the fight won't let you in, pressure a side lane instead of staying out without dealing damage."
+        },
+        "beatRivalDamage": "you dealt {times}x the damage of {enemy}",
+        "exposedTop": "You took more damage than anyone on your team ({share} of the total), and you deal damage from the back.",
+        "exposed": "You took {share} of your team's damage, above {habitual}: you deal damage from the back and you were soaking it.",
+        "exposedAction": "Hit from the edge of the fight: let your frontline be the first thing the enemy sees and move so there is always an ally between you and whoever can jump you. If nobody is in front, take a step back before attacking.",
+        "safeDamage": "you dealt damage from the back: you took only {share} of your team's damage",
+        "absorbed": "you soaked {share} of your team's damage",
+        "lowAbsorb": "You took only {share} of your team's damage: as frontline, the damage you didn't absorb went to your carries.",
+        "protected": "you provided {share} of your team's healing and shielding",
+        "lowProtect": "You provided only {share} of your team's healing and shielding.",
+        "fewFightsHabitual": "You were in {fights}% of the fights, while your usual is {habitual}%.",
+        "fewFights": "You were in only {fights}% of the fights.",
+        "manyFights": "you were in {fights}% of the fights",
+        "goldAhead": "you got {gold}k gold ahead of {enemy}",
+        "goldBehind": "You finished {gold}k gold behind {enemy}, your lane opponent.",
+        "evidenceDamage": "Damage: {share} of team",
+        "evidenceTaken": "Taken: {share} of team",
+        "evidenceHeal": "Healing: {share} of team",
+        "evidenceFights": "Fights: {fights}%"
+      }
     },
     "follow": {
       "improvedTitle": "You improved at {topic}",
@@ -2665,6 +2702,23 @@
           "action": "You have the items but are not using them in fights: hit whoever is closest from the edge of the fight instead of waiting for the perfect target, and show up to every objective with your team.",
           "evidence": "Damage per thousand gold: {mine} vs {theirs} for your opponent ({games} games)"
         }
+      },
+      "carryLoad": {
+        "title": "You lose games where you bring the damage",
+        "thesis": "In {carried} of your {losses} losses you dealt more damage than anyone on your team (on average, {share} of the total): damage isn't what's missing, the game slips away somewhere else.",
+        "action": {
+          "deaths": "In those losses you die {deaths} times on average: you win fights but fall at the end. Once your damage has done its job, don't chase whoever escapes: back off with your team and take the tower or the dragon.",
+          "objectives": "Turn every won fight into something that lasts: after the fight, don't chase or recall right away; take your team to the nearest tower or dragon while the enemy respawns."
+        },
+        "evidence": "Top team damage in {carried} of {losses} losses",
+        "evidenceDeaths": "Deaths in those losses: {deaths}"
+      },
+      "exposed": {
+        "title": "From the back, you take too much damage",
+        "thesis": "You deal damage from the back but take {share} of your team's damage ({games} games); for a marksman or a mage, under a fifth is expected.{split}",
+        "split": " In losses, {loss}; in wins, {win}.",
+        "evidence": "Damage taken: {share} of team ({games} games)",
+        "evidenceSplit": "Wins: {win} · Losses: {loss}"
       }
     },
     "laneEdge": {

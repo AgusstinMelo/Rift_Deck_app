@@ -1,11 +1,13 @@
 // Revisión de la última partida cargada: qué se salió de tu patrón (muertes, build contra
-// la composición rival, matchup, participación) y qué hacer la próxima vez.
+// la composición rival, matchup, participación) y, con los 10 jugadores, tu daño, el daño
+// que recibiste, tus peleas y el oro contra tu rival; y qué hacer la próxima vez.
 import { tr } from '../../../i18n/uiI18n.js';
 import { FAMILY, makeInsight } from '../card.js';
 import { fixed, pct, summarize } from '../stats.js';
 import { threatAdvice } from './build.js';
 import { reviewBuild } from './buildReview.js';
 import { vulnerabilityPlan } from './matchups.js';
+import { lastMatchNumbers } from './matchNumbers.js';
 import { findDeathCeiling, survivalTip } from './performance.js';
 
 const THREAT_WEIGHT = { healing: 3, burst: 2.8, magic: 2.6, physical: 2.6, cc: 2.2, tanks: 2.2, shields: 1.6 };
@@ -41,7 +43,7 @@ export function detectLastMatch(ctx) {
       });
     } else if (limit !== null && match.deaths <= Math.max(1, limit - 2)) {
       const suffix = match.deaths === 0 ? 'None' : match.deaths === 1 ? 'One' : '';
-      praise.push(tr(`coachEngine.last.praiseDeaths${suffix}`, { deaths: match.deaths }));
+      praise.push({ weight: match.deaths === 0 ? 2.8 : 2.4, text: tr(`coachEngine.last.praiseDeaths${suffix}`, { deaths: match.deaths }) });
     }
   }
 
@@ -51,7 +53,7 @@ export function detectLastMatch(ctx) {
   const review = reviewBuild(ctx, match);
   if (review?.verdict === 'shift') flags.push({ weight: 3.2, text: review.text, action: review.action });
   else if (review?.verdict === 'alternative') flags.push({ weight: 2.9, text: review.text, action: review.action, soft: true });
-  else if (review?.verdict === 'good' && review.text) praise.push(review.text);
+  else if (review?.verdict === 'good' && review.text) praise.push({ weight: 2.5, text: review.text });
   const coveredByReview = review?.text ? ['burst', 'physical', 'magic'] : [];
 
   // Build contra la composición rival.
@@ -67,7 +69,7 @@ export function detectLastMatch(ctx) {
         action: threatAdvice(ctx, id, { name: match.champion, own: match.own }),
       });
     } else if (threat.answered) {
-      praise.push(tr('coachEngine.last.praiseThreat', { answer: tr(`coachEngine.threat.${id}.answer`), threat: tr(`coachEngine.threat.${id}.present`) }));
+      praise.push({ weight: 1.5, text: tr('coachEngine.last.praiseThreat', { answer: tr(`coachEngine.threat.${id}.answer`), threat: tr(`coachEngine.threat.${id}.present`) }) });
     }
   });
 
@@ -91,8 +93,13 @@ export function detectLastMatch(ctx) {
     }
   }
 
-  // Participación en kills (si se cargaron las kills de equipo).
-  if (match.killParticipation !== null && match.killParticipation < 0.4) {
+  // Los números de la partida (con los 10 jugadores): daño, daño recibido, peleas y oro.
+  const numbers = lastMatchNumbers(ctx, match);
+  flags.push(...numbers.flags);
+  praise.push(...numbers.praise);
+
+  // Participación en kills (si se cargaron las kills de equipo y el juego no dio la de peleas).
+  if (!numbers.fights && match.killParticipation !== null && match.killParticipation < 0.4) {
     flags.push({
       weight: 1.6,
       text: tr('coachEngine.last.lowKp', { kp: pct(match.killParticipation) }),
@@ -101,6 +108,8 @@ export function detectLastMatch(ctx) {
   }
 
   flags.sort((a, b) => b.weight - a.weight);
+  praise.sort((a, b) => b.weight - a.weight);
+  const praiseList = praise.slice(0, 2).map(entry => entry.text).join(tr('coachEngine.and'));
   if (!flags.length && !(match.won && praise.length)) return [];
 
   const recent = ctx.now.getTime() - loadedAt(match) <= RECENT_MS;
@@ -118,9 +127,9 @@ export function detectLastMatch(ctx) {
       family: FAMILY.LAST_MATCH,
       tone: 'positive',
       title,
-      thesis: tr('coachEngine.last.cleanThesis', { list: praise.slice(0, 2).join(tr('coachEngine.and')) }),
+      thesis: tr('coachEngine.last.cleanThesis', { list: praiseList }),
       action: [review?.tip, tr('coachEngine.last.cleanAction')].filter(Boolean).join(' '),
-      evidence: [kda && tr('coachEngine.last.evidenceKda', { kda }), match.duration && tr('coachEngine.last.evidenceDuration', { minutes: Math.round(match.duration) })],
+      evidence: [kda && tr('coachEngine.last.evidenceKda', { kda }), ...numbers.evidence, match.duration && tr('coachEngine.last.evidenceDuration', { minutes: Math.round(match.duration) })],
       confidence: 0.6, sample: 1, priority: recent ? 96 : 40,
       entities: [match.champion],
     })];
@@ -130,7 +139,7 @@ export function detectLastMatch(ctx) {
   // arranca por lo que salió bien.
   const onlyOptions = match.won && flags.slice(0, 2).every(flag => flag.soft);
   const opener = !match.won ? ''
-    : onlyOptions ? (praise.length ? `${tr('coachEngine.last.cleanThesis', { list: praise.slice(0, 2).join(tr('coachEngine.and')) })} ` : '')
+    : onlyOptions ? (praise.length ? `${tr('coachEngine.last.cleanThesis', { list: praiseList })} ` : '')
       : tr('coachEngine.last.wonBut');
   return [makeInsight({
     key: `last-${match.id}`,
@@ -142,6 +151,7 @@ export function detectLastMatch(ctx) {
     action: [...new Set(flags.slice(0, 2).map(flag => flag.action))].join(' '),
     evidence: [
       kda && tr('coachEngine.last.evidenceKda', { kda }),
+      ...numbers.evidence,
       match.duration && tr('coachEngine.last.evidenceDuration', { minutes: Math.round(match.duration) }),
       flags.length > 2 && tr('coachEngine.last.evidenceMore', { count: flags.length - 2 }),
     ],

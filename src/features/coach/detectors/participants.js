@@ -42,7 +42,7 @@ export function participantMatches(ctx) {
 }
 
 /** Victorias y derrotas por separado, con al menos `min` de cada una. */
-function splitByResult(rows, min = 3) {
+function splitByResult(rows, min = 2) {
   const wins = rows.filter(row => row.match.won);
   const losses = rows.filter(row => !row.match.won);
   return wins.length >= min && losses.length >= min ? { wins, losses } : null;
@@ -70,7 +70,7 @@ function mainChampionRows(rows) {
 export function detectDamageShare(ctx, rows = participantMatches(ctx)) {
   const withDamage = rows.filter(row => row.allies.length === 5 && row.allies.every(player => known(player.damage_dealt)) && sumOf(row.allies, 'damage_dealt') > 0);
   const champRows = mainChampionRows(withDamage);
-  if (champRows.length < 6) return [];
+  if (champRows.length < 5) return [];
   const own = champRows[0].match.own;
   if (!own || !['carry', 'fighter'].includes(own.buildClass)) return [];
   const split = splitByResult(champRows);
@@ -105,7 +105,7 @@ export function detectDamageShare(ctx, rows = participantMatches(ctx)) {
  */
 export function detectLaneGold(ctx, rows = participantMatches(ctx)) {
   const withGold = rows.filter(row => row.self.lane !== 'support' && row.opponent && known(row.self.gold) && known(row.opponent.gold));
-  if (withGold.length < 6) return [];
+  if (withGold.length < 5) return [];
   const split = splitByResult(withGold);
   if (!split) return [];
   const diffOf = row => Number(row.self.gold) - Number(row.opponent.gold);
@@ -143,7 +143,7 @@ const mainLaneFrom = rows => {
 /** Participación en peleas (pestaña DATOS) en victorias contra derrotas. */
 export function detectFightPresence(ctx, rows = participantMatches(ctx)) {
   const withFights = rows.filter(row => known(row.self.teamfight_participation));
-  if (withFights.length < 6) return [];
+  if (withFights.length < 5) return [];
   const split = splitByResult(withFights);
   if (!split) return [];
   const of = list => avg(list.map(row => Number(row.self.teamfight_participation)));
@@ -182,7 +182,7 @@ export function detectRoleNumbers(ctx, rows = participantMatches(ctx)) {
 
   if (frontline) {
     const valid = mine.filter(row => row.allies.length === 5 && row.allies.every(player => known(player.damage_taken)) && sumOf(row.allies, 'damage_taken') > 0);
-    if (valid.length < 6) return [];
+    if (valid.length < 5) return [];
     const share = avg(valid.map(row => Number(row.self.damage_taken) / sumOf(row.allies, 'damage_taken')));
     if (share >= 0.22) return [];
     return [roleCard('tank', { share: pct(share), games: valid.length, champion: valid[0].match.champion }, valid, (0.25 - share) * 12)];
@@ -190,7 +190,7 @@ export function detectRoleNumbers(ctx, rows = participantMatches(ctx)) {
 
   if (isEnchanter(own)) {
     const valid = mine.filter(row => row.allies.length === 5 && row.allies.every(player => known(player.healing_shielding)) && sumOf(row.allies, 'healing_shielding') > 0);
-    if (valid.length < 6) return [];
+    if (valid.length < 5) return [];
     const share = avg(valid.map(row => Number(row.self.healing_shielding) / sumOf(row.allies, 'healing_shielding')));
     if (share >= 0.35) return [];
     return [roleCard('enchanter', { share: pct(share), games: valid.length, champion: valid[0].match.champion }, valid, (0.4 - share) * 10)];
@@ -201,7 +201,7 @@ export function detectRoleNumbers(ctx, rows = participantMatches(ctx)) {
     const valid = mine.filter(row => row.opponent
       && [row.self.damage_dealt, row.self.gold, row.opponent.damage_dealt, row.opponent.gold].every(known)
       && Number(row.self.gold) > 0 && Number(row.opponent.gold) > 0);
-    if (valid.length < 6) return [];
+    if (valid.length < 5) return [];
     const ratio = avg(valid.map(row => efficiency(row.self) / Math.max(1, efficiency(row.opponent))));
     if (ratio >= 0.85) return [];
     return [roleCard('carry', {
