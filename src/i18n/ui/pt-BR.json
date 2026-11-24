@@ -2062,14 +2062,16 @@
       "legal": "Aviso legal",
       "terms": "Termos",
       "privacy": "Privacidade",
-      "cookies": "Cookies"
+      "cookies": "Cookies",
+      "deletion": "Excluir conta"
     },
     "titles": {
       "about": "Sobre",
       "legal": "Aviso legal",
       "terms": "Termos e condições",
       "privacy": "Política de privacidade",
-      "cookies": "Política de cookies"
+      "cookies": "Política de cookies",
+      "deletion": "Excluir sua conta"
     },
     "spanishOnly": "Este documento só está disponível em espanhol, que é a versão juridicamente vinculante.",
     "documents": "Documentos legais",

@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Seo from '@/components/Seo';
 // Las páginas públicas se cargan aparte (ver publicRoutesLoader).
 import PublicRoutes from '@/components/public/publicRoutesLoader';
+import { PUBLIC_LEGAL_DOCUMENTS } from '@/components/LegalInfoModal';
 
 const PageNotFound = lazy(() => import('./lib/PageNotFound'));
 const Layout = lazy(() => import('@/components/Layout'));
@@ -37,7 +38,8 @@ const RouteFallback = () => (
 const AuthenticatedApp = ({ publicData }) => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
   const location = useLocation();
-  const usesPageSeo = ['/campeones', '/objetos', '/runas'].some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
+  const usesPageSeo = ['/campeones', '/objetos', '/runas'].some(path => location.pathname === path || location.pathname.startsWith(`${path}/`))
+    || PUBLIC_LEGAL_DOCUMENTS.some(doc => location.pathname === doc.path);
 
   if (usesPageSeo) {
     return <PublicRoutes publicData={publicData} />;

@@ -5,6 +5,8 @@ import PublicChampions from '@/pages/PublicChampions';
 import PublicChampionDetail from '@/pages/PublicChampionDetail';
 import PublicItems from '@/pages/PublicItems';
 import PublicRunes from '@/pages/PublicRunes';
+import PublicLegal from '@/pages/PublicLegal';
+import { PUBLIC_LEGAL_DOCUMENTS } from '@/components/LegalInfoModal';
 
 // La biblioteca pública scrollea dentro de .rd-main-content (como la app); la home, con window.
 const LIBRARY_PATH = /^\/(campeones|objetos|runas)(\/|$)/;
@@ -29,6 +31,9 @@ export default function PublicRoutes({ publicData }) {
         <Route path="/objetos/:slug" element={<PublicItems initialItems={publicData?.items} initialChampions={champions} />} />
         <Route path="/runas" element={<PublicRunes initialRunes={publicData?.runes} />} />
         <Route path="/runas/:slug" element={<PublicRunes initialRunes={publicData?.runes} />} />
+        {PUBLIC_LEGAL_DOCUMENTS.map(doc => (
+          <Route key={doc.type} path={doc.path} element={<PublicLegal type={doc.type} />} />
+        ))}
       </Routes>
     </>
   );

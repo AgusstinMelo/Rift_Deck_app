@@ -2062,14 +2062,16 @@
       "legal": "Aviso legal",
       "terms": "Términos",
       "privacy": "Privacidad",
-      "cookies": "Cookies"
+      "cookies": "Cookies",
+      "deletion": "Eliminar cuenta"
     },
     "titles": {
       "about": "Acerca de",
       "legal": "Aviso legal",
       "terms": "Términos y condiciones",
       "privacy": "Política de privacidad",
-      "cookies": "Política de cookies"
+      "cookies": "Política de cookies",
+      "deletion": "Eliminar tu cuenta"
     },
     "spanishOnly": "",
     "documents": "Documentos legales",

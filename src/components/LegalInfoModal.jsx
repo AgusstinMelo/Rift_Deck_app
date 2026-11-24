@@ -9,7 +9,6 @@ import { SITE_URL } from '@/seo/publicSeo';
 const LegalMarkdown = lazy(() => import('@/components/LegalMarkdown'));
 
 // Datos del titular (LSSI-CE art. 10). Actualizar acá si cambian.
-// TODO: completar código postal y ciudad del domicilio.
 const OWNER = {
   name: 'Agustín Melo',
   nie: 'Z5684386X',
@@ -22,18 +21,27 @@ const OWNER = {
 export const MIN_AGE = 14;
 
 // Versión de los textos legales; se guarda junto a la aceptación del registro.
-export const LEGAL_VERSION = '2026-10-23';
-const UPDATED = '27 de octubre de 2026';
+export const LEGAL_VERSION = '2026-11-24';
+const UPDATED = '24 de noviembre de 2026';
 
 // Documentos legales, en el orden en que se enlazan desde el footer y el perfil.
 export const LEGAL_DOCUMENTS = [
-  { type: 'legal', get label() { return tr('legal.docs.legal'); } },
-  { type: 'terms', get label() { return tr('legal.docs.terms'); } },
-  { type: 'privacy', get label() { return tr('legal.docs.privacy'); } },
-  { type: 'cookies', get label() { return tr('legal.docs.cookies'); } },
+  { type: 'legal', path: '/aviso-legal', get label() { return tr('legal.docs.legal'); } },
+  { type: 'terms', path: '/terminos', get label() { return tr('legal.docs.terms'); } },
+  { type: 'privacy', path: '/privacidad', get label() { return tr('legal.docs.privacy'); } },
+  { type: 'cookies', path: '/cookies', get label() { return tr('legal.docs.cookies'); } },
 ];
 
-const MODAL_CONTENT = {
+// Página pública para pedir la eliminación de la cuenta (la exige Google Play): no va en el
+// pie de los documentos legales, pero se publica igual que ellos.
+export const ACCOUNT_DELETION_DOCUMENT = {
+  type: 'deletion', path: '/eliminar-cuenta', get label() { return tr('legal.docs.deletion'); },
+};
+
+// Documentos con página pública propia (/privacidad, /terminos...), en ese orden.
+export const PUBLIC_LEGAL_DOCUMENTS = [...LEGAL_DOCUMENTS, ACCOUNT_DELETION_DOCUMENT];
+
+export const LEGAL_CONTENT = {
   about: {
     get title() { return tr('legal.titles.about'); },
     get markdown() { return tr('legal.about', { owner: OWNER.name, email: OWNER.email }); },
@@ -111,18 +119,21 @@ Las partidas, builds y objetivos que registras son tuyos. Nos das permiso para a
 
 Las estadísticas, tierlists, sugerencias y consejos del Coach se generan a partir de datos del juego y de tus partidas. Son orientativos: no garantizan victorias, subidas de rango ni resultados concretos.
 
-## Servicio gratuito y planes de pago
+## Plan gratuito y membresía premium
 
-Hoy Rift Deck es gratuito. Si en el futuro se ofrecen planes de pago:
+Puedes usar Rift Deck gratis. Algunas funciones, como las estadísticas avanzadas y los límites de uso más amplios de ciertas herramientas, requieren la **membresía premium**.
 
-- Antes de contratar verás el precio final con impuestos, la duración, la forma de renovación y cómo cancelar.
-- Podrás cancelar la renovación en cualquier momento; la cancelación tendrá efecto al final del período ya pagado.
-- Como consumidor tendrás **14 días naturales** para desistir de la contratación sin indicar motivos. Si pides expresamente que el servicio empiece antes de que termine ese plazo, y luego desistes, pagarás solo la parte proporcional al tiempo usado.
-- Los pagos se procesarán a través de proveedores externos (Mercado Pago y PayPal). Rift Deck no almacena los datos de tu tarjeta ni de tus medios de pago.
+- **Planes:** mensual, trimestral y anual. Antes de contratar verás el precio final con impuestos y la duración del plan.
+- **Renovación automática:** la suscripción se renueva al final de cada período por la misma duración y al precio vigente, hasta que la canceles. Si el precio cambia, te avisaremos antes de la renovación siguiente.
+- **Prueba gratuita:** cada cuenta con el correo confirmado puede activar una única prueba de 45 días. No pide medio de pago y no se convierte sola en una suscripción de pago.
+- **Medios de pago:** en la web, Mercado Pago o PayPal; en la app para Android descargada de Google Play, la facturación de Google Play. Rift Deck no almacena los datos de tu tarjeta ni de tus medios de pago.
+- **Cancelación:** puedes cancelar cuando quieras desde el medio con el que pagaste (Mercado Pago → Suscripciones; PayPal → Configuración → Pagos → Pagos automáticos; Google Play → Pagos y suscripciones → Suscripciones). La cancelación evita la próxima renovación y mantienes el acceso premium hasta el final del período ya pagado.
+- **Desistimiento:** como consumidor tienes **14 días naturales** desde la contratación para desistir sin indicar motivos, escribiendo a **${OWNER.email}**. Como el acceso premium empieza en cuanto contratas, si desistes dentro de ese plazo pagarás solo la parte proporcional al tiempo usado.
+- Las compras hechas a través de Google Play también se rigen por las condiciones de Google Play, y puedes pedir el reembolso a Google según su política. Nada de esto limita tus derechos como consumidor.
 
 ## Baja y eliminación de la cuenta
 
-Puedes eliminar tu cuenta cuando quieras desde tu perfil. Al hacerlo se borran tus datos personales y tu contenido, como se explica en la Política de privacidad.
+Puedes eliminar tu cuenta cuando quieras desde tu perfil, o pedirlo por correo como se explica en ${SITE_URL}/eliminar-cuenta. Al hacerlo se borran tus datos personales y tu contenido, como se explica en la Política de privacidad. Eliminar la cuenta no cancela una suscripción activa en Mercado Pago, PayPal o Google Play: cancélala antes desde allí.
 
 Podemos suspender o cerrar una cuenta que incumpla gravemente estos términos, avisándote cuando sea posible.
 
@@ -157,9 +168,10 @@ Esta política explica cómo se tratan tus datos personales en Rift Deck, confor
 
 - **Cuenta:** correo electrónico, nombre visible, imagen de perfil y contraseña (que se guarda cifrada). Si entras con Google, recibimos de tu cuenta de Google tu nombre, tu correo y la dirección de tu foto de perfil, que usamos como imagen de perfil hasta que elijas otra desde tu perfil.
 - **Contenido que registras:** partidas (campeón, línea, resultado, KDA, draft y otros datos de juego), builds y objetivos personales.
+- **Capturas de pantalla:** si cargas una partida a partir de capturas de la pantalla de fin de partida, las imágenes se envían a Google (Gemini) para leer los datos de la partida. No las guardamos: solo se usan mientras se procesa la carga.
 - **Reportes de errores:** el texto que envías, junto con tu correo y tu nombre visible.
 - **Datos técnicos:** dirección IP y registros técnicos que generan los proveedores de alojamiento al servir la plataforma.
-- **Pagos** (cuando estén disponibles): datos de la suscripción. Los datos de la tarjeta o del medio de pago los gestiona directamente el proveedor de pagos.
+- **Membresía y pagos:** plan, estado, fechas, importe, el identificador de la suscripción o compra en el proveedor de pagos y los avisos que ese proveedor nos envía sobre ella. Los datos de la tarjeta o del medio de pago los gestiona directamente el proveedor de pagos.
 
 No tratamos categorías especiales de datos ni tomamos decisiones automatizadas que produzcan efectos jurídicos sobre ti. Los análisis del Coach son sugerencias de juego que puedes seguir o ignorar.
 
@@ -169,7 +181,8 @@ No tratamos categorías especiales de datos ni tomamos decisiones automatizadas 
 - **Sugeridores con inteligencia artificial (campeones y builds):** cuando los usas, enviamos a Google (Gemini) los datos de juego necesarios para generar la sugerencia, como tus campeones, el draft y estadísticas de partidas. No enviamos tu correo ni tu nombre. Base: ejecución del contrato, a petición tuya.
 - **Atender reportes y consultas:** interés legítimo en dar soporte y mejorar el servicio (art. 6.1.f RGPD).
 - **Seguridad y prevención de abusos:** interés legítimo (art. 6.1.f RGPD).
-- **Obligaciones legales**, como las fiscales cuando haya pagos (art. 6.1.c RGPD).
+- **Gestionar la membresía premium y sus pagos:** ejecución del contrato (art. 6.1.b RGPD).
+- **Obligaciones legales**, como las fiscales y contables de los pagos (art. 6.1.c RGPD).
 
 No enviamos comunicaciones comerciales. Solo recibirás correos necesarios para tu cuenta, como la confirmación del registro o la recuperación de la contraseña.
 
@@ -177,7 +190,7 @@ No enviamos comunicaciones comerciales. Solo recibirás correos necesarios para 
 
 - Mientras tu cuenta esté activa.
 - Si eliminas la cuenta, borramos tus datos de la base de datos en ese momento. Pueden permanecer en las copias de seguridad del proveedor hasta que se renueven en su ciclo ordinario.
-- Si hubiera datos de facturación, se conservarán durante los plazos que exige la ley (hasta 6 años).
+- Los datos de facturación de los pagos (importe, fecha, plan e identificador de la operación) se conservan, aunque elimines la cuenta, durante los plazos que exige la ley (hasta 6 años), y solo para cumplirla.
 
 ## Quién recibe tus datos
 
@@ -185,9 +198,9 @@ No vendemos tus datos. Solo los comparten los proveedores que necesitamos para p
 
 - **Supabase Inc.** (base de datos, autenticación y funciones del servidor) — Estados Unidos.
 - **Vercel Inc.** (alojamiento de la web) — Estados Unidos.
-- **Google LLC** (Gemini, para el sugeridor, e inicio de sesión con Google) — Estados Unidos.
+- **Google LLC** (Gemini, para el sugeridor y la carga de partidas con capturas, e inicio de sesión con Google) — Estados Unidos.
 - **Servidores de imágenes** de la plataforma (media.base44.com) y de Tencent (game.gtimg.cn), que reciben tu dirección IP al mostrar imágenes de campeones, objetos y runas; y de Google (googleusercontent.com), que la recibe al mostrar la foto de perfil de Google mientras la uses.
-- Cuando haya pagos: **PayPal (Europe) S.à r.l. et Cie, S.C.A.** — Luxemburgo; y **Mercado Pago** — Argentina.
+- Proveedores de pagos, según el medio que elijas: **PayPal (Europe) S.à r.l. et Cie, S.C.A.** — Luxemburgo; **Mercado Pago** — Argentina; y **Google** (facturación de Google Play, en la app para Android). Cada uno trata además tus datos de pago como responsable, según su propia política de privacidad.
 
 También podremos comunicar datos a autoridades cuando una ley lo exija.
 
@@ -199,7 +212,7 @@ Algunos proveedores están en Estados Unidos. Esas transferencias se amparan en 
 
 Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad:
 
-- **Desde tu perfil:** puedes descargar todos tus datos y eliminar tu cuenta.
+- **Desde tu perfil:** puedes descargar todos tus datos y eliminar tu cuenta (los pasos están en ${SITE_URL}/eliminar-cuenta).
 - **Por correo:** escribiendo a **${OWNER.email}**, indicando qué derecho quieres ejercer.
 
 Si consideras que no hemos atendido bien tu solicitud, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (www.aepd.es).
@@ -245,13 +258,46 @@ Puedes borrar el almacenamiento de Rift Deck desde la configuración de tu naveg
 
 Si en el futuro incorporamos cookies que no sean técnicas, actualizaremos esta política y te pediremos tu consentimiento antes de usarlas.`,
   },
+  deletion: {
+    get title() { return tr('legal.titles.deletion'); },
+    markdown: `
+Última actualización: ${UPDATED}
+
+Esta página explica cómo eliminar tu cuenta de **Rift Deck** (la web ${OWNER.site} y la app para Android, desarrollada por ${OWNER.name}) y qué datos se borran.
+
+## Desde la web o la app
+
+1. Inicia sesión en Rift Deck.
+2. Abre tu **Perfil** y ve al apartado **Eliminar cuenta**.
+3. Escribe **ELIMINAR MI CUENTA** para confirmar y pulsa **Eliminar mi cuenta definitivamente**.
+
+La cuenta y los datos se eliminan en ese momento. Si quieres conservar una copia, antes puedes usar **Descargar mis datos** en el mismo perfil.
+
+## Si no puedes iniciar sesión
+
+Escribe a **${OWNER.email}** desde el correo con el que te registraste, con el asunto "Eliminar mi cuenta". Para proteger tu cuenta, solo atendemos pedidos que lleguen desde ese correo. Lo resolvemos en un plazo máximo de un mes.
+
+## Qué se elimina
+
+- Tu cuenta: correo, nombre visible, imagen de perfil y perfil público.
+- Tu contenido: partidas, builds, objetivos, historial del Coach y reportes de errores.
+
+## Qué se conserva
+
+- Los datos de facturación de los pagos (importe, fecha, plan e identificador de la operación) se conservan durante los plazos que exige la ley (hasta 6 años), solo para cumplirla.
+- Las copias de seguridad del proveedor de base de datos pueden contener tus datos hasta que se renueven en su ciclo ordinario.
+
+## Suscripciones activas
+
+Eliminar la cuenta **no cancela** una suscripción en Mercado Pago, PayPal o Google Play. Cancélala antes desde allí para que no se renueve; en Google Play: **Pagos y suscripciones → Suscripciones**.`,
+  },
 };
 
 export default function LegalInfoModal({ type, onClose }) {
   // Se puede pasar de un documento legal a otro sin cerrar el modal.
   const [current, setCurrent] = useState(type);
   const t = useT();
-  const content = MODAL_CONTENT[current];
+  const content = LEGAL_CONTENT[current];
   const isLegalDocument = LEGAL_DOCUMENTS.some(doc => doc.type === current);
 
   useEffect(() => {

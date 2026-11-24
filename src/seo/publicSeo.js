@@ -34,6 +34,34 @@ export const RUNES_SEO = {
   imageAlt: 'Runas de Wild Rift disponibles en Rift Deck',
 };
 
+// Páginas legales públicas (las enlaza la ficha de Google Play). El texto queda en español,
+// como el cuerpo de los documentos.
+const LEGAL_SEO = {
+  legal: { path: '/aviso-legal', title: 'Aviso legal', description: 'Datos del titular de Rift Deck e información legal del sitio.' },
+  terms: { path: '/terminos', title: 'Términos y condiciones', description: 'Condiciones de uso de Rift Deck, la membresía premium, su renovación y cancelación.' },
+  privacy: { path: '/privacidad', title: 'Política de privacidad', description: 'Qué datos trata Rift Deck, para qué, con quién se comparten y cómo ejercer tus derechos.' },
+  cookies: { path: '/cookies', title: 'Política de cookies', description: 'El almacenamiento técnico que usa Rift Deck y el contenido de terceros.' },
+  deletion: { path: '/eliminar-cuenta', title: 'Eliminar tu cuenta', description: 'Cómo eliminar tu cuenta de Rift Deck desde la web, la app o por correo, y qué datos se borran.' },
+};
+
+export const LEGAL_PATHS = Object.values(LEGAL_SEO).map(page => page.path);
+
+export const getLegalSeo = type => {
+  const page = LEGAL_SEO[type];
+  return {
+    title: `${page.title} | Rift Deck`,
+    description: page.description,
+    canonicalPath: page.path,
+    image: SOCIAL_IMAGE,
+    imageAlt: 'Rift Deck, plataforma de análisis para Wild Rift',
+  };
+};
+
+export const getLegalSeoByPath = pathname => {
+  const type = Object.keys(LEGAL_SEO).find(key => LEGAL_SEO[key].path === pathname);
+  return type ? getLegalSeo(type) : null;
+};
+
 export const getItemSeo = (item, slug) => ({
   title: `${item.name} Wild Rift | Estadísticas y efectos | Rift Deck`,
   description: [

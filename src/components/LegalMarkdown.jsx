@@ -1,5 +1,5 @@
 // Cuerpo en markdown de los documentos legales. Va en su propio archivo para cargarse
-// solo al abrir el modal: react-markdown no entra en el bundle principal.
+// solo al abrir el modal o una página legal pública: react-markdown no entra en el bundle principal.
 import ReactMarkdown from 'react-markdown';
 
 const COMPONENTS = {
@@ -17,6 +17,11 @@ const COMPONENTS = {
     <ul className="list-disc pl-5 mb-4 space-y-2 text-sm leading-6 text-muted-foreground">
       {children}
     </ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="list-decimal pl-5 mb-4 space-y-2 text-sm leading-6 text-muted-foreground">
+      {children}
+    </ol>
   ),
   li: ({ children }) => <li>{children}</li>,
   strong: ({ children }) => (

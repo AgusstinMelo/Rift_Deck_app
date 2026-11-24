@@ -2062,14 +2062,16 @@
       "legal": "Legal notice",
       "terms": "Terms",
       "privacy": "Privacy",
-      "cookies": "Cookies"
+      "cookies": "Cookies",
+      "deletion": "Delete account"
     },
     "titles": {
       "about": "About",
       "legal": "Legal notice",
       "terms": "Terms and conditions",
       "privacy": "Privacy policy",
-      "cookies": "Cookie policy"
+      "cookies": "Cookie policy",
+      "deletion": "Delete your account"
     },
     "spanishOnly": "This document is only available in Spanish, which is the legally binding version.",
     "documents": "Legal documents",

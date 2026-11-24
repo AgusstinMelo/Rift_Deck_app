@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { championSlug } from '../src/utils/championSlug.js';
 import { entitySlug } from '../src/utils/entitySlug.js';
-import { SITE_URL } from '../src/seo/publicSeo.js';
+import { LEGAL_PATHS, SITE_URL } from '../src/seo/publicSeo.js';
 import {
   getCurrentTierlistEntries,
   normalizePatchAverage,
@@ -130,6 +130,7 @@ const entries = [
   ...itemSlugs.map((slug, index) => [`/objetos/${slug}`, itemDays[index]]),
   ['/runas', runesDay],
   ...runeSlugs.map((slug, index) => [`/runas/${slug}`, runeDays[index]]),
+  ...LEGAL_PATHS.map(path => [path, null]),
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
