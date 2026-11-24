@@ -8,7 +8,14 @@ import {
 } from '@/api/membershipSupabase';
 import { createMercadoPagoSubscription } from '@/api/mercadoPagoSupabase';
 import { createPayPalSubscription } from '@/api/paypalSupabase';
-import { Gift, Lock, Sparkles } from 'lucide-react';
+import {
+  getPlayBillingService,
+  getPlayPrices,
+  isInAndroidApp,
+  purchasePlaySubscription,
+  restorePlayPurchases,
+} from '@/lib/googlePlayBilling';
+import { Gift, Lock, Sparkles, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import mercadoPagoLogo from '@/assets/mercado-pago.png';
@@ -32,9 +39,9 @@ const PLAN_NAMES = labels({
 
 // Se usan si membership_plans todavía no se pudo leer.
 const FALLBACK_PLANS = [
-{ code: 'premium', name: 'Mensual', amount_ars: 3000, amount_usd: 2, interval_months: 1 },
-{ code: 'premium_quarterly', name: 'Trimestral', amount_ars: 8500, amount_usd: 5.5, interval_months: 3 },
-{ code: 'premium_annual', name: 'Anual', amount_ars: 30000, amount_usd: 20, interval_months: 12 }];
+{ code: 'premium', name: 'Mensual', amount_ars: 3000, amount_usd: 2, interval_months: 1, google_play_product_id: 'premium_monthly' },
+{ code: 'premium_quarterly', name: 'Trimestral', amount_ars: 8500, amount_usd: 5.5, interval_months: 3, google_play_product_id: 'premium_quarterly' },
+{ code: 'premium_annual', name: 'Anual', amount_ars: 30000, amount_usd: 20, interval_months: 12, google_play_product_id: 'premium_annual' }];
 
 // Cada tarjeta ocupa 4 filas de la grilla padre (subgrid): logo/precio, descripción, acción y pasos
 // quedan alineados entre Mercado Pago y PayPal sin alturas fijas.
@@ -403,6 +410,84 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
 
 }
 
+// App de Android: Google Play es el único medio de pago (política de pagos de Google Play).
+function GooglePlayCard({ plan, plans, period, onPurchased }) {
+  const t = useT();
+  const [available, setAvailable] = useState(null);
+  const [prices, setPrices] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const productIds = plans.map((p) => p.google_play_product_id).filter(Boolean).join(',');
+
+  useEffect(() => {
+    let cancelled = false;
+    getPlayBillingService().then(async (service) => {
+      if (cancelled) return;
+      setAvailable(Boolean(service));
+      if (!service || !productIds) return;
+      const loaded = await getPlayPrices(productIds.split(',')).catch(() => ({}));
+      if (!cancelled) setPrices(loaded);
+    });
+    return () => { cancelled = true; };
+  }, [productIds]);
+
+  const productId = plan.google_play_product_id;
+  const price = productId ? prices[productId] : null;
+
+  const handleSubscribe = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (await purchasePlaySubscription(productId)) onPurchased();
+    } catch (e) {
+      setError(e?.message || t('membership.ocurrioUnErrorIntenta'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (available === false || (available && !productId)) {
+    return (
+      <div className="rd-card p-5 text-center text-sm text-muted-foreground max-w-md mx-auto">
+        {t('membership.googlePlay.noDisponible')}
+      </div>);
+  }
+
+  return (
+    <div className="rd-card p-5 space-y-3 border-primary/20 max-w-md mx-auto w-full">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Smartphone size={18} className="text-primary" />
+          </div>
+          <h3 className="font-rajdhani font-bold text-lg text-foreground uppercase tracking-tight">Google Play</h3>
+        </div>
+        <div className="text-right">
+          <span className="font-rajdhani font-bold text-2xl text-primary">{price || '—'}</span>
+          <span className="text-muted-foreground text-sm"> / {period}</span>
+        </div>
+      </div>
+
+      <p className="text-sm text-muted-foreground leading-relaxed">{t('membership.googlePlay.descripcion')}</p>
+
+      <Button className="w-full h-10" onClick={handleSubscribe} disabled={loading || !available || !price}>
+        {loading ? t('membership.googlePlay.procesando') : t('membership.googlePlay.suscribirme')}
+      </Button>
+
+      {error && <p className="text-xs text-red-400">{error}</p>}
+
+      <StepsBox
+        title={t('membership.comoFunciona')}
+        note={t('membership.googlePlay.nota')}
+        steps={[
+        t('membership.googlePlay.paso1'),
+        t('membership.googlePlay.paso2'),
+        t('membership.googlePlay.paso3')]
+        } />
+    </div>);
+
+}
+
 /**
  * Prueba gratis (si corresponde), selector de período y medios de pago.
  * `onAccessGranted` se llama al activar la prueba; sin él se recarga la página.
@@ -429,6 +514,18 @@ export function MembershipOffer({ membership, onAccessGranted }) {
     else window.location.reload();
   };
 
+  const inAndroidApp = isInAndroidApp();
+
+  // En la app, una suscripción de Play que todavía no se vinculó (reinstalación, otro celular)
+  // da acceso sin volver a comprar.
+  useEffect(() => {
+    if (!inAndroidApp) return;
+    restorePlayPurchases().then((restored) => {
+      if (restored > 0) handleTrialStarted();
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inAndroidApp]);
+
   return (
     <div className="space-y-4 [@media(max-height:700px)]:space-y-2.5">
       {trialExpired &&
@@ -441,10 +538,14 @@ export function MembershipOffer({ membership, onAccessGranted }) {
 
       <PeriodSelector plans={plans} selectedCode={plan.code} onSelect={setSelectedCode} />
 
+      {inAndroidApp ?
+      <GooglePlayCard plan={plan} plans={plans} period={period} onPurchased={handleTrialStarted} /> :
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <MercadoPagoCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} />
-        <PayPalCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalentUsd} />
-      </div>
+          <MercadoPagoCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} />
+          <PayPalCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalentUsd} />
+        </div>
+      }
     </div>);
 
 }

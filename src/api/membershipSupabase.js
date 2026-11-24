@@ -39,7 +39,7 @@ export async function startMembershipTrial() {
 export async function getMembershipPlans() {
   const { data, error } = await supabase
     .from('membership_plans')
-    .select('code, name, amount_ars, amount_usd, interval_months, sort_order')
+    .select('code, name, amount_ars, amount_usd, interval_months, sort_order, google_play_product_id')
     .eq('active', true)
     .order('sort_order');
 

@@ -46,3 +46,6 @@ promotion/
 # Claves de firma de Android (nunca al repo)
 *.keystore
 *.jks
+
+# Lockfile que genera deno test (npm run test:edge)
+deno.lock

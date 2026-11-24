@@ -1406,7 +1406,18 @@
       "3": "3 months",
       "12": "year"
     },
-    "kicker": "Rift Deck Premium"
+    "kicker": "Rift Deck Premium",
+    "podesCancelarlaGooglePlay": " You can cancel anytime in Google Play → Payments & subscriptions → Subscriptions.",
+    "googlePlay": {
+      "descripcion": "You pay with your Google Play account, in your currency. The subscription renews automatically at the end of each period.",
+      "suscribirme": "Subscribe with Google Play",
+      "procesando": "Processing...",
+      "nota": "Secure payment with Google Play",
+      "paso1": "Pick the period and tap Subscribe.",
+      "paso2": "Confirm the payment in the Google Play window.",
+      "paso3": "Premium is activated right away. Cancel anytime from Google Play.",
+      "noDisponible": "Google Play subscriptions are not available on this device. Install Rift Deck from Google Play to subscribe."
+    }
   },
   "notFound": {
     "pageNotFound": "Page Not Found",
@@ -2084,7 +2095,11 @@
     "paypalStartError": "We couldn't start the PayPal payment. Try again in a few minutes.",
     "paypalSyncError": "We couldn't confirm the PayPal subscription.",
     "mpInvalidEmail": "Enter a valid Mercado Pago email.",
-    "mpStartError": "We couldn't start the payment. Try again in a few minutes."
+    "mpStartError": "We couldn't start the payment. Try again in a few minutes.",
+    "playOtherAccount": "This Google Play subscription is already linked to another Rift Deck account.",
+    "playNotConfigured": "Google Play payments are not available yet.",
+    "playVerifyError": "Your payment went through, but we could not activate premium. Open the membership again in a few minutes; if nothing changes, contact us.",
+    "playStartError": "Could not open the Google Play payment. Please try again."
   },
   "insights": {
     "senalInicial": "Early signal"

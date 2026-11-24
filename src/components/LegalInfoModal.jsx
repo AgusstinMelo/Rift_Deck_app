@@ -133,7 +133,7 @@ Puedes usar Rift Deck gratis. Algunas funciones, como las estadísticas avanzada
 
 ## Baja y eliminación de la cuenta
 
-Puedes eliminar tu cuenta cuando quieras desde tu perfil, o pedirlo por correo como se explica en ${SITE_URL}/eliminar-cuenta. Al hacerlo se borran tus datos personales y tu contenido, como se explica en la Política de privacidad. Eliminar la cuenta no cancela una suscripción activa en Mercado Pago, PayPal o Google Play: cancélala antes desde allí.
+Puedes eliminar tu cuenta cuando quieras desde tu perfil, o pedirlo por correo como se explica en ${SITE_URL}/eliminar-cuenta. Al hacerlo se borran tus datos personales y tu contenido, como se explica en la Política de privacidad. Al eliminarla cancelamos la renovación de tus suscripciones en Mercado Pago, PayPal o Google Play; si no pudiéramos hacerlo, te avisaremos para que la canceles tú antes de completar la baja.
 
 Podemos suspender o cerrar una cuenta que incumpla gravemente estos términos, avisándote cuando sea posible.
 
@@ -289,7 +289,7 @@ Escribe a **${OWNER.email}** desde el correo con el que te registraste, con el a
 
 ## Suscripciones activas
 
-Eliminar la cuenta **no cancela** una suscripción en Mercado Pago, PayPal o Google Play. Cancélala antes desde allí para que no se renueve; en Google Play: **Pagos y suscripciones → Suscripciones**.`,
+Al eliminar la cuenta cancelamos la renovación de tus suscripciones en Mercado Pago, PayPal o Google Play, así no se te vuelve a cobrar. Si no pudiéramos cancelarla, la cuenta no se elimina y te avisamos para que la canceles tú desde el medio de pago (en Google Play: **Pagos y suscripciones → Suscripciones**). Los períodos ya pagados no se reembolsan automáticamente: si te corresponde un reembolso, escríbenos.`,
   },
 };
 

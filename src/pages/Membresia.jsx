@@ -19,6 +19,7 @@ const PLAN_NAMES = labels({
 const PROVIDER_NAMES = {
   mercadopago: 'Mercado Pago',
   paypal: 'PayPal',
+  google_play: 'Google Play',
 };
 
 function formatDate(date) {
@@ -59,6 +60,7 @@ function describeMembership(info) {
   const cancelHint = isSubscription ? {
     mercadopago: tr('membership.podesCancelarlaCuandoQuieras'),
     paypal: tr('membership.podesCancelarlaCuandoQuieras2'),
+    google_play: tr('membership.podesCancelarlaGooglePlay'),
   }[row?.provider] || '' : '';
 
   return {
