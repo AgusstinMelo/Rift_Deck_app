@@ -2980,7 +2980,7 @@
       "gamesCountOne": "1 partida",
       "ctaTitle": "¿Juegas a Wild Rift?",
       "ctaText": "Registra tus partidas, sigue tu winrate y crea tus builds con Rift Deck.",
-      "ctaButton": "Crear cuenta gratis",
+      "ctaButton": "Crear cuenta",
       "pool": "Pool de campeones",
       "poolHint": "Toca un campeón para ver sus matchups",
       "focusGames": "{count} partidas · {winrate}% de winrate",
