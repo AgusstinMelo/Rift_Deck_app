@@ -15,6 +15,14 @@ const app = <App />;
 const PUBLIC_PAGE = /^\/(campeones|objetos|runas)(\/|$)/;
 const isPublicPage = window.location.pathname === '/' || PUBLIC_PAGE.test(window.location.pathname);
 
+// Service worker: solo muestra una página "sin conexión" (ver public/sw.js). En desarrollo no,
+// para no interferir con el servidor de Vite.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 if (root.dataset.prerendered === 'true' && isPublicPage) {
   // Antes de hidratar, el código de las páginas públicas tiene que estar cargado. Mientras
   // tanto se ve el HTML prerenderizado.

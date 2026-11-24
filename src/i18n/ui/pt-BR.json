@@ -2995,5 +2995,20 @@
       "makePrivate": "Tornar privada",
       "publicTag": "Pública"
     }
+  },
+  "aiReport": {
+    "reportar": "Denunciar resposta",
+    "titulo": "Denunciar resposta da IA",
+    "descripcion": "Esta resposta foi gerada por uma IA. Se ela for ofensiva, inadequada ou incorreta, conte para a gente: vamos revisá-la para melhorar as sugestões.",
+    "motivo": "Motivo",
+    "motivos": {
+      "ofensivo": "Ofensiva ou inadequada",
+      "incorrecto": "Incorreta ou enganosa",
+      "otro": "Outro"
+    },
+    "comentario": "Conte o que aconteceu (opcional)",
+    "enviar": "Enviar denúncia",
+    "enviado": "Obrigado! Recebemos sua denúncia e vamos revisá-la.",
+    "error": "Não foi possível enviar a denúncia. Tente novamente."
   }
 }

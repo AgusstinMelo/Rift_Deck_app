@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "headers": [
     {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
       "source": "/login",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },

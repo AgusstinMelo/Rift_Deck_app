@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { AlertTriangle, CircleCheck, Loader2, Package, ShieldAlert, Sparkles, Swords, TrendingUp, Users, Zap } from 'lucide-react';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { pieceDraftFacts } from './v2DraftReasons';
+import ReportAiContent from '@/components/ai/ReportAiContent';
 
 function EntityIcon({ selection, label, badge, round = false, featured = false, small = false }) {
   const entity = selection.entity;
@@ -129,6 +130,19 @@ const ANALYSIS_TABS = [
   { id: 'loadout', label: 'buildV2.tabs.loadout' },
 ];
 
+// Lo que generó la IA en esta build, para guardarlo con un reporte.
+const reportableBuild = (result, items, runes) => ({
+  champion: result.champion?.name || result.champion,
+  role: result.role,
+  build_theme: result.build_theme,
+  matchup_read: result.matchup_read,
+  win_condition: result.win_condition,
+  composition_analysis: result.composition_analysis,
+  build_plan: result.build_plan,
+  key_adaptations: result.key_adaptations,
+  picks: [...items, ...runes, ...result.spells].map(pick => ({ name: pick.entity?.name, reason: pick.reason })),
+});
+
 function AnalysisPanel({ result, items, itemLabel, runes, runeLabel }) {
   const t = useT();
   const [tab, setTab] = useState('draft');
@@ -136,8 +150,11 @@ function AnalysisPanel({ result, items, itemLabel, runes, runeLabel }) {
   const enemyTips = result.composition_analysis.enemy_tips || [];
 
   return <section className="rd-card rd-v2-build-analysis flex flex-col p-4">
-    <div role="tablist" className="mb-2.5 flex shrink-0 flex-wrap gap-1 self-start rounded-xl border border-border bg-secondary/40 p-1">
-      {ANALYSIS_TABS.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${tab === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{t(label)}</button>)}
+    <div className="mb-2.5 flex shrink-0 flex-wrap items-center justify-between gap-2">
+      <div role="tablist" className="flex flex-wrap gap-1 rounded-xl border border-border bg-secondary/40 p-1">
+        {ANALYSIS_TABS.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${tab === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{t(label)}</button>)}
+      </div>
+      <ReportAiContent feature="build" content={reportableBuild(result, items, runes)} />
     </div>
     <div role="tabpanel" className="rd-v2-build-analysis-body text-sm leading-relaxed text-muted-foreground">
       {tab === 'draft' && <div className="rd-v2-draft flex min-h-full flex-col gap-3">

@@ -35,6 +35,7 @@ import LaneBadge from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import V2BuildTab from '@/features/buildV2/V2BuildTab';
 import StepNav from '@/components/suggester/StepNav';
+import ReportAiContent from '@/components/ai/ReportAiContent';
 import SuggesterUsageNotice from '@/components/suggester/SuggesterUsageNotice';
 import { useSuggesterUsage } from '@/hooks/useSuggesterUsage';
 import { useCloseOnOutside, useFloatingPanel } from '@/hooks/useFloatingPanel';
@@ -971,8 +972,12 @@ Escribe todos los textos de las recomendaciones en ${responseLanguage()}; los no
                 </div>
               ) : (
                 <>
-                  <div role="tablist" className="mb-2.5 flex shrink-0 flex-wrap gap-1 self-start rounded-xl border border-border bg-secondary/40 p-1">
-                    {resultViews.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={currentView === id} onClick={() => setView(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${currentView === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>)}
+                  <div className="mb-2.5 flex shrink-0 flex-wrap items-center justify-between gap-2">
+                    <div role="tablist" className="flex flex-wrap gap-1 rounded-xl border border-border bg-secondary/40 p-1">
+                      {resultViews.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={currentView === id} onClick={() => setView(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${currentView === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>)}
+                    </div>
+                    {/* Solo las recomendaciones salen de la IA; los gaps sin recomendaciones son locales. */}
+                    {hasRecommendations && <ReportAiContent feature="campeones" content={{ lane, recommendations }} />}
                   </div>
 
                   <div role="tabpanel" className="rd-v2-build-analysis-body text-sm text-muted-foreground">
