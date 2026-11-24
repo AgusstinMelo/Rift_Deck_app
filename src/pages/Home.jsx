@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, BarChart3, BookOpen, ClipboardList, Cpu, Globe2, LayoutDashboard, Layers, Lock, ShieldCheck,
+  ArrowRight, BarChart3, BookOpen, ClipboardList, Cpu, Globe2, LayoutDashboard, Layers, Lock, LogIn, ShieldCheck,
   Sparkles, Swords, Target, TrendingUp, UserRound,
 } from 'lucide-react';
 import HomeNav from '@/components/home/HomeNav';
@@ -355,8 +355,12 @@ export default function Home() {
             </p>
             <div className="mt-[clamp(1.5rem,5svh,2.75rem)] flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-10 land:mt-5 land:flex-row">
               <Link to="/registro" className={PRIMARY_BUTTON}>
-               {t('home.crearMiCuentaGratis')}
+               {t('home.crearMiCuenta')}
                 <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+              <Link to="/login" className={SECONDARY_BUTTON}>
+                <LogIn size={16} className="text-primary" aria-hidden="true" />
+               {t('home.iniciarSesion')}
               </Link>
               <a href="/campeones" className={SECONDARY_BUTTON}>
                 <BookOpen size={16} className="text-primary" aria-hidden="true" />
@@ -494,7 +498,7 @@ export default function Home() {
                 </h2>
                 <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:mt-8 land:mt-4 land:flex-row">
                   <Link to="/registro" className={PRIMARY_BUTTON}>
-                   {t('home.crearMiCuentaGratis')}
+                   {t('home.crearMiCuenta')}
                     <ArrowRight size={16} aria-hidden="true" />
                   </Link>
                   <Link to="/login" className={SECONDARY_BUTTON}>{t('home.yaTengoCuenta')}</Link>
