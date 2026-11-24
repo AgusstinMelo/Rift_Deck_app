@@ -161,15 +161,20 @@ export default function Tierlist() {
     [tierlist, activeSnapshotKey]
   );
 
-  // "Por Tier" en escritorio: las imágenes se agrandan hasta llenar el alto disponible.
+  // "Por Tier": las imágenes se ajustan al alto disponible para ver la línea entera sin
+  // scroll (en escritorio crecen hasta llenarlo; en el celular se achican hasta entrar).
   const scrollRef = useRef(null);
   const tierGroupsRef = useRef(null);
+  const isPhone = isPhonePortrait || isPhoneLandscape;
+  const fitTiers = (isDesktopFit || isPhone) && viewMode === 'tier' && laneFilter !== 'all';
   useTierTileSize({
     scrollRef,
     groupsRef: tierGroupsRef,
     // Con todas las líneas hay demasiados campeones: queda el tamaño fijo y la lista scrollea.
-    enabled: isDesktopFit && viewMode === 'tier' && laneFilter !== 'all',
-    layoutKey: `${isLoading}|${availableTiers.map(tier => filtered.filter(t => t.tier === tier).length).join(',')}`,
+    enabled: fitTiers,
+    minTile: isPhone ? 20 : 40,
+    maxTile: isPhone ? 64 : 120,
+    layoutKey: `${isLoading}|${isPhone}|${tierFilter}|${diffFilter}|${availableTiers.map(tier => filtered.filter(t => t.tier === tier).length).join(',')}`,
   });
 
   const renderVariation = (entry) => {
@@ -424,7 +429,7 @@ export default function Tierlist() {
           />
         </div>
       ) : viewMode === 'tier' ? (
-        <div ref={tierGroupsRef} className="rd-tier-groups space-y-6">
+        <div ref={tierGroupsRef} className={`rd-tier-groups space-y-6 ${fitTiers ? 'rd-tier-groups--fit' : ''}`}>
           {availableTiers.map(tier => {
             const championsInTier = filtered.filter(t => t.tier === tier);
             if (championsInTier.length === 0) return null;

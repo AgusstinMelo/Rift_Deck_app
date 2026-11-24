@@ -117,24 +117,22 @@
     grid-column: 1;
   }
 
-  .rd-tierlist-layout .rd-tierlist-header > .rd-status-pill {
-    grid-row: 1 / 3;
-    grid-column: 2;
+  /* Una sola fila: título a la izquierda y selectores a la derecha. La píldora "Actualizado…"
+     y el texto del parche no entran (el parche ya figura en su filtro). */
+  .rd-tierlist-layout .rd-tierlist-header > .rd-status-pill,
+  .rd-tierlist-layout .rd-tierlist-subline > p {
+    display: none;
   }
 
   .rd-tierlist-layout .rd-tierlist-subline {
-    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-column: 2;
+    align-self: center;
     min-width: 0;
+    margin-top: 0;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 0.75rem;
-  }
-
-  .rd-tierlist-layout .rd-tierlist-subline > p {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   /* Por Tier: cada tier es una fila de tierlist clásica. A la izquierda un riel
@@ -188,6 +186,51 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 0.45rem;
+  }
+
+  /* Línea ajustada al alto: las tiers en dos columnas con un riel mínimo (solo el badge) y
+     las imágenes del tamaño que calcula useTierTileSize (--rd-tile). */
+  .rd-tierlist-layout .rd-tier-groups--fit {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group {
+    grid-template-columns: 2.3rem minmax(0, 1fr);
+    border-radius: 0.7rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-head {
+    gap: 0;
+    padding: 0.25rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-head > :first-child {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.75rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-head .text-xs {
+    display: none;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-grid {
+    grid-template-columns: repeat(auto-fill, var(--rd-tile, 2.5rem));
+    align-content: center;
+    gap: 0.25rem;
+    padding: 0.3rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-tile {
+    width: var(--rd-tile, 2.5rem);
+    height: var(--rd-tile, 2.5rem);
+    border-radius: calc(var(--rd-tile, 2.5rem) * 0.18);
   }
 
   /* Tabla: anchos fijos para que las 9 columnas entren en el ancho de la tarjeta.
@@ -431,17 +474,40 @@
     letter-spacing: -0.01em;
   }
 
+  /* --rd-tile: tamaño que calcula useTierTileSize para que una línea entre sin scroll. */
   .rd-tierlist-layout .rd-tier-group-grid {
-    grid-template-columns: repeat(auto-fill, 2.5rem);
-    align-content: start;
+    grid-template-columns: repeat(auto-fill, var(--rd-tile, 2.5rem));
+    align-content: center;
     gap: 0.3rem;
     padding: 0.4rem;
   }
 
   .rd-tierlist-layout .rd-tier-tile {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.45rem;
+    width: var(--rd-tile, 2.5rem);
+    height: var(--rd-tile, 2.5rem);
+    border-radius: calc(var(--rd-tile, 2.5rem) * 0.18);
+  }
+
+  /* Línea ajustada al alto: riel más bajo (el badge al lado de la cantidad no entra en 3.1rem,
+     así que se achica) para que cada tier ocupe lo justo. */
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-head {
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.3rem 0.2rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-head > * {
+    position: static;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit .rd-tier-group-head > :first-child {
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: 0.85rem;
+  }
+
+  .rd-tierlist-layout .rd-tier-groups--fit > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.35rem;
   }
 
   /* Tabla (tarjetas en móvil): filas bajas. Nombre, tier y línea arriba;
