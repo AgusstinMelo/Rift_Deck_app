@@ -2,9 +2,13 @@ import React from 'react'
 import ReactDOM, { hydrateRoot } from 'react-dom/client'
 import App from '@/App.jsx'
 import { preparePublicRoutes } from '@/components/public/publicRoutesLoader'
+import { detectAndroidApp } from '@/lib/googlePlayBilling'
 import '@fontsource-variable/inter'
 import '@fontsource-variable/unbounded'
 import '@/index.css'
+
+// Antes que nada: la marca de la app de Android (?source=android-app) se lee y se limpia de la URL.
+detectAndroidApp();
 
 const root = document.getElementById('root');
 const app = <App />;

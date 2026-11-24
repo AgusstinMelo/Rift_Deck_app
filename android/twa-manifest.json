@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#09090B",
   "backgroundColor": "#0C0E12",
   "enableNotifications": false,
-  "startUrl": "/",
+  "startUrl": "/?source=android-app",
   "iconUrl": "https://www.riftdeckapp.com/riftdeck-icon.png?v=3",
   "maskableIconUrl": "https://www.riftdeckapp.com/riftdeck-icon-maskable-512.png?v=3",
   "splashScreenFadeOutDuration": 300,
@@ -20,8 +20,8 @@
     "path": "C:/Users/Aguss/Documents/Development/Rift_Deck_app/android-keys/riftdeck-upload.keystore",
     "alias": "upload"
   },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "unknown",
   "webManifestUrl": "https://www.riftdeckapp.com/manifest.json",
@@ -47,5 +47,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1.0.0"
+  "appVersion": "1.0.1"
 }

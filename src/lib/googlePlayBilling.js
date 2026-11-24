@@ -8,23 +8,41 @@ import { formatLocale, tr } from '@/i18n/uiI18n';
 
 export const PLAY_BILLING_METHOD = 'https://play.google.com/billing';
 const ANDROID_APP_REFERRER = 'android-app://com.riftdeckapp.app';
+// La app abre /?source=android-app (launchUrl en android/twa-manifest.json).
+const SOURCE_PARAM = 'source';
+const SOURCE_VALUE = 'android-app';
 const SESSION_KEY = 'rd-android-app';
 
+let inAndroidApp = null;
+
 /**
- * ¿La web corre dentro de la app de Android? La TWA abre la primera página con el referrer
- * android-app://<paquete>; se recuerda en la sesión porque al navegar el referrer cambia.
+ * Detecta si la web se abrió desde la app de Android y lo recuerda en la sesión de la pestaña
+ * (sessionStorage: no se comparte con Chrome, aunque la TWA use su mismo almacenamiento).
+ * Se llama al arrancar (main.jsx), antes de que una recarga o un login pierdan la marca.
  */
-export function isInAndroidApp() {
+export function detectAndroidApp() {
   if (typeof window === 'undefined') return false;
+  const url = new URL(window.location.href);
+  const fromLaunchUrl = url.searchParams.get(SOURCE_PARAM) === SOURCE_VALUE;
+  const fromReferrer = document.referrer.startsWith(ANDROID_APP_REFERRER);
+  let remembered = false;
   try {
-    if (document.referrer.startsWith(ANDROID_APP_REFERRER)) {
-      sessionStorage.setItem(SESSION_KEY, '1');
-      return true;
-    }
-    return sessionStorage.getItem(SESSION_KEY) === '1';
+    if (fromLaunchUrl || fromReferrer) sessionStorage.setItem(SESSION_KEY, '1');
+    remembered = sessionStorage.getItem(SESSION_KEY) === '1';
   } catch {
-    return document.referrer.startsWith(ANDROID_APP_REFERRER);
+    // Sin sessionStorage vale solo lo que se ve en esta carga.
   }
+  if (fromLaunchUrl) {
+    url.searchParams.delete(SOURCE_PARAM);
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+  }
+  inAndroidApp = fromLaunchUrl || fromReferrer || remembered;
+  return inAndroidApp;
+}
+
+/** ¿La web corre dentro de la app de Android? */
+export function isInAndroidApp() {
+  return inAndroidApp ?? detectAndroidApp();
 }
 
 let servicePromise = null;
