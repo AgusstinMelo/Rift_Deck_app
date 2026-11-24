@@ -1416,7 +1416,7 @@
       "paso1": "Pick the period and tap Subscribe.",
       "paso2": "Confirm the payment in the Google Play window.",
       "paso3": "Premium is activated right away. Cancel anytime from Google Play.",
-      "noDisponible": "Google Play subscriptions are not available on this device. Install Rift Deck from Google Play to subscribe."
+      "noDisponible": "Google Play subscriptions are not available right now. Please try again in a while."
     }
   },
   "notFound": {
