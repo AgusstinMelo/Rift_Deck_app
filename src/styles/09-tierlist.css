@@ -4,6 +4,20 @@
   min-height: 0;
 }
 
+/* "Por Tier" con una línea (rd-tier-groups--fit, alto ajustado por useTierTileSize): las tiers
+   ocupan todo el alto y se reparten lo que sobra, así la primera arranca arriba y la última
+   termina abajo en todas las líneas. En el celular horizontal van en grilla (más abajo):
+   ahí las filas se estiran igual. */
+.rd-tierlist-layout .rd-tier-groups--fit {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.rd-tierlist-layout .rd-tier-groups--fit > .rd-tier-group {
+  flex: 1 1 auto;
+}
+
 @media (min-width: 1024px) and (min-height: 501px) {
   .rd-main-content:has(.rd-tierlist-layout) {
     overflow: hidden;
@@ -193,6 +207,7 @@
   .rd-tierlist-layout .rd-tier-groups--fit {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: stretch;
     gap: 0.35rem;
   }
 
