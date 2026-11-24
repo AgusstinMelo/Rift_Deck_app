@@ -65,7 +65,12 @@ export function getPlayBillingService() {
 function formatPrice(price) {
   if (!price?.currency) return null;
   try {
-    return new Intl.NumberFormat(formatLocale(), { style: 'currency', currency: price.currency }).format(Number(price.value));
+    const value = Number(price.value);
+    // Sin ",00" en precios enteros: en el celular el precio va en una sola línea.
+    const digits = Number.isInteger(value) ? 0 : 2;
+    return new Intl.NumberFormat(formatLocale(), {
+      style: 'currency', currency: price.currency, minimumFractionDigits: digits, maximumFractionDigits: digits,
+    }).format(value);
   } catch {
     return `${price.value} ${price.currency}`;
   }

@@ -20,7 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import mercadoPagoLogo from '@/assets/mercado-pago.png';
 import paypalLogo from '@/assets/paypal.png';
-import { useT } from '@/lib/LocaleContext';
+import { useLocale, useT } from '@/lib/LocaleContext';
+import { PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 import { formatLocale, labels } from '@/i18n/uiI18n';
 
 const FEATURES = [
@@ -154,13 +155,23 @@ function StepsBox({ title, note, variant, steps }) {
 
 }
 
-function PeriodSelector({ plans, selectedCode, onSelect }) {
+// Celular (vertical u horizontal): versión compacta que entra en la pantalla sin scroll.
+function usePhoneLayout() {
+  const portrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
+  const landscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
+  return { compact: portrait || landscape, landscape };
+}
+
+function PeriodSelector({ plans, selectedCode, onSelect, compact = false }) {
   const t = useT();
   const monthly = plans.find((plan) => plan.interval_months === 1);
 
   return (
     <div className="flex justify-center">
-      <div className="inline-flex rounded-xl border border-border bg-secondary/30 p-1 gap-1" role="radiogroup" aria-label={t('membership.periodoDeLaMembresia')}>
+      <div
+        className={`rounded-xl border border-border bg-secondary/30 p-1 gap-1 ${compact ? 'flex w-full' : 'inline-flex'}`}
+        role="radiogroup"
+        aria-label={t('membership.periodoDeLaMembresia')}>
         {plans.map((plan) => {
           const selected = plan.code === selectedCode;
           const savings = savingsPct(plan, monthly);
@@ -172,7 +183,8 @@ function PeriodSelector({ plans, selectedCode, onSelect }) {
               role="radio"
               aria-checked={selected}
               onClick={() => onSelect(plan.code)}
-              className={`rounded-lg px-3 sm:px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`rounded-lg font-semibold transition-colors ${
+              compact ? 'flex-1 px-1.5 py-1.5 text-xs' : 'px-3 sm:px-4 py-2 text-sm'} ${
               selected ?
               'bg-primary text-primary-foreground shadow-sm' :
               'text-muted-foreground hover:text-foreground'}`
@@ -180,7 +192,7 @@ function PeriodSelector({ plans, selectedCode, onSelect }) {
 
               {PLAN_NAMES[plan.code] || plan.name}
               {savings > 0 &&
-              <span className={`ml-1.5 text-[10px] font-bold ${selected ? 'opacity-90' : 'text-primary'}`}>
+              <span className={`ml-1 text-[10px] font-bold ${selected ? 'opacity-90' : 'text-primary'}`}>
                   −{savings}%
                 </span>
               }
@@ -192,7 +204,7 @@ function PeriodSelector({ plans, selectedCode, onSelect }) {
 
 }
 
-function TrialCard({ onStarted, className = '' }) {
+function TrialCard({ onStarted, compact = false, className = '' }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -210,6 +222,31 @@ function TrialCard({ onStarted, className = '' }) {
     }
   };
 
+  const button =
+  <Button className={compact ? 'h-9 w-full' : 'h-10 sm:w-auto w-full'} onClick={handleStart} disabled={loading}>
+      {loading ? t('membership.activando') : t('membership.empezarPruebaGratis')}
+    </Button>;
+
+  if (compact) {
+    return (
+      <div className={`rd-card px-3 py-2.5 border-primary/40 bg-primary/5 space-y-2 ${className}`}>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+            <Gift size={16} className="text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-rajdhani font-bold text-sm text-foreground uppercase tracking-tight leading-tight">
+              {t('membership.probaPremium')} {TRIAL_DAYS} {t('membership.diasGratis')}
+            </h3>
+            <p className="text-[11px] text-muted-foreground leading-snug">{t('membership.sinTarjetaNiMedio')}</p>
+          </div>
+        </div>
+        {error && <p className="text-xs text-red-400">{error}</p>}
+        {button}
+      </div>);
+
+  }
+
   return (
     <div className={`rd-card px-4 py-3 border-primary/40 bg-primary/5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 ${className}`}>
       <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
@@ -226,14 +263,26 @@ function TrialCard({ onStarted, className = '' }) {
         {error && <p className="text-sm text-red-400">{error}</p>}
       </div>
 
-      <Button className="h-10 sm:w-auto w-full" onClick={handleStart} disabled={loading}>
-        {loading ? t('membership.activando') : t('membership.empezarPruebaGratis')}
-      </Button>
+      {button}
     </div>);
 
 }
 
-function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
+// Fila compacta de logo y precio (celular).
+function CompactPriceRow({ logo, price, period, monthlyEquivalent, priceClass }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      {logo}
+      <div className="text-right leading-tight whitespace-nowrap">
+        <span className={`font-rajdhani font-bold text-xl ${priceClass}`}>{price}</span>
+        <span className="text-muted-foreground text-xs"> / {period}</span>
+        {monthlyEquivalent && <p className="text-[10px] text-muted-foreground">{monthlyEquivalent}</p>}
+      </div>
+    </div>);
+
+}
+
+function MercadoPagoCard({ plan, period, monthlyEquivalent, compact = false }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -264,6 +313,47 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
     }
   };
 
+  const price = t('membership.ar', { formatAmount: formatAmount(plan.amount_ars) });
+  const monthlyText = monthlyEquivalent && t('membership.arPorMes', { formatAmount: formatAmount(monthlyEquivalent) });
+
+  if (compact) {
+    return (
+      <div className="rd-card p-3 space-y-2 border-primary/20">
+        <CompactPriceRow
+          logo={
+          <div className="bg-[#ffe900] rounded-lg px-2.5 py-1 inline-flex items-center">
+              <img src={mercadoPagoLogo} alt={t('membership.mercadoPago')} className="h-5 w-auto object-contain" />
+            </div>
+          }
+          price={price}
+          period={period}
+          monthlyEquivalent={monthlyText}
+          priceClass="text-primary" />
+
+        <div className="space-y-1">
+          <label htmlFor="mp-email-compact" className="block text-[11px] text-muted-foreground" title={t('membership.puedeSerDistintoAl')}>
+            {t('membership.tuEmailDeMercado')}
+          </label>
+          <div className="flex gap-2">
+            <Input
+              id="mp-email-compact"
+              type="email"
+              placeholder={t('membership.ejemploGmailCom')}
+              value={mpEmail}
+              onChange={(e) => setMpEmail(e.target.value)}
+              disabled={loading}
+              className="h-9 flex-1 min-w-0 text-sm" />
+            <Button className="h-9 shrink-0 px-3" onClick={handleActivate} disabled={loading || !mpEmail}>
+              {loading ? t('membership.redirigiendo') : t('membership.activarMembresia')}
+            </Button>
+          </div>
+        </div>
+
+        {error && <p className="text-xs text-red-400">{error}</p>}
+      </div>);
+
+  }
+
   return (
     <div className={`${PAYMENT_CARD} border-primary/20`}>
       <LogoPriceRow
@@ -276,16 +366,15 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
 
           </div>
         }
-        price={t('membership.ar', { formatAmount: formatAmount(plan.amount_ars) })}
+        price={price}
         period={period}
-        monthlyEquivalent={monthlyEquivalent && t('membership.arPorMes', { formatAmount: formatAmount(monthlyEquivalent) })}
+        monthlyEquivalent={monthlyText}
         priceClass="text-primary"
         region={t('membership.argentina')} />
 
       <TitleBlock
         title={t('membership.pagarConMercadoPago')}
-        description={t('membership.recomendadoParaUsuariosDe')}
- />
+        description={t('membership.recomendadoParaUsuariosDe')} />
 
       <div className="flex flex-col gap-1.5">
         <label className="rd-label">{t('membership.tuEmailDeMercado')}</label>
@@ -328,7 +417,7 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent }) {
 
 }
 
-function PayPalCard({ plan, period, monthlyEquivalent }) {
+function PayPalCard({ plan, period, monthlyEquivalent, compact = false }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -352,6 +441,39 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
     }
   };
 
+  const price = `U$D ${formatAmount(plan.amount_usd)}`;
+  const monthlyText = monthlyEquivalent && t('membership.uDPorMes', { formatAmount: formatAmount(monthlyEquivalent) });
+  const button =
+  <Button
+    className={`w-full ${compact ? 'h-9' : 'h-10'} bg-[#003087] hover:bg-[#002070] text-white border-0`}
+    onClick={handleSubscribe}
+    disabled={loading}>
+
+      {loading ? t('membership.redirigiendo') : t('membership.suscribirmeConPaypal')}
+    </Button>;
+
+  if (compact) {
+    return (
+      <div className="rd-card p-3 space-y-2 border-border">
+        <CompactPriceRow
+          logo={
+          <div className="bg-white rounded-lg px-2.5 py-1 inline-flex items-center">
+              <img src={paypalLogo} alt={t('membership.paypal')} className="h-5 w-auto object-contain" />
+            </div>
+          }
+          price={price}
+          period={period}
+          monthlyEquivalent={monthlyText}
+          priceClass="text-accent" />
+        {button}
+        {error ?
+        <p className="text-xs text-red-400">{error}</p> :
+        <p className="text-[11px] text-muted-foreground leading-snug">{t('membership.noNecesitasCompletarDatos')}</p>
+        }
+      </div>);
+
+  }
+
   return (
     <div className={`${PAYMENT_CARD} border-border`}>
       <LogoPriceRow
@@ -364,17 +486,16 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
 
           </div>
         }
-        price={`U$D ${formatAmount(plan.amount_usd)}`}
+        price={price}
         period={period}
-        monthlyEquivalent={monthlyEquivalent && t('membership.uDPorMes', { formatAmount: formatAmount(monthlyEquivalent) })}
+        monthlyEquivalent={monthlyText}
         priceClass="text-accent"
         region={t('membership.internacional')}
         variant="accent" />
 
       <TitleBlock
         title={t('membership.pagarConPaypal')}
-        description={t('membership.opcionParaUsuariosInternacionales')}
- />
+        description={t('membership.opcionParaUsuariosInternacionales')} />
 
       <div className="flex flex-col gap-1.5">
         <label className="rd-label">{t('membership.suscripcionConPaypal')}</label>
@@ -383,15 +504,7 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
          {t('membership.noNecesitasCompletarDatos')}
         </p>
 
-        <div className="mt-auto pt-1">
-          <Button
-            className="w-full h-10 bg-[#003087] hover:bg-[#002070] text-white border-0"
-            onClick={handleSubscribe}
-            disabled={loading}>
-
-            {loading ? t('membership.redirigiendo') : t('membership.suscribirmeConPaypal')}
-          </Button>
-        </div>
+        <div className="mt-auto pt-1">{button}</div>
 
         {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
@@ -410,8 +523,44 @@ function PayPalCard({ plan, period, monthlyEquivalent }) {
 
 }
 
+// Celular, en la web: un medio de pago a la vez, con pestañas (los dos juntos no entran).
+function CompactWebPayment({ plan, period, monthlyEquivalent, monthlyEquivalentUsd }) {
+  const t = useT();
+  const { locale } = useLocale();
+  const [method, setMethod] = useState(locale === 'es-419' ? 'mercadopago' : 'paypal');
+  const methods = [
+  { id: 'mercadopago', label: t('membership.mercadoPago') },
+  { id: 'paypal', label: t('membership.paypal') }];
+
+
+  return (
+    <div className="space-y-2">
+      <div className="flex rounded-xl border border-border bg-secondary/30 p-1 gap-1" role="tablist">
+        {methods.map(({ id, label }) =>
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={method === id}
+          onClick={() => setMethod(id)}
+          className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+          method === id ? 'bg-secondary text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`
+          }>
+            {label}
+          </button>
+        )}
+      </div>
+
+      {method === 'mercadopago' ?
+      <MercadoPagoCard compact plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} /> :
+      <PayPalCard compact plan={plan} period={period} monthlyEquivalent={monthlyEquivalentUsd} />
+      }
+    </div>);
+
+}
+
 // App de Android: Google Play es el único medio de pago (política de pagos de Google Play).
-function GooglePlayCard({ plan, plans, period, onPurchased }) {
+function GooglePlayCard({ plan, plans, period, onPurchased, compact = false }) {
   const t = useT();
   const [available, setAvailable] = useState(null);
   const [prices, setPrices] = useState({});
@@ -428,7 +577,7 @@ function GooglePlayCard({ plan, plans, period, onPurchased }) {
       const loaded = await getPlayPrices(productIds.split(',')).catch(() => ({}));
       if (!cancelled) setPrices(loaded);
     });
-    return () => { cancelled = true; };
+    return () => {cancelled = true;};
   }, [productIds]);
 
   const productId = plan.google_play_product_id;
@@ -446,33 +595,53 @@ function GooglePlayCard({ plan, plans, period, onPurchased }) {
     }
   };
 
-  if (available === false || (available && !productId)) {
+  if (available === false || available && !productId) {
     return (
-      <div className="rd-card p-5 text-center text-sm text-muted-foreground max-w-md mx-auto">
+      <div className={`rd-card text-center text-muted-foreground max-w-md mx-auto ${compact ? 'p-3 text-xs' : 'p-5 text-sm'}`}>
         {t('membership.googlePlay.noDisponible')}
       </div>);
+
+  }
+
+  const header =
+  <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <div className={`${compact ? 'w-7 h-7 rounded-lg' : 'w-9 h-9 rounded-xl'} bg-primary/10 flex items-center justify-center`}>
+          <Smartphone size={compact ? 15 : 18} className="text-primary" />
+        </div>
+        <h3 className={`font-rajdhani font-bold ${compact ? 'text-base' : 'text-lg'} text-foreground uppercase tracking-tight whitespace-nowrap`}>Google Play</h3>
+      </div>
+      <div className="text-right whitespace-nowrap">
+        <span className={`font-rajdhani font-bold ${compact ? 'text-lg' : 'text-2xl'} text-primary`}>{price || '—'}</span>
+        <span className={`text-muted-foreground ${compact ? 'text-xs' : 'text-sm'}`}> / {period}</span>
+      </div>
+    </div>;
+
+  const button =
+  <Button className={`w-full ${compact ? 'h-9' : 'h-10'}`} onClick={handleSubscribe} disabled={loading || !available || !price}>
+      {loading ? t('membership.googlePlay.procesando') : t('membership.googlePlay.suscribirme')}
+    </Button>;
+
+  if (compact) {
+    return (
+      <div className="rd-card p-3 space-y-2 border-primary/20 w-full">
+        {header}
+        {button}
+        {error ?
+        <p className="text-xs text-red-400">{error}</p> :
+        <p className="text-[11px] text-muted-foreground leading-snug">{t('membership.googlePlay.descripcion')}</p>
+        }
+      </div>);
+
   }
 
   return (
     <div className="rd-card p-5 space-y-3 border-primary/20 max-w-md mx-auto w-full">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Smartphone size={18} className="text-primary" />
-          </div>
-          <h3 className="font-rajdhani font-bold text-lg text-foreground uppercase tracking-tight">Google Play</h3>
-        </div>
-        <div className="text-right">
-          <span className="font-rajdhani font-bold text-2xl text-primary">{price || '—'}</span>
-          <span className="text-muted-foreground text-sm"> / {period}</span>
-        </div>
-      </div>
+      {header}
 
       <p className="text-sm text-muted-foreground leading-relaxed">{t('membership.googlePlay.descripcion')}</p>
 
-      <Button className="w-full h-10" onClick={handleSubscribe} disabled={loading || !available || !price}>
-        {loading ? t('membership.googlePlay.procesando') : t('membership.googlePlay.suscribirme')}
-      </Button>
+      {button}
 
       {error && <p className="text-xs text-red-400">{error}</p>}
 
@@ -491,27 +660,30 @@ function GooglePlayCard({ plan, plans, period, onPurchased }) {
 /**
  * Prueba gratis (si corresponde), selector de período y medios de pago.
  * `onAccessGranted` se llama al activar la prueba; sin él se recarga la página.
+ * `intro` (opcional): encabezado de la pantalla; en el celular horizontal va en la columna
+ * izquierda, junto a la prueba gratis, para que todo entre sin scroll.
  */
-export function MembershipOffer({ membership, onAccessGranted }) {
+export function MembershipOffer({ membership, onAccessGranted, intro = null }) {
   const t = useT();
+  const { compact, landscape } = usePhoneLayout();
   const [plans, setPlans] = useState(FALLBACK_PLANS);
   const [selectedCode, setSelectedCode] = useState('premium');
 
   useEffect(() => {
-    getMembershipPlans()
-      .then((rows) => rows.length > 0 && setPlans(rows))
-      .catch(() => {});
+    getMembershipPlans().
+    then((rows) => rows.length > 0 && setPlans(rows)).
+    catch(() => {});
   }, []);
 
   const plan = plans.find((p) => p.code === selectedCode) || plans[0];
   const period = PERIOD_LABELS[plan.interval_months] || t('membership.meses', { interval_months: plan.interval_months });
   const monthlyEquivalent = plan.interval_months > 1 ? Math.round(plan.amount_ars / plan.interval_months) : null;
-  const monthlyEquivalentUsd = plan.interval_months > 1 ? Math.round((plan.amount_usd / plan.interval_months) * 100) / 100 : null;
+  const monthlyEquivalentUsd = plan.interval_months > 1 ? Math.round(plan.amount_usd / plan.interval_months * 100) / 100 : null;
   const trialExpired = membership?.trialEndsAt && membership.trialEndsAt <= new Date() && !membership.hasAccess;
 
   const handleTrialStarted = () => {
-    if (onAccessGranted) onAccessGranted();
-    else window.location.reload();
+    if (onAccessGranted) onAccessGranted();else
+    window.location.reload();
   };
 
   const inAndroidApp = isInAndroidApp();
@@ -526,82 +698,146 @@ export function MembershipOffer({ membership, onAccessGranted }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inAndroidApp]);
 
+  const expiredNotice = trialExpired &&
+  <div className={`rd-card text-center text-muted-foreground ${compact ? 'p-2 text-xs' : 'p-3 text-sm'}`}>
+       {t('membership.tuPruebaGratisTermino')}
+      </div>;
+
+  const trial = membership?.trialAvailable && <TrialCard compact={compact} onStarted={handleTrialStarted} />;
+  const periodSelector = <PeriodSelector compact={compact} plans={plans} selectedCode={plan.code} onSelect={setSelectedCode} />;
+
+  let payment;
+  if (inAndroidApp) {
+    payment = <GooglePlayCard compact={compact} plan={plan} plans={plans} period={period} onPurchased={handleTrialStarted} />;
+  } else if (compact) {
+    payment = <CompactWebPayment plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} monthlyEquivalentUsd={monthlyEquivalentUsd} />;
+  } else {
+    payment =
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <MercadoPagoCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} />
+        <PayPalCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalentUsd} />
+      </div>;
+  }
+
+  if (landscape) {
+    return (
+      <div className="grid grid-cols-2 gap-3 items-start">
+        <div className="space-y-2">
+          {intro}
+          {expiredNotice}
+          {trial}
+        </div>
+        <div className="space-y-2">
+          {periodSelector}
+          {payment}
+        </div>
+      </div>);
+
+  }
+
   return (
-    <div className="space-y-4 [@media(max-height:700px)]:space-y-2.5">
-      {trialExpired &&
-      <div className="rd-card p-3 text-center text-sm text-muted-foreground">
-         {t('membership.tuPruebaGratisTermino')}
+    <div className={compact ? 'space-y-2.5' : 'space-y-4 [@media(max-height:700px)]:space-y-2.5'}>
+      {intro}
+      {expiredNotice}
+      {trial}
+      {periodSelector}
+      {payment}
+    </div>);
+
+}
+
+function GateIntro({ compact, landscape }) {
+  const t = useT();
+
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Lock size={17} className="text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="rd-section-kicker text-[10px]">{t('membership.premium')}</p>
+            <h2 className="font-rajdhani font-bold text-lg text-foreground tracking-tight uppercase leading-tight">
+              {t('membership.accesoPremiumAStats')}
+            </h2>
+          </div>
         </div>
-      }
+        {/* En horizontal, o en un celular muy bajo, no hay alto para la lista de beneficios. */}
+        {!landscape &&
+        <ul className="space-y-0.5 [@media(max-height:640px)]:hidden">
+            {FEATURES.map((feature) =>
+          <li key={feature} className="flex items-center gap-1.5 text-[11px] leading-tight text-muted-foreground">
+                <Sparkles size={10} className="text-primary shrink-0" />
+                {t(feature)}
+              </li>
+          )}
+          </ul>
+        }
+      </div>);
 
-      {membership?.trialAvailable && <TrialCard onStarted={handleTrialStarted} />}
+  }
 
-      <PeriodSelector plans={plans} selectedCode={plan.code} onSelect={setSelectedCode} />
-
-      {inAndroidApp ?
-      <GooglePlayCard plan={plan} plans={plans} period={period} onPurchased={handleTrialStarted} /> :
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <MercadoPagoCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalent} />
-          <PayPalCard plan={plan} period={period} monthlyEquivalent={monthlyEquivalentUsd} />
+  return (
+    <div className="text-center space-y-2 [@media(max-height:700px)]:space-y-1.5">
+      <div className="flex items-center justify-center gap-3">
+        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <Lock size={22} className="text-primary" />
         </div>
-      }
+
+        <div className="text-left">
+          <p className="rd-section-kicker">{t('membership.premium')}</p>
+
+          <h2 className="font-rajdhani font-bold text-2xl md:text-3xl text-foreground tracking-tight uppercase leading-tight">
+           {t('membership.accesoPremiumAStats')}
+          </h2>
+        </div>
+      </div>
+
+      <p className="text-muted-foreground text-sm max-w-2xl mx-auto leading-relaxed [@media(max-height:680px)]:hidden">
+       {t('membership.paraAccederALas')}
+      </p>
+
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+        {FEATURES.map((feature) =>
+        <span
+          key={feature}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground">
+
+            <Sparkles size={11} className="text-primary shrink-0" />
+            {t(feature)}
+          </span>
+        )}
+      </div>
     </div>);
 
 }
 
 export default function MembershipGate({ onAccessGranted }) {
-  const t = useT();
   const { user } = useAuth();
+  const { compact, landscape } = usePhoneLayout();
   const [membership, setMembership] = useState(null);
   const hasAccess = user?.role === 'admin' || membership?.hasAccess === true;
 
   useEffect(() => {
     if (user?.role === 'admin') return;
 
-    getMyMembership(user?.id)
-      .then(setMembership)
-      .catch(() => setMembership(null));
+    getMyMembership(user?.id).
+    then(setMembership).
+    catch(() => setMembership(null));
   }, [user?.id, user?.role]);
 
   if (hasAccess) return null;
 
   return (
-    <div className="min-h-full flex items-center justify-center py-4 px-4 [@media(max-height:700px)]:py-3">
-      <div className="w-full max-w-6xl space-y-3">
-        <div className="text-center space-y-2 [@media(max-height:700px)]:space-y-1.5">
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Lock size={22} className="text-primary" />
-            </div>
-
-            <div className="text-left">
-              <p className="rd-section-kicker">{t('membership.premium')}</p>
-
-              <h2 className="font-rajdhani font-bold text-2xl md:text-3xl text-foreground tracking-tight uppercase leading-tight">
-               {t('membership.accesoPremiumAStats')}
-              </h2>
-            </div>
-          </div>
-
-          <p className="text-muted-foreground text-sm max-w-2xl mx-auto leading-relaxed [@media(max-height:680px)]:hidden">
-           {t('membership.paraAccederALas')}
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            {FEATURES.map((feature) =>
-            <span
-              key={feature}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground">
-
-                <Sparkles size={11} className="text-primary shrink-0" />
-                {t(feature)}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <MembershipOffer membership={membership} onAccessGranted={onAccessGranted} />
+    <div className={compact ?
+    'min-h-full flex items-center justify-center px-3 py-2.5' :
+    'min-h-full flex items-center justify-center py-4 px-4 [@media(max-height:700px)]:py-3'}>
+      <div className="w-full max-w-6xl">
+        <MembershipOffer
+          membership={membership}
+          onAccessGranted={onAccessGranted}
+          intro={<GateIntro compact={compact} landscape={landscape} />} />
       </div>
     </div>);
 
