@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Unbounded'; src: url('../../node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2') format('woff2'); font-weight: 200 900; }
+  @font-face { font-family: 'Inter'; src: url('../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; }
+  :root {
+    --bg: hsl(224 41% 7%);
+    --card: hsl(222 36% 11%);
+    --gold: hsl(43 65% 58%);
+    --cyan: hsl(195 90% 48%);
+    --green: #4ade80;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1024px; height: 500px; overflow: hidden; }
+  body {
+    position: relative;
+    background:
+      radial-gradient(circle at 18% 30%, hsl(43 65% 58% / .16), transparent 42%),
+      radial-gradient(circle at 88% 78%, hsl(195 90% 48% / .14), transparent 45%),
+      var(--bg);
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+  }
+  .dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(hsl(43 65% 58% / .14) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 45%, #000 100%);
+  }
+  .left { position: absolute; left: 64px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; }
+  .logo { width: 330px; margin-bottom: 34px; }
+  h1 {
+    font-family: 'Unbounded', sans-serif; font-weight: 800; font-size: 38px; line-height: 1.12;
+    text-transform: uppercase; letter-spacing: -0.02em;
+  }
+  h1 span { color: var(--gold); display: block; }
+  p.sub { margin-top: 18px; font-size: 17px; line-height: 1.5; color: var(--muted); max-width: 410px; }
+
+  .right { position: absolute; right: 48px; top: 50%; transform: translateY(-50%); width: 400px; height: 380px; }
+  .card {
+    position: absolute; border-radius: 18px; padding: 16px 18px;
+    background: linear-gradient(160deg, hsl(222 36% 14%), hsl(222 36% 9%));
+    border: 1px solid hsl(43 65% 58% / .28);
+    box-shadow: 0 18px 40px rgb(0 0 0 / .45), inset 0 1px 0 rgb(255 255 255 / .04);
+  }
+  .label { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+  .big { font-family: 'Unbounded', sans-serif; font-weight: 800; font-size: 40px; margin-top: 8px; letter-spacing: -0.03em; }
+  .wr { left: 0; top: 10px; width: 180px; transform: rotate(-3deg); }
+  .wr .big { color: var(--green); }
+  .wr small { display: block; margin-top: 4px; font-size: 12px; color: var(--green); }
+  .wr small b { color: #f87171; font-weight: 500; }
+  .kda { right: 0; top: 0; width: 196px; transform: rotate(2.5deg); }
+  .kda .big { color: var(--gold); }
+  .bars { display: flex; gap: 6px; align-items: flex-end; height: 42px; margin-top: 10px; }
+  .bars i { flex: 1; border-radius: 4px; background: linear-gradient(180deg, var(--cyan), hsl(195 90% 48% / .25)); }
+  .coach { left: 18px; right: 6px; top: 178px; transform: rotate(-1deg); display: flex; gap: 14px; align-items: center; padding: 18px 20px; border-color: hsl(43 65% 58% / .45); }
+  .coach .icon { width: 46px; height: 46px; flex: none; border-radius: 50%; display: grid; place-items: center; background: hsl(43 65% 58% / .16); color: var(--gold); font-size: 22px; }
+  .coach .k { color: var(--gold); }
+  .coach .t { font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.25; margin-top: 5px; }
+  .chip { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 600; color: var(--green); border: 1px solid rgb(74 222 128 / .4); background: rgb(74 222 128 / .1); border-radius: 999px; padding: 3px 9px; }
+</style>
+</head>
+<body>
+  <div class="dots"></div>
+
+  <div class="left">
+    <img class="logo" src="../../src/assets/riftdeck-logo-horizontal.png" alt="">
+    <h1>Analizá tus partidas.<span>Subí de rango.</span></h1>
+    <p class="sub">Estadísticas, coach personalizado y builds según el draft, a partir de tus propias partidas.</p>
+  </div>
+
+  <div class="right">
+    <div class="card wr">
+      <div class="label">Winrate</div>
+      <div class="big">57%</div>
+      <small>122V / <b>93D</b></small>
+    </div>
+    <div class="card kda">
+      <div class="label">Forma reciente</div>
+      <div class="bars"><i style="height:45%"></i><i style="height:62%"></i><i style="height:52%"></i><i style="height:80%"></i><i style="height:70%"></i><i style="height:100%"></i></div>
+    </div>
+    <div class="card coach">
+      <div class="icon">✦</div>
+      <div>
+        <div class="label k">Insight del Coach</div>
+        <div class="t">Priorizá a tu mejor pick: 67% en tus últimas 12</div>
+        <span class="chip">Confianza alta</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
