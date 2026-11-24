@@ -15,11 +15,12 @@ import {
   purchasePlaySubscription,
   restorePlayPurchases,
 } from '@/lib/googlePlayBilling';
-import { Gift, Lock, Sparkles, Smartphone } from 'lucide-react';
+import { Gift, Lock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import mercadoPagoLogo from '@/assets/mercado-pago.png';
 import paypalLogo from '@/assets/paypal.png';
+import googlePlayLogo from '@/assets/google-play.png';
 import { useLocale, useT } from '@/lib/LocaleContext';
 import { PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, useMatchMedia } from '@/hooks/useMatchMedia';
 import { formatLocale, labels } from '@/i18n/uiI18n';
@@ -155,7 +156,34 @@ function StepsBox({ title, note, variant, steps }) {
 
 }
 
-// Celular (vertical u horizontal): versión compacta que entra en la pantalla sin scroll.
+// Celular (vertical u horizontal): versión compacta que entra en la pantalla sin scroll y crece
+// con el alto disponible. Las clases van escritas enteras para que Tailwind las genere:
+// 640px = un poco más de aire; 700px = todo más grande; 840px (o 380px en horizontal) = además,
+// los pasos del pago.
+const ROOMY = {
+  card: 'p-3 space-y-2 [@media(min-height:700px)]:p-4 [@media(min-height:700px)]:space-y-3',
+  button: 'h-9 [@media(min-height:640px)]:h-10',
+  logo: 'h-5 [@media(min-height:700px)]:h-6',
+  price: 'text-xl [@media(min-height:700px)]:text-2xl',
+  note: 'text-[11px] [@media(min-height:700px)]:text-xs',
+};
+
+// Pasos del pago en el celular: solo si sobra alto.
+function CompactSteps({ steps }) {
+  return (
+    <ol className="hidden [@media(min-height:840px)]:block [@media(orientation:landscape)_and_(min-height:380px)]:block space-y-1 rounded-lg border border-border/60 bg-secondary/30 px-3 py-2">
+      {steps.map((step, index) =>
+      <li key={index} className="flex items-start gap-2 text-[11px] leading-snug text-muted-foreground">
+          <span className="shrink-0 w-4 h-4 rounded-full bg-primary/15 text-primary text-[9px] font-bold flex items-center justify-center mt-px">
+            {index + 1}
+          </span>
+          {step}
+        </li>
+      )}
+    </ol>);
+
+}
+
 function usePhoneLayout() {
   const portrait = useMatchMedia(PHONE_PORTRAIT_QUERY);
   const landscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
@@ -184,7 +212,7 @@ function PeriodSelector({ plans, selectedCode, onSelect, compact = false }) {
               aria-checked={selected}
               onClick={() => onSelect(plan.code)}
               className={`rounded-lg font-semibold transition-colors ${
-              compact ? 'flex-1 px-1.5 py-1.5 text-xs' : 'px-3 sm:px-4 py-2 text-sm'} ${
+              compact ? 'flex-1 px-1.5 py-1.5 text-xs [@media(min-height:700px)]:py-2 [@media(min-height:700px)]:text-sm' : 'px-3 sm:px-4 py-2 text-sm'} ${
               selected ?
               'bg-primary text-primary-foreground shadow-sm' :
               'text-muted-foreground hover:text-foreground'}`
@@ -223,22 +251,22 @@ function TrialCard({ onStarted, compact = false, className = '' }) {
   };
 
   const button =
-  <Button className={compact ? 'h-9 w-full' : 'h-10 sm:w-auto w-full'} onClick={handleStart} disabled={loading}>
+  <Button className={compact ? `${ROOMY.button} w-full` : 'h-10 sm:w-auto w-full'} onClick={handleStart} disabled={loading}>
       {loading ? t('membership.activando') : t('membership.empezarPruebaGratis')}
     </Button>;
 
   if (compact) {
     return (
-      <div className={`rd-card px-3 py-2.5 border-primary/40 bg-primary/5 space-y-2 ${className}`}>
+      <div className={`rd-card px-3 py-2.5 border-primary/40 bg-primary/5 space-y-2 [@media(min-height:700px)]:p-4 [@media(min-height:700px)]:space-y-3 ${className}`}>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 [@media(min-height:700px)]:w-10 [@media(min-height:700px)]:h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
             <Gift size={16} className="text-primary" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-rajdhani font-bold text-sm text-foreground uppercase tracking-tight leading-tight">
+            <h3 className="font-rajdhani font-bold text-sm [@media(min-height:700px)]:text-base text-foreground uppercase tracking-tight leading-tight">
               {t('membership.probaPremium')} {TRIAL_DAYS} {t('membership.diasGratis')}
             </h3>
-            <p className="text-[11px] text-muted-foreground leading-snug">{t('membership.sinTarjetaNiMedio')}</p>
+            <p className={`${ROOMY.note} text-muted-foreground leading-snug`}>{t('membership.sinTarjetaNiMedio')}</p>
           </div>
         </div>
         {error && <p className="text-xs text-red-400">{error}</p>}
@@ -274,7 +302,7 @@ function CompactPriceRow({ logo, price, period, monthlyEquivalent, priceClass })
     <div className="flex items-center justify-between gap-2">
       {logo}
       <div className="text-right leading-tight whitespace-nowrap">
-        <span className={`font-rajdhani font-bold text-xl ${priceClass}`}>{price}</span>
+        <span className={`font-rajdhani font-bold ${ROOMY.price} ${priceClass}`}>{price}</span>
         <span className="text-muted-foreground text-xs"> / {period}</span>
         {monthlyEquivalent && <p className="text-[10px] text-muted-foreground">{monthlyEquivalent}</p>}
       </div>
@@ -318,11 +346,11 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent, compact = false }) {
 
   if (compact) {
     return (
-      <div className="rd-card p-3 space-y-2 border-primary/20">
+      <div className={`rd-card ${ROOMY.card} border-primary/20`}>
         <CompactPriceRow
           logo={
           <div className="bg-[#ffe900] rounded-lg px-2.5 py-1 inline-flex items-center">
-              <img src={mercadoPagoLogo} alt={t('membership.mercadoPago')} className="h-5 w-auto object-contain" />
+              <img src={mercadoPagoLogo} alt={t('membership.mercadoPago')} className={`${ROOMY.logo} w-auto object-contain`} />
             </div>
           }
           price={price}
@@ -331,7 +359,7 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent, compact = false }) {
           priceClass="text-primary" />
 
         <div className="space-y-1">
-          <label htmlFor="mp-email-compact" className="block text-[11px] text-muted-foreground" title={t('membership.puedeSerDistintoAl')}>
+          <label htmlFor="mp-email-compact" className={`block ${ROOMY.note} text-muted-foreground`} title={t('membership.puedeSerDistintoAl')}>
             {t('membership.tuEmailDeMercado')}
           </label>
           <div className="flex gap-2">
@@ -342,14 +370,20 @@ function MercadoPagoCard({ plan, period, monthlyEquivalent, compact = false }) {
               value={mpEmail}
               onChange={(e) => setMpEmail(e.target.value)}
               disabled={loading}
-              className="h-9 flex-1 min-w-0 text-sm" />
-            <Button className="h-9 shrink-0 px-3" onClick={handleActivate} disabled={loading || !mpEmail}>
+              className={`${ROOMY.button} flex-1 min-w-0 text-sm`} />
+            <Button className={`${ROOMY.button} shrink-0 px-3`} onClick={handleActivate} disabled={loading || !mpEmail}>
               {loading ? t('membership.redirigiendo') : t('membership.activarMembresia')}
             </Button>
           </div>
         </div>
 
         {error && <p className="text-xs text-red-400">{error}</p>}
+
+        <CompactSteps steps={[
+        t('membership.ingresaTuEmailDe'),
+        t('membership.tocaActivarMembresiaPara'),
+        `${t('membership.laMembresiaSeActiva')} ${period}.`]
+        } />
       </div>);
 
   }
@@ -445,7 +479,7 @@ function PayPalCard({ plan, period, monthlyEquivalent, compact = false }) {
   const monthlyText = monthlyEquivalent && t('membership.uDPorMes', { formatAmount: formatAmount(monthlyEquivalent) });
   const button =
   <Button
-    className={`w-full ${compact ? 'h-9' : 'h-10'} bg-[#003087] hover:bg-[#002070] text-white border-0`}
+    className={`w-full ${compact ? ROOMY.button : 'h-10'} bg-[#003087] hover:bg-[#002070] text-white border-0`}
     onClick={handleSubscribe}
     disabled={loading}>
 
@@ -454,11 +488,11 @@ function PayPalCard({ plan, period, monthlyEquivalent, compact = false }) {
 
   if (compact) {
     return (
-      <div className="rd-card p-3 space-y-2 border-border">
+      <div className={`rd-card ${ROOMY.card} border-border`}>
         <CompactPriceRow
           logo={
           <div className="bg-white rounded-lg px-2.5 py-1 inline-flex items-center">
-              <img src={paypalLogo} alt={t('membership.paypal')} className="h-5 w-auto object-contain" />
+              <img src={paypalLogo} alt={t('membership.paypal')} className={`${ROOMY.logo} w-auto object-contain`} />
             </div>
           }
           price={price}
@@ -468,8 +502,13 @@ function PayPalCard({ plan, period, monthlyEquivalent, compact = false }) {
         {button}
         {error ?
         <p className="text-xs text-red-400">{error}</p> :
-        <p className="text-[11px] text-muted-foreground leading-snug">{t('membership.noNecesitasCompletarDatos')}</p>
+        <p className={`${ROOMY.note} text-muted-foreground leading-snug`}>{t('membership.noNecesitasCompletarDatos')}</p>
         }
+        <CompactSteps steps={[
+        t('membership.tocaSuscribirmeConPaypal'),
+        t('membership.iniciaSesionEnPaypal'),
+        `${t('membership.laMembresiaSeActiva')} ${period}.`]
+        } />
       </div>);
 
   }
@@ -543,7 +582,7 @@ function CompactWebPayment({ plan, period, monthlyEquivalent, monthlyEquivalentU
           role="tab"
           aria-selected={method === id}
           onClick={() => setMethod(id)}
-          className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+          className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors [@media(min-height:700px)]:py-2 [@media(min-height:700px)]:text-sm ${
           method === id ? 'bg-secondary text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`
           }>
             {label}
@@ -605,32 +644,34 @@ function GooglePlayCard({ plan, plans, period, onPurchased, compact = false }) {
 
   const header =
   <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <div className={`${compact ? 'w-7 h-7 rounded-lg' : 'w-9 h-9 rounded-xl'} bg-primary/10 flex items-center justify-center`}>
-          <Smartphone size={compact ? 15 : 18} className="text-primary" />
-        </div>
-        <h3 className={`font-rajdhani font-bold ${compact ? 'text-base' : 'text-lg'} text-foreground uppercase tracking-tight whitespace-nowrap`}>Google Play</h3>
+      <div className={`bg-white inline-flex items-center shrink-0 ${compact ? 'rounded-lg px-2.5 py-1' : 'rounded-xl px-4 py-2 shadow-sm'}`}>
+        <img src={googlePlayLogo} alt="Google Play" className={`${compact ? ROOMY.logo : 'h-7'} w-auto object-contain`} />
       </div>
       <div className="text-right whitespace-nowrap">
-        <span className={`font-rajdhani font-bold ${compact ? 'text-lg' : 'text-2xl'} text-primary`}>{price || '—'}</span>
+        <span className={`font-rajdhani font-bold ${compact ? ROOMY.price : 'text-2xl'} text-primary`}>{price || '—'}</span>
         <span className={`text-muted-foreground ${compact ? 'text-xs' : 'text-sm'}`}> / {period}</span>
       </div>
     </div>;
 
   const button =
-  <Button className={`w-full ${compact ? 'h-9' : 'h-10'}`} onClick={handleSubscribe} disabled={loading || !available || !price}>
+  <Button className={`w-full ${compact ? ROOMY.button : 'h-10'}`} onClick={handleSubscribe} disabled={loading || !available || !price}>
       {loading ? t('membership.googlePlay.procesando') : t('membership.googlePlay.suscribirme')}
     </Button>;
 
   if (compact) {
     return (
-      <div className="rd-card p-3 space-y-2 border-primary/20 w-full">
+      <div className={`rd-card ${ROOMY.card} border-primary/20 w-full`}>
         {header}
         {button}
         {error ?
         <p className="text-xs text-red-400">{error}</p> :
-        <p className="text-[11px] text-muted-foreground leading-snug">{t('membership.googlePlay.descripcion')}</p>
+        <p className={`${ROOMY.note} text-muted-foreground leading-snug`}>{t('membership.googlePlay.descripcion')}</p>
         }
+        <CompactSteps steps={[
+        t('membership.googlePlay.paso1'),
+        t('membership.googlePlay.paso2'),
+        t('membership.googlePlay.paso3')]
+        } />
       </div>);
 
   }
@@ -721,13 +762,13 @@ export function MembershipOffer({ membership, onAccessGranted, intro = null }) {
 
   if (landscape) {
     return (
-      <div className="grid grid-cols-2 gap-3 items-start">
-        <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-3 items-center">
+        <div className="space-y-2 [@media(min-height:370px)]:space-y-3">
           {intro}
           {expiredNotice}
           {trial}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 [@media(min-height:370px)]:space-y-3">
           {periodSelector}
           {payment}
         </div>
@@ -736,7 +777,7 @@ export function MembershipOffer({ membership, onAccessGranted, intro = null }) {
   }
 
   return (
-    <div className={compact ? 'space-y-2.5' : 'space-y-4 [@media(max-height:700px)]:space-y-2.5'}>
+    <div className={compact ? 'space-y-2.5 [@media(min-height:640px)]:space-y-3.5' : 'space-y-4 [@media(max-height:700px)]:space-y-2.5'}>
       {intro}
       {expiredNotice}
       {trial}
@@ -751,29 +792,34 @@ function GateIntro({ compact, landscape }) {
 
   if (compact) {
     return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <Lock size={17} className="text-primary" />
+      <div className="space-y-2 [@media(min-height:700px)]:space-y-3">
+        <div className="flex items-center gap-2.5 [@media(min-height:700px)]:gap-3">
+          <div className="w-9 h-9 [@media(min-height:700px)]:w-11 [@media(min-height:700px)]:h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Lock size={18} className="text-primary" />
           </div>
           <div className="min-w-0">
             <p className="rd-section-kicker text-[10px]">{t('membership.premium')}</p>
-            <h2 className="font-rajdhani font-bold text-lg text-foreground tracking-tight uppercase leading-tight">
+            <h2 className="font-rajdhani font-bold text-lg [@media(min-height:640px)]:text-xl [@media(min-height:700px)]:text-2xl text-foreground tracking-tight uppercase leading-tight">
               {t('membership.accesoPremiumAStats')}
             </h2>
           </div>
         </div>
-        {/* En horizontal, o en un celular muy bajo, no hay alto para la lista de beneficios. */}
         {!landscape &&
-        <ul className="space-y-0.5 [@media(max-height:640px)]:hidden">
-            {FEATURES.map((feature) =>
-          <li key={feature} className="flex items-center gap-1.5 text-[11px] leading-tight text-muted-foreground">
-                <Sparkles size={10} className="text-primary shrink-0" />
-                {t(feature)}
-              </li>
-          )}
-          </ul>
+        <p className="hidden [@media(min-height:700px)]:block text-xs text-muted-foreground leading-relaxed">
+            {t('membership.paraAccederALas')}
+          </p>
         }
+        {/* Beneficios: no entran en un celular muy bajo; en horizontal, solo si hay alto (la app). */}
+        <ul className={landscape ?
+        'hidden [@media(min-height:330px)]:block space-y-0.5' :
+        'space-y-0.5 [@media(min-height:700px)]:space-y-1 [@media(max-height:599px)]:hidden'}>
+          {FEATURES.map((feature) =>
+          <li key={feature} className="flex items-center gap-1.5 text-[11px] [@media(min-height:700px)]:text-xs leading-tight text-muted-foreground">
+              <Sparkles size={10} className="text-primary shrink-0" />
+              {t(feature)}
+            </li>
+          )}
+        </ul>
       </div>);
 
   }
@@ -831,7 +877,7 @@ export default function MembershipGate({ onAccessGranted }) {
 
   return (
     <div className={compact ?
-    'min-h-full flex items-center justify-center px-3 py-2.5' :
+    'min-h-full flex items-center justify-center px-3 py-2.5 [@media(min-height:640px)]:px-4 [@media(min-height:700px)]:py-3' :
     'min-h-full flex items-center justify-center py-4 px-4 [@media(max-height:700px)]:py-3'}>
       <div className="w-full max-w-6xl">
         <MembershipOffer
