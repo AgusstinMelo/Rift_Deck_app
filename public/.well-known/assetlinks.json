@@ -5,6 +5,7 @@
       "namespace": "android_app",
       "package_name": "com.riftdeckapp.app",
       "sha256_cert_fingerprints": [
+        "7A:DD:3A:25:1E:EE:4F:46:86:66:AE:86:B6:E4:B2:F6:0E:D5:65:FA:84:EB:85:FB:96:16:89:13:4C:42:B0:8B",
         "44:9F:B8:25:26:30:BA:BD:B5:07:7F:D9:FD:46:BD:76:D2:F7:C6:A2:98:85:9D:63:DE:A4:72:E0:60:63:5A:12",
         "64:26:4E:20:98:72:28:4B:4C:07:3D:05:64:75:E2:6A:49:87:73:A1:B7:A1:60:68:54:48:B4:AB:7F:85:27:AC"
       ]
