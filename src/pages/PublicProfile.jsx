@@ -19,6 +19,7 @@ import {
 import { DEFAULT_MATCH_TYPE, MATCH_TYPES } from '@/constants/matchTypes';
 import { formatLocale } from '@/i18n/uiI18n';
 import { useAuth } from '@/lib/AuthContext';
+import ReportContent from '@/components/report/ReportContent';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import PublicHeader from '@/components/public/PublicHeader';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -216,7 +217,9 @@ function FocusTile({ icon: Icon, label, entry, tone, imageOf, labelOf, emptyText
 export default function PublicProfile() {
   const t = useT();
   const { slug = '' } = useParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  // Reportar el perfil (contenido de usuarios): con sesión iniciada y si no es el propio.
+  const canReport = isAuthenticated && String(user?.public_slug || '').toLowerCase() !== slug.toLowerCase();
   const { entityName } = useCatalogText();
 
   const { data: profile, isLoading, isError } = useQuery({
@@ -315,6 +318,9 @@ export default function PublicProfile() {
             <div className="min-w-0">
               <div className="rd-pp-kicker"><span />{t('publicProfile.page.kicker')}</div>
               <h1 className="rd-pp-name">{profile.name}</h1>
+              {canReport && (
+                <ReportContent type="profile" className="mt-1" content={{ slug, name: profile.name }} />
+              )}
             </div>
           </div>
 

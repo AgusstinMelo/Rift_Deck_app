@@ -5,18 +5,50 @@ import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/LocaleContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-// Reporte de una respuesta generada con IA (lo pide la política de contenido generado por IA
-// de Google Play). Se guarda en bug_reports con la respuesta completa para poder revisarla.
-const REASONS = ['ofensivo', 'incorrecto', 'otro'];
+// Reportar contenido desde la app: respuestas de la IA (política de contenido generado por IA
+// de Google Play) y contenido de otros usuarios, como builds y perfiles públicos (política de
+// contenido generado por usuarios). Se guarda en bug_reports con lo reportado, para revisarlo.
+//
+// Los valores que se guardan (página, descripción) van en español, como el resto de bug_reports.
+const TYPES = {
+  ai: {
+    page: 'Sugeridor',
+    label: 'aiReport.reportar',
+    title: 'aiReport.titulo',
+    description: 'aiReport.descripcion',
+    reasons: ['ofensivo', 'incorrecto', 'otro'],
+    reasonKey: reason => `aiReport.motivos.${reason}`,
+    prefix: feature => `[Reporte de IA · ${feature}]`,
+  },
+  build: {
+    page: 'Builds',
+    label: 'contentReport.reportar',
+    title: 'contentReport.tituloBuild',
+    description: 'contentReport.descripcion',
+    reasons: ['ofensivo', 'spam', 'otro'],
+    reasonKey: reason => `contentReport.motivos.${reason}`,
+    prefix: () => '[Reporte de build pública]',
+  },
+  profile: {
+    page: 'Otro',
+    label: 'contentReport.reportar',
+    title: 'contentReport.tituloPerfil',
+    description: 'contentReport.descripcion',
+    reasons: ['ofensivo', 'spam', 'otro'],
+    reasonKey: reason => `contentReport.motivos.${reason}`,
+    prefix: () => '[Reporte de perfil público]',
+  },
+};
 
-// Tope de la respuesta que se guarda con el reporte (alcanza para cualquier sugerencia).
+// Tope de lo reportado que se guarda con el reporte (alcanza para cualquier sugerencia).
 const MAX_CONTENT_CHARS = 20000;
 
-export default function ReportAiContent({ feature, content, className = '' }) {
+export default function ReportContent({ type = 'ai', feature = '', content, className = '' }) {
   const t = useT();
   const { user } = useAuth();
+  const config = TYPES[type];
   const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState('ofensivo');
+  const [reason, setReason] = useState(config.reasons[0]);
   const [comment, setComment] = useState('');
   const [status, setStatus] = useState('idle');
 
@@ -25,7 +57,7 @@ export default function ReportAiContent({ feature, content, className = '' }) {
     if (!next && status !== 'sending') {
       setStatus('idle');
       setComment('');
-      setReason('ofensivo');
+      setReason(config.reasons[0]);
     }
   };
 
@@ -34,9 +66,8 @@ export default function ReportAiContent({ feature, content, className = '' }) {
     setStatus('sending');
     try {
       await createBugReport(user, {
-        // Valores guardados en español, como el resto de bug_reports.
-        page: 'Sugeridor',
-        description: `[Reporte de IA · ${feature}] ${reason}${comment.trim() ? `: ${comment.trim()}` : ''}`,
+        page: config.page,
+        description: `${config.prefix(feature)} ${reason}${comment.trim() ? `: ${comment.trim()}` : ''}`,
         severity: reason === 'ofensivo' ? 'alta' : 'media',
         additional_notes: JSON.stringify(content ?? null).slice(0, MAX_CONTENT_CHARS),
         browser: navigator.userAgent,
@@ -52,18 +83,21 @@ export default function ReportAiContent({ feature, content, className = '' }) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={event => {
+          event.stopPropagation();
+          setOpen(true);
+        }}
         className={`inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-red-400 ${className}`}
       >
         <Flag size={12} />
-        {t('aiReport.reportar')}
+        {t(config.label)}
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md rounded-2xl p-5">
           <DialogHeader className="text-left">
-            <DialogTitle className="font-rajdhani text-xl uppercase">{t('aiReport.titulo')}</DialogTitle>
-            <DialogDescription>{t('aiReport.descripcion')}</DialogDescription>
+            <DialogTitle className="font-rajdhani text-xl uppercase">{t(config.title)}</DialogTitle>
+            <DialogDescription>{t(config.description)}</DialogDescription>
           </DialogHeader>
 
           {status === 'sent' ? (
@@ -74,17 +108,17 @@ export default function ReportAiContent({ feature, content, className = '' }) {
             <form onSubmit={handleSubmit} className="space-y-4">
               <fieldset className="space-y-2">
                 <legend className="mb-1.5 text-xs text-muted-foreground">{t('aiReport.motivo')}</legend>
-                {REASONS.map(value => (
+                {config.reasons.map(value => (
                   <label key={value} className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
                     <input
                       type="radio"
-                      name="ai-report-reason"
+                      name={`report-reason-${type}`}
                       value={value}
                       checked={reason === value}
                       onChange={() => setReason(value)}
                       className="accent-[hsl(var(--primary))]"
                     />
-                    {t(`aiReport.motivos.${value}`)}
+                    {t(config.reasonKey(value))}
                   </label>
                 ))}
               </fieldset>

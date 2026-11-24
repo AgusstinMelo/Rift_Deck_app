@@ -3025,5 +3025,16 @@
     "enviar": "Send report",
     "enviado": "Thanks! We got your report and will review it.",
     "error": "We could not send the report. Please try again."
+  },
+  "contentReport": {
+    "reportar": "Report",
+    "tituloBuild": "Report build",
+    "tituloPerfil": "Report profile",
+    "descripcion": "If you see offensive content, spam or anything inappropriate, let us know: we review it and remove it if it breaks the terms.",
+    "motivos": {
+      "ofensivo": "Offensive or inappropriate",
+      "spam": "Spam or advertising",
+      "otro": "Other"
+    }
   }
 }

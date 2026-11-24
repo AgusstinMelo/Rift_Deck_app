@@ -3025,5 +3025,16 @@
     "enviar": "Enviar reporte",
     "enviado": "¡Gracias! Recibimos tu reporte y lo vamos a revisar.",
     "error": "No pudimos enviar el reporte. Probá de nuevo."
+  },
+  "contentReport": {
+    "reportar": "Reportar",
+    "tituloBuild": "Reportar build",
+    "tituloPerfil": "Reportar perfil",
+    "descripcion": "Si ves contenido ofensivo, spam o algo que no corresponde, avisanos: lo revisamos y, si incumple los términos, lo sacamos.",
+    "motivos": {
+      "ofensivo": "Ofensivo o inapropiado",
+      "spam": "Spam o publicidad",
+      "otro": "Otro"
+    }
   }
 }

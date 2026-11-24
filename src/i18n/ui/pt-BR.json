@@ -3025,5 +3025,16 @@
     "enviar": "Enviar denúncia",
     "enviado": "Obrigado! Recebemos sua denúncia e vamos revisá-la.",
     "error": "Não foi possível enviar a denúncia. Tente novamente."
+  },
+  "contentReport": {
+    "reportar": "Denunciar",
+    "tituloBuild": "Denunciar build",
+    "tituloPerfil": "Denunciar perfil",
+    "descripcion": "Se você vir conteúdo ofensivo, spam ou algo inadequado, avise a gente: vamos revisar e, se violar os termos, removê-lo.",
+    "motivos": {
+      "ofensivo": "Ofensivo ou inadequado",
+      "spam": "Spam ou publicidade",
+      "otro": "Outro"
+    }
   }
 }

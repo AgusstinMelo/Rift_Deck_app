@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { AlertTriangle, CircleCheck, Loader2, Package, ShieldAlert, Sparkles, Swords, TrendingUp, Users, Zap } from 'lucide-react';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { pieceDraftFacts } from './v2DraftReasons';
-import ReportAiContent from '@/components/ai/ReportAiContent';
+import ReportContent from '@/components/report/ReportContent';
 
 function EntityIcon({ selection, label, badge, round = false, featured = false, small = false }) {
   const entity = selection.entity;
@@ -154,7 +154,7 @@ function AnalysisPanel({ result, items, itemLabel, runes, runeLabel }) {
       <div role="tablist" className="flex flex-wrap gap-1 rounded-xl border border-border bg-secondary/40 p-1">
         {ANALYSIS_TABS.map(({ id, label }) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${tab === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>{t(label)}</button>)}
       </div>
-      <ReportAiContent feature="build" content={reportableBuild(result, items, runes)} />
+      <ReportContent type="ai" feature="build" content={reportableBuild(result, items, runes)} />
     </div>
     <div role="tabpanel" className="rd-v2-build-analysis-body text-sm leading-relaxed text-muted-foreground">
       {tab === 'draft' && <div className="rd-v2-draft flex min-h-full flex-col gap-3">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
+import ReportContent from '@/components/report/ReportContent';
 import { getComparableBuilds } from '@/api/buildsSupabase';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import LaneBadge from '@/components/ui/LaneBadge';
@@ -180,7 +181,7 @@ function BuildSelector({ slot, allBuilds, allChampions, selected, onSelect }) {
 }
 
 // ── Champion Header Card ──────────────────────────────────────────────────────
-function ChampionHeader({ build, champion, side, itemCount }) {
+function ChampionHeader({ build, champion, side, itemCount, currentUserId }) {
   const t = useT();
   if (!build || !champion) {
     return (
@@ -210,6 +211,13 @@ function ChampionHeader({ build, champion, side, itemCount }) {
           <div className={`flex items-center gap-3 mt-2 text-xs text-muted-foreground ${isRight ? 'justify-end' : ''}`}>
             <span>🗡️ {itemCount} {t('builds.items2')}</span>
             {build.patch && <span>{t('goals.filterLabels.patches')} {build.patch}</span>}
+            {/* Build pública de otro usuario: se puede reportar (contenido de usuarios). */}
+            {build.is_public && currentUserId && build.user_id !== currentUserId && (
+              <ReportContent
+                type="build"
+                content={{ build_id: build.id, owner_id: build.user_id, champion: build.champion_name, name: build.name, notes: build.notes }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -271,13 +279,13 @@ export default function BuildCompare({ onBack, champions, items, patchVersion })
 
       {/* Champion Headers */}
       <div className="rd-buildcmp-heads flex items-stretch gap-4 mb-6">
-        <ChampionHeader build={buildA} champion={champA} side="left" itemCount={itemsA.length} />
+        <ChampionHeader build={buildA} champion={champA} side="left" itemCount={itemsA.length} currentUserId={user?.id} />
         <div className="flex items-center justify-center shrink-0">
           <div className="bg-card border border-border rounded-full w-12 h-12 flex items-center justify-center">
             <span className="font-rajdhani font-bold text-lg text-primary">{t('builds.vs')}</span>
           </div>
         </div>
-        <ChampionHeader build={buildB} champion={champB} side="right" itemCount={itemsB.length} />
+        <ChampionHeader build={buildB} champion={champB} side="right" itemCount={itemsB.length} currentUserId={user?.id} />
       </div>
 
 
