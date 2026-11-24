@@ -1,0 +1,11 @@
+# Compilación local (Gradle / Bubblewrap)
+.gradle/
+build/
+app/build/
+local.properties
+*.apk
+*.aab
+*.idsig
+# Nunca subir claves de firma
+*.keystore
+*.jks

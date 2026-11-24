@@ -1,0 +1,51 @@
+{
+  "packageId": "com.riftdeckapp.app",
+  "host": "www.riftdeckapp.com",
+  "name": "Rift Deck",
+  "launcherName": "Rift Deck",
+  "display": "standalone",
+  "themeColor": "#09090B",
+  "themeColorDark": "#000000",
+  "navigationColor": "#09090B",
+  "navigationColorDark": "#09090B",
+  "navigationDividerColor": "#09090B",
+  "navigationDividerColorDark": "#09090B",
+  "backgroundColor": "#0C0E12",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://www.riftdeckapp.com/riftdeck-icon.png?v=3",
+  "maskableIconUrl": "https://www.riftdeckapp.com/riftdeck-icon-maskable-512.png?v=3",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:/Users/Aguss/Documents/Development/Rift_Deck_app/android-keys/riftdeck-upload.keystore",
+    "alias": "upload"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "unknown",
+  "webManifestUrl": "https://www.riftdeckapp.com/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://www.riftdeckapp.com/",
+  "minSdkVersion": 24,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.0.0"
+}

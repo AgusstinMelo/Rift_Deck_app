@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.riftdeckapp.app",
+      "sha256_cert_fingerprints": [
+        "64:26:4E:20:98:72:28:4B:4C:07:3D:05:64:75:E2:6A:49:87:73:A1:B7:A1:60:68:54:48:B4:AB:7F:85:27:AC"
+      ]
+    }
+  }
+]

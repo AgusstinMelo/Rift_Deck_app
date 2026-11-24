@@ -42,3 +42,7 @@ test/fixtures/captures/
 
 # Material de promoción (local)
 promotion/
+
+# Claves de firma de Android (nunca al repo)
+*.keystore
+*.jks
