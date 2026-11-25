@@ -3051,18 +3051,18 @@
     "stepsTitle": "Cómo sumarte",
     "steps": {
       "group": {
-        "title": "Unite al grupo de testers",
+        "title": "Unite a Rift Deck Testers",
         "text": "Entrá con la cuenta de Google que usás en Play Store y tocá «Unirse al grupo».",
         "cta": "Unirme al grupo"
       },
       "optIn": {
-        "title": "Aceptá ser tester",
+        "title": "Aceptá ser tester en Google",
         "text": "Abrí la invitación y tocá «Convertirse en verificador».",
         "cta": "Abrir la invitación"
       },
       "install": {
-        "title": "Instalá Rift Deck",
-        "text": "Descargala desde Play Store, creá tu cuenta y dejala instalada los 14 días.",
+        "title": "Instalá Rift Deck desde la Play Store",
+        "text": "Creá tu cuenta y dejala instalada los 14 días.",
         "cta": "Ver en Play Store"
       }
     },

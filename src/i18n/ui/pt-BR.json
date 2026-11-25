@@ -3051,18 +3051,18 @@
     "stepsTitle": "Como participar",
     "steps": {
       "group": {
-        "title": "Entre no grupo de testers",
+        "title": "Entre no Rift Deck Testers",
         "text": "Entre com a conta Google que você usa na Play Store e toque em \"Participar do grupo\".",
         "cta": "Entrar no grupo"
       },
       "optIn": {
-        "title": "Aceite ser tester",
+        "title": "Aceite ser tester no Google",
         "text": "Abra o convite e toque em \"Torne-se um testador\".",
         "cta": "Abrir o convite"
       },
       "install": {
-        "title": "Instale o Rift Deck",
-        "text": "Baixe na Play Store, crie sua conta e mantenha o app instalado durante os 14 dias.",
+        "title": "Instale o Rift Deck pela Play Store",
+        "text": "Crie sua conta e mantenha o app instalado durante os 14 dias.",
         "cta": "Ver na Play Store"
       }
     },

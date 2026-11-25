@@ -5,18 +5,19 @@ import { useT } from '@/lib/LocaleContext';
 
 const CONTACT_EMAIL = 'riftdeckapp@gmail.com';
 
-export default function HomeFooter() {
+// compact: una franja baja, sin el logo en el celular (para páginas que entran en la pantalla, como /testers).
+export default function HomeFooter({ compact = false }) {
   const t = useT();
   const [legalModal, setLegalModal] = useState(null);
 
   return (
     <footer className="border-t border-primary/10 bg-card/40">
-      <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-10 land:py-3">
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between land:flex-row land:items-center land:justify-between">
-          <img src={logoHorizontalUrl} alt="Rift Deck" width="174" height="22" loading="lazy" className="h-[22px] w-auto self-start object-contain" />
+      <div className={`mx-auto w-full max-w-6xl px-4 md:px-6 ${compact ? 'py-2.5' : 'py-6 md:py-10 land:py-3'}`}>
+        <div className={`flex flex-col md:flex-row md:items-center md:justify-between land:flex-row land:items-center land:justify-between ${compact ? 'gap-2' : 'gap-5'}`}>
+          <img src={logoHorizontalUrl} alt="Rift Deck" width="174" height="22" loading="lazy" className={`h-[22px] w-auto self-start object-contain ${compact ? 'hidden md:block' : ''}`} />
 
           <nav aria-label={t('home.enlacesDelPieDe')}>
-            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <ul className={`flex flex-wrap items-center ${compact ? 'gap-x-4 gap-y-1 text-xs md:gap-x-6 md:text-sm' : 'gap-x-6 gap-y-2 text-sm'}`}>
               {LEGAL_DOCUMENTS.map(({ type, label }) => (
                 <li key={type}>
                   <button type="button" onClick={() => setLegalModal(type)} className="text-muted-foreground transition-colors hover:text-primary">
@@ -37,7 +38,9 @@ export default function HomeFooter() {
           </nav>
         </div>
 
-        <p className="mt-6 max-w-4xl text-xs leading-relaxed text-muted-foreground/80 md:mt-8 land:mt-2 land:text-[10px] short:mt-4 short:text-[11px]">
+        <p className={`text-muted-foreground/80 ${compact
+          ? 'mt-1.5 text-[10px] leading-snug'
+          : 'mt-6 max-w-4xl text-xs leading-relaxed md:mt-8 land:mt-2 land:text-[10px] short:mt-4 short:text-[11px]'}`}>
          {t('home.riftDeckNoEsta')}
         </p>
       </div>

@@ -30,6 +30,8 @@ const INFO_TABS = ['steps', 'try', 'faq'];
 const TAB_TITLES = { steps: 'testers.stepsTitle', try: 'testers.tryTitle', faq: 'testers.faqShort' };
 
 const SECTION_TITLE = 'font-rajdhani text-lg font-bold uppercase lg:text-xl';
+// Escritorio bajo (por ejemplo 1366×768, clases [@media(min-width:1024px)_and_(max-height:860px)]):
+// se saca la intro y el premio va en versión corta, así la página y el pie entran sin scroll.
 
 export default function PublicTesters() {
   const t = useT();
@@ -43,17 +45,17 @@ export default function PublicTesters() {
       <Seo {...TESTERS_SEO} indexable />
       <PublicHeader />
 
-      <main {...swipe} className="mx-auto grid w-full max-w-6xl flex-1 content-start gap-5 px-4 py-5 lg:min-h-[calc(100dvh-3rem)] lg:grid-cols-[1.15fr_1fr] lg:content-center lg:gap-10 lg:px-6 lg:py-6">
+      <main {...swipe} className="mx-auto grid w-full max-w-6xl flex-1 content-start gap-4 px-4 py-4 lg:grid-cols-[1.15fr_1fr] lg:content-center lg:gap-10 lg:px-6 lg:py-6">
         <div className="flex flex-col gap-4">
           <header>
-            <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary lg:text-[11px]">
+            <p className="flex items-center gap-2 text-[10px] font-semibold uppercase short:hidden tracking-[0.22em] text-primary lg:text-[11px]">
               <span className="h-px w-8 bg-primary/60" aria-hidden="true" />
               {t('testers.kicker')}
             </p>
             <h1 className="mt-2 font-rajdhani text-[25px] font-bold uppercase leading-none min-[380px]:text-[28px] tracking-[-0.04em] lg:text-[44px]">
               {t('testers.title')}
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground min-[380px]:text-sm lg:mt-3 lg:text-base">{t('testers.intro')}</p>
+            <p className={`mt-2 text-[13px] leading-relaxed text-muted-foreground short:hidden min-[380px]:text-sm lg:mt-3 lg:text-base [@media(min-width:1024px)_and_(max-height:860px)]:hidden`}>{t('testers.intro')}</p>
           </header>
 
           <section className="rd-card flex gap-3 border-primary/40 p-3 lg:gap-4 lg:p-4" aria-labelledby="testers-reward">
@@ -62,8 +64,8 @@ export default function PublicTesters() {
             </span>
             <div>
               <h2 id="testers-reward" className="font-rajdhani text-base font-bold text-primary lg:text-lg">{t('testers.reward.title')}</h2>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground lg:hidden">{t('testers.reward.short')}</p>
-              <p className="mt-0.5 hidden text-sm leading-relaxed text-muted-foreground lg:block">{t('testers.reward.text')}</p>
+              <p className={`mt-0.5 text-xs leading-relaxed text-muted-foreground lg:hidden [@media(min-width:1024px)_and_(max-height:860px)]:block`}>{t('testers.reward.short')}</p>
+              <p className={`mt-0.5 hidden text-sm leading-relaxed text-muted-foreground lg:block [@media(min-width:1024px)_and_(max-height:860px)]:hidden`}>{t('testers.reward.text')}</p>
             </div>
           </section>
 
@@ -91,7 +93,7 @@ export default function PublicTesters() {
                     href={step.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rd-card group flex items-center gap-3 p-3 transition-colors hover:border-primary/50"
+                    className="rd-card group flex items-center gap-3 px-3 py-2.5 transition-colors lg:p-3 hover:border-primary/50"
                   >
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary font-rajdhani text-base font-bold text-primary-foreground" aria-hidden="true">
                       {index + 1}
@@ -146,14 +148,15 @@ export default function PublicTesters() {
             </div>
           </section>
 
-          <p className="text-xs text-muted-foreground">
+          {/* En el celular no: el pie ya tiene "Contacto" y así la página entra sin scroll. */}
+          <p className="hidden text-xs text-muted-foreground lg:block">
             {t('testers.thanks')}{' '}
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">{CONTACT_EMAIL}</a>
           </p>
         </div>
       </main>
 
-      <HomeFooter />
+      <HomeFooter compact />
     </div>
   );
 }

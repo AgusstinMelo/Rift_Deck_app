@@ -3051,18 +3051,18 @@
     "stepsTitle": "How to join",
     "steps": {
       "group": {
-        "title": "Join the testers group",
+        "title": "Join Rift Deck Testers",
         "text": "Sign in with the Google account you use on the Play Store and tap \"Join group\".",
         "cta": "Join the group"
       },
       "optIn": {
-        "title": "Accept the invitation",
+        "title": "Accept being a tester on Google",
         "text": "Open the invitation and tap \"Become a tester\".",
         "cta": "Open the invitation"
       },
       "install": {
-        "title": "Install Rift Deck",
-        "text": "Download it from the Play Store, create your account and keep it installed for the 14 days.",
+        "title": "Install Rift Deck from the Play Store",
+        "text": "Create your account and keep it installed for the 14 days.",
         "cta": "View on Play Store"
       }
     },
