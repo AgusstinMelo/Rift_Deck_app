@@ -103,6 +103,9 @@ export function detectThreatGaps(ctx) {
     // (las partidas contra la amenaza son más difíciles de por sí).
     const calm = summarize(ctx.matches.filter(match => match.compKnown && !match.threats[threat.id]));
     const reference = calm.games >= 8 ? calm : ctx.base;
+    // Los números tienen que respaldar el consejo: si las veces que sí armaste la respuesta te
+    // fue igual o peor que sin ella, tus partidas no dicen que la build sea lo que falla.
+    if (answered.games >= 2 && answered.wr <= unanswered.wr) return;
     const unansweredShrunk = shrunkRate(unanswered.wins, unanswered.games, reference.wr);
     const answeredShrunk = answered.games >= 2 ? shrunkRate(answered.wins, answered.games, reference.wr) : null;
     const belowBase = reference.wr - unansweredShrunk;
@@ -133,9 +136,10 @@ export function detectThreatGaps(ctx) {
         wrUnanswered: pct(unanswered.wr),
         winsUnanswered: unanswered.wins,
         gamesUnanswered: unanswered.games,
+        // Sin partidas con respuesta, la comparación es contra tus partidas sin esa amenaza.
         withAnswer: answered.games >= 2
           ? tr('coachEngine.threat.withAnswer', { wr: pct(answered.wr), wins: answered.wins, games: answered.games })
-          : '',
+          : tr(reference === calm ? 'coachEngine.threat.vsCalm' : 'coachEngine.threat.vsBase', { wr: pct(reference.wr) }),
       }),
       action: threatAdvice(ctx, threat.id, champion),
       evidence: [
@@ -205,6 +209,8 @@ export function detectRuneFit(ctx) {
     const fitting = rows.filter(row => keystoneFits(row.own, row.keystone) === true);
     const misfitStats = summarize(misfit);
     const fittingStats = summarize(fitting);
+    // Si con una runa que encaja te fue igual o peor, tus números no respaldan el cambio.
+    if (fittingStats.games >= 2 && fittingStats.wr <= misfitStats.wr) return;
     // Runa clave sugerida: la que mejor le fue con ese campeón entre las que encajan, o la más afín del catálogo.
     const usedFitting = [...groupBy(fitting, row => row.keystone.name)]
       .map(([name, keystoneRows]) => ({ name, stats: summarize(keystoneRows) }))

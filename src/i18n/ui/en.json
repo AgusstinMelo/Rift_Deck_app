@@ -2381,6 +2381,8 @@
     "threat": {
       "thesis": "Playing {champions}, in {games} matches the enemy had {threat} and you built {answer} in only {answered}. Without that answer you won {winsUnanswered} of {gamesUnanswered} ({wrUnanswered}){withAnswer}.",
       "withAnswer": "; when you did build it, {wins} of {games} ({wr})",
+      "vsCalm": "; against opponents without it, {wr}",
+      "vsBase": "; your overall winrate is {wr}",
       "actionWithItems": "With {champion}, add {answer} (for example, {items}). {timing}",
       "evidenceRate": "Built {answer}: {answered} of {games} matches",
       "evidenceWithout": "No answer: won {wins} of {games} ({wr})",

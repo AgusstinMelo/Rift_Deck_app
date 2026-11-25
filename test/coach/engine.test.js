@@ -49,6 +49,27 @@ test('antiheal: sin respuesta contra curadores se pierde; el consejo pide el tip
   assert.equal(card.tone, 'critical');
 });
 
+test('antiheal: sin partidas con respuesta, compara contra tus partidas sin curadores', () => {
+  const matches = [
+    ...many(6, { enemy_champions: HEALERS, result: 'loss' }),
+    ...many(2, { enemy_champions: HEALERS, result: 'win' }, 10),
+    ...many(12, { result: 'win' }, 13),
+  ];
+  const card = find(report(matches).insights, 'threat-healing');
+  assert.match(card.thesis, /contra rivales sin esa amenaza, el 100%/);
+});
+
+test('antiheal: no se recomienda si cuando lo armaste te fue igual o peor', () => {
+  const answeredItems = ['Recordatorio Mortal', 'Hidra Titánica', 'Filo Infinito'];
+  const matches = [
+    ...many(4, { enemy_champions: HEALERS, result: 'loss' }),
+    ...many(3, { enemy_champions: HEALERS, result: 'win' }, 5),
+    ...many(2, { enemy_champions: HEALERS, items_used: answeredItems, result: 'loss' }, 9),
+    ...many(12, { result: 'win' }, 13),
+  ];
+  assert.equal(find(report(matches).insights, 'threat-healing'), undefined);
+});
+
 test('antiheal: no se marca si igual ganás sin responder', () => {
   const matches = [...many(8, { enemy_champions: HEALERS, result: 'win' }), ...many(8, { result: 'loss' }, 10)];
   assert.equal(find(report(matches).insights, 'threat-healing'), undefined);
@@ -155,6 +176,11 @@ test('runa clave: una de autoataques en un campeón de habilidades no encaja', (
   const card = find(report(matches).insights, 'runes-garen');
   assert.ok(card);
   assert.match(card.action, /Electrocutar/);
+});
+
+test('runa clave: no se sugiere cambiarla si con una que encaja te fue igual o peor', () => {
+  const matches = [...many(4, { runes_used: ['Ritmo Letal'], result: 'win' }), ...many(4, { runes_used: ['Electrocutar'], result: 'loss' }, 5)];
+  assert.equal(find(report(matches).insights, 'runes-garen'), undefined);
 });
 
 test('ningún consejo pide jugar más para validar, registrar datos o usar la app', () => {

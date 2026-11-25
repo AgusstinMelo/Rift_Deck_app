@@ -2381,6 +2381,8 @@
     "threat": {
       "thesis": "Jogando com {champions}, em {games} partidas o inimigo tinha {threat} e você montou {answer} só em {answered}. Sem essa resposta você venceu {winsUnanswered} de {gamesUnanswered} ({wrUnanswered}){withAnswer}.",
       "withAnswer": "; quando montou, {wins} de {games} ({wr})",
+      "vsCalm": "; contra rivais sem essa ameaça, {wr}",
+      "vsBase": "; seu winrate geral é {wr}",
       "actionWithItems": "Com {champion}, adicione {answer} (por exemplo, {items}). {timing}",
       "evidenceRate": "Montou {answer}: {answered} de {games} partidas",
       "evidenceWithout": "Sem resposta: venceu {wins} de {games} ({wr})",
