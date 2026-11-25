@@ -129,10 +129,23 @@ export default function Stats() {
     [allMatches, matchTypeFilter],
   );
   const coach = useCoachReport(user, { matches: coachMatches, wrItems, champions, runes, limit: 8 }, [t]);
+  const insights = coach.insights;
+  // En smartphone no entran dos consejos legibles: va uno por página.
+  const insightsPerPage = isPhoneLandscape || isPhonePortrait ? 1 : 2;
+  const coachPageCount = Math.max(1, Math.ceil(insights.length / insightsPerPage));
+  const effectiveCoachPage = Math.min(coachPage, coachPageCount - 1);
   const swipe = useSwipeTabs({
-    ids: ['overview', 'direct', 'general', 'synergy', ...(coach.insights.length ? ['coach'] : [])],
+    ids: ['overview', 'direct', 'general', 'synergy', ...(insights.length ? ['coach'] : [])],
     active: analyticsView,
     onChange: setAnalyticsView,
+    // En el Coach se pasa de consejo en consejo; desde el último (o el primero) cambia la pestaña.
+    onInnerSwipe: forward => {
+      if (analyticsView !== 'coach') return false;
+      const nextPage = effectiveCoachPage + (forward ? 1 : -1);
+      if (nextPage < 0 || nextPage >= coachPageCount) return false;
+      setCoachPage(nextPage);
+      return true;
+    },
   });
 
   if (membershipLoading || isLoading) {
@@ -370,11 +383,6 @@ export default function Stats() {
     .sort((a, b) => b.total - a.total || a.wr - b.wr)
     .slice(0, 10);
 
-  const insights = coach.insights;
-  // En smartphone no entran dos consejos legibles: va uno por página.
-  const insightsPerPage = isPhoneLandscape || isPhonePortrait ? 1 : 2;
-  const coachPageCount = Math.max(1, Math.ceil(insights.length / insightsPerPage));
-  const effectiveCoachPage = Math.min(coachPage, coachPageCount - 1);
   const visibleInsights = insights.slice(effectiveCoachPage * insightsPerPage, (effectiveCoachPage + 1) * insightsPerPage);
 
   return (

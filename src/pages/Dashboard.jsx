@@ -123,7 +123,6 @@ export default function Dashboard() {
   const [shareSeen, setShareSeen] = useState(shareOpenedRecently);
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
   const changeTab = id => { setActiveTab(id); setActivitySlide(0); };
-  const swipe = useSwipeTabs({ ids: DASHBOARD_TABS.map(tab => tab.id), active: activeTab, onChange: changeTab });
 
   const { data: allMatches = [] } = useQuery(userMatchesQuery(user));
   // Va después de allMatches: usarlo antes de declararlo rompe el render.
@@ -340,6 +339,32 @@ export default function Dashboard() {
     if (mainChampions.length < 2) return;
     setMainIndex(current => (current + direction + mainChampions.length) % mainChampions.length);
   };
+
+  // En el celular se desliza entre pestañas. Sobre "Mis mains" primero se pasa de main en main
+  // y sobre "Meta por línea" (una línea a la vez en el celular) de línea en línea; desde el
+  // último (o el primero) cambia la pestaña.
+  const swipe = useSwipeTabs({
+    ids: DASHBOARD_TABS.map(tab => tab.id),
+    active: activeTab,
+    onChange: changeTab,
+    onInnerSwipe: (forward, target) => {
+      if (activeTab !== 'meta') return false;
+      const step = forward ? 1 : -1;
+      if (target.closest?.('.rd-main-card')) {
+        const next = Math.min(mainIndex, Math.max(mainChampions.length - 1, 0)) + step;
+        if (next < 0 || next >= mainChampions.length) return false;
+        setMainIndex(next);
+        return true;
+      }
+      const picker = target.closest?.('.rd-card')?.querySelector('.rd-meta-lane-picker');
+      if (!picker || getComputedStyle(picker).display === 'none') return false;
+      const lanes = laneHighlights.map(({ lane }) => lane);
+      const next = lanes.indexOf(metaLane) + step;
+      if (next < 0 || next >= lanes.length) return false;
+      setMetaLane(lanes[next]);
+      return true;
+    },
+  });
 
   // El scroll del carrusel se mapea de forma proporcional: 0 → primera tarjeta, máximo → última.
   const handleActivityScroll = (event) => {

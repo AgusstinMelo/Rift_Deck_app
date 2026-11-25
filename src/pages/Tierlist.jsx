@@ -12,6 +12,7 @@ import LaneBadge, { LANE_CONFIG } from '@/components/ui/LaneBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY, DESKTOP_FIT_QUERY } from '@/hooks/useMatchMedia';
 import { useTierTileSize } from '@/hooks/useTierTileSize';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 import { useT } from '@/lib/LocaleContext';
 import { formatLocale, tr } from '@/i18n/uiI18n';
 
@@ -62,6 +63,8 @@ const sortTiers = (tiers) => [...tiers].sort((a, b) => {
 export default function Tierlist() {
   const t = useT();
   const [laneFilter, setLaneFilter] = useState('all');
+  // En el celular se desliza entre líneas (Todas → Top → … → Support → Todas).
+  const swipe = useSwipeTabs({ ids: ['all', ...LANES], active: laneFilter, onChange: setLaneFilter });
   const [tierFilter, setTierFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
   const isPhoneLandscape = useMatchMedia(PHONE_LANDSCAPE_QUERY);
@@ -277,7 +280,7 @@ export default function Tierlist() {
   );
 
   return (
-    <div className="rd-page rd-dashboard rd-tierlist-layout">
+    <div className="rd-page rd-dashboard rd-tierlist-layout" {...swipe}>
 
       <div className="rd-tierlist-header flex items-start justify-between gap-4">
         <div>

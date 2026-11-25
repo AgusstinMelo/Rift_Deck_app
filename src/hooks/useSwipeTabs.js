@@ -40,9 +40,12 @@ function horizontalScrollersAt(target, boundary) {
  *
  * Un carrusel o una tabla que se desliza de costado tiene prioridad: primero se recorre y,
  * con el gesto que empieza ya en su final (o en su principio, hacia atrás), cambia la pestaña.
- * @param {{ ids: string[], active: string, onChange: (id: string) => void, enabled?: boolean }} options
+ * Lo mismo con un paginado propio (onInnerSwipe, recibe la dirección y el elemento donde
+ * empezó el gesto): si devuelve true, el gesto pasó de página dentro de la pestaña y no la cambia.
+ * @param {{ ids: string[], active: string, onChange: (id: string) => void, enabled?: boolean,
+ *   onInnerSwipe?: (forward: boolean, target: Element) => boolean }} options
  */
-export function useSwipeTabs({ ids, active, onChange, enabled = true }) {
+export function useSwipeTabs({ ids, active, onChange, enabled = true, onInnerSwipe }) {
   const isTouch = useMatchMedia(TOUCH_QUERY);
   const start = useRef(null);
 
@@ -56,7 +59,7 @@ export function useSwipeTabs({ ids, active, onChange, enabled = true }) {
       if (touch.clientX < EDGE_GUTTER || touch.clientX > window.innerWidth - EDGE_GUTTER) return;
       const scrollers = horizontalScrollersAt(event.target, event.currentTarget);
       if (!scrollers) return;
-      start.current = { x: touch.clientX, y: touch.clientY, time: Date.now(), scrollers };
+      start.current = { x: touch.clientX, y: touch.clientY, time: Date.now(), scrollers, target: event.target };
     },
     onTouchEnd(event) {
       const from = start.current;
@@ -69,6 +72,7 @@ export function useSwipeTabs({ ids, active, onChange, enabled = true }) {
       if (Date.now() - from.time > MAX_DURATION_MS) return;
       const forward = dx < 0;
       if (!from.scrollers.every(scroller => (forward ? scroller.atEnd : scroller.atStart))) return;
+      if (onInnerSwipe?.(forward, from.target)) return;
       const index = Math.max(0, ids.indexOf(active));
       const next = (index + (forward ? 1 : -1) + ids.length) % ids.length;
       onChange(ids[next]);
