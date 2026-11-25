@@ -41,9 +41,9 @@ const PLAN_NAMES = labels({
 
 // Se usan si membership_plans todavía no se pudo leer.
 const FALLBACK_PLANS = [
-{ code: 'premium', name: 'Mensual', amount_ars: 3000, amount_usd: 2, interval_months: 1, google_play_product_id: 'premium_monthly' },
-{ code: 'premium_quarterly', name: 'Trimestral', amount_ars: 8500, amount_usd: 5.5, interval_months: 3, google_play_product_id: 'premium_quarterly' },
-{ code: 'premium_annual', name: 'Anual', amount_ars: 30000, amount_usd: 20, interval_months: 12, google_play_product_id: 'premium_annual' }];
+{ code: 'premium', name: 'Mensual', amount_ars: 3200, amount_usd: 2, interval_months: 1, google_play_product_id: 'premium_monthly' },
+{ code: 'premium_quarterly', name: 'Trimestral', amount_ars: 8750, amount_usd: 5.5, interval_months: 3, google_play_product_id: 'premium_quarterly' },
+{ code: 'premium_annual', name: 'Anual', amount_ars: 31800, amount_usd: 20, interval_months: 12, google_play_product_id: 'premium_annual' }];
 
 // Cada tarjeta ocupa 4 filas de la grilla padre (subgrid): logo/precio, descripción, acción y pasos
 // quedan alineados entre Mercado Pago y PayPal sin alturas fijas.
