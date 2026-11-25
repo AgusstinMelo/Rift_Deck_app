@@ -11,6 +11,13 @@ nuevo si cambia `twa-manifest.json` (ícono, colores, versión, permisos).
   SHA-256 de la clave de subida y la de Play App Signing (Play Console → Integridad de la app).
   Si falta, la app muestra la barra de URL de Chrome.
 
+**Ojo con `bubblewrap update`:** Bubblewrap ata el `DelegationService` a `enableNotifications`.
+Con las notificaciones apagadas lo deja deshabilitado, y sin ese servicio Chrome no llega al
+puente de facturación (la Digital Goods API responde `clientAppUnavailable` y no cargan los
+precios). En `app/src/main/AndroidManifest.xml` el servicio está forzado a
+`android:enabled="true"` / `android:exported="true"`: si se regenera el proyecto, volver a
+ponerlo así.
+
 ## Clave de firma
 
 La clave de subida está FUERA del repo, en `../android-keys/riftdeck-upload.keystore`
