@@ -3045,6 +3045,7 @@
     "intro": "Try the Android app before anyone else and help us get it ready for Google Play. All you need is an Android phone and a Google account.",
     "reward": {
       "title": "1 year of Premium for free",
+      "short": "Use it for the 14-day test and get a year of Premium on us.",
       "text": "Use the app during the 14-day test and, when it ends, email us the address of your Rift Deck account: we will unlock a year of Premium. Until then, the 45-day free trial already gives you everything."
     },
     "stepsTitle": "How to join",
@@ -3075,6 +3076,7 @@
       "feedback": "Tell us what breaks or what you would improve."
     },
     "faqTitle": "FAQ",
+    "faqShort": "FAQ",
     "faq": {
       "notFound": {
         "q": "The invitation says the app is not available",

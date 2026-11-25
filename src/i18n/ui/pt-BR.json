@@ -3045,6 +3045,7 @@
     "intro": "Teste o app de Android antes de todo mundo e ajude a deixá-lo pronto para publicar no Google Play. Você só precisa de um celular Android e uma conta Google.",
     "reward": {
       "title": "1 ano de Premium grátis",
+      "short": "Use durante os 14 dias do teste e ganhe um ano de Premium.",
       "text": "Use o app durante os 14 dias do teste e, no final, mande pra gente o e-mail da sua conta do Rift Deck: ativamos um ano de Premium. Enquanto isso, o teste grátis de 45 dias já libera tudo."
     },
     "stepsTitle": "Como participar",
@@ -3075,6 +3076,7 @@
       "feedback": "Conte pra gente o que falha ou o que você melhoraria."
     },
     "faqTitle": "Perguntas frequentes",
+    "faqShort": "Dúvidas",
     "faq": {
       "notFound": {
         "q": "O convite diz que o app não está disponível",
