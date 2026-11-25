@@ -9,6 +9,7 @@ import { useCatalogText, useT } from '@/lib/LocaleContext';
 import { runeBranchLabel } from '@/utils/runeBranches';
 import { useMemo, useRef, useState } from 'react';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 import {
   CardTitle, FaceList, FillSpace, ItemIconList, PersonalUsageBlock, splitEffects, useArtLights, useFitText, usePersonalMatches,
 } from '@/components/library/detailParts';
@@ -120,6 +121,7 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
     ['tree', t('library.rama')],
   ];
   const activePanel = panelTabs.some(([id]) => id === section) ? section : 'effects';
+  const swipe = useSwipeTabs({ ids: panelTabs.map(([id]) => id), active: activePanel, onChange: setSection, enabled: usePanels });
   const show = id => !usePanels || phonePanel[id] === activePanel;
   // Celular: la letra de la descripción, del perfil y de contra qué rinde se ajusta para
   // llenar su tarjeta sin scroll.
@@ -152,7 +154,7 @@ export default function RuneDetail({ rune, runes, champions = [], items = [], pu
   );
 
   return (
-    <article className="rd-cd rd-ed" data-panels={usePanels ? 'on' : 'off'} data-kind="rune" data-length={longDescription ? "long" : "normal"} data-branch={rune.branch || undefined} style={lightStyle}>
+    <article {...swipe} className="rd-cd rd-ed" data-panels={usePanels ? 'on' : 'off'} data-kind="rune" data-length={longDescription ? "long" : "normal"} data-branch={rune.branch || undefined} style={lightStyle}>
       <header className="rd-cd-hero rd-ed-hero">
         {rune.image_url && <img className="rd-ed-hero-glow" src={rune.image_url} alt="" aria-hidden="true" />}
         <div className="rd-cd-hero-shade" aria-hidden="true" />

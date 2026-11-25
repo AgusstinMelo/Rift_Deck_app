@@ -9,6 +9,7 @@ import { BarChart3, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight
 import PageHeader from '@/components/ui/PageHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import { useCoachReport } from '@/hooks/useCoachReport';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 import { averageMatchKda } from '@/domain/matchStats';
 import MembershipGate from '@/components/membership/MembershipGate';
 import { daysUntil, getMyMembership } from '@/api/membershipSupabase';
@@ -128,6 +129,11 @@ export default function Stats() {
     [allMatches, matchTypeFilter],
   );
   const coach = useCoachReport(user, { matches: coachMatches, wrItems, champions, runes, limit: 8 }, [t]);
+  const swipe = useSwipeTabs({
+    ids: ['overview', 'direct', 'general', 'synergy', ...(coach.insights.length ? ['coach'] : [])],
+    active: analyticsView,
+    onChange: setAnalyticsView,
+  });
 
   if (membershipLoading || isLoading) {
     return (
@@ -372,7 +378,7 @@ export default function Stats() {
   const visibleInsights = insights.slice(effectiveCoachPage * insightsPerPage, (effectiveCoachPage + 1) * insightsPerPage);
 
   return (
-    <div className="rd-page rd-dashboard rd-compact-page rd-stats-layout">
+    <div className="rd-page rd-dashboard rd-compact-page rd-stats-layout" {...swipe}>
 
       <section className="rd-viewport-section rd-stats-overview space-y-6" aria-label={t('stats.resumenDeRendimiento')}>
       <div className="rd-stats-header flex flex-wrap items-start justify-between gap-4">

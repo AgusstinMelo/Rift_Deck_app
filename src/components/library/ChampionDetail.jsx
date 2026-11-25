@@ -14,6 +14,7 @@ import LaneBadge from '@/components/ui/LaneBadge';
 import { championSlug } from '@/utils/championSlug';
 import { getTierEntriesForChampion } from '@/utils/tierlist';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 import { DAMAGE_LABELS, LANE_IMAGES, LANE_LABELS, getChampionLanes } from '@/utils/championPresentation';
 import { DEFAULT_PALETTE, loadArtPalette } from '@/features/share/artPalette';
 import { useCatalogText, useT } from '@/lib/LocaleContext';
@@ -573,6 +574,7 @@ export default function ChampionDetail({
       : publicMode ? t('library.relacionados') : t('library.rendimiento')]] : []),
   ];
   const activePanel = panelTabs.some(([id]) => id === section) ? section : 'profile';
+  const swipe = useSwipeTabs({ ids: panelTabs.map(([id]) => id), active: activePanel, onChange: setSection, enabled: usePanels });
   const show = id => !usePanels || PHONE_PANEL[id] === activePanel;
   // Celular: la letra de las notas se ajusta a su extensión y llena el espacio de la tarjeta.
   const notesRef = useRef(null);
@@ -586,7 +588,7 @@ export default function ChampionDetail({
   const scaling = SCALING_LABEL[champion.scaling] || champion.scaling;
 
   return (
-    <article ref={articleRef} className="rd-cd" style={lightStyle} data-panels={usePanels ? 'on' : 'off'} data-mosaic={mosaic ? 'on' : 'off'}>
+    <article {...swipe} ref={articleRef} className="rd-cd" style={lightStyle} data-panels={usePanels ? 'on' : 'off'} data-mosaic={mosaic ? 'on' : 'off'}>
       {/* HÉROE: identidad sobre su porción del splash (la posición meta va en su tarjeta). */}
       <header className="rd-cd-hero">
         <div className="rd-cd-hero-shade" aria-hidden="true" />

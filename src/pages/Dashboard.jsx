@@ -26,6 +26,7 @@ import TierBadge from '@/components/ui/TierBadge';
 import PatchFilter from '@/components/filters/PatchFilter';
 import { getChampionInsight } from '@/components/library/ChampionDetail';
 import { useCoachReport } from '@/hooks/useCoachReport';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 import { filterByPatch, getPatchGroup, patchMatchesSelection } from '@/utils/patches';
 import { averageMatchKda, championPool, matchRowKda } from '@/domain/matchStats';
 import { matchesInPeriod } from '@/features/share/periodSummary';
@@ -121,6 +122,8 @@ export default function Dashboard() {
   const [shareOpen, setShareOpen] = useState(false);
   const [shareSeen, setShareSeen] = useState(shareOpenedRecently);
   const activeHeading = DASHBOARD_HEADINGS[activeTab];
+  const changeTab = id => { setActiveTab(id); setActivitySlide(0); };
+  const swipe = useSwipeTabs({ ids: DASHBOARD_TABS.map(tab => tab.id), active: activeTab, onChange: changeTab });
 
   const { data: allMatches = [] } = useQuery(userMatchesQuery(user));
   // Va después de allMatches: usarlo antes de declararlo rompe el render.
@@ -369,7 +372,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="rd-page rd-dashboard-tabs">
+    <div className="rd-page rd-dashboard-tabs" {...swipe}>
       <header className="rd-dashboard-header">
         <div>
           <div className="rd-page-kicker rd-dashboard-kicker flex items-center gap-2 mb-1">
@@ -388,7 +391,7 @@ export default function Dashboard() {
               role="tab"
               aria-selected={activeTab === tab.id}
               className={`rd-panel-tab ${activeTab === tab.id ? 'rd-panel-tab-active' : ''}`}
-              onClick={() => { setActiveTab(tab.id); setActivitySlide(0); }}
+              onClick={() => changeTab(tab.id)}
             >
               {tab.label}
             </button>

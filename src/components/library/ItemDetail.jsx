@@ -3,6 +3,7 @@
 // Enfrentamientos y objetos del mismo tipo. En escritorio entra todo sin scroll.
 import { useMemo, useRef, useState } from 'react';
 import { useMatchMedia, PHONE_LANDSCAPE_QUERY, PHONE_PORTRAIT_QUERY } from '@/hooks/useMatchMedia';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 import { ArrowLeft, Ban, CheckCircle2, Coins, Sword } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { entitySlug } from '@/utils/entitySlug';
@@ -190,6 +191,7 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
     ...(usage && related.length > 0 ? [['related', t('library.relacionados')]] : []),
   ];
   const activePanel = panelTabs.some(([id]) => id === section) ? section : 'effects';
+  const swipe = useSwipeTabs({ ids: panelTabs.map(([id]) => id), active: activePanel, onChange: setSection, enabled: usePanels });
   const show = id => !usePanels || phonePanel[id] === activePanel;
   // Celular: la letra de los efectos se ajusta a su extensión y llena el espacio de la tarjeta.
   const effectsRef = useRef(null);
@@ -206,7 +208,7 @@ export default function ItemDetail({ item, items, champions, publicBasePath, onB
   });
 
   return (
-    <article className="rd-cd rd-ed" data-panels={usePanels ? 'on' : 'off'} data-kind="item" data-length={longText ? "long" : "normal"} data-text={veryLongText ? "xlong" : undefined} data-stats={stats.length ? "yes" : "none"} data-effects={tightEffects === item.id ? 'tight' : undefined} style={lightStyle}>
+    <article {...swipe} className="rd-cd rd-ed" data-panels={usePanels ? 'on' : 'off'} data-kind="item" data-length={longText ? "long" : "normal"} data-text={veryLongText ? "xlong" : undefined} data-stats={stats.length ? "yes" : "none"} data-effects={tightEffects === item.id ? 'tight' : undefined} style={lightStyle}>
       <header className="rd-cd-hero rd-ed-hero">
         {item.image_url && <img className="rd-ed-hero-glow" src={item.image_url} alt="" aria-hidden="true" />}
         <div className="rd-cd-hero-shade" aria-hidden="true" />
