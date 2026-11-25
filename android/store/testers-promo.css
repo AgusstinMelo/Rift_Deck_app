@@ -1,0 +1,98 @@
+/* Estilos compartidos de las imágenes "Buscamos testers" (cuadrada, 4:5 e historia).
+   Cada HTML fija el tamaño del lienzo y ajusta posiciones con variables. */
+@font-face { font-family: 'Unbounded'; src: url('../../node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2') format('woff2'); font-weight: 200 900; }
+
+:root {
+  --bg: hsl(226 45% 6%);
+  --gold: hsl(43 65% 58%);
+  --gold-deep: hsl(40 70% 48%);
+  --pad: 106px;            /* margen izquierdo del contenido */
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: var(--w); height: var(--h); overflow: hidden; }
+/* Fondo: el mismo de la tarjeta de compartir de la app (src/features/share/ShareCard.jsx,
+   paleta por defecto, sin campeón): destellos dorado / violeta / celeste, grilla
+   triangular y rayos desde arriba. */
+body {
+  position: relative;
+  background:
+    radial-gradient(60% 40% at 100% 0%, rgb(212 175 55 / .12) 0%, rgb(212 175 55 / 0) 70%),
+    radial-gradient(70% 45% at 0% 100%, rgb(124 58 237 / .28) 0%, rgb(124 58 237 / 0) 70%),
+    radial-gradient(50% 30% at 0% 35%, rgb(56 189 248 / .12) 0%, rgb(56 189 248 / 0) 70%),
+    radial-gradient(120% 80% at 50% 0%, #1D2540 0%, #0B0F1A 60%, #07090F 100%);
+  color: #f8fafc;
+  font-family: 'Unbounded', sans-serif;
+}
+
+/* Rayos desde arriba */
+.rays {
+  position: absolute; inset: 0;
+  background: conic-gradient(from 180deg at 50% -10%, transparent 0deg, rgb(245 215 110 / .06) 8deg, transparent 16deg, transparent 28deg, rgb(245 215 110 / .05) 34deg, transparent 40deg, transparent 320deg, rgb(245 215 110 / .05) 326deg, transparent 332deg, transparent 344deg, rgb(245 215 110 / .06) 350deg, transparent 358deg);
+}
+/* Grilla triangular */
+.diamonds {
+  position: absolute; inset: 0; opacity: .55;
+  background:
+    repeating-linear-gradient(60deg, rgb(212 175 55 / .05) 0 2px, transparent 2px 36px),
+    repeating-linear-gradient(-60deg, rgb(212 175 55 / .05) 0 2px, transparent 2px 36px);
+}
+
+/* Marco dorado con esquinas, como una carta */
+.frame { position: absolute; inset: 20px; border: 2px solid rgb(212 175 55 / .32); border-radius: 36px; box-shadow: inset 0 0 60px rgb(212 175 55 / .08); }
+.corner { position: absolute; width: 84px; height: 84px; border: 6px solid #D4AF37; filter: drop-shadow(0 0 6px rgb(212 175 55 / .3)); }
+.corner.tl { left: 20px; top: 20px; border-right: 0; border-bottom: 0; border-top-left-radius: 36px; }
+.corner.tr { right: 20px; top: 20px; border-left: 0; border-bottom: 0; border-top-right-radius: 36px; }
+.corner.bl { left: 20px; bottom: 20px; border-right: 0; border-top: 0; border-bottom-left-radius: 36px; }
+.corner.br { right: 20px; bottom: 20px; border-left: 0; border-top: 0; border-bottom-right-radius: 36px; }
+
+/* Logo de Wild Rift arriba (si existe wildrift-logo.png); si no, un rótulo de texto */
+.top { position: absolute; left: 0; right: 0; top: var(--top-y); display: flex; justify-content: center; }
+.top img { height: var(--wr-h); }
+.top .tag {
+  display: none; align-items: center; gap: 14px;
+  font-size: 18px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--gold);
+}
+.top .tag::before, .top .tag::after { content: ''; width: 44px; height: 2px; background: var(--gold); opacity: .7; }
+.top.no-logo img { display: none; }
+.top.no-logo .tag { display: inline-flex; }
+
+/* Columna de texto */
+.copy { position: absolute; left: var(--pad); top: var(--copy-y); width: var(--copy-w); }
+h1 {
+  font-weight: 800; font-size: var(--h1); line-height: 1; letter-spacing: -0.01em; text-transform: uppercase;
+}
+h1 span {
+  display: block; margin-top: .08em;
+  background: linear-gradient(180deg, hsl(45 80% 66%), var(--gold-deep));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+p.sub { margin-top: var(--sub-gap); font-size: var(--sub); font-weight: 400; line-height: 1.32; color: #e5e9f0; }
+
+.steps { margin-top: var(--steps-gap); width: var(--step-w); display: flex; flex-direction: column; gap: var(--step-gap); }
+.step {
+  display: flex; align-items: center; gap: 22px; height: var(--step-h); padding: 0 26px 0 20px; border-radius: 16px;
+  background: linear-gradient(160deg, hsl(224 40% 13% / .96), hsl(226 45% 8% / .96));
+  border: 1px solid hsl(220 30% 60% / .22);
+  box-shadow: 0 10px 30px rgb(0 0 0 / .35);
+}
+.num {
+  flex: none; width: var(--num); height: var(--num); border-radius: 50%; display: grid; place-items: center;
+  font-weight: 600; font-size: calc(var(--num) * .5); line-height: 1; color: hsl(226 45% 8%);
+  background: linear-gradient(180deg, hsl(45 80% 64%), var(--gold-deep));
+}
+.step span { font-size: var(--step-font); font-weight: 500; white-space: nowrap; }
+
+/* Teléfono con la captura del dashboard, inclinado en perspectiva */
+.phone-wrap { position: absolute; left: var(--phone-x); top: var(--phone-y); perspective: 1800px; }
+.phone {
+  width: var(--phone-w); aspect-ratio: 786 / 1662; padding: 14px; border-radius: 54px;
+  background: linear-gradient(150deg, hsl(222 20% 26%), hsl(225 30% 9%) 40%, hsl(222 20% 18%));
+  box-shadow: 0 40px 90px rgb(0 0 0 / .7), inset 0 0 0 2px hsl(220 20% 35% / .6);
+  transform: rotateY(-22deg) rotateX(6deg) rotateZ(5deg);
+  transform-origin: left center;
+}
+.phone img { display: block; width: 100%; height: 100%; border-radius: 42px; }
+
+/* Logo de Rift Deck abajo, centrado */
+.brand { position: absolute; left: 0; right: 0; bottom: var(--brand-y); display: flex; justify-content: center; }
+.brand img { width: var(--brand-w); }
