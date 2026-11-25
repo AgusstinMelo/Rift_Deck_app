@@ -10,21 +10,36 @@ const EDGE_GUTTER = 24;
 
 const IGNORED = 'input, textarea, select, [contenteditable="true"], [data-swipe-ignore]';
 
-/** ¿El toque arrancó en algo que ya usa el deslizamiento horizontal (carrusel, tabla, campo)? */
-function startsInHorizontalGesture(target, boundary) {
+const EDGE_TOLERANCE = 2;
+
+/**
+ * Lo que hay bajo el dedo al empezar: null si es un campo o algo marcado con
+ * data-swipe-ignore; si no, la lista de elementos con scroll horizontal (carruseles, tablas
+ * anchas) y si cada uno ya estaba en su principio o en su final.
+ */
+function horizontalScrollersAt(target, boundary) {
+  const scrollers = [];
   for (let el = target; el && el !== boundary; el = el.parentElement) {
-    if (el.matches?.(IGNORED)) return true;
+    if (el.matches?.(IGNORED)) return null;
     if (el.scrollWidth > el.clientWidth + 1) {
       const overflowX = getComputedStyle(el).overflowX;
-      if (overflowX === 'auto' || overflowX === 'scroll') return true;
+      if (overflowX === 'auto' || overflowX === 'scroll') {
+        scrollers.push({
+          atStart: el.scrollLeft <= EDGE_TOLERANCE,
+          atEnd: el.scrollLeft + el.clientWidth >= el.scrollWidth - EDGE_TOLERANCE,
+        });
+      }
     }
   }
-  return false;
+  return scrollers;
 }
 
 /**
  * Pestañas que se cambian deslizando el dedo en el celular. Del último pasa al primero y
  * al revés. Devuelve los handlers para el contenedor de la página: `<div {...swipe}>`.
+ *
+ * Un carrusel o una tabla que se desliza de costado tiene prioridad: primero se recorre y,
+ * con el gesto que empieza ya en su final (o en su principio, hacia atrás), cambia la pestaña.
  * @param {{ ids: string[], active: string, onChange: (id: string) => void, enabled?: boolean }} options
  */
 export function useSwipeTabs({ ids, active, onChange, enabled = true }) {
@@ -39,8 +54,9 @@ export function useSwipeTabs({ ids, active, onChange, enabled = true }) {
       if (event.touches.length !== 1) return;
       const touch = event.touches[0];
       if (touch.clientX < EDGE_GUTTER || touch.clientX > window.innerWidth - EDGE_GUTTER) return;
-      if (startsInHorizontalGesture(event.target, event.currentTarget)) return;
-      start.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+      const scrollers = horizontalScrollersAt(event.target, event.currentTarget);
+      if (!scrollers) return;
+      start.current = { x: touch.clientX, y: touch.clientY, time: Date.now(), scrollers };
     },
     onTouchEnd(event) {
       const from = start.current;
@@ -51,8 +67,10 @@ export function useSwipeTabs({ ids, active, onChange, enabled = true }) {
       const dy = touch.clientY - from.y;
       if (Math.abs(dx) < MIN_DISTANCE || Math.abs(dx) < Math.abs(dy) * 1.5) return;
       if (Date.now() - from.time > MAX_DURATION_MS) return;
+      const forward = dx < 0;
+      if (!from.scrollers.every(scroller => (forward ? scroller.atEnd : scroller.atStart))) return;
       const index = Math.max(0, ids.indexOf(active));
-      const next = (index + (dx < 0 ? 1 : -1) + ids.length) % ids.length;
+      const next = (index + (forward ? 1 : -1) + ids.length) % ids.length;
       onChange(ids[next]);
     },
     onTouchCancel() {

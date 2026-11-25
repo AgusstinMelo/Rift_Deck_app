@@ -14,6 +14,7 @@ import GoalsSummary from '@/features/goals/components/GoalsSummary';
 import GoalWizard from '@/features/goals/components/wizard/GoalWizard';
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/features/goals/components/goalUi';
 import { useT } from '@/lib/LocaleContext';
+import { useSwipeTabs } from '@/hooks/useSwipeTabs';
 
 function CreateGoalButton() {
   const t = useT();
@@ -153,11 +154,17 @@ function ActiveGoalsPanel({ current, all }) {
   );
 }
 
-function GoalsOverview({ items, limit }) {
+/** Pestaña de la vista general (Activos / Historial), guardada en ?tab= de la URL. */
+function useGoalsTab() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') === 'historial' ? 'historial' : 'activos';
-  const { current, finished, archived } = partitionGoals(items);
   const changeTab = tab => setSearchParams(tab === 'activos' ? {} : { tab }, { replace: true });
+  return { activeTab, changeTab };
+}
+
+function GoalsOverview({ items, limit }) {
+  const { activeTab, changeTab } = useGoalsTab();
+  const { current, finished, archived } = partitionGoals(items);
 
   return (
     <>
@@ -221,6 +228,8 @@ export default function Goals() {
   const isOverview = Boolean(useMatch('/objetivos'));
   const access = useGoalsAccess();
   const { items, matches, now, isLoading, error, refetch } = useEvaluatedGoals();
+  const { activeTab, changeTab } = useGoalsTab();
+  const swipe = useSwipeTabs({ ids: OVERVIEW_TABS.map(tab => tab.id), active: activeTab, onChange: changeTab, enabled: isOverview });
 
   if (access.isLoading) return <div className="rd-page rd-dashboard"><LoadingState /></div>;
   if (!access.hasAccess) return <MembershipGate />;
@@ -249,5 +258,5 @@ export default function Goals() {
 
   // La vista general se ajusta al viewport; detalle, edición y creación scrollean normal.
   const layoutClass = isOverview && !isLoading && !error ? 'rd-goals-layout' : '';
-  return <div className={`rd-page rd-dashboard ${layoutClass}`}>{content}</div>;
+  return <div className={`rd-page rd-dashboard ${layoutClass}`} {...swipe}>{content}</div>;
 }
