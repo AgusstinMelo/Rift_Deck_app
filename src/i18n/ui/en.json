@@ -3038,5 +3038,65 @@
       "spam": "Spam or advertising",
       "otro": "Other"
     }
+  },
+  "testers": {
+    "kicker": "Closed test · Android",
+    "title": "Become a Rift Deck tester",
+    "intro": "Try the Android app before anyone else and help us get it ready for Google Play. All you need is an Android phone and a Google account.",
+    "reward": {
+      "title": "1 year of Premium for free",
+      "text": "Use the app during the 14-day test and, when it ends, email us the address of your Rift Deck account: we will unlock a year of Premium. Until then, the 45-day free trial already gives you everything."
+    },
+    "stepsTitle": "How to join",
+    "steps": {
+      "group": {
+        "title": "Join the testers group",
+        "text": "Sign in with the Google account you use on the Play Store and tap \"Join group\".",
+        "cta": "Join the group"
+      },
+      "optIn": {
+        "title": "Accept the invitation",
+        "text": "Open the invitation and tap \"Become a tester\".",
+        "cta": "Open the invitation"
+      },
+      "install": {
+        "title": "Install Rift Deck",
+        "text": "Download it from the Play Store, create your account and keep it installed for the 14 days.",
+        "cta": "View on Play Store"
+      }
+    },
+    "sameAccount": "All three steps use the same Google account: the one on your phone's Play Store.",
+    "tryTitle": "What to try",
+    "try": {
+      "matches": "Log your matches, by hand or with a screenshot of the results screen.",
+      "stats": "Check your stats, matchups and synergies.",
+      "coach": "Read the Coach's tips as you add matches.",
+      "library": "Browse the patch tier list and the champion, item and rune pages.",
+      "feedback": "Tell us what breaks or what you would improve."
+    },
+    "faqTitle": "FAQ",
+    "faq": {
+      "notFound": {
+        "q": "The invitation says the app is not available",
+        "a": "First you need to join the group with the same Google account you use on the Play Store. After joining, it may take a few minutes to show up."
+      },
+      "pay": {
+        "q": "Do I have to pay anything?",
+        "a": "No. The app is free and Premium has a 45-day trial, no card needed. When the closed test ends, we unlock your year of Premium."
+      },
+      "iphone": {
+        "q": "Does it work on iPhone?",
+        "a": "The test is Android only. On iPhone you can use Rift Deck on the web at riftdeckapp.com."
+      },
+      "leave": {
+        "q": "Can I leave the test?",
+        "a": "Yes, from the invitation, with \"Leave the program\". Please stay for the 14 days: Google requires a minimum number of testers during that time before the app can be published."
+      },
+      "bugs": {
+        "q": "How do I report a bug?",
+        "a": "From the app, with the \"Report a Bug\" button, or by emailing {email}."
+      }
+    },
+    "thanks": "Thanks for helping us! Questions? Email us at"
   }
 }

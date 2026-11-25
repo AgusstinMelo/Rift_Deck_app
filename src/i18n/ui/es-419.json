@@ -3038,5 +3038,65 @@
       "spam": "Spam o publicidad",
       "otro": "Otro"
     }
+  },
+  "testers": {
+    "kicker": "Prueba cerrada · Android",
+    "title": "Sumate como tester de Rift Deck",
+    "intro": "Probá la app de Android antes que nadie y ayudanos a dejarla lista para publicarla en Google Play. Solo necesitás un celular Android y una cuenta de Google.",
+    "reward": {
+      "title": "1 año de Premium gratis",
+      "text": "Usá la app durante los 14 días de la prueba y, al terminar, escribinos con el mail de tu cuenta de Rift Deck: te activamos un año de Premium. Mientras tanto, la prueba gratis de 45 días ya te da todo."
+    },
+    "stepsTitle": "Cómo sumarte",
+    "steps": {
+      "group": {
+        "title": "Unite al grupo de testers",
+        "text": "Entrá con la cuenta de Google que usás en Play Store y tocá «Unirse al grupo».",
+        "cta": "Unirme al grupo"
+      },
+      "optIn": {
+        "title": "Aceptá ser tester",
+        "text": "Abrí la invitación y tocá «Convertirse en verificador».",
+        "cta": "Abrir la invitación"
+      },
+      "install": {
+        "title": "Instalá Rift Deck",
+        "text": "Descargala desde Play Store, creá tu cuenta y dejala instalada los 14 días.",
+        "cta": "Ver en Play Store"
+      }
+    },
+    "sameAccount": "Los tres pasos van con la misma cuenta de Google: la de tu Play Store en el celular.",
+    "tryTitle": "Qué probar",
+    "try": {
+      "matches": "Registrá tus partidas, a mano o con una captura de la pantalla de resultados.",
+      "stats": "Mirá tus estadísticas, tus matchups y tus sinergias.",
+      "coach": "Leé los consejos del Coach a medida que sumás partidas.",
+      "library": "Consultá el tierlist del parche y las fichas de campeones, objetos y runas.",
+      "feedback": "Contanos qué falla o qué mejorarías."
+    },
+    "faqTitle": "Preguntas frecuentes",
+    "faq": {
+      "notFound": {
+        "q": "La invitación dice que la app no está disponible",
+        "a": "Primero tenés que unirte al grupo con la misma cuenta de Google que usás en Play Store. Después de unirte, puede tardar unos minutos en aparecer."
+      },
+      "pay": {
+        "q": "¿Tengo que pagar algo?",
+        "a": "No. La app es gratis y Premium tiene 45 días de prueba, sin tarjeta. Al terminar la prueba cerrada te activamos el año de Premium."
+      },
+      "iphone": {
+        "q": "¿Funciona en iPhone?",
+        "a": "La prueba es solo para Android. En iPhone podés usar Rift Deck desde la web, en riftdeckapp.com."
+      },
+      "leave": {
+        "q": "¿Puedo salir de la prueba?",
+        "a": "Sí, desde la invitación, con «Abandonar el programa». Te pedimos que te quedes los 14 días: Google exige un mínimo de testers durante ese tiempo para poder publicar la app."
+      },
+      "bugs": {
+        "q": "¿Cómo reporto un error?",
+        "a": "Desde la app, con el botón «Reportar Bug», o escribiendo a {email}."
+      }
+    },
+    "thanks": "¡Gracias por ayudarnos! ¿Dudas? Escribinos a"
   }
 }

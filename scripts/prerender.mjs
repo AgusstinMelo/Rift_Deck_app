@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { championSlug, findChampionBySlug } from '../src/utils/championSlug.js';
 import { entitySlug, findEntityBySlug } from '../src/utils/entitySlug.js';
 import { DAMAGE_LABELS, displayList, getChampionLaneLabels } from '../src/utils/championPresentation.js';
-import { CHAMPIONS_SEO, ITEMS_SEO, LANDING_SEO, LEGAL_PATHS, RUNES_SEO, SITE_URL, getChampionSeo, getItemSeo, getLegalSeoByPath, getRuneSeo } from '../src/seo/publicSeo.js';
+import { CHAMPIONS_SEO, ITEMS_SEO, LANDING_SEO, LEGAL_PATHS, RUNES_SEO, SITE_URL, TESTERS_SEO, getChampionSeo, getItemSeo, getLegalSeoByPath, getRuneSeo } from '../src/seo/publicSeo.js';
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -34,10 +34,10 @@ const template = await readFile(resolve('dist/index.html'), 'utf8');
 const publicData = JSON.parse(await readFile(resolve('.prerender/public-data.json'), 'utf8'));
 const { champions, items, runes, tierlist } = publicData;
 const { renderPublicRoute } = await import(pathToFileURL(resolve('dist-ssr/entry-server.js')).href);
-const paths = ['/', '/campeones', ...champions.map(champion => `/campeones/${championSlug(champion.name)}`), '/objetos', ...items.map(item => `/objetos/${entitySlug(item.name)}`), '/runas', ...runes.map(rune => `/runas/${entitySlug(rune.name)}`), ...LEGAL_PATHS];
+const paths = ['/', '/campeones', ...champions.map(champion => `/campeones/${championSlug(champion.name)}`), '/objetos', ...items.map(item => `/objetos/${entitySlug(item.name)}`), '/runas', ...runes.map(rune => `/runas/${entitySlug(rune.name)}`), ...LEGAL_PATHS, '/testers'];
 
 for (const pathname of paths) {
-  const legalSeo = getLegalSeoByPath(pathname);
+  const legalSeo = getLegalSeoByPath(pathname) || (pathname === '/testers' ? TESTERS_SEO : null);
   const champion = pathname.startsWith('/campeones/')
     ? findChampionBySlug(champions, pathname.split('/').pop())
     : null;

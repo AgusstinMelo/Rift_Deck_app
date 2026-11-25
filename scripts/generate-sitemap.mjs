@@ -131,6 +131,7 @@ const entries = [
   ['/runas', runesDay],
   ...runeSlugs.map((slug, index) => [`/runas/${slug}`, runeDays[index]]),
   ...LEGAL_PATHS.map(path => [path, null]),
+  ['/testers', null],
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

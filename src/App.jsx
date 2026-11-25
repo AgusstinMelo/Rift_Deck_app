@@ -39,7 +39,8 @@ const AuthenticatedApp = ({ publicData }) => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
   const location = useLocation();
   const usesPageSeo = ['/campeones', '/objetos', '/runas'].some(path => location.pathname === path || location.pathname.startsWith(`${path}/`))
-    || PUBLIC_LEGAL_DOCUMENTS.some(doc => location.pathname === doc.path);
+    || PUBLIC_LEGAL_DOCUMENTS.some(doc => location.pathname === doc.path)
+    || location.pathname === '/testers';
 
   if (usesPageSeo) {
     return <PublicRoutes publicData={publicData} />;

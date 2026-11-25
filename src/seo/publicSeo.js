@@ -34,6 +34,16 @@ export const RUNES_SEO = {
   imageAlt: 'Runas de Wild Rift disponibles en Rift Deck',
 };
 
+// Convocatoria de testers para la prueba cerrada de Google Play (se comparte por WhatsApp y
+// redes: la imagen es la de la invitación).
+export const TESTERS_SEO = {
+  title: 'Sumate como tester de Rift Deck | 1 año de Premium gratis',
+  description: 'Probá la app de Android de Rift Deck antes que nadie: unite a la prueba cerrada en 3 pasos y llevate 1 año de Premium gratis.',
+  canonicalPath: '/testers',
+  image: `${SITE_URL}/testers-og.jpg`,
+  imageAlt: 'Rift Deck busca testers para su app de Android',
+};
+
 // Páginas legales públicas (las enlaza la ficha de Google Play). El texto queda en español,
 // como el cuerpo de los documentos.
 const LEGAL_SEO = {
